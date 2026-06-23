@@ -54,16 +54,12 @@ pub fn restore_snapshot(id: String) -> Result<(), EnvarlyError> {
 pub fn validate_paths(paths: Vec<String>) -> Vec<bool> {
     paths
         .iter()
-        .map(|p| {
-            let expanded = expand_env_vars(p);
-            std::path::Path::new(&expanded).exists()
-        })
+        .map(|p| std::path::Path::new(&expand_env_vars(p)).exists())
         .collect()
 }
 
-fn expand_env_vars(s: &str) -> String {
+pub(crate) fn expand_env_vars(s: &str) -> String {
     let mut result = s.to_string();
-    // Simple %VAR% expansion using the current process environment
     while let Some(start) = result.find('%') {
         if let Some(end) = result[start + 1..].find('%') {
             let var_name = &result[start + 1..start + 1 + end];
@@ -82,4 +78,52 @@ fn expand_env_vars(s: &str) -> String {
         }
     }
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn expand_no_vars() {
+        assert_eq!(expand_env_vars("C:\\Windows\\System32"), "C:\\Windows\\System32");
+    }
+
+    #[test]
+    fn expand_known_var() {
+        std::env::set_var("_TEST_EXPAND_VAR", "hello");
+        let result = expand_env_vars("%_TEST_EXPAND_VAR%\\sub");
+        assert_eq!(result, "hello\\sub");
+        std::env::remove_var("_TEST_EXPAND_VAR");
+    }
+
+    #[test]
+    fn expand_unknown_var_passthrough() {
+        // Unknown vars are left unexpanded (loop breaks)
+        let input = "%DOES_NOT_EXIST_ZZZ%";
+        let result = expand_env_vars(input);
+        assert_eq!(result, input);
+    }
+
+    #[test]
+    fn validate_paths_existing() {
+        // System32 should always exist on Windows CI
+        let results = validate_paths(vec!["C:\\Windows".to_string()]);
+        // On non-Windows CI this might be false; guard the assertion
+        if cfg!(target_os = "windows") {
+            assert_eq!(results, vec![true]);
+        }
+    }
+
+    #[test]
+    fn validate_paths_nonexistent() {
+        let results = validate_paths(vec!["C:\\ZZZ_DOES_NOT_EXIST_PATH_XYZ".to_string()]);
+        assert_eq!(results, vec![false]);
+    }
+
+    #[test]
+    fn validate_paths_empty_list() {
+        let results = validate_paths(vec![]);
+        assert!(results.is_empty());
+    }
 }

@@ -1,29 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #0f1117;
+  --color-panel: #161b22;
+  --color-surface: #1c2333;
+  --color-hover: #21283b;
+  --color-rim: #30363d;
+  --color-rim-subtle: #21262d;
+  --color-fg: #e6edf3;
+  --color-muted: #7d8590;
+  --color-dim: #484f58;
+  --color-accent: #58a6ff;
+  --color-accent-hi: #79bbff;
+  --color-success: #3fb950;
+  --color-danger: #f85149;
+  --color-warn: #d29922;
+  --color-violet: #bc8cff;
+
+  --font-mono: "Cascadia Code", "Fira Code", "Consolas", monospace;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-:root {
-  --bg: #0f1117;
-  --bg-panel: #161b22;
-  --bg-surface: #1c2333;
-  --bg-hover: #21283b;
-  --border: #30363d;
-  --border-subtle: #21262d;
-  --text: #e6edf3;
-  --text-muted: #7d8590;
-  --text-dim: #484f58;
-  --accent: #58a6ff;
-  --accent-hover: #79bbff;
-  --green: #3fb950;
-  --red: #f85149;
-  --orange: #d29922;
-  --purple: #bc8cff;
-  --sidebar-width: 300px;
-  --header-height: 48px;
-  --radius: 6px;
-  --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
 }
 
 html, body, #root {
@@ -32,10 +32,10 @@ html, body, #root {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--color-canvas);
+  color: var(--color-fg);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -54,17 +54,7 @@ input, textarea {
   outline: none;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-dim);
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-rim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-dim); }

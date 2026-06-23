@@ -1,0 +1,14 @@
+import type { Meta, StoryObj } from "@storybook/react";
+import { SnapshotPanel } from "./SnapshotPanel";
+
+const meta: Meta<typeof SnapshotPanel> = {
+  title: "Components/SnapshotPanel",
+  component: SnapshotPanel,
+  parameters: { layout: "fullscreen" },
+  args: { onRestored: () => {} },
+};
+
+export default meta;
+type Story = StoryObj<typeof SnapshotPanel>;
+
+export const Default: Story = {};

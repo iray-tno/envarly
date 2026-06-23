@@ -1,0 +1,71 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import type { EnvVar } from "../../types";
+import { Sidebar } from "./Sidebar";
+
+const makeVar = (name: string, scope: "User" | "System"): EnvVar => ({
+  name,
+  value: "some-value",
+  scope,
+  isPathLike: false,
+});
+
+const vars: EnvVar[] = [
+  makeVar("JAVA_HOME", "User"),
+  makeVar("PATH", "User"),
+  makeVar("WINDIR", "System"),
+  makeVar("SystemRoot", "System"),
+];
+
+describe("Sidebar", () => {
+  it("renders all variables by default", () => {
+    render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} loading={false} />);
+    for (const v of vars) {
+      expect(screen.getByText(v.name)).toBeInTheDocument();
+    }
+  });
+
+  it("filters by search query", async () => {
+    const user = userEvent.setup();
+    render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} loading={false} />);
+    await user.type(screen.getByPlaceholderText("Search variables..."), "JAVA");
+    expect(screen.getByText("JAVA_HOME")).toBeInTheDocument();
+    expect(screen.queryByText("PATH")).not.toBeInTheDocument();
+  });
+
+  it("filters by User scope", async () => {
+    const user = userEvent.setup();
+    render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} loading={false} />);
+    await user.click(screen.getByRole("button", { name: /user/i }));
+    expect(screen.getByText("JAVA_HOME")).toBeInTheDocument();
+    expect(screen.queryByText("WINDIR")).not.toBeInTheDocument();
+  });
+
+  it("calls onSelect when a variable is clicked", async () => {
+    const onSelect = vi.fn();
+    const user = userEvent.setup();
+    render(<Sidebar vars={vars} selected={null} onSelect={onSelect} loading={false} />);
+    await user.click(screen.getByText("JAVA_HOME"));
+    expect(onSelect).toHaveBeenCalledWith(vars[0]);
+  });
+
+  it("shows loading state", () => {
+    render(<Sidebar vars={[]} selected={null} onSelect={vi.fn()} loading={true} />);
+    expect(screen.getByText("Loading…")).toBeInTheDocument();
+  });
+
+  it("shows empty state when no match", async () => {
+    const user = userEvent.setup();
+    render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} loading={false} />);
+    await user.type(screen.getByPlaceholderText("Search variables..."), "ZZZNOMATCH");
+    expect(screen.getByText("No variables found")).toBeInTheDocument();
+  });
+
+  it("displays scope counts in tabs", () => {
+    render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} loading={false} />);
+    // All=4, User=2, System=2
+    const badges = screen.getAllByText(/^\d+$/);
+    expect(badges.map((b) => b.textContent)).toEqual(["4", "2", "2"]);
+  });
+});
