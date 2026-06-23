@@ -1,0 +1,31 @@
+[package]
+name = "envarly"
+version = "0.1.0"
+description = "Modern Windows environment variable manager"
+authors = ["zigza"]
+edition = "2021"
+
+[lib]
+name = "envarly_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+winreg = "0.55"
+clap = { version = "4", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+dirs-next = "2"
+tokio = { version = "1", features = ["full"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.59", features = [
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_Foundation",
+] }
