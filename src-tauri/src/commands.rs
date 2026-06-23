@@ -8,6 +8,11 @@ pub fn get_env_vars() -> Result<Vec<EnvVar>, EnvarlyError> {
 }
 
 #[tauri::command]
+pub fn get_registry_snapshot() -> Result<crate::env_store::EnvSnapshot, EnvarlyError> {
+    env_store::read_snapshot()
+}
+
+#[tauri::command]
 pub fn set_env_var(name: String, value: String, scope: VarScope) -> Result<(), EnvarlyError> {
     env_store::write_var(&name, &value, &scope)
 }

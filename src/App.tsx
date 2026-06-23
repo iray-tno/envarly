@@ -1,26 +1,118 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
+import { DiffPanel } from "./components/DiffPanel/DiffPanel";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
 import { useEnvVars } from "./hooks/useEnvVars";
 import { cn } from "./lib/cn";
-import type { EnvVar } from "./types";
+import { applyAccepted, computeDiff, snapshotsEqual } from "./lib/diff";
+import type { DiffEntry } from "./lib/diff";
+import { api } from "./api";
+import type { EnvSnapshot, EnvVar, VarScope } from "./types";
 
-type Tab = "editor" | "snapshots";
+type Tab = "editor" | "snapshots" | "changes";
 
 export default function App() {
   const { vars, loading, error, refresh } = useEnvVars();
   const [selected, setSelected] = useState<EnvVar | null>(null);
   const [tab, setTab] = useState<Tab>("editor");
 
-  useEffect(() => {
-    refresh();
+  // Baseline snapshot captured on mount; updated after apply
+  const baselineRef = useRef<EnvSnapshot | null>(null);
+  const [diffEntries, setDiffEntries] = useState<DiffEntry[]>([]);
+  const [applyBusy, setApplyBusy] = useState(false);
+
+  /** Fetch current registry state and compare against baseline. */
+  const checkForExternalChanges = useCallback(async () => {
+    if (!baselineRef.current) return;
+    try {
+      const current = await api.getRegistrySnapshot();
+      if (snapshotsEqual(baselineRef.current, current)) {
+        setDiffEntries([]);
+      } else {
+        setDiffEntries(computeDiff(baselineRef.current, current));
+      }
+    } catch {
+      // silently ignore — diff detection is best-effort
+    }
   }, []);
+
+  // Capture baseline on first load
+  useEffect(() => {
+    (async () => {
+      try {
+        baselineRef.current = await api.getRegistrySnapshot();
+      } catch {
+        // ignore; diff detection won't work but the rest of the app is fine
+      }
+      refresh();
+    })();
+  }, []);
+
+  const handleRefresh = useCallback(async () => {
+    await refresh();
+    await checkForExternalChanges();
+  }, [refresh, checkForExternalChanges]);
 
   const handleDeleted = () => {
     setSelected(null);
     refresh();
   };
+
+  /** Called from DiffPanel: write reverted entries back to registry, advance baseline. */
+  const handleDiffApply = async (accepted: DiffEntry[], reverted: DiffEntry[]) => {
+    setApplyBusy(true);
+    try {
+      for (const entry of reverted) {
+        const scope = entry.scope as VarScope;
+        if (entry.kind === "added") {
+          // revert: delete what was added externally
+          await api.deleteEnvVar(entry.name, scope);
+        } else if (entry.kind === "removed") {
+          // revert: restore what was deleted externally
+          await api.setEnvVar(entry.name, entry.value!, scope);
+        } else {
+          // revert: write old value back
+          await api.setEnvVar(entry.name, entry.oldValue!, scope);
+        }
+      }
+
+      // Advance baseline: merge accepted external changes
+      if (baselineRef.current) {
+        baselineRef.current = applyAccepted(baselineRef.current, accepted);
+      }
+
+      setDiffEntries([]);
+      setTab("editor");
+      await refresh();
+    } catch (err) {
+      console.error("Failed to apply diff", err);
+    } finally {
+      setApplyBusy(false);
+    }
+  };
+
+  const handleDiffDismiss = () => {
+    // Advance baseline to current (ignore all diffs)
+    if (baselineRef.current) {
+      baselineRef.current = applyAccepted(baselineRef.current, diffEntries);
+    }
+    setDiffEntries([]);
+    if (tab === "changes") setTab("editor");
+  };
+
+  // Auto-switch to changes tab when new diffs appear
+  useEffect(() => {
+    if (diffEntries.length > 0 && tab === "editor") {
+      setTab("changes");
+    }
+  }, [diffEntries.length]);
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "editor", label: "Variables" },
+    { id: "snapshots", label: "Snapshots" },
+    ...(diffEntries.length > 0 ? [{ id: "changes" as Tab, label: `Changes (${diffEntries.length})` }] : []),
+  ];
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -38,22 +130,23 @@ export default function App() {
           className="flex gap-0.5"
           style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         >
-          {(["editor", "snapshots"] as Tab[]).map((t) => (
+          {tabs.map(({ id, label }) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={id}
+              onClick={() => setTab(id)}
               className={cn(
-                "px-3 py-1.5 rounded text-[13px] capitalize transition-colors",
-                tab === t ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
+                "px-3 py-1.5 rounded text-[13px] transition-colors",
+                tab === id ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
+                id === "changes" && tab !== id && "text-warn hover:text-warn",
               )}
             >
-              {t === "editor" ? "Variables" : "Snapshots"}
+              {label}
             </button>
           ))}
         </nav>
 
         <button
-          onClick={refresh}
+          onClick={handleRefresh}
           disabled={loading}
           className="ml-auto px-2.5 py-1 rounded text-muted text-xs hover:bg-hover hover:text-fg disabled:opacity-50 transition-colors"
           style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
@@ -69,25 +162,29 @@ export default function App() {
       )}
 
       <main className="flex flex-1 overflow-hidden">
-        {tab === "editor" ? (
+        {tab === "editor" && (
           <>
-            <Sidebar
-              vars={vars}
-              selected={selected}
-              onSelect={setSelected}
-              loading={loading}
-            />
+            <Sidebar vars={vars} selected={selected} onSelect={setSelected} loading={loading} />
             <div className="flex flex-1 overflow-hidden">
-              <DetailPanel
-                variable={selected}
-                onSaved={refresh}
-                onDeleted={handleDeleted}
-              />
+              <DetailPanel variable={selected} onSaved={refresh} onDeleted={handleDeleted} />
             </div>
           </>
-        ) : (
+        )}
+
+        {tab === "snapshots" && (
           <div className="flex flex-1 overflow-hidden">
             <SnapshotPanel onRestored={refresh} />
+          </div>
+        )}
+
+        {tab === "changes" && (
+          <div className="flex flex-1 overflow-hidden">
+            <DiffPanel
+              entries={diffEntries}
+              onApply={handleDiffApply}
+              onDismiss={handleDiffDismiss}
+              busy={applyBusy}
+            />
           </div>
         )}
       </main>

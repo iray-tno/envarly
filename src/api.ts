@@ -25,4 +25,7 @@ export const api = {
 
   validatePaths: (paths: string[]) =>
     invoke<boolean[]>('validate_paths', { paths }),
+
+  getRegistrySnapshot: () =>
+    invoke<import('./types').EnvSnapshot>('get_registry_snapshot'),
 };
