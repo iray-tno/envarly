@@ -28,4 +28,12 @@ export const api = {
 
   getRegistrySnapshot: () =>
     invoke<import('./types').EnvSnapshot>('get_registry_snapshot'),
+
+  /** Returns file content as a string. Does NOT write to the registry. */
+  exportVars: (scope: 'All' | 'User' | 'System', format: 'json' | 'reg') =>
+    invoke<string>('export_vars', { scope, format }),
+
+  /** Parses file content and returns a snapshot. Does NOT write to the registry. */
+  parseImport: (content: string, format: 'json' | 'reg') =>
+    invoke<import('./types').EnvSnapshot>('parse_import', { content, format }),
 };

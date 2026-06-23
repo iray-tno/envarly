@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
 import { DiffPanel } from "./components/DiffPanel/DiffPanel";
+import { ImportExportPanel } from "./components/ImportExportPanel/ImportExportPanel";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
 import { useEnvVars } from "./hooks/useEnvVars";
@@ -10,7 +11,7 @@ import type { DiffEntry } from "./lib/diff";
 import { api } from "./api";
 import type { EnvSnapshot, EnvVar, VarScope } from "./types";
 
-type Tab = "editor" | "snapshots" | "changes";
+type Tab = "editor" | "snapshots" | "changes" | "importexport";
 
 export default function App() {
   const { vars, loading, error, refresh } = useEnvVars();
@@ -111,6 +112,7 @@ export default function App() {
   const tabs: { id: Tab; label: string }[] = [
     { id: "editor", label: "Variables" },
     { id: "snapshots", label: "Snapshots" },
+    { id: "importexport", label: "Import / Export" },
     ...(diffEntries.length > 0 ? [{ id: "changes" as Tab, label: `Changes (${diffEntries.length})` }] : []),
   ];
 
@@ -174,6 +176,12 @@ export default function App() {
         {tab === "snapshots" && (
           <div className="flex flex-1 overflow-hidden">
             <SnapshotPanel onRestored={refresh} />
+          </div>
+        )}
+
+        {tab === "importexport" && (
+          <div className="flex flex-1 overflow-hidden">
+            <ImportExportPanel onApplied={refresh} />
           </div>
         )}
 

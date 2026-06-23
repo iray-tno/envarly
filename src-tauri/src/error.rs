@@ -11,6 +11,9 @@ pub enum EnvarlyError {
 
     #[error("Snapshot error: {0}")]
     Snapshot(String),
+
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
 }
 
 // Tauri commands must return serializable errors

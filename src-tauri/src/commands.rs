@@ -1,4 +1,4 @@
-use crate::env_store::{self, EnvVar, VarScope};
+use crate::env_store::{self, EnvSnapshot, EnvVar, VarScope};
 use crate::error::EnvarlyError;
 use crate::snapshot::{self, SnapshotMeta};
 
@@ -53,6 +53,25 @@ pub fn restore_snapshot(id: String) -> Result<(), EnvarlyError> {
         env_store::write_var(name, value, &VarScope::System)?;
     }
     Ok(())
+}
+
+/// Return the current registry state as JSON or .reg text. Read-only.
+#[tauri::command]
+pub fn export_vars(scope: String, format: String) -> Result<String, EnvarlyError> {
+    let snapshot = env_store::read_snapshot()?;
+    Ok(match format.as_str() {
+        "reg" => crate::export::to_reg(&snapshot, &scope),
+        _ => crate::export::to_json(&snapshot, &scope),
+    })
+}
+
+/// Parse an exported file and return its contents as a snapshot. Does NOT touch the registry.
+#[tauri::command]
+pub fn parse_import(content: String, format: String) -> Result<EnvSnapshot, EnvarlyError> {
+    match format.as_str() {
+        "reg" => crate::export::parse_reg(&content),
+        _ => crate::export::parse_json(&content),
+    }
 }
 
 #[tauri::command]
