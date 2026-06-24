@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom";
+import { vi } from "vitest";
 
 // Mock Tauri's invoke — components never call it directly (they go through api.ts)
 vi.mock("@tauri-apps/api/core", () => ({
