@@ -35,9 +35,9 @@ export const api = {
   /** Spawn a new elevated instance via UAC and exit this process. */
   restartAsAdmin: () => invoke<void>('restart_as_admin'),
 
-  /** Returns file content as a string. Does NOT write to the registry. */
+  /** Opens a native save dialog, writes the file, and returns the saved path (null = cancelled). */
   exportVars: (scope: 'All' | 'User' | 'System', format: 'json' | 'reg') =>
-    invoke<string>('export_vars', { scope, format }),
+    invoke<string | null>('export_vars', { scope, format }),
 
   /** Parses file content and returns a snapshot. Does NOT write to the registry. */
   parseImport: (content: string, format: 'json' | 'reg') =>

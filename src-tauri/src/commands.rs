@@ -87,14 +87,50 @@ pub fn restart_as_admin(app: tauri::AppHandle) -> Result<(), EnvarlyError> {
     Ok(())
 }
 
-/// Return the current registry state as JSON or .reg text. Read-only.
+/// Open a native save dialog and write the exported content to the chosen file.
+/// Returns the saved file path, or None if the user cancelled.
 #[tauri::command]
-pub fn export_vars(scope: String, format: String) -> Result<String, EnvarlyError> {
+pub async fn export_vars(
+    app: tauri::AppHandle,
+    scope: String,
+    format: String,
+) -> Result<Option<String>, EnvarlyError> {
+    use tauri_plugin_dialog::{DialogExt, FilePath};
+
     let snapshot = env_store::read_snapshot()?;
-    Ok(match format.as_str() {
-        "reg" => crate::export::to_reg(&snapshot, &scope),
-        _ => crate::export::to_json(&snapshot, &scope),
-    })
+    let (content, ext, filter_name) = match format.as_str() {
+        "reg" => (
+            crate::export::to_reg(&snapshot, &scope),
+            "reg",
+            "Registry files",
+        ),
+        _ => (
+            crate::export::to_json(&snapshot, &scope),
+            "json",
+            "JSON files",
+        ),
+    };
+
+    let default_name = format!(
+        "envarly-{}.{}",
+        chrono::Local::now().format("%Y%m%d"),
+        ext
+    );
+
+    let path = app
+        .dialog()
+        .file()
+        .set_file_name(&default_name)
+        .add_filter(filter_name, &[ext])
+        .blocking_save_file();
+
+    match path {
+        Some(FilePath::Path(p)) => {
+            std::fs::write(&p, content.as_bytes()).map_err(EnvarlyError::Registry)?;
+            Ok(Some(p.to_string_lossy().into_owned()))
+        }
+        _ => Ok(None), // cancelled
+    }
 }
 
 /// Parse an exported file and return its contents as a snapshot. Does NOT touch the registry.

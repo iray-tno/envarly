@@ -24,20 +24,6 @@ function flattenSnapshot(snap: EnvSnapshot): FlatVar[] {
   ].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function downloadContent(content: string, filename: string) {
-  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
 interface ExportTabProps {
   onStatus: (msg: string | null) => void;
 }
@@ -51,10 +37,12 @@ function ExportTab({ onStatus }: ExportTabProps) {
     setBusy(true);
     onStatus(null);
     try {
-      const content = await api.exportVars(scope, format);
-      const ext = format === "reg" ? "reg" : "json";
-      downloadContent(content, `envarly-${today()}.${ext}`);
-      onStatus(`Exported ${scope} variables as .${ext}`);
+      const savedPath = await api.exportVars(scope, format);
+      if (savedPath) {
+        onStatus(`Saved to ${savedPath}`);
+      } else {
+        onStatus(null); // user cancelled — no message
+      }
     } catch (e) {
       onStatus(`Export failed: ${e}`);
     } finally {

@@ -23,6 +23,7 @@ chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
 dirs-next = "2"
 tokio = { version = "1", features = ["full"] }
+tauri-plugin-dialog = "2.7.1"
 
 [dev-dependencies]
 tempfile = "3"

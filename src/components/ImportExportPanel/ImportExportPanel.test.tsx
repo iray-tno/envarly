@@ -13,7 +13,7 @@ const MOCK_SNAPSHOT = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(api.exportVars).mockResolvedValue('{"user":{},"system":{}}');
+  vi.mocked(api.exportVars).mockResolvedValue("C:\\Users\\zigza\\envarly-20260624.json");
   vi.mocked(api.parseImport).mockResolvedValue(MOCK_SNAPSHOT);
   vi.mocked(api.setEnvVar).mockResolvedValue(undefined);
 });
@@ -44,7 +44,7 @@ describe("ImportExportPanel — Export tab", () => {
     // The action button label is "Export All → .json"
     await user.click(screen.getByRole("button", { name: /export all/i }));
     await waitFor(() => {
-      expect(screen.getByText(/exported/i)).toBeInTheDocument();
+      expect(screen.getByText(/saved to/i)).toBeInTheDocument();
     });
   });
 });
