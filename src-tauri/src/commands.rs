@@ -55,6 +55,38 @@ pub fn restore_snapshot(id: String) -> Result<(), EnvarlyError> {
     Ok(())
 }
 
+/// Returns true when the process has write access to HKLM (admin / elevated).
+#[tauri::command]
+pub fn is_elevated() -> bool {
+    env_store::is_elevated()
+}
+
+/// Spawn a new elevated instance via UAC and exit the current process.
+#[tauri::command]
+pub fn restart_as_admin(app: tauri::AppHandle) -> Result<(), EnvarlyError> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        let exe = std::env::current_exe().map_err(EnvarlyError::Registry)?;
+        std::process::Command::new("powershell")
+            .args([
+                "-NoProfile",
+                "-WindowStyle",
+                "Hidden",
+                "-Command",
+                &format!("Start-Process '{}' -Verb RunAs", exe.display()),
+            ])
+            .creation_flags(CREATE_NO_WINDOW)
+            .spawn()
+            .map_err(EnvarlyError::Registry)?;
+        app.exit(0);
+    }
+    #[cfg(not(target_os = "windows"))]
+    let _ = app;
+    Ok(())
+}
+
 /// Return the current registry state as JSON or .reg text. Read-only.
 #[tauri::command]
 pub fn export_vars(scope: String, format: String) -> Result<String, EnvarlyError> {

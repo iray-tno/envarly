@@ -29,6 +29,12 @@ export const api = {
   getRegistrySnapshot: () =>
     invoke<import('./types').EnvSnapshot>('get_registry_snapshot'),
 
+  /** True when the process has write access to HKLM (elevated / admin). */
+  isElevated: () => invoke<boolean>('is_elevated'),
+
+  /** Spawn a new elevated instance via UAC and exit this process. */
+  restartAsAdmin: () => invoke<void>('restart_as_admin'),
+
   /** Returns file content as a string. Does NOT write to the registry. */
   exportVars: (scope: 'All' | 'User' | 'System', format: 'json' | 'reg') =>
     invoke<string>('export_vars', { scope, format }),

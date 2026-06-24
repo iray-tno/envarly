@@ -9,7 +9,7 @@ const USER_ENV_KEY: &str = "Environment";
 const SYSTEM_ENV_KEY: &str = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "PascalCase")]
 pub enum VarScope {
     User,
     System,
@@ -37,29 +37,15 @@ pub fn read_all() -> Result<Vec<EnvVar>, EnvarlyError> {
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let user_key = hkcu.open_subkey(USER_ENV_KEY)?;
     for (name, value) in iter_string_values(&user_key) {
-        let is_path_like = name.to_uppercase() == "PATH"
-            || value.contains(';')
-            || value.contains('%');
-        vars.push(EnvVar {
-            name,
-            value,
-            scope: VarScope::User,
-            is_path_like,
-        });
+        let is_path_like = is_path_list(&name, &value);
+        vars.push(EnvVar { name, value, scope: VarScope::User, is_path_like });
     }
 
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
     let sys_key = hklm.open_subkey(SYSTEM_ENV_KEY)?;
     for (name, value) in iter_string_values(&sys_key) {
-        let is_path_like = name.to_uppercase() == "PATH"
-            || value.contains(';')
-            || value.contains('%');
-        vars.push(EnvVar {
-            name,
-            value,
-            scope: VarScope::System,
-            is_path_like,
-        });
+        let is_path_like = is_path_list(&name, &value);
+        vars.push(EnvVar { name, value, scope: VarScope::System, is_path_like });
     }
 
     vars.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
@@ -110,6 +96,22 @@ pub fn delete_var(name: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
     }
     broadcast_settings_change();
     Ok(())
+}
+
+/// Entries separated by `;` where at least one has a backslash → treat as a path list.
+/// This correctly excludes PATHEXT (.COM;.EXE;.BAT) while keeping PATH and PSModulePath.
+fn is_path_list(name: &str, value: &str) -> bool {
+    if name.to_uppercase() == "PATH" {
+        return true;
+    }
+    value.contains(';') && value.split(';').any(|part| part.contains('\\'))
+}
+
+/// Check whether the process has write access to HKLM (i.e. is elevated / admin).
+pub fn is_elevated() -> bool {
+    RegKey::predef(HKEY_LOCAL_MACHINE)
+        .open_subkey_with_flags(SYSTEM_ENV_KEY, KEY_SET_VALUE)
+        .is_ok()
 }
 
 fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, String)> + '_ {

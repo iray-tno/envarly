@@ -30,6 +30,8 @@ pub fn run() {
             commands::validate_paths,
             commands::export_vars,
             commands::parse_import,
+            commands::is_elevated,
+            commands::restart_as_admin,
         ])
         .run(tauri::generate_context!())
         .expect("error while running envarly");

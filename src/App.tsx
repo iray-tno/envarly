@@ -18,6 +18,7 @@ export default function App() {
   const { vars, loading, error, refresh } = useEnvVars();
   const [selected, setSelected] = useState<EnvVar | null>(null);
   const [tab, setTab] = useState<Tab>("editor");
+  const [elevated, setElevated] = useState(false);
 
   // Baseline snapshot captured on mount; updated after apply
   const baselineRef = useRef<EnvSnapshot | null>(null);
@@ -39,13 +40,18 @@ export default function App() {
     }
   }, []);
 
-  // Capture baseline on first load
+  // Capture baseline and check elevation on first load
   useEffect(() => {
     (async () => {
       try {
         baselineRef.current = await api.getRegistrySnapshot();
       } catch {
         // ignore; diff detection won't work but the rest of the app is fine
+      }
+      try {
+        setElevated(await api.isElevated());
+      } catch {
+        // non-Windows dev environment
       }
       refresh();
     })();
@@ -122,7 +128,7 @@ export default function App() {
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Header */}
       <header
-        className="flex items-center gap-3 h-12 px-4 bg-panel border-b border-rim shrink-0"
+        className="flex items-center gap-3 h-13 px-5 bg-panel border-b border-rim shrink-0"
         style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
       >
         <div className="flex items-center gap-2 mr-2">
@@ -149,14 +155,30 @@ export default function App() {
           ))}
         </nav>
 
-        <button
-          onClick={handleRefresh}
-          disabled={loading}
-          className="ml-auto px-2.5 py-1 rounded text-muted text-xs hover:bg-hover hover:text-fg disabled:opacity-50 transition-colors"
+        <div
+          className="ml-auto flex items-center gap-2"
           style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         >
-          ↻ Refresh
-        </button>
+          {!elevated && (
+            <button
+              onClick={() => api.restartAsAdmin()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-warn/40 text-warn text-xs hover:bg-warn/10 transition-colors"
+              title="System variables are read-only. Restart as administrator to edit them."
+            >
+              🛡 Run as admin
+            </button>
+          )}
+          {elevated && (
+            <span className="text-[11px] text-success opacity-60">🛡 Administrator</span>
+          )}
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            className="px-3 py-1.5 rounded text-muted text-xs hover:bg-hover hover:text-fg disabled:opacity-50 transition-colors"
+          >
+            ↻ Refresh
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -170,7 +192,7 @@ export default function App() {
           <>
             <Sidebar vars={vars} selected={selected} onSelect={setSelected} loading={loading} />
             <div className="flex flex-1 overflow-hidden">
-              <DetailPanel variable={selected} onSaved={refresh} onDeleted={handleDeleted} />
+              <DetailPanel variable={selected} elevated={elevated} onSaved={refresh} onDeleted={handleDeleted} />
             </div>
           </>
         )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
 import type { EnvVar } from "../../types";
@@ -6,13 +7,14 @@ import { PathEditor } from "../PathEditor/PathEditor";
 
 interface Props {
   variable: EnvVar | null;
+  elevated: boolean;
   onSaved: () => void;
   onDeleted: () => void;
 }
 
 type StatusMsg = { type: "ok" | "err"; text: string };
 
-export function DetailPanel({ variable, onSaved, onDeleted }: Props) {
+export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
   const [value, setValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -66,16 +68,17 @@ export function DetailPanel({ variable, onSaved, onDeleted }: Props) {
   };
 
   const isPath = variable.name.toUpperCase() === "PATH" || variable.isPathLike;
+  const readOnly = variable.scope === "System" && !elevated;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-4 pb-2.5 border-b border-rim-subtle shrink-0">
+      <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-rim-subtle shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <h2 className="font-mono font-semibold text-base text-fg truncate">{variable.name}</h2>
           <span
             className={cn(
-              "text-[10px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0",
+              "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide shrink-0",
               variable.scope === "User"
                 ? "bg-accent/15 text-accent"
                 : "bg-violet/15 text-violet",
@@ -83,23 +86,30 @@ export function DetailPanel({ variable, onSaved, onDeleted }: Props) {
           >
             {variable.scope}
           </span>
+          {readOnly && (
+            <span className="text-[10px] text-dim border border-rim rounded px-1.5 py-0.5 shrink-0">
+              read-only · requires admin
+            </span>
+          )}
         </div>
         <div className="flex gap-2 shrink-0">
-          {dirty && (
+          {dirty && !readOnly && (
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-3 py-1 rounded bg-accent text-canvas text-xs font-medium hover:bg-accent-hi disabled:opacity-50 transition-colors"
+              className="px-4 py-1.5 rounded bg-accent text-canvas text-sm font-medium hover:bg-accent-hi disabled:opacity-50 transition-colors"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? "Applying…" : "Apply"}
             </button>
           )}
-          <button
-            onClick={handleDelete}
-            className="px-3 py-1 rounded bg-danger/15 text-danger border border-danger/30 text-xs font-medium hover:bg-danger/25 transition-colors"
-          >
-            Delete
-          </button>
+          {!readOnly && (
+            <button
+              onClick={handleDelete}
+              className="px-4 py-1.5 rounded bg-danger/15 text-danger border border-danger/30 text-sm font-medium hover:bg-danger/25 transition-colors"
+            >
+              Delete
+            </button>
+          )}
         </div>
       </div>
 
@@ -116,21 +126,54 @@ export function DetailPanel({ variable, onSaved, onDeleted }: Props) {
       )}
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3">
+      <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
         <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">
           {isPath ? "PATH entries (drag to reorder, double-click to edit)" : "Value"}
         </p>
 
         {isPath ? (
-          <PathEditor rawValue={value} onChange={handleValueChange} />
+          <PathEditor rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
         ) : (
           <textarea
-            className="w-full px-3 py-2.5 bg-surface border border-rim rounded font-mono text-xs text-fg leading-relaxed resize-y focus:border-accent focus:outline-none transition-colors"
+            className="w-full px-3 py-2.5 bg-surface border border-rim rounded font-mono text-xs text-fg leading-relaxed resize-y focus:border-accent focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             value={value}
             onChange={(e) => handleValueChange(e.target.value)}
             rows={Math.max(3, value.split("\n").length + 1)}
             spellCheck={false}
+            disabled={readOnly}
           />
+        )}
+
+        {/* Diff preview — shown when the value has been edited */}
+        {dirty && !readOnly && (
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[10px] font-semibold text-muted uppercase tracking-wide">
+              Preview changes
+            </p>
+            <div className="rounded overflow-hidden text-[11px]">
+              <ReactDiffViewer
+                oldValue={isPath ? variable.value.split(";").join("\n") : variable.value}
+                newValue={isPath ? value.split(";").join("\n") : value}
+                splitView={false}
+                compareMethod={isPath ? DiffMethod.LINES : DiffMethod.WORDS}
+                useDarkTheme
+                hideLineNumbers
+                styles={{
+                  variables: {
+                    dark: {
+                      diffViewerBackground: "#1c2333",
+                      addedBackground: "#1a3a2a",
+                      addedColor: "#3fb950",
+                      removedBackground: "#3a1a1a",
+                      removedColor: "#f85149",
+                      wordAddedBackground: "#1a3a2a",
+                      wordRemovedBackground: "#3a1a1a",
+                    },
+                  },
+                }}
+              />
+            </div>
+          </div>
         )}
 
         {/* Metadata */}

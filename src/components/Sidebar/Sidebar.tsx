@@ -36,9 +36,9 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
   return (
     <aside className="w-[300px] shrink-0 flex flex-col bg-panel border-r border-rim overflow-hidden">
       {/* Search */}
-      <div className="p-2.5 pb-1.5">
+      <div className="px-3 pt-3 pb-2">
         <input
-          className="w-full px-2.5 py-1.5 bg-surface border border-rim rounded text-fg text-xs focus:border-accent focus:outline-none placeholder:text-dim transition-colors"
+          className="w-full px-3 py-2 bg-surface border border-rim rounded text-fg text-xs focus:border-accent focus:outline-none placeholder:text-dim transition-colors"
           type="text"
           placeholder="Search variables..."
           value={search}
@@ -47,7 +47,7 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
       </div>
 
       {/* Scope tabs */}
-      <div className="flex gap-1 px-2.5 pb-1.5">
+      <div className="flex gap-1 px-3 pb-2">
         {SCOPES.map((scope) => {
           const count =
             scope === "All" ? vars.length : counts[scope as VarScope];
@@ -56,7 +56,7 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
               key={scope}
               onClick={() => setScopeFilter(scope)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded text-[11px] transition-colors",
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-[11px] transition-colors",
                 scopeFilter === scope
                   ? "bg-surface text-accent"
                   : "text-muted hover:bg-hover hover:text-fg",
@@ -72,12 +72,12 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
       </div>
 
       {/* Variable list */}
-      <div className="flex-1 overflow-y-auto px-1.5 py-1">
+      <div className="flex-1 overflow-y-auto px-2 py-1">
         {loading && (
-          <p className="text-center text-dim text-xs py-6">Loading…</p>
+          <p className="text-center text-dim text-xs py-8">Loading…</p>
         )}
         {!loading && filtered.length === 0 && (
-          <p className="text-center text-dim text-xs py-6">No variables found</p>
+          <p className="text-center text-dim text-xs py-8">No variables found</p>
         )}
         {filtered.map((v) => {
           const isSelected =
@@ -87,7 +87,7 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
               key={`${v.scope}:${v.name}`}
               onClick={() => onSelect(v)}
               className={cn(
-                "flex items-center w-full gap-2 px-2 py-1.5 rounded text-left transition-colors",
+                "flex items-center w-full gap-2.5 px-3 py-2 rounded text-left transition-colors",
                 isSelected
                   ? "bg-surface text-fg"
                   : "text-muted hover:bg-hover hover:text-fg",

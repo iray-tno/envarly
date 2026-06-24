@@ -107,9 +107,10 @@ function SortablePathItem({ entry, onRemove, onEdit }: SortableItemProps) {
 interface Props {
   rawValue: string;
   onChange: (newValue: string) => void;
+  readOnly?: boolean;
 }
 
-export function PathEditor({ rawValue, onChange }: Props) {
+export function PathEditor({ rawValue, onChange, readOnly = false }: Props) {
   const [entries, setEntries] = useState<PathEntry[]>([]);
   const [newPath, setNewPath] = useState("");
 
@@ -206,21 +207,23 @@ export function PathEditor({ rawValue, onChange }: Props) {
         </SortableContext>
       </DndContext>
 
-      <div className="flex gap-2 mt-1">
-        <input
-          className="flex-1 px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg placeholder:text-dim focus:border-accent focus:outline-none transition-colors"
-          placeholder="Add new path…"
-          value={newPath}
-          onChange={(e) => setNewPath(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addEntry()}
-        />
-        <button
-          onClick={addEntry}
-          className="px-3 py-1.5 rounded bg-accent text-canvas text-xs font-medium hover:bg-accent-hi transition-colors"
-        >
-          Add
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="flex gap-2 mt-1">
+          <input
+            className="flex-1 px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg placeholder:text-dim focus:border-accent focus:outline-none transition-colors"
+            placeholder="Add new path…"
+            value={newPath}
+            onChange={(e) => setNewPath(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addEntry()}
+          />
+          <button
+            onClick={addEntry}
+            className="px-3 py-1.5 rounded bg-accent text-canvas text-xs font-medium hover:bg-accent-hi transition-colors"
+          >
+            Add
+          </button>
+        </div>
+      )}
     </div>
   );
 }
