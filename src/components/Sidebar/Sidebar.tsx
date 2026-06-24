@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { cn } from "../../lib/cn";
 import type { EnvVar, VarScope } from "../../types";
+import { SegmentedControl } from "../ui/SegmentedControl";
+import { TextInput } from "../ui/TextInput";
 
 interface Props {
   vars: EnvVar[];
@@ -33,45 +35,36 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
     System: vars.filter((v) => v.scope === "System").length,
   };
 
+  const scopeOptions = SCOPES.map((s) => ({
+    value: s,
+    label: s,
+    count: s === "All" ? vars.length : counts[s as VarScope],
+  }));
+
   return (
     <aside className="w-[300px] shrink-0 flex flex-col bg-panel border-r border-rim overflow-hidden">
-      {/* Search */}
       <div className="px-3 pt-3 pb-2">
-        <input
-          className="w-full px-3 py-2 bg-surface border border-rim rounded text-fg text-xs focus:border-accent focus:outline-none placeholder:text-dim transition-colors"
+        <TextInput
+          label="Search"
+          labelHidden
           type="text"
           placeholder="Search variables..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="w-full"
         />
       </div>
 
-      {/* Scope tabs */}
-      <div className="flex gap-1 px-3 pb-2">
-        {SCOPES.map((scope) => {
-          const count =
-            scope === "All" ? vars.length : counts[scope as VarScope];
-          return (
-            <button
-              key={scope}
-              onClick={() => setScopeFilter(scope)}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-[11px] transition-colors",
-                scopeFilter === scope
-                  ? "bg-surface text-accent"
-                  : "text-muted hover:bg-hover hover:text-fg",
-              )}
-            >
-              {scope}
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-hover text-dim">
-                {count}
-              </span>
-            </button>
-          );
-        })}
+      <div className="px-3 pb-2">
+        <SegmentedControl
+          aria-label="Filter by scope"
+          options={scopeOptions}
+          value={scopeFilter}
+          onChange={setScopeFilter}
+          className="w-full [&>button]:flex-1 [&>button]:justify-center"
+        />
       </div>
 
-      {/* Variable list */}
       <div className="flex-1 overflow-y-auto px-2 py-1">
         {loading && (
           <p className="text-center text-dim text-xs py-8">Loading…</p>
@@ -85,9 +78,11 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
           return (
             <button
               key={`${v.scope}:${v.name}`}
+              type="button"
               onClick={() => onSelect(v)}
               className={cn(
                 "flex items-center w-full gap-2.5 px-3 py-2 rounded text-left transition-colors",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
                 isSelected
                   ? "bg-surface text-fg"
                   : "text-muted hover:bg-hover hover:text-fg",

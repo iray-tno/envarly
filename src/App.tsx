@@ -5,6 +5,7 @@ import { ImportExportPanel } from "./components/ImportExportPanel/ImportExportPa
 import { LicensesPanel } from "./components/LicensesPanel/LicensesPanel";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
+import { Button } from "./components/ui/Button";
 import { useEnvVars } from "./hooks/useEnvVars";
 import { cn } from "./lib/cn";
 import { applyAccepted, computeDiff, snapshotsEqual } from "./lib/diff";
@@ -143,9 +144,11 @@ export default function App() {
           {tabs.map(({ id, label }) => (
             <button
               key={id}
+              type="button"
               onClick={() => setTab(id)}
               className={cn(
                 "px-3 py-1.5 rounded text-[13px] transition-colors",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-panel",
                 tab === id ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
                 id === "changes" && tab !== id && "text-warn hover:text-warn",
               )}
@@ -160,24 +163,20 @@ export default function App() {
           style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         >
           {!elevated && (
-            <button
+            <Button
+              variant="warn"
               onClick={() => api.restartAsAdmin()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-warn/40 text-warn text-xs hover:bg-warn/10 transition-colors"
               title="System variables are read-only. Restart as administrator to edit them."
             >
               🛡 Run as admin
-            </button>
+            </Button>
           )}
           {elevated && (
             <span className="text-[11px] text-success opacity-60">🛡 Administrator</span>
           )}
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            className="px-3 py-1.5 rounded text-muted text-xs hover:bg-hover hover:text-fg disabled:opacity-50 transition-colors"
-          >
+          <Button variant="ghost" onClick={handleRefresh} disabled={loading}>
             ↻ Refresh
-          </button>
+          </Button>
         </div>
       </header>
 

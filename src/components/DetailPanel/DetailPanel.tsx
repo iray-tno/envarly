@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { api } from "../../api";
-import { cn } from "../../lib/cn";
 import type { EnvVar } from "../../types";
+import { Badge } from "../ui/Badge";
+import { Button } from "../ui/Button";
+import { Textarea } from "../ui/Textarea";
 import { PathEditor } from "../PathEditor/PathEditor";
 
 interface Props {
@@ -76,39 +78,28 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
       <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-rim-subtle shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <h2 className="font-mono font-semibold text-base text-fg truncate">{variable.name}</h2>
-          <span
-            className={cn(
-              "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide shrink-0",
-              variable.scope === "User"
-                ? "bg-accent/15 text-accent"
-                : "bg-violet/15 text-violet",
-            )}
-          >
+          <Badge variant={variable.scope === "User" ? "user" : "system"}>
             {variable.scope}
-          </span>
+          </Badge>
           {readOnly && (
-            <span className="text-[10px] text-dim border border-rim rounded px-1.5 py-0.5 shrink-0">
-              read-only · requires admin
-            </span>
+            <Badge variant="readonly">read-only · requires admin</Badge>
           )}
         </div>
         <div className="flex gap-2 shrink-0">
           {dirty && !readOnly && (
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-1.5 rounded bg-accent text-canvas text-sm font-medium hover:bg-accent-hi disabled:opacity-50 transition-colors"
             >
               {saving ? "Applying…" : "Apply"}
-            </button>
+            </Button>
           )}
           {!readOnly && (
-            <button
-              onClick={handleDelete}
-              className="px-4 py-1.5 rounded bg-danger/15 text-danger border border-danger/30 text-sm font-medium hover:bg-danger/25 transition-colors"
-            >
+            <Button variant="danger" size="md" onClick={handleDelete}>
               Delete
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -116,10 +107,12 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
       {/* Status */}
       {status && (
         <div
-          className={cn(
-            "px-5 py-1.5 text-xs shrink-0",
-            status.type === "ok" ? "bg-success/10 text-success" : "bg-danger/10 text-danger",
-          )}
+          className={
+            status.type === "ok"
+              ? "px-5 py-1.5 text-xs bg-success/10 text-success shrink-0"
+              : "px-5 py-1.5 text-xs bg-danger/10 text-danger shrink-0"
+          }
+          role={status.type === "err" ? "alert" : undefined}
         >
           {status.text}
         </div>
@@ -128,14 +121,15 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
         <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">
-          {isPath ? "PATH entries (drag to reorder, double-click to edit)" : "Value"}
+          {isPath ? "PATH entries (drag to reorder)" : "Value"}
         </p>
 
         {isPath ? (
           <PathEditor rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
         ) : (
-          <textarea
-            className="w-full px-3 py-2.5 bg-surface border border-rim rounded font-mono text-xs text-fg leading-relaxed resize-y focus:border-accent focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          <Textarea
+            label="Value"
+            labelHidden
             value={value}
             onChange={(e) => handleValueChange(e.target.value)}
             rows={Math.max(3, value.split("\n").length + 1)}
@@ -144,7 +138,6 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
           />
         )}
 
-        {/* Diff preview — shown when the value has been edited */}
         {dirty && !readOnly && (
           <div className="flex flex-col gap-1.5">
             <p className="text-[10px] font-semibold text-muted uppercase tracking-wide">

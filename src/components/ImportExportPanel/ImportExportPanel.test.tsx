@@ -21,19 +21,19 @@ beforeEach(() => {
 describe("ImportExportPanel — Export tab", () => {
   it("renders scope and format controls", () => {
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "User" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "System" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: ".json" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: ".reg" })).toBeInTheDocument();
+    // SegmentedControl items have role="radio"
+    expect(screen.getByRole("radio", { name: "All" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "User" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "System" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: ".json" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: ".reg" })).toBeInTheDocument();
   });
 
   it("calls exportVars with selected scope and format", async () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: "User" }));
-    await user.click(screen.getByRole("button", { name: ".reg" }));
-    // The action button label is "Export User → .reg"
+    await user.click(screen.getByRole("radio", { name: "User" }));
+    await user.click(screen.getByRole("radio", { name: ".reg" }));
     await user.click(screen.getByRole("button", { name: /export user/i }));
     expect(api.exportVars).toHaveBeenCalledWith("User", "reg");
   });
@@ -41,7 +41,6 @@ describe("ImportExportPanel — Export tab", () => {
   it("shows success status after export", async () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    // The action button label is "Export All → .json"
     await user.click(screen.getByRole("button", { name: /export all/i }));
     await waitFor(() => {
       expect(screen.getByText(/saved to/i)).toBeInTheDocument();
@@ -51,7 +50,7 @@ describe("ImportExportPanel — Export tab", () => {
 
 describe("ImportExportPanel — Import tab", () => {
   function switchToImport() {
-    return userEvent.setup().click(screen.getByRole("button", { name: /import/i }));
+    return userEvent.setup().click(screen.getByRole("radio", { name: /^import$/i }));
   }
 
   it("shows textarea and Parse button on import tab", async () => {
@@ -64,7 +63,7 @@ describe("ImportExportPanel — Import tab", () => {
   it("calls parseImport with text content and format", async () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: /import/i }));
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
     fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
       target: { value: '{"user":{},"system":{}}' },
     });
@@ -75,7 +74,7 @@ describe("ImportExportPanel — Import tab", () => {
   it("shows preview table after successful parse", async () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: /import/i }));
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
     fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
       target: { value: "{}" },
     });
@@ -91,7 +90,7 @@ describe("ImportExportPanel — Import tab", () => {
     const onApplied = vi.fn();
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={onApplied} />);
-    await user.click(screen.getByRole("button", { name: /import/i }));
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
     fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
       target: { value: "{}" },
     });
@@ -105,7 +104,7 @@ describe("ImportExportPanel — Import tab", () => {
   it("Parse button disabled when textarea is empty", async () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: /import/i }));
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
     expect(screen.getByRole("button", { name: /^parse$/i })).toBeDisabled();
   });
 
@@ -113,7 +112,7 @@ describe("ImportExportPanel — Import tab", () => {
     vi.mocked(api.parseImport).mockRejectedValueOnce(new Error("bad format"));
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: /import/i }));
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
     fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
       target: { value: "not valid" },
     });

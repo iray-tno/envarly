@@ -10,7 +10,6 @@ vi.mock("../../api", () => ({
   },
 }));
 
-// Use forward-slash paths to avoid backslash escaping issues in userEvent
 const A = "/usr/local/bin";
 const B = "/nonexistent/path";
 const C = "/usr/bin";
@@ -19,21 +18,20 @@ const RAW = `${A};${B};${C}`;
 describe("PathEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: A=valid, B=invalid, C=valid
     vi.mocked(api.validatePaths).mockResolvedValue([true, false, true]);
   });
 
   it("renders each path entry", () => {
     render(<PathEditor rawValue={RAW} onChange={vi.fn()} />);
-    expect(screen.getByText(A)).toBeInTheDocument();
-    expect(screen.getByText(B)).toBeInTheDocument();
-    expect(screen.getByText(C)).toBeInTheDocument();
+    // Entries are rendered as controlled inputs
+    expect(screen.getByDisplayValue(A)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(B)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(C)).toBeInTheDocument();
   });
 
   it("marks invalid paths after validation", async () => {
     render(<PathEditor rawValue={RAW} onChange={vi.fn()} />);
     await waitFor(() => {
-      // The "✗ not found" badge on the invalid entry
       expect(screen.getAllByText(/not found/).length).toBeGreaterThan(0);
     });
   });
@@ -64,12 +62,12 @@ describe("PathEditor", () => {
     expect(onChange).toHaveBeenCalledWith("/my/path");
   });
 
-  it("removes an entry when × is clicked", async () => {
+  it("removes an entry when remove button is clicked", async () => {
     const onChange = vi.fn();
     const user = userEvent.setup();
     vi.mocked(api.validatePaths).mockResolvedValue([true, true]);
     render(<PathEditor rawValue={`${A};${C}`} onChange={onChange} />);
-    const removeButtons = await screen.findAllByTitle("Remove");
+    const removeButtons = await screen.findAllByRole("button", { name: /^remove/i });
     await user.click(removeButtons[0]);
     expect(onChange).toHaveBeenCalledWith(C);
   });

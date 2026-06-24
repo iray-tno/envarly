@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
 import type { EnvSnapshot, VarScope } from "../../types";
+import { Button } from "../ui/Button";
+import { SegmentedControl } from "../ui/SegmentedControl";
+import { Textarea } from "../ui/Textarea";
 
 type Mode = "export" | "import";
 type ExportScope = "All" | "User" | "System";
@@ -24,6 +27,17 @@ function flattenSnapshot(snap: EnvSnapshot): FlatVar[] {
   ].sort((a, b) => a.name.localeCompare(b.name));
 }
 
+const scopeOptions: { value: ExportScope; label: string }[] = [
+  { value: "All", label: "All" },
+  { value: "User", label: "User" },
+  { value: "System", label: "System" },
+];
+
+const formatOptions: { value: ExportFormat; label: string }[] = [
+  { value: "json", label: ".json" },
+  { value: "reg", label: ".reg" },
+];
+
 interface ExportTabProps {
   onStatus: (msg: string | null) => void;
 }
@@ -41,7 +55,7 @@ function ExportTab({ onStatus }: ExportTabProps) {
       if (savedPath) {
         onStatus(`Saved to ${savedPath}`);
       } else {
-        onStatus(null); // user cancelled — no message
+        onStatus(null);
       }
     } catch (e) {
       onStatus(`Export failed: ${e}`);
@@ -53,39 +67,23 @@ function ExportTab({ onStatus }: ExportTabProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-medium text-muted uppercase tracking-wide">Scope</label>
-        <div className="flex gap-1">
-          {(["All", "User", "System"] as ExportScope[]).map((s) => (
-            <button
-              key={s}
-              onClick={() => setScope(s)}
-              className={cn(
-                "px-3 py-1.5 rounded text-xs transition-colors",
-                scope === s ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        <span className="text-xs font-medium text-muted uppercase tracking-wide">Scope</span>
+        <SegmentedControl
+          aria-label="Export scope"
+          options={scopeOptions}
+          value={scope}
+          onChange={setScope}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-medium text-muted uppercase tracking-wide">Format</label>
-        <div className="flex gap-1">
-          {(["json", "reg"] as ExportFormat[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFormat(f)}
-              className={cn(
-                "px-3 py-1.5 rounded text-xs font-mono transition-colors",
-                format === f ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
-              )}
-            >
-              .{f}
-            </button>
-          ))}
-        </div>
+        <span className="text-xs font-medium text-muted uppercase tracking-wide">Format</span>
+        <SegmentedControl
+          aria-label="Export format"
+          options={formatOptions}
+          value={format}
+          onChange={setFormat}
+        />
         <p className="text-xs text-dim">
           {format === "json"
             ? "Envarly JSON — can be re-imported into Envarly."
@@ -93,13 +91,15 @@ function ExportTab({ onStatus }: ExportTabProps) {
         </p>
       </div>
 
-      <button
+      <Button
+        variant="primary"
+        size="md"
         onClick={handleExport}
         disabled={busy}
-        className="self-start px-4 py-2 rounded bg-accent text-canvas text-xs font-medium hover:bg-accent-hi disabled:opacity-50 transition-colors"
+        className="self-start"
       >
         {busy ? "Exporting…" : `Export ${scope} → .${format}`}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -126,7 +126,7 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
     if (file.name.endsWith(".reg")) setFormat("reg");
     else setFormat("json");
     const reader = new FileReader();
-    reader.onload = (ev) => setText(ev.target?.result as string ?? "");
+    reader.onload = (ev) => setText((ev.target?.result as string) ?? "");
     reader.readAsText(file, "utf-8");
     setPreview(null);
     onStatus(null);
@@ -193,28 +193,16 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* File picker */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => fileRef.current?.click()}
-          className="px-3 py-1.5 rounded border border-rim text-muted text-xs hover:bg-hover hover:text-fg transition-colors"
-        >
+        <Button variant="secondary" onClick={() => fileRef.current?.click()}>
           Choose file…
-        </button>
-        <div className="flex gap-1">
-          {(["json", "reg"] as ExportFormat[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFormat(f)}
-              className={cn(
-                "px-2.5 py-1 rounded text-xs font-mono transition-colors",
-                format === f ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
-              )}
-            >
-              .{f}
-            </button>
-          ))}
-        </div>
+        </Button>
+        <SegmentedControl
+          aria-label="Import format"
+          options={formatOptions}
+          value={format}
+          onChange={setFormat}
+        />
         <input
           ref={fileRef}
           type="file"
@@ -225,43 +213,52 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
         />
       </div>
 
-      {/* Paste area */}
-      <textarea
+      <Textarea
+        label="File contents"
+        labelHidden
         value={text}
-        onChange={(e) => { setText(e.target.value); setPreview(null); }}
+        onChange={(e) => {
+          setText(e.target.value);
+          setPreview(null);
+        }}
         placeholder="…or paste file contents here"
         rows={5}
-        className="w-full rounded border border-rim bg-canvas font-mono text-xs text-fg p-2.5 resize-y placeholder:text-dim focus:outline-none focus:border-accent"
       />
 
-      <button
+      <Button
+        variant="secondary"
         onClick={handleParse}
         disabled={parsing || !text.trim()}
-        className="self-start px-4 py-1.5 rounded border border-rim text-xs text-muted hover:bg-hover hover:text-fg disabled:opacity-40 transition-colors"
+        className="self-start"
       >
         {parsing ? "Parsing…" : "Parse"}
-      </button>
+      </Button>
 
-      {/* Preview table */}
       {preview && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3 text-xs text-muted">
-            <span>{preview.length} variable{preview.length !== 1 ? "s" : ""} found</span>
-            <button
+            <span>
+              {preview.length} variable{preview.length !== 1 ? "s" : ""} found
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => toggleAll(true)}
               disabled={allChecked}
-              className="hover:text-fg disabled:opacity-30 transition-colors"
+              className="px-1.5 py-0.5"
             >
               Select all
-            </button>
+            </Button>
             <span className="text-dim">·</span>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => toggleAll(false)}
               disabled={noneChecked}
-              className="hover:text-fg disabled:opacity-30 transition-colors"
+              className="px-1.5 py-0.5"
             >
               Deselect all
-            </button>
+            </Button>
           </div>
 
           <div className="rounded border border-rim overflow-hidden max-h-64 overflow-y-auto">
@@ -310,22 +307,25 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
                     </td>
                     <td className="px-3 py-1.5 font-mono font-semibold text-fg">{v.name}</td>
                     <td className="px-3 py-1.5 text-muted">{v.scope}</td>
-                    <td className="px-3 py-1.5 font-mono text-muted truncate max-w-xs">{v.value}</td>
+                    <td className="px-3 py-1.5 font-mono text-muted truncate max-w-xs">
+                      {v.value}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <button
+          <Button
+            variant="primary"
             onClick={handleApply}
             disabled={applying || noneChecked}
-            className="self-start px-4 py-1.5 rounded bg-accent text-canvas text-xs font-medium hover:bg-accent-hi disabled:opacity-40 transition-colors"
+            className="self-start"
           >
             {applying
               ? "Applying…"
               : `Apply ${checkedCount} selected variable${checkedCount !== 1 ? "s" : ""}`}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -349,25 +349,26 @@ export function ImportExportPanel({ onApplied }: Props) {
     }
   };
 
+  const modeOptions: { value: Mode; label: string }[] = [
+    { value: "export", label: "Export" },
+    { value: "import", label: "Import" },
+  ];
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-5 py-4 border-b border-rim shrink-0">
         <div className="flex items-center gap-3 mb-4">
           <h2 className="text-sm font-semibold text-fg">Import / Export</h2>
-          <div className="flex gap-0.5 ml-auto">
-            {(["export", "import"] as Mode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => { setMode(m); setStatus(null); }}
-                className={cn(
-                  "px-3 py-1 rounded text-xs capitalize transition-colors",
-                  mode === m ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
-                )}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            aria-label="Mode"
+            options={modeOptions}
+            value={mode}
+            onChange={(m) => {
+              setMode(m);
+              setStatus(null);
+            }}
+            className="ml-auto"
+          />
         </div>
 
         {status && (

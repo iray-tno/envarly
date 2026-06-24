@@ -37,7 +37,7 @@ describe("Sidebar", () => {
   it("filters by User scope", async () => {
     const user = userEvent.setup();
     render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} loading={false} />);
-    await user.click(screen.getByRole("button", { name: /user/i }));
+    await user.click(screen.getByRole("radio", { name: /^user/i }));
     expect(screen.getByText("JAVA_HOME")).toBeInTheDocument();
     expect(screen.queryByText("WINDIR")).not.toBeInTheDocument();
   });

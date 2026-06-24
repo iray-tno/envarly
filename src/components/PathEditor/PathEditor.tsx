@@ -18,6 +18,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useState } from "react";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
+import { Button } from "../ui/Button";
+import { IconButton } from "../ui/IconButton";
 
 export interface PathEntry {
   id: string;
@@ -25,82 +27,85 @@ export interface PathEntry {
   exists: boolean | null;
 }
 
-interface SortableItemProps {
+interface PathRowProps {
   entry: PathEntry;
   onRemove: () => void;
   onEdit: (val: string) => void;
 }
 
-function SortablePathItem({ entry, onRemove, onEdit }: SortableItemProps) {
+function SortablePathRow({ entry, onRemove, onEdit }: PathRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: entry.id });
 
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(entry.value);
-
-  const commitEdit = () => {
-    onEdit(draft);
-    setEditing(false);
-  };
-
   return (
-    <div
+    <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex items-center gap-1.5 px-2 py-1.5 rounded border transition-colors",
-        isDragging ? "opacity-50" : "opacity-100",
-        entry.exists === false
-          ? "border-danger/40 bg-danger/5"
-          : "border-rim-subtle bg-surface",
+        "flex items-center border-b border-rim-subtle last:border-0 transition-colors",
+        isDragging ? "opacity-50 bg-hover" : "bg-canvas",
+        entry.exists === false && "bg-danger/5",
       )}
     >
-      <span
+      {/* Drag handle */}
+      <button
+        type="button"
         {...attributes}
         {...listeners}
-        className="text-dim cursor-grab active:cursor-grabbing select-none text-sm leading-none shrink-0"
+        aria-label="Drag to reorder"
+        title="Drag to reorder"
+        className={cn(
+          "w-8 flex items-center justify-center shrink-0 self-stretch text-dim",
+          "cursor-grab active:cursor-grabbing select-none",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
+        )}
       >
         ⠿
-      </span>
-
-      {editing ? (
-        <input
-          autoFocus
-          className="flex-1 bg-transparent border-b border-accent text-fg font-mono text-[11px] px-0.5 outline-none"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commitEdit}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") commitEdit();
-            if (e.key === "Escape") setEditing(false);
-          }}
-        />
-      ) : (
-        <span
-          className="flex-1 font-mono text-[11px] text-fg truncate cursor-default"
-          onDoubleClick={() => {
-            setDraft(entry.value);
-            setEditing(true);
-          }}
-          title={entry.value}
-        >
-          {entry.value}
-          {entry.exists === false && (
-            <span className="ml-1.5 text-[10px] text-danger bg-danger/10 px-1 py-0.5 rounded">
-              ✗ not found
-            </span>
-          )}
-        </span>
-      )}
-
-      <button
-        onClick={onRemove}
-        className="text-dim hover:text-danger text-base leading-none px-0.5 shrink-0 transition-colors"
-        title="Remove"
-      >
-        ×
       </button>
-    </div>
+
+      {/* Path input */}
+      <div className="flex-1 py-1.5 pr-2">
+        <input
+          aria-label={`Path entry: ${entry.value}`}
+          value={entry.value}
+          onChange={(e) => onEdit(e.target.value)}
+          spellCheck={false}
+          className="w-full bg-transparent font-mono text-[11px] text-fg focus:outline-none"
+        />
+      </div>
+
+      {/* Status */}
+      <div className="w-6 flex items-center justify-center shrink-0 text-xs">
+        {entry.exists === false && (
+          <span
+            aria-hidden="true"
+            title="Not found on disk"
+            className="text-danger leading-none"
+          >
+            ✗
+          </span>
+        )}
+        {entry.exists === true && (
+          <span
+            aria-hidden="true"
+            title="Path exists"
+            className="text-success leading-none"
+          >
+            ✓
+          </span>
+        )}
+      </div>
+
+      {/* Remove */}
+      <div className="w-7 flex items-center justify-center shrink-0">
+        <IconButton
+          icon="×"
+          aria-label={`Remove ${entry.value}`}
+          variant="danger"
+          onClick={onRemove}
+        />
+      </div>
+    </li>
   );
 }
 
@@ -124,7 +129,6 @@ export function PathEditor({ rawValue, onChange, readOnly = false }: Props) {
     setEntries(parts.map((value, i) => ({ id: `${i}-${value}`, value, exists: null })));
   }, [rawValue]);
 
-  // Re-validate whenever an entry's exists field is null (new/changed entries)
   useEffect(() => {
     if (entries.length === 0) return;
     if (entries.every((e) => e.exists !== null)) return;
@@ -137,7 +141,9 @@ export function PathEditor({ rawValue, onChange, readOnly = false }: Props) {
         }
       })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [entries]);
 
   const emit = (updated: PathEntry[]) => onChange(updated.map((e) => e.value).join(";"));
@@ -165,14 +171,13 @@ export function PathEditor({ rawValue, onChange, readOnly = false }: Props) {
 
   const editEntry = (id: string, val: string) =>
     setEntries((prev) => {
-      const next = prev.map((e) => (e.id === id ? { ...e, value: val } : e));
+      const next = prev.map((e) => (e.id === id ? { ...e, value: val, exists: null } : e));
       emit(next);
       return next;
     });
 
   const addEntry = () => {
     if (!newPath.trim()) return;
-    // exists: null triggers the validation effect
     const entry: PathEntry = { id: `new-${Date.now()}`, value: newPath.trim(), exists: null };
     setEntries((prev) => {
       const next = [...prev, entry];
@@ -185,43 +190,51 @@ export function PathEditor({ rawValue, onChange, readOnly = false }: Props) {
   const invalidCount = entries.filter((e) => e.exists === false).length;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       {invalidCount > 0 && (
-        <div className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs">
+        <div className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs" role="alert">
           {invalidCount} path{invalidCount > 1 ? "s" : ""} not found on disk
         </div>
       )}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={entries.map((e) => e.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-1">
+          <ol
+            aria-label="PATH entries"
+            className="border border-rim rounded overflow-hidden"
+          >
             {entries.map((entry) => (
-              <SortablePathItem
+              <SortablePathRow
                 key={entry.id}
                 entry={entry}
                 onRemove={() => removeEntry(entry.id)}
                 onEdit={(val) => editEntry(entry.id, val)}
               />
             ))}
-          </div>
+            {entries.length === 0 && (
+              <li className="px-4 py-3 text-xs text-dim text-center">No entries</li>
+            )}
+          </ol>
         </SortableContext>
       </DndContext>
 
       {!readOnly && (
-        <div className="flex gap-2 mt-1">
+        <div className="flex gap-2">
           <input
-            className="flex-1 px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg placeholder:text-dim focus:border-accent focus:outline-none transition-colors"
+            aria-label="New path entry"
+            className={cn(
+              "flex-1 px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
+              "placeholder:text-dim transition-colors",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",
+            )}
             placeholder="Add new path…"
             value={newPath}
             onChange={(e) => setNewPath(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addEntry()}
           />
-          <button
-            onClick={addEntry}
-            className="px-3 py-1.5 rounded bg-accent text-canvas text-xs font-medium hover:bg-accent-hi transition-colors"
-          >
+          <Button variant="primary" onClick={addEntry}>
             Add
-          </button>
+          </Button>
         </div>
       )}
     </div>
