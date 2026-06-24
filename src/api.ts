@@ -39,6 +39,10 @@ export const api = {
   exportVars: (scope: 'All' | 'User' | 'System', format: 'json' | 'reg') =>
     invoke<string | null>('export_vars', { scope, format }),
 
+  /** Export a hand-picked list of variables. Values come from the frontend. */
+  exportCustomVars: (vars: { name: string; value: string; scope: string }[], format: 'json' | 'reg') =>
+    invoke<string | null>('export_custom', { vars, format }),
+
   /** Parses file content and returns a snapshot. Does NOT write to the registry. */
   parseImport: (content: string, format: 'json' | 'reg') =>
     invoke<import('./types').EnvSnapshot>('parse_import', { content, format }),

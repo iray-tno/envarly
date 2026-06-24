@@ -11,20 +11,30 @@ const MOCK_SNAPSHOT = {
   system: { WINDIR: "C:\\Windows" },
 };
 
+const MOCK_VARS = [
+  { name: "JAVA_HOME", value: "C:\\jdk21", scope: "User", isPathLike: false },
+  { name: "MY_VAR", value: "hello", scope: "User", isPathLike: false },
+  { name: "WINDIR", value: "C:\\Windows", scope: "System", isPathLike: false },
+];
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(api.exportVars).mockResolvedValue("C:\\Users\\zigza\\envarly-20260624.json");
+  vi.mocked(api.exportCustomVars).mockResolvedValue("C:\\Users\\zigza\\envarly-custom-20260624.json");
+  vi.mocked(api.getEnvVars).mockResolvedValue(MOCK_VARS as never);
   vi.mocked(api.parseImport).mockResolvedValue(MOCK_SNAPSHOT);
   vi.mocked(api.setEnvVar).mockResolvedValue(undefined);
+  vi.mocked(api.deleteEnvVar).mockResolvedValue(undefined);
+  vi.mocked(api.getRegistrySnapshot).mockResolvedValue(MOCK_SNAPSHOT);
 });
 
 describe("ImportExportPanel — Export tab", () => {
   it("renders scope and format controls", () => {
     render(<ImportExportPanel onApplied={vi.fn()} />);
-    // SegmentedControl items have role="radio"
     expect(screen.getByRole("radio", { name: "All" })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "User" })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "System" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Custom…" })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: ".json" })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: ".reg" })).toBeInTheDocument();
   });
@@ -45,6 +55,25 @@ describe("ImportExportPanel — Export tab", () => {
     await waitFor(() => {
       expect(screen.getByText(/saved to/i)).toBeInTheDocument();
     });
+  });
+
+  it("loads variables and calls exportCustomVars when Custom scope selected", async () => {
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: "Custom…" }));
+    await waitFor(() => expect(screen.getByText("JAVA_HOME")).toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: /export \d+ selected/i }));
+    await waitFor(() => expect(api.exportCustomVars).toHaveBeenCalled());
+  });
+
+  it("shows secret warning when secret var is selected in Custom mode", async () => {
+    vi.mocked(api.getEnvVars).mockResolvedValue([
+      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", isPathLike: false },
+    ] as never);
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: "Custom…" }));
+    await waitFor(() => expect(screen.getByText(/sensitive data/i)).toBeInTheDocument());
   });
 });
 
@@ -75,9 +104,7 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
-      target: { value: "{}" },
-    });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => {
       expect(screen.getByText("JAVA_HOME")).toBeInTheDocument();
@@ -86,14 +113,34 @@ describe("ImportExportPanel — Import tab", () => {
     });
   });
 
-  it("calls setEnvVar for each selected var on Apply", async () => {
+  it("shows Merge and Replace strategy options after parse", async () => {
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    await user.click(screen.getByRole("button", { name: /^parse$/i }));
+    await waitFor(() => screen.getByText("JAVA_HOME"));
+    expect(screen.getByRole("radio", { name: "Merge" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Replace" })).toBeInTheDocument();
+  });
+
+  it("shows danger warning when Replace strategy selected", async () => {
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    await user.click(screen.getByRole("button", { name: /^parse$/i }));
+    await waitFor(() => screen.getByText("JAVA_HOME"));
+    await user.click(screen.getByRole("radio", { name: "Replace" }));
+    expect(screen.getByText(/replace will delete/i)).toBeInTheDocument();
+  });
+
+  it("calls setEnvVar for each selected var on Merge Apply", async () => {
     const onApplied = vi.fn();
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={onApplied} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
-      target: { value: "{}" },
-    });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => screen.getByText("JAVA_HOME"));
     await user.click(screen.getByRole("button", { name: /apply/i }));
@@ -113,12 +160,21 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
-      target: { value: "not valid" },
-    });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "not valid" } });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/parse failed/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/parse failed/i)).toBeInTheDocument());
+  });
+
+  it("shows secret warning in import preview when secrets present", async () => {
+    vi.mocked(api.parseImport).mockResolvedValueOnce({
+      user: { AWS_SECRET_ACCESS_KEY: "abc123" },
+      system: {},
     });
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    await user.click(screen.getByRole("button", { name: /^parse$/i }));
+    await waitFor(() => expect(screen.getByText(/sensitive data/i)).toBeInTheDocument());
   });
 });

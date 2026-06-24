@@ -1,0 +1,18 @@
+const KNOWN_SECRETS = new Set([
+  "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN",
+  "GITHUB_TOKEN", "GH_TOKEN", "NPM_TOKEN", "NPM_AUTH_TOKEN",
+  "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY",
+  "STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY",
+  "DATABASE_URL", "DB_PASSWORD", "REDIS_URL",
+  "SLACK_TOKEN", "DISCORD_TOKEN",
+]);
+
+const SECRET_SUBSTRINGS = [
+  "SECRET", "TOKEN", "PASSWORD", "PASSWD",
+  "API_KEY", "APIKEY", "CREDENTIAL", "PRIVATE_KEY", "ACCESS_KEY", "AUTH_KEY",
+];
+
+export function isSecretVar(name: string): boolean {
+  const upper = name.toUpperCase();
+  return KNOWN_SECRETS.has(upper) || SECRET_SUBSTRINGS.some((s) => upper.includes(s));
+}

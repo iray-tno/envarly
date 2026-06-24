@@ -144,8 +144,16 @@ export function LicensesPanel() {
       </div>
 
       {/* Footer */}
-      <div className="px-5 py-2 border-t border-rim shrink-0 text-[11px] text-dim">
-        Envarly itself is released under the MIT License.
+      <div className="px-5 py-2 border-t border-rim shrink-0 text-[11px] text-dim flex items-center gap-3">
+        <span>Envarly is released under the MIT License.</span>
+        <a
+          href="https://github.com/iray-tno/envarly"
+          target="_blank"
+          rel="noreferrer"
+          className="ml-auto hover:text-accent transition-colors font-mono"
+        >
+          github.com/iray-tno/envarly ↗
+        </a>
       </div>
     </div>
   );

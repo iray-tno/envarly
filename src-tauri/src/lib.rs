@@ -30,6 +30,7 @@ pub fn run() {
             commands::restore_snapshot,
             commands::validate_paths,
             commands::export_vars,
+            commands::export_custom,
             commands::parse_import,
             commands::is_elevated,
             commands::restart_as_admin,

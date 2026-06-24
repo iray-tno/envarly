@@ -174,6 +174,15 @@ export default function App() {
           {elevated && (
             <span className="text-[11px] text-success opacity-60">🛡 Administrator</span>
           )}
+          <a
+            href="https://github.com/iray-tno/envarly"
+            target="_blank"
+            rel="noreferrer"
+            className="text-dim hover:text-muted transition-colors text-xs px-1"
+            title="View on GitHub"
+          >
+            ↗ GitHub
+          </a>
           <Button variant="ghost" onClick={handleRefresh} disabled={loading}>
             ↻ Refresh
           </Button>

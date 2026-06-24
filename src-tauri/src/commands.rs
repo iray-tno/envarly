@@ -1,6 +1,14 @@
 use crate::env_store::{self, EnvSnapshot, EnvVar, VarScope};
 use crate::error::EnvarlyError;
 use crate::snapshot::{self, SnapshotMeta};
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+pub struct CustomExportVar {
+    pub name: String,
+    pub value: String,
+    pub scope: String,
+}
 
 #[tauri::command]
 pub fn get_env_vars() -> Result<Vec<EnvVar>, EnvarlyError> {
@@ -139,6 +147,56 @@ pub fn parse_import(content: String, format: String) -> Result<EnvSnapshot, Enva
     match format.as_str() {
         "reg" => crate::export::parse_reg(&content),
         _ => crate::export::parse_json(&content),
+    }
+}
+
+/// Export a caller-supplied list of variables (name+value+scope) to a user-chosen file.
+/// Values come from the frontend so no extra registry read is needed.
+#[tauri::command]
+pub async fn export_custom(
+    app: tauri::AppHandle,
+    vars: Vec<CustomExportVar>,
+    format: String,
+) -> Result<Option<String>, EnvarlyError> {
+    use std::collections::HashMap;
+    use tauri_plugin_dialog::{DialogExt, FilePath};
+
+    let mut snapshot = EnvSnapshot {
+        user: HashMap::new(),
+        system: HashMap::new(),
+    };
+    for v in &vars {
+        match v.scope.as_str() {
+            "User"   => { snapshot.user.insert(v.name.clone(), v.value.clone()); }
+            "System" => { snapshot.system.insert(v.name.clone(), v.value.clone()); }
+            _ => {}
+        }
+    }
+
+    let (content, ext, filter_name) = match format.as_str() {
+        "reg" => (crate::export::to_reg(&snapshot, "All"), "reg", "Registry files"),
+        _     => (crate::export::to_json(&snapshot, "All"), "json", "JSON files"),
+    };
+
+    let default_name = format!(
+        "envarly-custom-{}.{}",
+        chrono::Local::now().format("%Y%m%d"),
+        ext
+    );
+
+    let path = app
+        .dialog()
+        .file()
+        .set_file_name(&default_name)
+        .add_filter(filter_name, &[ext])
+        .blocking_save_file();
+
+    match path {
+        Some(FilePath::Path(p)) => {
+            std::fs::write(&p, content.as_bytes()).map_err(EnvarlyError::Registry)?;
+            Ok(Some(p.to_string_lossy().into_owned()))
+        }
+        _ => Ok(None),
     }
 }
 
