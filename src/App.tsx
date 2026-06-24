@@ -6,7 +6,9 @@ import { LicensesPanel } from "./components/LicensesPanel/LicensesPanel";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
 import { Button } from "./components/ui/Button";
+import { ThemeContext } from "./context/ThemeContext";
 import { useEnvVars } from "./hooks/useEnvVars";
+import { useTheme } from "./hooks/useTheme";
 import { cn } from "./lib/cn";
 import { applyAccepted, computeDiff, snapshotsEqual } from "./lib/diff";
 import type { DiffEntry } from "./lib/diff";
@@ -16,6 +18,7 @@ import type { EnvSnapshot, EnvVar, VarScope } from "./types";
 type Tab = "editor" | "snapshots" | "changes" | "importexport" | "licenses";
 
 export default function App() {
+  const { theme, toggle: toggleTheme } = useTheme();
   const { vars, loading, error, refresh } = useEnvVars();
   const [selected, setSelected] = useState<EnvVar | null>(null);
   const [tab, setTab] = useState<Tab>("editor");
@@ -126,6 +129,7 @@ export default function App() {
   ];
 
   return (
+    <ThemeContext.Provider value={theme}>
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Header */}
       <header
@@ -183,6 +187,13 @@ export default function App() {
           >
             ↗ GitHub
           </a>
+          <button
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="px-2 py-1 rounded text-muted hover:bg-hover hover:text-fg transition-colors text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas"
+          >
+            {theme === "dark" ? "☀" : "🌙"}
+          </button>
           <Button variant="ghost" onClick={handleRefresh} disabled={loading}>
             ↻ Refresh
           </Button>
@@ -235,5 +246,6 @@ export default function App() {
         )}
       </main>
     </div>
+    </ThemeContext.Provider>
   );
 }

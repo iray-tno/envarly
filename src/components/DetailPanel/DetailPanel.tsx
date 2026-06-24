@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { api } from "../../api";
+import { useThemeContext } from "../../context/ThemeContext";
 import type { EnvVar } from "../../types";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
@@ -17,6 +18,7 @@ interface Props {
 type StatusMsg = { type: "ok" | "err"; text: string };
 
 export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
+  const theme = useThemeContext();
   const [value, setValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -149,7 +151,7 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
                 newValue={isPath ? value.split(";").join("\n") : value}
                 splitView={false}
                 compareMethod={isPath ? DiffMethod.LINES : DiffMethod.WORDS}
-                useDarkTheme
+                useDarkTheme={theme === "dark"}
                 hideLineNumbers
                 styles={{
                   variables: {
@@ -161,6 +163,15 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
                       removedColor: "#f85149",
                       wordAddedBackground: "#1a3a2a",
                       wordRemovedBackground: "#3a1a1a",
+                    },
+                    light: {
+                      diffViewerBackground: "#f6f8fa",
+                      addedBackground: "#e6ffec",
+                      addedColor: "#1a7f37",
+                      removedBackground: "#ffebe9",
+                      removedColor: "#cf222e",
+                      wordAddedBackground: "#e6ffec",
+                      wordRemovedBackground: "#ffebe9",
                     },
                   },
                 }}
