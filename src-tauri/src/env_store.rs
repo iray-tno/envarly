@@ -240,10 +240,16 @@ pub fn read_snapshot() -> Result<EnvSnapshot, EnvarlyError> {
 }
 
 pub fn write_var(name: &str, value: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
+    #[cfg(test)]
+    panic!("write_var() must not be called in tests — use write_var_with(&MemBackend, ...) instead");
+    #[cfg_attr(test, allow(unreachable_code))]
     write_var_with(&WinregBackend, name, value, scope)
 }
 
 pub fn delete_var(name: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
+    #[cfg(test)]
+    panic!("delete_var() must not be called in tests — use delete_var_with(&MemBackend, ...) instead");
+    #[cfg_attr(test, allow(unreachable_code))]
     delete_var_with(&WinregBackend, name, scope)
 }
 
