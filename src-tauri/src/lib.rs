@@ -2,6 +2,7 @@
 mod cli;
 #[cfg(windows)]
 mod commands;
+mod crypto;
 mod env_store;
 mod error;
 pub mod export;

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
+use crate::crypto;
 use crate::env_store::EnvSnapshot;
 use crate::error::EnvarlyError;
 
@@ -25,6 +26,22 @@ fn snapshots_dir() -> Result<PathBuf, EnvarlyError> {
     Ok(dir)
 }
 
+fn write_snap(path: &PathBuf, meta: &SnapshotMeta) -> Result<(), EnvarlyError> {
+    let json = serde_json::to_vec(meta)?;
+    let encrypted = crypto::protect(&json)?;
+    fs::write(path, encrypted)
+        .map_err(|e| EnvarlyError::Snapshot(format!("Cannot write snapshot: {e}")))?;
+    Ok(())
+}
+
+fn read_snap(path: &PathBuf) -> Result<SnapshotMeta, EnvarlyError> {
+    let encrypted = fs::read(path)
+        .map_err(|e| EnvarlyError::Snapshot(format!("Cannot read snapshot file: {e}")))?;
+    let json = crypto::unprotect(&encrypted)?;
+    serde_json::from_slice(&json)
+        .map_err(|e| EnvarlyError::Snapshot(format!("Cannot parse snapshot: {e}")))
+}
+
 pub fn save_snapshot(snapshot: EnvSnapshot, label: &str) -> Result<SnapshotMeta, EnvarlyError> {
     let now = Utc::now();
     let id = now.format("%Y%m%dT%H%M%SZ").to_string();
@@ -34,11 +51,8 @@ pub fn save_snapshot(snapshot: EnvSnapshot, label: &str) -> Result<SnapshotMeta,
         label: label.to_string(),
         snapshot,
     };
-    let dir = snapshots_dir()?;
-    let path = dir.join(format!("{id}.json"));
-    let json = serde_json::to_string_pretty(&meta)?;
-    fs::write(&path, json)
-        .map_err(|e| EnvarlyError::Snapshot(format!("Cannot write snapshot: {e}")))?;
+    let path = snapshots_dir()?.join(format!("{id}.snap"));
+    write_snap(&path, &meta)?;
     Ok(meta)
 }
 
@@ -58,10 +72,8 @@ pub fn save_snapshot_to(
     };
     fs::create_dir_all(dir)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot create dir: {e}")))?;
-    let path = dir.join(format!("{id}.json"));
-    let json = serde_json::to_string_pretty(&meta)?;
-    fs::write(&path, json)
-        .map_err(|e| EnvarlyError::Snapshot(format!("Cannot write snapshot: {e}")))?;
+    let path = dir.join(format!("{id}.snap"));
+    write_snap(&path, &meta)?;
     Ok(meta)
 }
 
@@ -77,12 +89,10 @@ pub fn list_snapshots_from(dir: &PathBuf) -> Result<Vec<SnapshotMeta>, EnvarlyEr
         let entry =
             entry.map_err(|e| EnvarlyError::Snapshot(format!("Read entry error: {e}")))?;
         let path = entry.path();
-        if path.extension().and_then(|e| e.to_str()) != Some("json") {
+        if path.extension().and_then(|e| e.to_str()) != Some("snap") {
             continue;
         }
-        let data = fs::read_to_string(&path)
-            .map_err(|e| EnvarlyError::Snapshot(format!("Cannot read snapshot file: {e}")))?;
-        if let Ok(meta) = serde_json::from_str::<SnapshotMeta>(&data) {
+        if let Ok(meta) = read_snap(&path) {
             metas.push(meta);
         }
     }
@@ -91,8 +101,7 @@ pub fn list_snapshots_from(dir: &PathBuf) -> Result<Vec<SnapshotMeta>, EnvarlyEr
 }
 
 pub fn delete_snapshot(id: &str) -> Result<(), EnvarlyError> {
-    let dir = snapshots_dir()?;
-    let path = dir.join(format!("{id}.json"));
+    let path = snapshots_dir()?.join(format!("{id}.snap"));
     fs::remove_file(&path)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot delete snapshot: {e}")))?;
     Ok(())
@@ -100,7 +109,7 @@ pub fn delete_snapshot(id: &str) -> Result<(), EnvarlyError> {
 
 #[cfg(test)]
 pub fn delete_snapshot_from(id: &str, dir: &PathBuf) -> Result<(), EnvarlyError> {
-    let path = dir.join(format!("{id}.json"));
+    let path = dir.join(format!("{id}.snap"));
     fs::remove_file(&path)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot delete snapshot: {e}")))?;
     Ok(())
