@@ -1,4 +1,8 @@
 fn main() {
     #[cfg(windows)]
-    tauri_build::build()
+    {
+        println!("cargo:rerun-if-changed=icons/icon.ico");
+        println!("cargo:rerun-if-changed=icons/icon.png");
+        tauri_build::build()
+    }
 }
