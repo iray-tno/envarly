@@ -221,7 +221,7 @@ export function SnapshotPanel({ onRestored }: Props) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-5 py-6 flex flex-col gap-4 overflow-y-auto">
+    <div className="w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto">
       <div>
         <h2 className="text-sm font-semibold text-fg mb-1">Snapshots</h2>
         <p className="text-xs text-muted">

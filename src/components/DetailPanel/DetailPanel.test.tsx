@@ -63,13 +63,14 @@ describe("DetailPanel", () => {
     expect(screen.getByRole("button", { name: /apply/i })).toBeInTheDocument();
   });
 
-  it("calls api.setEnvVar on apply", async () => {
+  it("calls api.setEnvVar on apply → confirm", async () => {
     const user = userEvent.setup();
     const onSaved = vi.fn();
     render(<DetailPanel variable={simpleVar} elevated onSaved={onSaved} onDeleted={vi.fn()} />);
     await user.clear(screen.getByRole("textbox"));
     await user.type(screen.getByRole("textbox"), "NewValue");
-    await user.click(screen.getByRole("button", { name: /apply/i }));
+    await user.click(screen.getByRole("button", { name: /^apply$/i }));
+    await user.click(screen.getByRole("button", { name: /confirm/i }));
     await waitFor(() => {
       expect(api.setEnvVar).toHaveBeenCalledWith("JAVA_HOME", "NewValue", "User");
       expect(onSaved).toHaveBeenCalled();
@@ -81,12 +82,13 @@ describe("DetailPanel", () => {
     expect(screen.getByText(/drag to reorder/i)).toBeInTheDocument();
   });
 
-  it("shows success message after apply", async () => {
+  it("shows success message after apply → confirm", async () => {
     const user = userEvent.setup();
     render_(simpleVar);
     await user.clear(screen.getByRole("textbox"));
     await user.type(screen.getByRole("textbox"), "changed");
-    await user.click(screen.getByRole("button", { name: /apply/i }));
+    await user.click(screen.getByRole("button", { name: /^apply$/i }));
+    await user.click(screen.getByRole("button", { name: /confirm/i }));
     await waitFor(() =>
       expect(screen.getByText(/saved and broadcast/i)).toBeInTheDocument(),
     );
