@@ -29,7 +29,7 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 | Linter / formatter | Biome |
 | JS tests | Vitest + @testing-library/react |
 | Rust tests | cargo test (MemBackend — no real registry writes) |
-| Component explorer | Storybook 8 + addon-a11y |
+| Component explorer | [Storybook 8](https://iray-tno.github.io/envarly/storybook/) + addon-a11y |
 | Runtime versions | mise (Node 22, Rust stable) |
 
 ## Prerequisites

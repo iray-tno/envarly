@@ -15,7 +15,7 @@ const config: StorybookConfig = {
   },
   docs: { autodocs: "tag" },
   viteFinal: (config) => {
-    if (isProd) config.base = "/envarly/";
+    if (isProd) config.base = "/envarly/storybook/";
     return config;
   },
 };
