@@ -146,11 +146,12 @@ Spacing follows a 4px/8px grid. Tailwind class mapping:
 
 | Intent | Classes |
 |--------|---------|
-| Button (sm) | `px-4 py-2 text-sm` |
-| Button (md) | `px-5 py-2.5 text-sm font-medium` |
+| Button (sm) | `px-4 py-2.5 text-sm` |
+| Button (md) | `px-5 py-3 text-sm font-medium` |
+| IconButton | `p-1.5` |
 | Input / Textarea | `px-4 py-2.5 text-sm` |
 | Sidebar item | `px-4 py-2.5 rounded` |
-| Badge | `px-2.5 text-xs` |
+| Badge | `px-3 py-1 text-xs` |
 
 ---
 
