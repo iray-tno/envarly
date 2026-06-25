@@ -39,16 +39,59 @@ describe("ImportExportPanel — Export tab", () => {
     expect(screen.getByRole("radio", { name: ".reg" })).toBeInTheDocument();
   });
 
-  it("calls exportVars with selected scope and format", async () => {
+  it("exports directly without confirmation when no secrets in scope", async () => {
+    // Default mock: JAVA_HOME, MY_VAR, WINDIR — none are secrets
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: /export all/i }));
+    await waitFor(() => expect(api.exportVars).toHaveBeenCalledWith("All", "json"));
+    expect(screen.queryByRole("button", { name: /export anyway/i })).not.toBeInTheDocument();
+  });
+
+  it("shows service names in confirmation when secrets are present", async () => {
+    vi.mocked(api.getEnvVars).mockResolvedValue([
+      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", isPathLike: false },
+      { name: "GITHUB_TOKEN", value: "xyz", scope: "System", isPathLike: false },
+    ] as never);
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: /export all/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/aws/i)).toBeInTheDocument();
+      expect(screen.getByText(/github/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /export anyway/i })).toBeInTheDocument();
+    });
+  });
+
+  it("calls exportVars with selected scope and format after confirming", async () => {
+    vi.mocked(api.getEnvVars).mockResolvedValue([
+      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", isPathLike: false },
+    ] as never);
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: "User" }));
     await user.click(screen.getByRole("radio", { name: ".reg" }));
     await user.click(screen.getByRole("button", { name: /export user/i }));
+    await waitFor(() => screen.getByRole("button", { name: /export anyway/i }));
+    await user.click(screen.getByRole("button", { name: /export anyway/i }));
     expect(api.exportVars).toHaveBeenCalledWith("User", "reg");
   });
 
+  it("cancelling confirmation keeps the export button visible", async () => {
+    vi.mocked(api.getEnvVars).mockResolvedValue([
+      { name: "GITHUB_TOKEN", value: "ghp_xxxx", scope: "User", isPathLike: false },
+    ] as never);
+    const user = userEvent.setup();
+    render(<ImportExportPanel onApplied={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: /export all/i }));
+    await waitFor(() => screen.getByRole("button", { name: /cancel/i }));
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+    expect(screen.getByRole("button", { name: /export all/i })).toBeInTheDocument();
+    expect(api.exportVars).not.toHaveBeenCalled();
+  });
+
   it("shows success status after export", async () => {
+    // No secrets in default mock → direct export
     const user = userEvent.setup();
     render(<ImportExportPanel onApplied={vi.fn()} />);
     await user.click(screen.getByRole("button", { name: /export all/i }));
@@ -62,6 +105,7 @@ describe("ImportExportPanel — Export tab", () => {
     render(<ImportExportPanel onApplied={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: "Custom…" }));
     await waitFor(() => expect(screen.getByText("JAVA_HOME")).toBeInTheDocument());
+    // Test data (JAVA_HOME) has no secrets → no confirmation step
     await user.click(screen.getByRole("button", { name: /export \d+ selected/i }));
     await waitFor(() => expect(api.exportCustomVars).toHaveBeenCalled());
   });

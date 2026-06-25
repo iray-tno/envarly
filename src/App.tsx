@@ -182,7 +182,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => openUrl("https://github.com/iray-tno/envarly")}
-            className="text-dim hover:text-muted transition-colors text-xs px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-panel"
+            className="text-muted hover:text-fg transition-colors text-xs px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-panel"
             title="View on GitHub"
           >
             ↗ GitHub

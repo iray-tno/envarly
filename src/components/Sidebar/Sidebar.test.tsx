@@ -64,8 +64,32 @@ describe("Sidebar", () => {
 
   it("displays scope counts in tabs", () => {
     render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} loading={false} />);
-    // All=4, User=2, System=2
+    // All=4, User=2, System=2, Secrets=0 (no secret vars in test data)
     const badges = screen.getAllByText(/^\d+$/);
-    expect(badges.map((b) => b.textContent)).toEqual(["4", "2", "2"]);
+    expect(badges.map((b) => b.textContent)).toEqual(["4", "2", "2", "0"]);
+  });
+
+  it("detects secrets from value pattern even with a generic name", () => {
+    const valueSecretVars: EnvVar[] = [
+      { name: "MY_KEY", value: "ghp_abcdefghijklmnopqrstuvwxyz123456", scope: "User", isPathLike: false },
+      { name: "NORMAL_VAR", value: "hello", scope: "User", isPathLike: false },
+    ];
+    render(<Sidebar vars={valueSecretVars} selected={null} onSelect={vi.fn()} loading={false} />);
+    // "GitHub" service badge should appear next to MY_KEY
+    expect(screen.getByTitle("GitHub Personal Access Token")).toBeInTheDocument();
+  });
+
+  it("filters to secret variables only in Secrets tab", async () => {
+    const secretVars: EnvVar[] = [
+      makeVar("AWS_SECRET_ACCESS_KEY", "User"),
+      makeVar("GITHUB_TOKEN", "System"),
+      makeVar("JAVA_HOME", "User"),
+    ];
+    const user = userEvent.setup();
+    render(<Sidebar vars={secretVars} selected={null} onSelect={vi.fn()} loading={false} />);
+    await user.click(screen.getByRole("radio", { name: /secrets/i }));
+    expect(screen.getByText("AWS_SECRET_ACCESS_KEY")).toBeInTheDocument();
+    expect(screen.getByText("GITHUB_TOKEN")).toBeInTheDocument();
+    expect(screen.queryByText("JAVA_HOME")).not.toBeInTheDocument();
   });
 });

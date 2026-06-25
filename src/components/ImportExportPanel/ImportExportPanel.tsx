@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
-import { isSecretVar } from "../../lib/secrets";
+import { type SecretInfo, resolveSecret } from "../../lib/secrets";
 import type { EnvSnapshot, EnvVar, VarScope } from "../../types";
 import { Button } from "../ui/Button";
 import { SegmentedControl } from "../ui/SegmentedControl";
@@ -55,6 +55,30 @@ function SecretBanner({ count }: { count: number }) {
   );
 }
 
+interface ExportConfirmProps {
+  secretServices: string[];
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function ExportConfirm({ secretServices, onConfirm, onCancel }: ExportConfirmProps) {
+  return (
+    <div className="flex flex-col gap-3 p-3 rounded border border-warn/40 bg-warn/10">
+      <p className="flex gap-2 text-warn text-xs">
+        <span className="shrink-0">⚠</span>
+        <span>
+          {secretServices.join(", ")} credentials will be included in the exported file.
+          Only export to destinations you trust.
+        </span>
+      </p>
+      <div className="flex gap-2">
+        <Button variant="primary" size="sm" onClick={onConfirm}>Export anyway</Button>
+        <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+      </div>
+    </div>
+  );
+}
+
 interface VarTableProps {
   vars: FlatVar[];
   checked: Record<string, boolean>;
@@ -96,7 +120,7 @@ function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps) {
           <tbody>
             {vars.map((v) => {
               const key = varKey(v);
-              const secret = isSecretVar(v.name);
+              const secret = resolveSecret(v.name, v.value);
               return (
                 <tr
                   key={key}
@@ -112,12 +136,20 @@ function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps) {
                   <td className="px-3 py-1.5 font-mono font-semibold text-fg">
                     <span className="flex items-center gap-1.5">
                       {v.name}
-                      {secret && <span title="May contain sensitive data" className="text-warn text-[10px]">⚠</span>}
+                      {secret && (
+                        <span
+                          title={secret.label}
+                          className="text-warn text-[10px] font-medium shrink-0"
+                        >
+                          ⚠ {secret.service}
+                        </span>
+                      )}
                     </span>
                   </td>
                   <td className="px-3 py-1.5 text-muted">{v.scope}</td>
                   <td className="px-3 py-1.5 font-mono text-muted truncate max-w-xs">
                     {secret ? "••••••••" : v.value}
+
                   </td>
                 </tr>
               );
@@ -144,6 +176,9 @@ function ExportTab({ onStatus }: ExportTabProps) {
   const [allVars, setAllVars] = useState<FlatVar[] | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [loadingVars, setLoadingVars] = useState(false);
+  const [pendingExport, setPendingExport] = useState(false);
+  const [pendingSecretServices, setPendingSecretServices] = useState<string[]>([]);
+  const [checkingSecrets, setCheckingSecrets] = useState(false);
 
   useEffect(() => {
     if (scope !== "Custom") return;
@@ -162,16 +197,19 @@ function ExportTab({ onStatus }: ExportTabProps) {
   const handleScopeChange = (s: ExportScope) => {
     setScope(s);
     if (s !== "Custom") setAllVars(null);
+    setPendingExport(false);
+    setPendingSecretServices([]);
     onStatus(null);
   };
 
   const selectedCustomVars = allVars?.filter((v) => checked[varKey(v)]) ?? [];
   const secretCount =
     scope === "Custom"
-      ? selectedCustomVars.filter((v) => isSecretVar(v.name)).length
+      ? selectedCustomVars.filter((v) => resolveSecret(v.name, v.value) !== null).length
       : 0;
 
-  const handleExport = async () => {
+  const doExport = async () => {
+    setPendingExport(false);
     setBusy(true);
     onStatus(null);
     try {
@@ -186,6 +224,51 @@ function ExportTab({ onStatus }: ExportTabProps) {
       onStatus(`Export failed: ${e}`);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleExport = async () => {
+    if (scope === "Custom") {
+      if (secretCount > 0) {
+        const services = [
+          ...new Set(
+            selectedCustomVars
+              .map((v) => resolveSecret(v.name, v.value))
+              .filter((s): s is SecretInfo => s !== null)
+              .map((s) => s.service),
+          ),
+        ];
+        setPendingSecretServices(services);
+        setPendingExport(true);
+      } else {
+        void doExport();
+      }
+      return;
+    }
+
+    // For All/User/System: fetch vars to find actual secrets before warning
+    setCheckingSecrets(true);
+    try {
+      const vars: EnvVar[] = await api.getEnvVars();
+      const flat = vars.filter((v) => scope === "All" || v.scope === scope);
+      const services = [
+        ...new Set(
+          flat
+            .map((v) => resolveSecret(v.name, v.value))
+            .filter((s): s is SecretInfo => s !== null)
+            .map((s) => s.service),
+        ),
+      ];
+      if (services.length > 0) {
+        setPendingSecretServices(services);
+        setPendingExport(true);
+      } else {
+        void doExport();
+      }
+    } catch {
+      void doExport();
+    } finally {
+      setCheckingSecrets(false);
     }
   };
 
@@ -225,15 +308,23 @@ function ExportTab({ onStatus }: ExportTabProps) {
         </div>
       )}
 
-      <Button
-        variant="primary"
-        size="md"
-        onClick={handleExport}
-        disabled={busy || !canExport}
-        className="self-start"
-      >
-        {busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → .${format}` : `Export ${scope} → .${format}`}
-      </Button>
+      {pendingExport ? (
+        <ExportConfirm
+          secretServices={pendingSecretServices}
+          onConfirm={() => void doExport()}
+          onCancel={() => { setPendingExport(false); setPendingSecretServices([]); }}
+        />
+      ) : (
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => void handleExport()}
+          disabled={busy || !canExport || checkingSecrets}
+          className="self-start"
+        >
+          {checkingSecrets ? "Checking…" : busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → .${format}` : `Export ${scope} → .${format}`}
+        </Button>
+      )}
     </div>
   );
 }
@@ -335,7 +426,7 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
   };
 
   const checkedCount = preview ? preview.filter((v) => checked[varKey(v)]).length : 0;
-  const secretCount = preview ? preview.filter((v) => checked[varKey(v)] && isSecretVar(v.name)).length : 0;
+  const secretCount = preview ? preview.filter((v) => checked[varKey(v)] && resolveSecret(v.name, v.value) !== null).length : 0;
   const noneChecked = checkedCount === 0;
 
   // Scopes affected by Replace, for the warning message
