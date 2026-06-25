@@ -7,9 +7,19 @@ use crate::crypto;
 use crate::env_store::EnvSnapshot;
 use crate::error::EnvarlyError;
 
+/// Snapshot file format version. Increment when the serialized shape changes.
+/// Version history:
+///   0 – legacy plaintext JSON (.json), no version field (pre-encryption era)
+///   1 – DPAPI-encrypted JSON blob (.snap), version field present
+pub const SNAPSHOT_FORMAT_VERSION: u32 = 1;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SnapshotMeta {
+    /// Format version; absent in v0 files (defaults to 0 via serde default).
+    /// When adding a migration, match on this field in `read_snap`.
+    #[serde(default)]
+    pub version: u32,
     pub id: String,
     pub created_at: String,
     pub label: String,
@@ -46,6 +56,7 @@ pub fn save_snapshot(snapshot: EnvSnapshot, label: &str) -> Result<SnapshotMeta,
     let now = Utc::now();
     let id = now.format("%Y%m%dT%H%M%SZ").to_string();
     let meta = SnapshotMeta {
+        version: SNAPSHOT_FORMAT_VERSION,
         id: id.clone(),
         created_at: now.to_rfc3339(),
         label: label.to_string(),
@@ -65,6 +76,7 @@ pub fn save_snapshot_to(
     let now = Utc::now();
     let id = now.format("%Y%m%dT%H%M%SZ").to_string();
     let meta = SnapshotMeta {
+        version: SNAPSHOT_FORMAT_VERSION,
         id: id.clone(),
         created_at: now.to_rfc3339(),
         label: label.to_string(),
