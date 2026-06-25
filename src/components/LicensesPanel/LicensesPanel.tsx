@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { cn } from "../../lib/cn";
 import licensesData from "../../assets/oss-licenses.json";
 
@@ -38,14 +39,13 @@ function RepoLink({ url }: { url: string }) {
   if (!url) return null;
   const display = url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className="text-dim hover:text-accent transition-colors truncate text-[11px] font-mono"
+    <button
+      type="button"
+      onClick={() => openUrl(url)}
+      className="text-dim hover:text-accent transition-colors truncate text-[11px] font-mono focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
     >
       {display}
-    </a>
+    </button>
   );
 }
 
@@ -146,14 +146,13 @@ export function LicensesPanel() {
       {/* Footer */}
       <div className="px-5 py-2 border-t border-rim shrink-0 text-[11px] text-dim flex items-center gap-3">
         <span>Envarly is released under the MIT License.</span>
-        <a
-          href="https://github.com/iray-tno/envarly"
-          target="_blank"
-          rel="noreferrer"
-          className="ml-auto hover:text-accent transition-colors font-mono"
+        <button
+          type="button"
+          onClick={() => openUrl("https://github.com/iray-tno/envarly")}
+          className="ml-auto hover:text-accent transition-colors font-mono focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
         >
           github.com/iray-tno/envarly ↗
-        </a>
+        </button>
       </div>
     </div>
   );

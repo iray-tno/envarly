@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
 import { DiffPanel } from "./components/DiffPanel/DiffPanel";
 import { ImportExportPanel } from "./components/ImportExportPanel/ImportExportPanel";
@@ -178,15 +179,14 @@ export default function App() {
           {elevated && (
             <span className="text-[11px] text-success opacity-60">🛡 Administrator</span>
           )}
-          <a
-            href="https://github.com/iray-tno/envarly"
-            target="_blank"
-            rel="noreferrer"
-            className="text-dim hover:text-muted transition-colors text-xs px-1"
+          <button
+            type="button"
+            onClick={() => openUrl("https://github.com/iray-tno/envarly")}
+            className="text-dim hover:text-muted transition-colors text-xs px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-panel"
             title="View on GitHub"
           >
             ↗ GitHub
-          </a>
+          </button>
           <button
             onClick={toggleTheme}
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
