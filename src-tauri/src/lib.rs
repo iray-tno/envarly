@@ -1,12 +1,16 @@
+#[cfg(windows)]
 mod cli;
+#[cfg(windows)]
 mod commands;
 mod env_store;
 mod error;
 pub mod export;
+#[cfg(windows)]
 mod snapshot;
 
 /// If CLI subcommand args are present, execute them and exit the process.
 /// Returns normally (unit) when there are no subcommand args, so the caller can launch the GUI.
+#[cfg(windows)]
 pub fn try_run_cli() {
     if std::env::args().len() <= 1 {
         return;
@@ -14,6 +18,7 @@ pub fn try_run_cli() {
     cli::run() // -> !  (either exits 0 on success or exits 1 on error)
 }
 
+#[cfg(windows)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()

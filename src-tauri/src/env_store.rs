@@ -1,11 +1,15 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+#[cfg(windows)]
 use winreg::enums::*;
+#[cfg(windows)]
 use winreg::RegKey;
 
 use crate::error::EnvarlyError;
 
+#[cfg(windows)]
 const USER_ENV_KEY: &str = "Environment";
+#[cfg(windows)]
 const SYSTEM_ENV_KEY: &str = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -50,8 +54,10 @@ pub trait EnvBackend: Send + Sync {
 // Production backend: Windows registry
 // ---------------------------------------------------------------------------
 
+#[cfg(windows)]
 pub struct WinregBackend;
 
+#[cfg(windows)]
 impl EnvBackend for WinregBackend {
     fn read_user(&self) -> Result<HashMap<String, String>, EnvarlyError> {
         let key = RegKey::predef(HKEY_CURRENT_USER).open_subkey(USER_ENV_KEY)?;
@@ -123,7 +129,7 @@ impl MemBackend {
         }
     }
 
-    pub fn with_user(mut self, vars: impl IntoIterator<Item = (&'static str, &'static str)>) -> Self {
+    pub fn with_user(self, vars: impl IntoIterator<Item = (&'static str, &'static str)>) -> Self {
         *self.user.lock().unwrap() = vars.into_iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
         self
     }
@@ -228,31 +234,30 @@ pub fn delete_var_with(backend: &dyn EnvBackend, name: &str, scope: &VarScope) -
 }
 
 // ---------------------------------------------------------------------------
-// Public API — thin wrappers using WinregBackend
+// Public API — thin wrappers using WinregBackend (Windows only)
 // ---------------------------------------------------------------------------
 
+#[cfg(windows)]
 pub fn read_all() -> Result<Vec<EnvVar>, EnvarlyError> {
     read_all_with(&WinregBackend)
 }
 
+#[cfg(windows)]
 pub fn read_snapshot() -> Result<EnvSnapshot, EnvarlyError> {
     read_snapshot_with(&WinregBackend)
 }
 
+#[cfg(windows)]
 pub fn write_var(name: &str, value: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
-    #[cfg(test)]
-    panic!("write_var() must not be called in tests — use write_var_with(&MemBackend, ...) instead");
-    #[cfg_attr(test, allow(unreachable_code))]
     write_var_with(&WinregBackend, name, value, scope)
 }
 
+#[cfg(windows)]
 pub fn delete_var(name: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
-    #[cfg(test)]
-    panic!("delete_var() must not be called in tests — use delete_var_with(&MemBackend, ...) instead");
-    #[cfg_attr(test, allow(unreachable_code))]
     delete_var_with(&WinregBackend, name, scope)
 }
 
+#[cfg(windows)]
 pub fn is_elevated() -> bool {
     WinregBackend.is_elevated()
 }
@@ -268,6 +273,7 @@ pub(crate) fn is_path_list(name: &str, value: &str) -> bool {
     value.contains(';') && value.split(';').any(|part| part.contains('\\'))
 }
 
+#[cfg(windows)]
 fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, String)> + '_ {
     key.enum_values().filter_map(|v| {
         let (name, val) = v.ok()?;
@@ -278,6 +284,7 @@ fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, String)> + 
     })
 }
 
+#[cfg(windows)]
 fn broadcast_settings_change() {
     #[cfg(target_os = "windows")]
     unsafe {
