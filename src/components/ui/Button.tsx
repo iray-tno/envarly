@@ -18,8 +18,8 @@ const variantCls: Record<Variant, string> = {
 };
 
 const sizeCls: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-xs",
-  md: "px-4 py-2 text-sm font-medium",
+  sm: "px-4 py-2 text-sm",
+  md: "px-5 py-2.5 text-sm font-medium",
 };
 
 export function Button({ variant = "ghost", size = "sm", className, children, ...props }: Props) {

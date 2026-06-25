@@ -31,7 +31,7 @@ export function SegmentedControl<T extends string>({
           aria-checked={value === opt.value}
           onClick={() => onChange(opt.value)}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded text-xs transition-colors",
+            "flex items-center gap-1.5 px-4 py-2 rounded text-sm transition-colors",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
             value === opt.value
               ? "bg-surface text-fg"
@@ -40,7 +40,7 @@ export function SegmentedControl<T extends string>({
         >
           {opt.label}
           {opt.count !== undefined && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-hover text-dim leading-none">
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-hover text-dim leading-none">
               {opt.count}
             </span>
           )}

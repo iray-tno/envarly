@@ -86,7 +86,7 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
               type="button"
               onClick={() => onSelect(v)}
               className={cn(
-                "flex items-center mx-2 w-[calc(100%-1rem)] gap-2 px-4 py-2 rounded text-left transition-colors",
+                "flex items-center mx-2 w-[calc(100%-1rem)] gap-2 px-4 py-2.5 rounded text-left transition-colors",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
                 isSelected
                   ? "bg-surface text-fg"

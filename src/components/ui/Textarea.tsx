@@ -13,7 +13,7 @@ export function Textarea({ label, labelHidden = false, error, className, id, ...
     <div className="flex flex-col gap-1">
       <label
         htmlFor={inputId}
-        className={cn("text-xs font-medium text-muted", labelHidden && "sr-only")}
+        className={cn("text-sm font-medium text-muted", labelHidden && "sr-only")}
       >
         {label}
       </label>
@@ -21,7 +21,7 @@ export function Textarea({ label, labelHidden = false, error, className, id, ...
         id={inputId}
         {...props}
         className={cn(
-          "px-3 py-2.5 bg-surface border rounded font-mono text-xs text-fg leading-relaxed resize-y transition-colors",
+          "px-4 py-3 bg-surface border rounded font-mono text-sm text-fg leading-relaxed resize-y transition-colors",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
           error ? "border-danger" : "border-rim focus:border-accent",
           "placeholder:text-dim disabled:opacity-60 disabled:cursor-not-allowed",
@@ -29,7 +29,7 @@ export function Textarea({ label, labelHidden = false, error, className, id, ...
         )}
       />
       {error && (
-        <p className="text-xs text-danger" role="alert">
+        <p className="text-sm text-danger" role="alert">
           {error}
         </p>
       )}
