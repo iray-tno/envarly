@@ -17,6 +17,7 @@
     "lint:fix": "biome check --write src",
     "format": "biome format --write src",
     "gen-licenses": "node scripts/gen-licenses.mjs",
+    "check-version": "node scripts/check-version.mjs",
     "version": "node scripts/sync-version.mjs && git add src-tauri/tauri.conf.json src-tauri/Cargo.toml"
   },
   "dependencies": {
