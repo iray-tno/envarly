@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
 import { DiffPanel } from "./components/DiffPanel/DiffPanel";
@@ -10,6 +10,7 @@ import { Button } from "./components/ui/Button";
 import { Modal } from "./components/ui/Modal";
 import { ThemeContext } from "./context/ThemeContext";
 import { useEnvVars } from "./hooks/useEnvVars";
+import { useStaged } from "./hooks/useStaged";
 import { useTheme } from "./hooks/useTheme";
 import { cn } from "./lib/cn";
 import { applyAccepted, computeDiff, snapshotsEqual } from "./lib/diff";
@@ -17,7 +18,18 @@ import type { DiffEntry } from "./lib/diff";
 import { api } from "./api";
 import type { EnvSnapshot, EnvVar, VarScope } from "./types";
 
-type Dialog = "importexport" | "changes" | "licenses" | null;
+type Dialog = "importexport" | "changes" | "staged" | "licenses" | null;
+
+/** Convert staged changes to DiffEntry[] for the unified review modal. */
+function stagedToDiff(staged: Map<string, import("./hooks/useStaged").StagedChange>): DiffEntry[] {
+  return Array.from(staged.values()).map((c): DiffEntry => {
+    if (c.kind === "delete")
+      return { kind: "removed", name: c.name, scope: c.scope, value: c.originalValue! };
+    if (c.originalValue === null)
+      return { kind: "added", name: c.name, scope: c.scope, value: c.newValue! };
+    return { kind: "changed", name: c.name, scope: c.scope, oldValue: c.originalValue, newValue: c.newValue! };
+  }).sort((a, b) => a.scope.localeCompare(b.scope) || a.name.localeCompare(b.name));
+}
 
 export default function App() {
   const { theme, toggle: toggleTheme } = useTheme();
@@ -27,9 +39,14 @@ export default function App() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
 
+  const { staged, effectiveVars, stageSet, stageDelete, stageImport, stageSnapshot, unstage, clearStaged } =
+    useStaged(vars);
+
+  // External-change detection
   const baselineRef = useRef<EnvSnapshot | null>(null);
   const [diffEntries, setDiffEntries] = useState<DiffEntry[]>([]);
   const [applyBusy, setApplyBusy] = useState(false);
+  const [stagedBusy, setStagedBusy] = useState(false);
 
   const checkForExternalChanges = useCallback(async () => {
     if (!baselineRef.current) return;
@@ -37,7 +54,7 @@ export default function App() {
       const current = await api.getRegistrySnapshot();
       setDiffEntries(snapshotsEqual(baselineRef.current, current) ? [] : computeDiff(baselineRef.current, current));
     } catch {
-      // diff detection is best-effort
+      // best-effort
     }
   }, []);
 
@@ -54,8 +71,13 @@ export default function App() {
     await checkForExternalChanges();
   }, [refresh, checkForExternalChanges]);
 
-  const handleDeleted = () => { setSelected(null); refresh(); };
+  // Keep selected pointing at the current effectiveVar for the same identity
+  const effectiveSelected = useMemo<EnvVar | null>(() => {
+    if (!selected) return null;
+    return effectiveVars.find((v) => v.name === selected.name && v.scope === selected.scope) ?? null;
+  }, [selected, effectiveVars]);
 
+  // External changes apply
   const handleDiffApply = async (accepted: DiffEntry[], reverted: DiffEntry[]) => {
     setApplyBusy(true);
     try {
@@ -82,10 +104,35 @@ export default function App() {
     setDialog(null);
   };
 
-  // Auto-open changes dialog when new diffs appear
+  // Auto-open changes dialog when external diffs appear
   useEffect(() => {
     if (diffEntries.length > 0) setDialog("changes");
   }, [diffEntries.length]);
+
+  // Apply all staged changes to registry
+  const handleApplyStaged = async () => {
+    setStagedBusy(true);
+    try {
+      for (const change of staged.values()) {
+        if (change.kind === "delete") {
+          await api.deleteEnvVar(change.name, change.scope);
+        } else {
+          await api.setEnvVar(change.name, change.newValue!, change.scope);
+        }
+      }
+      clearStaged();
+      setDialog(null);
+      await refresh();
+      // Refresh baseline so external-change detection doesn't flag our own writes
+      try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
+    } catch (err) {
+      console.error("Failed to apply staged changes", err);
+    } finally {
+      setStagedBusy(false);
+    }
+  };
+
+  const stagedDiff = useMemo(() => stagedToDiff(staged), [staged]);
 
   return (
     <ThemeContext.Provider value={theme}>
@@ -108,13 +155,23 @@ export default function App() {
               ↻ Refresh
             </Button>
 
+            {staged.size > 0 && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setDialog("staged")}
+              >
+                Apply {staged.size} staged {staged.size === 1 ? "change" : "changes"}
+              </Button>
+            )}
+
             {diffEntries.length > 0 && (
               <Button
                 variant="warn"
                 size="sm"
                 onClick={() => setDialog("changes")}
               >
-                ⚠ Apply {diffEntries.length} {diffEntries.length === 1 ? "change" : "changes"}
+                ⚠ {diffEntries.length} external {diffEntries.length === 1 ? "change" : "changes"}
               </Button>
             )}
 
@@ -182,14 +239,22 @@ export default function App() {
 
         {/* Main */}
         <main className="flex flex-1 overflow-hidden">
-          <Sidebar vars={vars} selected={selected} onSelect={setSelected} loading={loading} />
+          <Sidebar
+            vars={effectiveVars}
+            selected={selected}
+            onSelect={setSelected}
+            loading={loading}
+            staged={staged}
+          />
 
           <div className="flex flex-1 overflow-hidden">
             <DetailPanel
-              variable={selected}
+              variable={effectiveSelected}
               elevated={elevated}
-              onSaved={refresh}
-              onDeleted={handleDeleted}
+              staged={staged}
+              onStage={stageSet}
+              onStageDelete={stageDelete}
+              onUnstage={unstage}
             />
           </div>
 
@@ -210,7 +275,7 @@ export default function App() {
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
-                <SnapshotPanel onRestored={refresh} />
+                <SnapshotPanel onStageSnapshot={(snap) => { stageSnapshot(snap); setSnapshotsOpen(false); }} />
               </div>
             </div>
           )}
@@ -223,10 +288,30 @@ export default function App() {
           title="Import / Export"
           size="xl"
         >
-          <ImportExportPanel onApplied={() => { refresh(); setDialog(null); }} />
+          <ImportExportPanel
+            onStage={(sets, deletes) => {
+              stageImport(sets, deletes);
+              setDialog(null);
+            }}
+          />
         </Modal>
 
-        {/* Changes modal */}
+        {/* Staged changes review modal */}
+        <Modal
+          open={dialog === "staged"}
+          onClose={() => setDialog(null)}
+          title={`Apply ${staged.size} staged ${staged.size === 1 ? "change" : "changes"}`}
+          size="xl"
+        >
+          <StagedModal
+            diff={stagedDiff}
+            busy={stagedBusy}
+            onApply={handleApplyStaged}
+            onClose={() => setDialog(null)}
+          />
+        </Modal>
+
+        {/* External changes modal */}
         <Modal
           open={dialog === "changes"}
           onClose={handleDiffDismiss}
@@ -254,5 +339,83 @@ export default function App() {
         </Modal>
       </div>
     </ThemeContext.Provider>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Staged changes review panel (inline — no separate file needed)
+// ---------------------------------------------------------------------------
+
+interface StagedModalProps {
+  diff: DiffEntry[];
+  busy: boolean;
+  onApply: () => void;
+  onClose: () => void;
+}
+
+function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
+  const byKind = {
+    added:   diff.filter((e) => e.kind === "added"),
+    removed: diff.filter((e) => e.kind === "removed"),
+    changed: diff.filter((e) => e.kind === "changed"),
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-6 py-4 border-b border-rim shrink-0">
+        <p className="text-xs text-muted mb-3">
+          These changes will be written to the Windows registry and broadcast to running applications.
+        </p>
+        <div className="flex gap-3 text-xs">
+          {byKind.added.length > 0   && <span className="text-success">+{byKind.added.length} added</span>}
+          {byKind.removed.length > 0 && <span className="text-danger">−{byKind.removed.length} removed</span>}
+          {byKind.changed.length > 0 && <span className="text-warn">~{byKind.changed.length} changed</span>}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-2">
+        {diff.map((entry) => {
+          const key = `${entry.scope}:${entry.name}`;
+          return (
+            <div
+              key={key}
+              className={cn(
+                "rounded border px-3 py-2 text-xs",
+                entry.kind === "added"   && "border-success/30 bg-success/5 text-success",
+                entry.kind === "removed" && "border-danger/30 bg-danger/5 text-danger",
+                entry.kind === "changed" && "border-warn/30 bg-warn/5 text-warn",
+              )}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono font-semibold text-fg">{entry.name}</span>
+                <span className="opacity-60 text-[10px]">{entry.scope}</span>
+                <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">
+                  {entry.kind}
+                </span>
+              </div>
+              {entry.kind === "removed" && (
+                <p className="font-mono text-[11px] opacity-70 line-through truncate">{entry.value}</p>
+              )}
+              {entry.kind === "added" && (
+                <p className="font-mono text-[11px] truncate">{entry.value}</p>
+              )}
+              {entry.kind === "changed" && (
+                <div className="flex flex-col gap-0.5">
+                  <p className="font-mono text-[11px] text-danger/70 line-through truncate">{entry.oldValue}</p>
+                  <p className="font-mono text-[11px] text-success truncate">{entry.newValue}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="px-6 py-4 border-t border-rim shrink-0 flex gap-2 justify-end">
+        <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>Cancel</Button>
+        <Button variant="primary" size="md" onClick={onApply} disabled={busy}>
+          {busy ? "Applying…" : `Apply ${diff.length} ${diff.length === 1 ? "change" : "changes"} to registry`}
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -1,17 +1,16 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../../api";
+import type { StagedChange } from "../../hooks/useStaged";
 import type { EnvVar } from "../../types";
 import { DetailPanel } from "./DetailPanel";
 
 vi.mock("../../api", () => ({
-  api: {
-    setEnvVar: vi.fn(),
-    deleteEnvVar: vi.fn(),
-    validatePaths: vi.fn(),
-  },
+  api: { validatePaths: vi.fn() },
 }));
+
+const noStaged = new Map<string, StagedChange>();
 
 const simpleVar: EnvVar = {
   name: "JAVA_HOME",
@@ -28,18 +27,33 @@ const pathVar: EnvVar = {
 };
 
 describe("DetailPanel", () => {
+  const onStage = vi.fn();
+  const onStageDelete = vi.fn();
+  const onUnstage = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(api.setEnvVar).mockResolvedValue(undefined);
-    vi.mocked(api.deleteEnvVar).mockResolvedValue(undefined);
     vi.mocked(api.validatePaths).mockResolvedValue([true]);
   });
 
-  const render_ = (variable: EnvVar | null, elevated = true) =>
-    render(<DetailPanel variable={variable} elevated={elevated} onSaved={vi.fn()} onDeleted={vi.fn()} />);
+  const render_ = (
+    variable: EnvVar | null,
+    elevated = true,
+    staged = noStaged,
+  ) =>
+    render(
+      <DetailPanel
+        variable={variable}
+        elevated={elevated}
+        staged={staged}
+        onStage={onStage}
+        onStageDelete={onStageDelete}
+        onUnstage={onUnstage}
+      />,
+    );
 
   it("shows empty state when no variable selected", () => {
-    render_( null);
+    render_(null);
     expect(screen.getByText(/select a variable/i)).toBeInTheDocument();
   });
 
@@ -54,50 +68,93 @@ describe("DetailPanel", () => {
     expect(badge).toHaveClass("rounded-full");
   });
 
-  it("shows Apply button after editing value", async () => {
+  it("shows Stage button after editing value", async () => {
     const user = userEvent.setup();
     render_(simpleVar);
     const textarea = screen.getByRole("textbox");
     await user.clear(textarea);
     await user.type(textarea, "NewValue");
-    expect(screen.getByRole("button", { name: /apply/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^stage$/i })).toBeInTheDocument();
   });
 
-  it("calls api.setEnvVar on apply → confirm", async () => {
+  it("calls onStage with new value on Stage click", async () => {
     const user = userEvent.setup();
-    const onSaved = vi.fn();
-    render(<DetailPanel variable={simpleVar} elevated onSaved={onSaved} onDeleted={vi.fn()} />);
+    render_(simpleVar);
     await user.clear(screen.getByRole("textbox"));
     await user.type(screen.getByRole("textbox"), "NewValue");
-    await user.click(screen.getByRole("button", { name: /^apply$/i }));
-    await user.click(screen.getByRole("button", { name: /confirm/i }));
-    await waitFor(() => {
-      expect(api.setEnvVar).toHaveBeenCalledWith("JAVA_HOME", "NewValue", "User");
-      expect(onSaved).toHaveBeenCalled();
-    });
+    await user.click(screen.getByRole("button", { name: /^stage$/i }));
+    expect(onStage).toHaveBeenCalledWith("JAVA_HOME", "User", "NewValue");
   });
 
-  it("shows PathEditor for PATH variable", () => {
+  it("shows PATH editor for path-like variable", () => {
     render_(pathVar);
     expect(screen.getByText(/drag to reorder/i)).toBeInTheDocument();
   });
 
-  it("shows success message after apply → confirm", async () => {
-    const user = userEvent.setup();
+  it("shows Delete button when not dirty and not staged", () => {
     render_(simpleVar);
-    await user.clear(screen.getByRole("textbox"));
-    await user.type(screen.getByRole("textbox"), "changed");
-    await user.click(screen.getByRole("button", { name: /^apply$/i }));
-    await user.click(screen.getByRole("button", { name: /confirm/i }));
-    await waitFor(() =>
-      expect(screen.getByText(/saved and broadcast/i)).toBeInTheDocument(),
-    );
+    expect(screen.getByRole("button", { name: /delete/i })).toBeInTheDocument();
+  });
+
+  it("calls onStageDelete when Delete confirmed", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render_(simpleVar);
+    await user.click(screen.getByRole("button", { name: /delete/i }));
+    expect(onStageDelete).toHaveBeenCalledWith("JAVA_HOME", "User");
   });
 
   it("hides edit controls for System variable when not elevated", () => {
     const sysVar: EnvVar = { ...simpleVar, scope: "System" };
-    render(<DetailPanel variable={sysVar} elevated={false} onSaved={vi.fn()} onDeleted={vi.fn()} />);
+    render_(sysVar, false);
     expect(screen.getByText(/requires admin/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
+  });
+
+  it("shows staged badge and Unstage button when var is staged for set", () => {
+    const stagedMap = new Map<string, StagedChange>([
+      ["User:JAVA_HOME", {
+        kind: "set",
+        name: "JAVA_HOME",
+        scope: "User",
+        originalValue: "C:\\old",
+        newValue: simpleVar.value,
+      }],
+    ]);
+    render_(simpleVar, true, stagedMap);
+    expect(screen.getByText("staged")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /unstage/i })).toBeInTheDocument();
+  });
+
+  it("calls onUnstage when Unstage clicked on staged-set var", async () => {
+    const user = userEvent.setup();
+    const stagedMap = new Map<string, StagedChange>([
+      ["User:JAVA_HOME", {
+        kind: "set",
+        name: "JAVA_HOME",
+        scope: "User",
+        originalValue: "C:\\old",
+        newValue: simpleVar.value,
+      }],
+    ]);
+    render_(simpleVar, true, stagedMap);
+    await user.click(screen.getByRole("button", { name: /unstage/i }));
+    expect(onUnstage).toHaveBeenCalledWith("JAVA_HOME", "User");
+  });
+
+  it("shows staged-delete overlay when var is staged for delete", () => {
+    const deletedVar: EnvVar = { ...simpleVar, value: "C:\\Program Files\\Java\\jdk-21" };
+    const stagedMap = new Map<string, StagedChange>([
+      ["User:JAVA_HOME", {
+        kind: "delete",
+        name: "JAVA_HOME",
+        scope: "User",
+        originalValue: deletedVar.value,
+        newValue: null,
+      }],
+    ]);
+    render_(deletedVar, true, stagedMap);
+    expect(screen.getByText(/staged for deletion/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /unstage/i })).toBeInTheDocument();
   });
 });

@@ -4,12 +4,12 @@ import { cn } from "../../lib/cn";
 import { computeDiff } from "../../lib/diff";
 import type { DiffEntry } from "../../lib/diff";
 import { resolveSecret } from "../../lib/secrets";
-import type { SnapshotMeta } from "../../types";
+import type { EnvSnapshot, SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/TextInput";
 
 interface Props {
-  onRestored: () => void;
+  onStageSnapshot: (snap: EnvSnapshot) => void;
 }
 
 // ── Diff summary row ─────────────────────────────────────────────────────────
@@ -67,12 +67,11 @@ function DiffRow({ entry }: { entry: DiffEntry }) {
 interface PreviewProps {
   snap: SnapshotMeta;
   diff: DiffEntry[];
-  busy: boolean;
   onRestore: () => void;
   onCancel: () => void;
 }
 
-function SnapshotPreview({ snap, diff, busy, onRestore, onCancel }: PreviewProps) {
+function SnapshotPreview({ snap, diff, onRestore, onCancel }: PreviewProps) {
   const added   = diff.filter((e) => e.kind === "added").length;
   const removed = diff.filter((e) => e.kind === "removed").length;
   const changed = diff.filter((e) => e.kind === "changed").length;
@@ -125,9 +124,8 @@ function SnapshotPreview({ snap, diff, busy, onRestore, onCancel }: PreviewProps
           variant={diff.length === 0 ? "secondary" : "primary"}
           size="md"
           onClick={onRestore}
-          disabled={busy}
         >
-          {busy ? "Restoring…" : "Restore this snapshot"}
+          {diff.length === 0 ? "No changes to stage" : "Stage restore"}
         </Button>
         <Button variant="ghost" size="md" onClick={onCancel}>Cancel</Button>
       </div>
@@ -137,7 +135,7 @@ function SnapshotPreview({ snap, diff, busy, onRestore, onCancel }: PreviewProps
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 
-export function SnapshotPanel({ onRestored }: Props) {
+export function SnapshotPanel({ onStageSnapshot }: Props) {
   const [snapshots, setSnapshots] = useState<SnapshotMeta[]>([]);
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
@@ -188,21 +186,17 @@ export function SnapshotPanel({ onRestored }: Props) {
     }
   };
 
-  const handleRestore = async () => {
+  const handleRestore = () => {
     if (!previewing) return;
-    setBusy(true);
-    setStatus(null);
-    try {
-      await api.restoreSnapshot(previewing.id);
-      setStatus(`Restored "${previewing.label}".`);
-      setPreviewing(null);
-      setPreviewDiff([]);
-      onRestored();
-    } catch (e) {
-      setStatus(`Error: ${e}`);
-    } finally {
-      setBusy(false);
-    }
+    onStageSnapshot(previewing.snapshot);
+    const count = previewDiff.length;
+    setStatus(
+      count === 0
+        ? `"${previewing.label}" matches current state — nothing to stage.`
+        : `"${previewing.label}" staged (${count} change${count !== 1 ? "s" : ""}). Use "Apply staged" to commit.`,
+    );
+    setPreviewing(null);
+    setPreviewDiff([]);
   };
 
   const handleDelete = async (id: string) => {
@@ -256,7 +250,6 @@ export function SnapshotPanel({ onRestored }: Props) {
         <SnapshotPreview
           snap={previewing}
           diff={previewDiff}
-          busy={busy}
           onRestore={handleRestore}
           onCancel={() => { setPreviewing(null); setPreviewDiff([]); }}
         />

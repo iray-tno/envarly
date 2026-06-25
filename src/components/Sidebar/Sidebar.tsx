@@ -1,4 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import type { StagedChange } from "../../hooks/useStaged";
+import { stagedKey } from "../../hooks/useStaged";
 import { cn } from "../../lib/cn";
 import { resolveSecret } from "../../lib/secrets";
 import type { EnvVar, VarScope } from "../../types";
@@ -10,12 +12,13 @@ interface Props {
   selected: EnvVar | null;
   onSelect: (v: EnvVar) => void;
   loading: boolean;
+  staged: Map<string, StagedChange>;
 }
 
 const SCOPES = ["All", "User", "System", "Secrets"] as const;
 type ScopeFilter = (typeof SCOPES)[number];
 
-export function Sidebar({ vars, selected, onSelect, loading }: Props) {
+export function Sidebar({ vars, selected, onSelect, loading, staged }: Props) {
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -108,9 +111,13 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
           <p className="text-center text-dim text-sm py-8">No variables found</p>
         )}
         {filtered.map((v) => {
-          const key = `${v.scope}:${v.name}`;
+          const key = stagedKey(v.name, v.scope);
           const isSelected = selected?.name === v.name && selected?.scope === v.scope;
           const secret = resolveSecret(v.name, v.value);
+          const stagedChange = staged.get(key);
+          const isDelete = stagedChange?.kind === "delete";
+          const isSet = stagedChange?.kind === "set";
+          const isNew = isSet && stagedChange.originalValue === null;
           return (
             <button
               key={key}
@@ -128,16 +135,28 @@ export function Sidebar({ vars, selected, onSelect, loading }: Props) {
                 isSelected
                   ? "bg-surface text-fg"
                   : "text-muted hover:bg-hover hover:text-fg",
+                isDelete && "opacity-50",
               )}
             >
-              <span className="flex-1 font-mono text-sm truncate">{v.name}</span>
-              {secret && (
+              <span className={cn("flex-1 font-mono text-sm truncate", isDelete && "line-through")}>
+                {v.name}
+              </span>
+              {secret && !isDelete && (
                 <span
                   title={secret.label}
                   className="text-[9px] font-medium text-warn/80 shrink-0 max-w-[44px] truncate"
                 >
                   {secret.service}
                 </span>
+              )}
+              {isDelete && (
+                <span className="text-[9px] font-bold text-danger shrink-0">D</span>
+              )}
+              {isNew && (
+                <span className="text-[9px] font-bold text-success shrink-0">A</span>
+              )}
+              {isSet && !isNew && (
+                <span className="text-[9px] font-bold text-warn shrink-0">M</span>
               )}
               <span
                 className={cn(

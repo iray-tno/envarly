@@ -334,11 +334,14 @@ function ExportTab({ onStatus }: ExportTabProps) {
 // ---------------------------------------------------------------------------
 
 interface ImportTabProps {
-  onApplied: () => void;
+  onStage: (
+    sets: Array<{ name: string; scope: VarScope; value: string }>,
+    deletes: Array<{ name: string; scope: VarScope }>,
+  ) => void;
   onStatus: (msg: string | null) => void;
 }
 
-function ImportTab({ onApplied, onStatus }: ImportTabProps) {
+function ImportTab({ onStage, onStatus }: ImportTabProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [format, setFormat] = useState<ExportFormat>("json");
   const [text, setText] = useState("");
@@ -386,40 +389,34 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
     setApplying(true);
     onStatus(null);
     try {
+      const sets = selected.map((v) => ({ name: v.name, scope: v.scope, value: v.value }));
+      let deletes: Array<{ name: string; scope: VarScope }> = [];
+
       if (strategy === "replace") {
-        // Determine affected scopes from selected vars
         const affectedScopes = new Set(selected.map((v) => v.scope));
         const current = await api.getRegistrySnapshot();
-
-        // Delete current vars not present in the selected set, per scope
         const selectedKeys = new Set(selected.map((v) => `${v.scope}:${v.name}`));
         if (affectedScopes.has("User")) {
           for (const name of Object.keys(current.user)) {
-            if (!selectedKeys.has(`User:${name}`)) {
-              await api.deleteEnvVar(name, "User");
-            }
+            if (!selectedKeys.has(`User:${name}`)) deletes.push({ name, scope: "User" });
           }
         }
         if (affectedScopes.has("System")) {
           for (const name of Object.keys(current.system)) {
-            if (!selectedKeys.has(`System:${name}`)) {
-              await api.deleteEnvVar(name, "System");
-            }
+            if (!selectedKeys.has(`System:${name}`)) deletes.push({ name, scope: "System" });
           }
         }
       }
 
-      for (const v of selected) {
-        await api.setEnvVar(v.name, v.value, v.scope);
-      }
-
-      const deletedMsg = strategy === "replace" ? " (replaced scope)" : "";
-      onStatus(`Applied ${selected.length} variable${selected.length !== 1 ? "s" : ""}${deletedMsg}.`);
+      onStage(sets, deletes);
+      const suffix = strategy === "replace" && deletes.length > 0
+        ? ` (+${deletes.length} deletions staged)`
+        : "";
+      onStatus(`${selected.length} variable${selected.length !== 1 ? "s" : ""} staged${suffix}. Use "Apply staged" to commit.`);
       setPreview(null);
       setText("");
-      onApplied();
     } catch (e) {
-      onStatus(`Apply failed: ${e}`);
+      onStatus(`Stage failed: ${e}`);
     } finally {
       setApplying(false);
     }
@@ -493,7 +490,7 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
             disabled={applying || noneChecked}
             className="self-start"
           >
-            {applying ? "Applying…" : `${strategy === "replace" ? "Replace" : "Apply"} ${checkedCount} selected variable${checkedCount !== 1 ? "s" : ""}`}
+            {applying ? "Staging…" : `Stage ${checkedCount} variable${checkedCount !== 1 ? "s" : ""}${strategy === "replace" ? " (Replace)" : ""}`}
           </Button>
         </div>
       )}
@@ -506,10 +503,13 @@ function ImportTab({ onApplied, onStatus }: ImportTabProps) {
 // ---------------------------------------------------------------------------
 
 interface Props {
-  onApplied: () => void;
+  onStage: (
+    sets: Array<{ name: string; scope: VarScope; value: string }>,
+    deletes: Array<{ name: string; scope: VarScope }>,
+  ) => void;
 }
 
-export function ImportExportPanel({ onApplied }: Props) {
+export function ImportExportPanel({ onStage }: Props) {
   const [mode, setMode] = useState<Mode>("export");
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
 
@@ -546,7 +546,7 @@ export function ImportExportPanel({ onApplied }: Props) {
       <div className="flex-1 overflow-y-auto px-5 py-4">
         {mode === "export"
           ? <ExportTab onStatus={handleStatus} />
-          : <ImportTab onApplied={onApplied} onStatus={handleStatus} />
+          : <ImportTab onStage={onStage} onStatus={handleStatus} />
         }
       </div>
     </div>
