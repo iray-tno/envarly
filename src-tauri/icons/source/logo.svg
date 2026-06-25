@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <defs>
+    <!-- Midnight navy base -->
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0b0e20"/>
+      <stop offset="100%" stop-color="#05080f"/>
+    </linearGradient>
+    <!-- Aurora teal glow — upper right -->
+    <radialGradient id="aurora1" cx="78%" cy="18%" r="55%">
+      <stop offset="0%"   stop-color="#0d6655" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#0d6655" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Aurora violet hint — lower left -->
+    <radialGradient id="aurora2" cx="22%" cy="82%" r="45%">
+      <stop offset="0%"   stop-color="#4a1a7a" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#4a1a7a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="500" height="500" rx="110" fill="url(#base)"/>
+  <rect width="500" height="500" rx="110" fill="url(#aurora1)"/>
+  <rect width="500" height="500" rx="110" fill="url(#aurora2)"/>
+
+  <!-- A few subtle stars -->
+  <g fill="white">
+    <circle cx="58"  cy="48"  r="1.5" opacity="0.55"/>
+    <circle cx="420" cy="52"  r="2"   opacity="0.60"/>
+    <circle cx="462" cy="130" r="1"   opacity="0.40"/>
+    <circle cx="455" cy="345" r="1.5" opacity="0.45"/>
+    <circle cx="70"  cy="390" r="1"   opacity="0.40"/>
+    <circle cx="290" cy="30"  r="1.5" opacity="0.50"/>
+    <g transform="translate(444,80)" opacity="0.70">
+      <line x1="-4" y1="0" x2="4" y2="0" stroke="white" stroke-width="1"/>
+      <line x1="0" y1="-4" x2="0" y2="4" stroke="white" stroke-width="1"/>
+      <circle r="1.5"/>
+    </g>
+  </g>
+
+  <g stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M 162 130 C 138 200, 186 300, 162 370" stroke-width="52"/>
+    <path d="M 162 150 Q 262 116 362 150" stroke-width="48"/>
+    <path d="M 162 250 L 314 250" stroke-width="48"/>
+    <path d="M 162 350 Q 262 384 362 350" stroke-width="48"/>
+  </g>
+</svg>

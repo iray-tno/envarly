@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <!-- Monochrome E mark — transparent background, white strokes -->
+  <!-- Use on dark surfaces. For light surfaces, swap stroke color to #0f1117 or currentColor -->
+  <g stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Spine: gentle S-curve -->
+    <path d="M 162 130 C 138 200, 186 300, 162 370" stroke-width="52"/>
+    <!-- Top bar: bows upward -->
+    <path d="M 162 150 Q 262 116 362 150" stroke-width="48"/>
+    <!-- Middle bar: straight -->
+    <path d="M 162 250 L 314 250" stroke-width="48"/>
+    <!-- Bottom bar: bows downward -->
+    <path d="M 162 350 Q 262 384 362 350" stroke-width="48"/>
+  </g>
+</svg>
