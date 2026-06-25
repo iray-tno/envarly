@@ -1,5 +1,28 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import type { StagedChange } from "../../hooks/useStaged";
 import { DetailPanel } from "./DetailPanel";
+
+const noStaged = new Map<string, StagedChange>();
+
+const stagedSet = new Map<string, StagedChange>([
+  ["User:JAVA_HOME", {
+    kind: "set",
+    name: "JAVA_HOME",
+    scope: "User",
+    originalValue: "C:\\Program Files\\Java\\jdk-17",
+    newValue: "C:\\Program Files\\Java\\jdk-21",
+  }],
+]);
+
+const stagedDelete = new Map<string, StagedChange>([
+  ["User:JAVA_HOME", {
+    kind: "delete",
+    name: "JAVA_HOME",
+    scope: "User",
+    originalValue: "C:\\Program Files\\Java\\jdk-21",
+    newValue: null,
+  }],
+]);
 
 const meta: Meta<typeof DetailPanel> = {
   title: "Components/DetailPanel",
@@ -13,8 +36,10 @@ const meta: Meta<typeof DetailPanel> = {
     ),
   ],
   args: {
-    onSaved: () => {},
-    onDeleted: () => {},
+    staged: noStaged,
+    onStage: () => {},
+    onStageDelete: () => {},
+    onUnstage: () => {},
   },
 };
 
@@ -58,6 +83,30 @@ export const SystemVariable: Story = {
       name: "PROCESSOR_ARCHITECTURE",
       value: "AMD64",
       scope: "System",
+      isPathLike: false,
+    },
+  },
+};
+
+export const StagedModified: Story = {
+  args: {
+    staged: stagedSet,
+    variable: {
+      name: "JAVA_HOME",
+      value: "C:\\Program Files\\Java\\jdk-21",
+      scope: "User",
+      isPathLike: false,
+    },
+  },
+};
+
+export const StagedDeleted: Story = {
+  args: {
+    staged: stagedDelete,
+    variable: {
+      name: "JAVA_HOME",
+      value: "C:\\Program Files\\Java\\jdk-21",
+      scope: "User",
       isPathLike: false,
     },
   },

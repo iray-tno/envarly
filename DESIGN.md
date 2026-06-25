@@ -10,10 +10,14 @@ Architecture decisions, security model, and data format specs. Not a tutorial; r
 src/                 React frontend (TypeScript)
   api.ts             Tauri command bridge — all invoke() calls live here
   App.tsx            Root: state, layout, dialog orchestration
+  hooks/
+    useStaged.ts     Staging area: Map<"Scope:name", StagedChange>; effectiveVars merge
+    useEnvVars.ts    Registry polling + refresh
+    useTheme.ts      Dark/light theme persistence
   components/
-    Sidebar/         Variable list, search, keyboard nav (ARIA listbox)
-    DetailPanel/     Edit + two-step Apply → Confirm flow
-    DiffPanel/       Unified diff view (shared by Apply, Import, Snapshot restore)
+    Sidebar/         Variable list, search, keyboard nav (ARIA listbox); M/A/D staged markers
+    DetailPanel/     Edit → stage locally; Apply staged writes to registry
+    DiffPanel/       Unified diff view (external-change detection)
     SnapshotPanel/   Snapshot list (rendered in right sidebar)
     ImportExportPanel/  Import/Export wizard (rendered in modal)
     LicensesPanel/   OSS license listing (rendered in modal)
@@ -34,15 +38,17 @@ src-tauri/src/       Rust backend
 
 All communication goes through `src/api.ts`. No `invoke()` call appears anywhere else in the frontend. This makes the boundary easy to audit, mock in tests, and replace if the IPC layer changes.
 
-### Two-step Apply flow
+### Staging area
 
-Edits are **staged locally** in React state. The registry is never written until the user completes the full Apply → Confirm sequence:
+All edits are **staged locally** via `useStaged` before any registry write. The registry is never touched until the user clicks **Apply N staged changes** in the header.
 
-1. User edits a value → React state only, no IPC
-2. User clicks **Apply** → diff is shown inline in DetailPanel
-3. User clicks **Confirm** → `api.setEnvVar()` is called → registry write + `WM_SETTINGCHANGE` broadcast
+1. User edits a value in DetailPanel → clicks **Stage** → `stageSet()` called, no IPC
+2. Import → click "Stage N variables" → `stageImport()`, no IPC
+3. Snapshot → click "Stage restore" → `stageSnapshot()`, no IPC
+4. Sidebar shows **M** (modified) / **A** (added) / **D** (to-be-deleted) markers on staged items
+5. User clicks **Apply N staged changes** (header) → unified diff modal → click **Apply to registry** → batch `api.setEnvVar`/`api.deleteEnvVar` + `WM_SETTINGCHANGE` broadcast → `clearStaged()`
 
-This applies to direct edits, import, and snapshot restore — all three paths eventually present the same diff before writing.
+`effectiveVars` (from `useStaged`) merges registry vars with staged changes; Sidebar and DetailPanel always display this merged view. Staged-deleted vars remain visible with a D marker so they can be unstaged.
 
 ---
 
@@ -50,7 +56,7 @@ This applies to direct edits, import, and snapshot restore — all three paths e
 
 ### Read-only until confirmed
 
-The CLI (`get`, `list`, `export`) and Import preview **never write to the registry**. Imports are parsed into a preview structure; the user must click Confirm before any write happens. This is a hard invariant: no mutation escapes the `commands::set_env_var` / `commands::delete_env_var` handlers.
+The CLI (`get`, `list`, `export`) and Import preview **never write to the registry**. Imports are parsed into a preview structure that is staged locally; the user must click "Apply N staged changes" and confirm in the diff modal before any write happens. This is a hard invariant: no mutation escapes the `commands::set_env_var` / `commands::delete_env_var` handlers.
 
 ### Content Security Policy
 

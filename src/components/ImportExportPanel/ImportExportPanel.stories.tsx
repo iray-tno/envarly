@@ -5,7 +5,7 @@ import { ImportExportPanel } from "./ImportExportPanel";
 const meta = {
   title: "Components/ImportExportPanel",
   component: ImportExportPanel,
-  args: { onApplied: fn() },
+  args: { onStage: fn() },
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (

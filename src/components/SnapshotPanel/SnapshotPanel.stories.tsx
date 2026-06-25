@@ -5,7 +5,7 @@ const meta: Meta<typeof SnapshotPanel> = {
   title: "Components/SnapshotPanel",
   component: SnapshotPanel,
   parameters: { layout: "fullscreen" },
-  args: { onRestored: () => {} },
+  args: { onStageSnapshot: () => {} },
 };
 
 export default meta;
