@@ -13,7 +13,7 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
   - *Custom export*: pick individual variables, with secret-variable warnings
   - *Import merge strategy*: Merge (additive) or Replace (sync — removes variables not in the file)
   - Preview before any write; registry is never touched until you explicitly click Apply
-- **Secret detection** — well-known secret variable names (AWS keys, tokens, passwords, API keys, etc.) are flagged with a warning badge in import/export flows
+- **Secret detection** — name-based + value-pattern detection across 35+ token formats (GitHub `ghp_`, GitLab `glpat-`, Slack `xoxb-`, Anthropic `sk-ant-`, npm `npm_`, PyPI `pypi-`, …); service badge shown on each match; **⚠ Secrets** sidebar tab; export confirmation lists affected services
 - **Admin elevation** — "Run as admin" button restarts the process elevated; system variables become editable
 - **CLI mode** — read-only subcommands (`get`, `list`, `export`) run from a terminal without launching the GUI
 - **WM\_SETTINGCHANGE broadcast** — running apps pick up changes without a restart
@@ -125,7 +125,9 @@ Open the **Import / Export** tab.
 
 Supported formats: `.json` (Envarly-native) and `.reg` (Windows Registry Script).
 
-In **Custom** mode, variables whose names match known secret patterns (e.g. `AWS_SECRET_ACCESS_KEY`, `DATABASE_PASSWORD`) are flagged with a warning — review before sharing the file.
+In **Custom** mode, variables whose names or values match known secret patterns are flagged with a `⚠ ServiceName` badge.
+
+When clicking **Export**, Envarly checks whether the selection contains secrets. If it does, a confirmation step lists the affected services (e.g. "AWS, GitHub credentials will be included"). Export only proceeds after explicit confirmation.
 
 ### Import
 
@@ -138,12 +140,39 @@ In **Custom** mode, variables whose names match known secret patterns (e.g. `AWS
 
 ## Secret detection
 
-`src/lib/secrets.ts` exports `isSecretVar(name)`, which checks variable names against:
+`src/lib/secrets.ts` provides two complementary detection strategies:
 
-- An exact-match set of known secret names (AWS keys, GitHub tokens, Stripe keys, etc.)
-- Substring keywords: `SECRET`, `TOKEN`, `PASSWORD`, `PASSWD`, `API_KEY`, `PRIVATE_KEY`, `WEBHOOK`, etc.
+**Name-based** — `detectSecret(name): SecretInfo | null`
 
-Detected secrets are shown with a `⚠` badge in Custom export and in the import preview. Values are masked by default; click to reveal.
+1. Exact match against ~25 well-known variable names (`AWS_SECRET_ACCESS_KEY`, `GITHUB_TOKEN`, `DATABASE_URL`, …)
+2. Service-prefix + secret keyword (`STRIPE_SECRET_KEY` → Stripe, `AZURE_CLIENT_SECRET` → Azure, …)
+3. Generic keyword fallback (`MY_WEBHOOK_URL` → Generic)
+
+**Value-based** — `detectSecretByValue(value): SecretInfo | null`
+
+Recognises ~35 structured token formats by their prefix regardless of variable name:
+
+| Prefix | Service |
+|---|---|
+| `ghp_` `gho_` `ghs_` `github_pat_` | GitHub |
+| `glpat-` `gloas-` `glcbt-` | GitLab |
+| `xoxb-` `xoxp-` `xapp-` | Slack |
+| `sk-ant-` | Anthropic |
+| `sk-proj-` | OpenAI |
+| `sk_live_` `sk_test_` | Stripe |
+| `AKIA` / `ASIA` (20-char) | AWS |
+| `npm_` | npm |
+| `pypi-` | PyPI |
+| `hf_` | HuggingFace |
+| `dapi` | Databricks |
+| `hvs.` `hvb.` | HashiCorp Vault |
+| `SG.` | SendGrid |
+| `shpat_` `shpss_` | Shopify |
+| `pscale_tkn_` | PlanetScale |
+
+**Combined** — `resolveSecret(name, value): SecretInfo | null` — name first, value fallback. Use this when both are available (variable list, import preview, export).
+
+Detected secrets are shown with a `⚠ ServiceName` badge (e.g. `⚠ AWS`, `⚠ GitHub`). Values are masked with `••••••••` in import/export views. The **⚠ Secrets** tab in the sidebar filters the variable list to secrets only.
 
 ## Snapshots
 
@@ -172,7 +201,7 @@ envarly/
 │   ├── lib/
 │   │   ├── cn.ts                 # clsx + tailwind-merge helper
 │   │   ├── diff.ts               # Pure diff computation (no side effects)
-│   │   └── secrets.ts            # Secret variable name detection
+│   │   └── secrets.ts            # Secret detection: name-based + value pattern (35+ token formats)
 │   └── components/
 │       ├── ui/                   # Atomic UI primitives
 │       │   ├── Badge.tsx
@@ -181,7 +210,7 @@ envarly/
 │       │   ├── SegmentedControl.tsx
 │       │   ├── TextInput.tsx
 │       │   └── Textarea.tsx
-│       ├── Sidebar/              # Variable list with search & scope filter
+│       ├── Sidebar/              # Variable list with search, scope filter, ⚠ Secrets tab
 │       ├── DetailPanel/          # Variable editor (plain text + PATH editor)
 │       ├── PathEditor/           # Drag-and-drop PATH entry editor
 │       ├── SnapshotPanel/        # Snapshot list, create, restore
