@@ -5,6 +5,8 @@
 fn main() {
     // If a CLI subcommand is present (e.g. `envarly get PATH`), handle it and exit.
     // With no args, this returns and the GUI launches below.
+    #[cfg(windows)]
     envarly_lib::try_run_cli();
+    #[cfg(windows)]
     envarly_lib::run();
 }
