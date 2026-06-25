@@ -22,12 +22,14 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
   const [value, setValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [status, setStatus] = useState<StatusMsg | null>(null);
 
   useEffect(() => {
     if (variable) {
       setValue(variable.value);
       setDirty(false);
+      setConfirming(false);
       setStatus(null);
     }
   }, [variable?.name, variable?.scope]);
@@ -44,14 +46,19 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
   const handleValueChange = (newVal: string) => {
     setValue(newVal);
     setDirty(newVal !== variable.value);
+    setConfirming(false);
   };
 
-  const handleSave = async () => {
+  const handleApply = () => setConfirming(true);
+  const handleCancelConfirm = () => setConfirming(false);
+
+  const handleConfirm = async () => {
     setSaving(true);
     setStatus(null);
     try {
       await api.setEnvVar(variable.name, value, variable.scope);
       setDirty(false);
+      setConfirming(false);
       setStatus({ type: "ok", text: "Saved and broadcast to running apps." });
       onSaved();
     } catch (e) {
@@ -74,6 +81,9 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
   const isPath = variable.name.toUpperCase() === "PATH" || variable.isPathLike;
   const readOnly = variable.scope === "System" && !elevated;
 
+  const oldDisplay = isPath ? variable.value.split(";").join("\n") : variable.value;
+  const newDisplay = isPath ? value.split(";").join("\n") : value;
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
@@ -88,20 +98,28 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
           )}
         </div>
         <div className="flex gap-2 shrink-0">
-          {dirty && !readOnly && (
-            <Button
-              variant="primary"
-              size="md"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? "Applying…" : "Apply"}
-            </Button>
-          )}
-          {!readOnly && (
-            <Button variant="danger" size="md" onClick={handleDelete}>
-              Delete
-            </Button>
+          {confirming ? (
+            <>
+              <Button variant="primary" size="md" onClick={handleConfirm} disabled={saving}>
+                {saving ? "Applying…" : "Confirm"}
+              </Button>
+              <Button variant="ghost" size="md" onClick={handleCancelConfirm}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              {dirty && !readOnly && (
+                <Button variant="primary" size="md" onClick={handleApply}>
+                  Apply
+                </Button>
+              )}
+              {!readOnly && (
+                <Button variant="danger" size="md" onClick={handleDelete}>
+                  Delete
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -111,8 +129,8 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
         <div
           className={
             status.type === "ok"
-              ? "px-5 py-1.5 text-xs bg-success/10 text-success shrink-0"
-              : "px-5 py-1.5 text-xs bg-danger/10 text-danger shrink-0"
+              ? "px-5 py-2 text-sm bg-success/10 text-success shrink-0"
+              : "px-5 py-2 text-sm bg-danger/10 text-danger shrink-0"
           }
           role={status.type === "err" ? "alert" : undefined}
         >
@@ -122,33 +140,16 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
-        <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">
-          {isPath ? "PATH entries (drag to reorder)" : "Value"}
-        </p>
-
-        {isPath ? (
-          <PathEditor rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
-        ) : (
-          <Textarea
-            label="Value"
-            labelHidden
-            value={value}
-            onChange={(e) => handleValueChange(e.target.value)}
-            rows={Math.max(3, value.split("\n").length + 1)}
-            spellCheck={false}
-            disabled={readOnly}
-          />
-        )}
-
-        {dirty && !readOnly && (
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[10px] font-semibold text-muted uppercase tracking-wide">
-              Preview changes
+        {confirming ? (
+          /* Diff confirmation view */
+          <>
+            <p className="text-sm font-semibold text-muted uppercase tracking-wide">
+              Review changes before applying
             </p>
             <div className="rounded overflow-hidden text-[11px]">
               <ReactDiffViewer
-                oldValue={isPath ? variable.value.split(";").join("\n") : variable.value}
-                newValue={isPath ? value.split(";").join("\n") : value}
+                oldValue={oldDisplay}
+                newValue={newDisplay}
                 splitView={false}
                 compareMethod={isPath ? DiffMethod.LINES : DiffMethod.WORDS}
                 useDarkTheme={theme === "dark"}
@@ -177,24 +178,45 @@ export function DetailPanel({ variable, elevated, onSaved, onDeleted }: Props) {
                 }}
               />
             </div>
-          </div>
-        )}
+          </>
+        ) : (
+          /* Edit view */
+          <>
+            <p className="text-sm font-semibold text-muted uppercase tracking-wide">
+              {isPath ? "PATH entries (drag to reorder)" : "Value"}
+            </p>
 
-        {/* Metadata */}
-        <div className="flex flex-col gap-1.5 pt-2 border-t border-rim-subtle mt-1">
-          {[
-            ["Scope", variable.scope],
-            ["Length", `${value.length} chars`],
-            ...(isPath
-              ? [["Entries", String(value.split(";").filter((p) => p.trim()).length)]]
-              : []),
-          ].map(([label, val]) => (
-            <div key={label} className="flex gap-3 text-xs">
-              <span className="text-dim w-14 shrink-0">{label}</span>
-              <span className="text-muted font-mono">{val}</span>
+            {isPath ? (
+              <PathEditor rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
+            ) : (
+              <Textarea
+                label="Value"
+                labelHidden
+                value={value}
+                onChange={(e) => handleValueChange(e.target.value)}
+                rows={Math.max(3, value.split("\n").length + 1)}
+                spellCheck={false}
+                disabled={readOnly}
+              />
+            )}
+
+            {/* Metadata */}
+            <div className="flex flex-col gap-1.5 pt-2 border-t border-rim-subtle mt-1">
+              {[
+                ["Scope", variable.scope],
+                ["Length", `${value.length} chars`],
+                ...(isPath
+                  ? [["Entries", String(value.split(";").filter((p) => p.trim()).length)]]
+                  : []),
+              ].map(([label, val]) => (
+                <div key={label} className="flex gap-3 text-sm">
+                  <span className="text-dim w-14 shrink-0">{label}</span>
+                  <span className="text-muted font-mono">{val}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
