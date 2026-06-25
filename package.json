@@ -16,7 +16,8 @@
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
     "format": "biome format --write src",
-    "gen-licenses": "node scripts/gen-licenses.mjs"
+    "gen-licenses": "node scripts/gen-licenses.mjs",
+    "version": "node scripts/sync-version.mjs && git add src-tauri/tauri.conf.json src-tauri/Cargo.toml"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
