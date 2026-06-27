@@ -13,12 +13,12 @@ const withStaged = new Map<string, StagedChange>([
 ]);
 
 const SAMPLE_VARS: EnvVar[] = [
-  { name: "PATH", value: "C:\\Windows\\System32;C:\\Program Files\\nodejs", scope: "User", isPathLike: true },
-  { name: "JAVA_HOME", value: "C:\\Program Files\\Java\\jdk-21", scope: "User", isPathLike: false },
-  { name: "NODE_ENV", value: "development", scope: "User", isPathLike: false },
-  { name: "WINDIR", value: "C:\\Windows", scope: "System", isPathLike: false },
-  { name: "SystemRoot", value: "C:\\Windows", scope: "System", isPathLike: false },
-  { name: "PROCESSOR_ARCHITECTURE", value: "AMD64", scope: "System", isPathLike: false },
+  { name: "PATH", value: "C:\\Windows\\System32;C:\\Program Files\\nodejs", scope: "User", listSeparator: ";" },
+  { name: "JAVA_HOME", value: "C:\\Program Files\\Java\\jdk-21", scope: "User", listSeparator: null },
+  { name: "NODE_ENV", value: "development", scope: "User", listSeparator: null },
+  { name: "WINDIR", value: "C:\\Windows", scope: "System", listSeparator: null },
+  { name: "SystemRoot", value: "C:\\Windows", scope: "System", listSeparator: null },
+  { name: "PROCESSOR_ARCHITECTURE", value: "AMD64", scope: "System", listSeparator: null },
 ];
 
 const meta: Meta<typeof Sidebar> = {

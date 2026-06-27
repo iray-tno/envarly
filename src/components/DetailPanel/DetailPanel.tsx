@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
 import type { EnvVar, VarScope } from "../../types";
+import { ListEditor } from "../ListEditor/ListEditor";
+import { PathEditor } from "../PathEditor/PathEditor";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Textarea } from "../ui/Textarea";
-import { PathEditor } from "../PathEditor/PathEditor";
 
 interface Props {
   variable: EnvVar | null;
@@ -19,12 +20,18 @@ interface Props {
 export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete, onUnstage }: Props) {
   const [value, setValue] = useState("");
   const [dirty, setDirty] = useState(false);
+  const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
+  const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
 
   useEffect(() => {
-    if (variable) {
-      setValue(variable.value);
-      setDirty(false);
-    }
+    if (!variable) return;
+    const isSameVar =
+      prevVarRef.current?.name === variable.name &&
+      prevVarRef.current?.scope === variable.scope;
+    setValue(variable.value);
+    setDirty(false);
+    if (!isSameVar) setOverrideSeparator(null);
+    prevVarRef.current = { name: variable.name, scope: variable.scope };
   }, [variable?.name, variable?.scope, variable?.value]);
 
   if (!variable) {
@@ -63,14 +70,32 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
 
   const handleUnstage = () => {
     onUnstage(variable.name, variable.scope);
-    // Reset editor to registry value (which is in stagedChange.originalValue)
     const original = stagedChange?.originalValue ?? variable.value;
     setValue(original);
     setDirty(false);
   };
 
-  const isPath = variable.name.toUpperCase() === "PATH" || variable.isPathLike;
+  /** Auto-detect list separator from pasted text. */
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const text = e.clipboardData.getData("text");
+    if (text.includes(";") && text.split(";").some((p) => p.includes("\\"))) {
+      setOverrideSeparator(";");
+    } else if (text.includes(",") && text.split(",").length > 1) {
+      setOverrideSeparator(",");
+    }
+  };
+
+  const effectiveSeparator = overrideSeparator ?? variable.listSeparator;
   const readOnly = variable.scope === "System" && !elevated;
+
+  const editorLabel =
+    effectiveSeparator === ";" ? "Path entries (drag to reorder)" :
+    effectiveSeparator === "," ? "List entries (drag to reorder)" :
+    "Value";
+
+  const entriesCount = effectiveSeparator
+    ? value.split(effectiveSeparator).filter((p) => p.trim()).length
+    : null;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -123,20 +148,51 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
           <Button variant="secondary" size="md" onClick={handleUnstage}>Unstage</Button>
         </div>
       ) : (
-        /* Edit view */
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
-          <p className="text-sm font-semibold text-muted uppercase tracking-wide">
-            {isPath ? "PATH entries (drag to reorder)" : "Value"}
-          </p>
+          {/* Editor label + mode toggle */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-muted uppercase tracking-wide">{editorLabel}</p>
+            <div className="flex gap-1">
+              {effectiveSeparator !== null ? (
+                <button
+                  type="button"
+                  onClick={() => setOverrideSeparator(null)}
+                  className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
+                >
+                  Plain text
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setOverrideSeparator(";")}
+                    className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
+                  >
+                    List (;)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOverrideSeparator(",")}
+                    className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
+                  >
+                    List (,)
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
 
-          {isPath ? (
+          {effectiveSeparator === ";" ? (
             <PathEditor rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
+          ) : effectiveSeparator === "," ? (
+            <ListEditor separator="," rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
           ) : (
             <Textarea
               label="Value"
               labelHidden
               value={value}
               onChange={(e) => handleValueChange(e.target.value)}
+              onPaste={handlePaste}
               rows={Math.max(3, value.split("\n").length + 1)}
               spellCheck={false}
               disabled={readOnly}
@@ -148,9 +204,7 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
             {[
               ["Scope", variable.scope],
               ["Length", `${value.length} chars`],
-              ...(isPath
-                ? [["Entries", String(value.split(";").filter((p) => p.trim()).length)]]
-                : []),
+              ...(entriesCount !== null ? [["Entries", String(entriesCount)]] : []),
               ...(isStagedSet && stagedChange.originalValue !== null
                 ? [["Original", stagedChange.originalValue.length > 40
                     ? `${stagedChange.originalValue.slice(0, 40)}…`

@@ -56,7 +56,7 @@ export const SimpleVariable: Story = {
       name: "JAVA_HOME",
       value: "C:\\Program Files\\Java\\jdk-21",
       scope: "User",
-      isPathLike: false,
+      listSeparator: null,
     },
   },
 };
@@ -72,7 +72,7 @@ export const PathVariable: Story = {
         "C:\\Users\\dev\\.cargo\\bin",
       ].join(";"),
       scope: "User",
-      isPathLike: true,
+      listSeparator: ";",
     },
   },
 };
@@ -83,7 +83,7 @@ export const SystemVariable: Story = {
       name: "PROCESSOR_ARCHITECTURE",
       value: "AMD64",
       scope: "System",
-      isPathLike: false,
+      listSeparator: null,
     },
   },
 };
@@ -95,7 +95,7 @@ export const StagedModified: Story = {
       name: "JAVA_HOME",
       value: "C:\\Program Files\\Java\\jdk-21",
       scope: "User",
-      isPathLike: false,
+      listSeparator: null,
     },
   },
 };
@@ -107,7 +107,7 @@ export const StagedDeleted: Story = {
       name: "JAVA_HOME",
       value: "C:\\Program Files\\Java\\jdk-21",
       scope: "User",
-      isPathLike: false,
+      listSeparator: null,
     },
   },
 };

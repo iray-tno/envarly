@@ -16,14 +16,14 @@ const simpleVar: EnvVar = {
   name: "JAVA_HOME",
   value: "C:\\Program Files\\Java\\jdk-21",
   scope: "User",
-  isPathLike: false,
+  listSeparator: null,
 };
 
 const pathVar: EnvVar = {
   name: "PATH",
   value: "C:\\Windows\\System32;C:\\Windows",
   scope: "User",
-  isPathLike: true,
+  listSeparator: ";",
 };
 
 describe("DetailPanel", () => {

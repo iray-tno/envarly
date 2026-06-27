@@ -4,7 +4,8 @@ export interface EnvVar {
   name: string;
   value: string;
   scope: VarScope;
-  isPathLike: boolean;
+  /** ";" = PATH-style, "," = NO_PROXY-style, null = plain value */
+  listSeparator: ";" | "," | null;
 }
 
 export interface EnvSnapshot {

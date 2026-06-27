@@ -27,7 +27,8 @@ pub struct EnvVar {
     pub name: String,
     pub value: String,
     pub scope: VarScope,
-    pub is_path_like: bool,
+    /// ";", ",", or null — indicates how the value should be rendered as a list.
+    pub list_separator: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -198,12 +199,12 @@ pub fn read_all_with(backend: &dyn EnvBackend) -> Result<Vec<EnvVar>, EnvarlyErr
     let mut vars: Vec<EnvVar> = Vec::new();
 
     for (name, value) in backend.read_user()? {
-        let is_path_like = is_path_list(&name, &value);
-        vars.push(EnvVar { name, value, scope: VarScope::User, is_path_like });
+        let list_separator = detect_list_separator(&name, &value);
+        vars.push(EnvVar { name, value, scope: VarScope::User, list_separator });
     }
     for (name, value) in backend.read_system()? {
-        let is_path_like = is_path_list(&name, &value);
-        vars.push(EnvVar { name, value, scope: VarScope::System, is_path_like });
+        let list_separator = detect_list_separator(&name, &value);
+        vars.push(EnvVar { name, value, scope: VarScope::System, list_separator });
     }
 
     vars.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
@@ -268,11 +269,20 @@ pub fn is_elevated() -> bool {
 // Helpers
 // ---------------------------------------------------------------------------
 
-pub(crate) fn is_path_list(name: &str, value: &str) -> bool {
-    if name.to_uppercase() == "PATH" {
-        return true;
+pub(crate) fn detect_list_separator(name: &str, value: &str) -> Option<String> {
+    let upper = name.to_uppercase();
+    if upper == "PATH" {
+        return Some(";".to_string());
     }
-    value.contains(';') && value.split(';').any(|part| part.contains('\\'))
+    // Comma-separated list variables
+    if upper == "NO_PROXY" || upper == "NOPROXY" {
+        return Some(",".to_string());
+    }
+    // Semicolon-separated path lists: value has ";" and at least one part contains "\"
+    if value.contains(';') && value.split(';').any(|part| part.contains('\\')) {
+        return Some(";".to_string());
+    }
+    None
 }
 
 #[cfg(windows)]
@@ -320,28 +330,38 @@ mod tests {
         MemBackend::new()
     }
 
-    // --- is_path_list ---
+    // --- detect_list_separator ---
 
     #[test]
-    fn path_name_is_always_path_like() {
-        assert!(is_path_list("PATH", "anything"));
-        assert!(is_path_list("path", "anything"));
-        assert!(is_path_list("Path", "anything"));
+    fn path_name_always_semicolon() {
+        assert_eq!(detect_list_separator("PATH", "anything"), Some(";".to_string()));
+        assert_eq!(detect_list_separator("path", "anything"), Some(";".to_string()));
+        assert_eq!(detect_list_separator("Path", "anything"), Some(";".to_string()));
     }
 
     #[test]
-    fn semicolon_with_backslash_is_path_like() {
-        assert!(is_path_list("PSModulePath", r"C:\Windows\System32;C:\Windows"));
+    fn semicolon_with_backslash_is_semicolon() {
+        assert_eq!(
+            detect_list_separator("PSModulePath", r"C:\Windows\System32;C:\Windows"),
+            Some(";".to_string())
+        );
     }
 
     #[test]
-    fn pathext_is_not_path_like() {
-        assert!(!is_path_list("PATHEXT", ".COM;.EXE;.BAT;.CMD"));
+    fn pathext_not_detected() {
+        assert_eq!(detect_list_separator("PATHEXT", ".COM;.EXE;.BAT;.CMD"), None);
     }
 
     #[test]
-    fn single_value_no_semicolon_not_path_like() {
-        assert!(!is_path_list("JAVA_HOME", r"C:\Program Files\Java\jdk-21"));
+    fn single_value_not_detected() {
+        assert_eq!(detect_list_separator("JAVA_HOME", r"C:\Program Files\Java\jdk-21"), None);
+    }
+
+    #[test]
+    fn no_proxy_is_comma() {
+        assert_eq!(detect_list_separator("NO_PROXY", "localhost,127.0.0.1"), Some(",".to_string()));
+        assert_eq!(detect_list_separator("no_proxy", "localhost"), Some(",".to_string()));
+        assert_eq!(detect_list_separator("NOPROXY", "localhost"), Some(",".to_string()));
     }
 
     // --- MemBackend read/write/delete ---
@@ -396,17 +416,20 @@ mod tests {
     }
 
     #[test]
-    fn read_all_sets_is_path_like_correctly() {
+    fn read_all_sets_list_separator_correctly() {
         let b = MemBackend::new().with_user([
             ("PATH", r"C:\Windows;C:\Windows\System32"),
             ("PATHEXT", ".COM;.EXE;.BAT"),
             ("JAVA_HOME", r"C:\jdk21"),
+            ("NO_PROXY", "localhost,127.0.0.1"),
         ]);
         let vars = read_all_with(&b).unwrap();
-        let map: HashMap<&str, bool> = vars.iter().map(|v| (v.name.as_str(), v.is_path_like)).collect();
-        assert_eq!(map["PATH"], true);
-        assert_eq!(map["PATHEXT"], false);
-        assert_eq!(map["JAVA_HOME"], false);
+        let map: HashMap<&str, Option<String>> =
+            vars.iter().map(|v| (v.name.as_str(), v.list_separator.clone())).collect();
+        assert_eq!(map["PATH"], Some(";".to_string()));
+        assert_eq!(map["PATHEXT"], None);
+        assert_eq!(map["JAVA_HOME"], None);
+        assert_eq!(map["NO_PROXY"], Some(",".to_string()));
     }
 
     #[test]

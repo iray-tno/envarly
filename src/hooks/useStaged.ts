@@ -15,6 +15,14 @@ export interface StagedChange {
 
 type StagedKey = string; // `${VarScope}:${name}`
 
+function inferListSeparator(name: string, value: string): ";" | "," | null {
+  const upper = name.toUpperCase();
+  if (upper === "PATH") return ";";
+  if (upper === "NO_PROXY" || upper === "NOPROXY") return ",";
+  if (value.includes(";") && value.split(";").some((p) => p.includes("\\"))) return ";";
+  return null;
+}
+
 export function stagedKey(name: string, scope: VarScope): StagedKey {
   return `${scope}:${name}`;
 }
@@ -152,9 +160,7 @@ export function useStaged(registryVars: EnvVar[]) {
           name: change.name,
           scope: change.scope,
           value: change.newValue!,
-          isPathLike:
-            existing?.isPathLike ??
-            (change.name.toUpperCase() === "PATH" || (change.newValue?.includes(";") ?? false)),
+          listSeparator: existing?.listSeparator ?? inferListSeparator(change.name, change.newValue ?? ""),
         });
       }
       // "delete": var stays in result with original value; sidebar renders D marker

@@ -12,9 +12,9 @@ const MOCK_SNAPSHOT = {
 };
 
 const MOCK_VARS = [
-  { name: "JAVA_HOME", value: "C:\\jdk21", scope: "User", isPathLike: false },
-  { name: "MY_VAR", value: "hello", scope: "User", isPathLike: false },
-  { name: "WINDIR", value: "C:\\Windows", scope: "System", isPathLike: false },
+  { name: "JAVA_HOME", value: "C:\\jdk21", scope: "User", listSeparator: null },
+  { name: "MY_VAR", value: "hello", scope: "User", listSeparator: null },
+  { name: "WINDIR", value: "C:\\Windows", scope: "System", listSeparator: null },
 ];
 
 beforeEach(() => {
@@ -50,8 +50,8 @@ describe("ImportExportPanel — Export tab", () => {
 
   it("shows service names in confirmation when secrets are present", async () => {
     vi.mocked(api.getEnvVars).mockResolvedValue([
-      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", isPathLike: false },
-      { name: "GITHUB_TOKEN", value: "xyz", scope: "System", isPathLike: false },
+      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", listSeparator: null },
+      { name: "GITHUB_TOKEN", value: "xyz", scope: "System", listSeparator: null },
     ] as never);
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
@@ -65,7 +65,7 @@ describe("ImportExportPanel — Export tab", () => {
 
   it("calls exportVars with selected scope and format after confirming", async () => {
     vi.mocked(api.getEnvVars).mockResolvedValue([
-      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", isPathLike: false },
+      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", listSeparator: null },
     ] as never);
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
@@ -79,7 +79,7 @@ describe("ImportExportPanel — Export tab", () => {
 
   it("cancelling confirmation keeps the export button visible", async () => {
     vi.mocked(api.getEnvVars).mockResolvedValue([
-      { name: "GITHUB_TOKEN", value: "ghp_xxxx", scope: "User", isPathLike: false },
+      { name: "GITHUB_TOKEN", value: "ghp_xxxx", scope: "User", listSeparator: null },
     ] as never);
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
@@ -112,7 +112,7 @@ describe("ImportExportPanel — Export tab", () => {
 
   it("shows secret warning when secret var is selected in Custom mode", async () => {
     vi.mocked(api.getEnvVars).mockResolvedValue([
-      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", isPathLike: false },
+      { name: "AWS_SECRET_ACCESS_KEY", value: "abc", scope: "User", listSeparator: null },
     ] as never);
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);

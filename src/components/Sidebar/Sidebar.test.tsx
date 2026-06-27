@@ -11,7 +11,7 @@ const makeVar = (name: string, scope: "User" | "System"): EnvVar => ({
   name,
   value: "some-value",
   scope,
-  isPathLike: false,
+  listSeparator: null,
 });
 
 const vars: EnvVar[] = [
@@ -74,8 +74,8 @@ describe("Sidebar", () => {
 
   it("detects secrets from value pattern even with a generic name", () => {
     const valueSecretVars: EnvVar[] = [
-      { name: "MY_KEY", value: "ghp_abcdefghijklmnopqrstuvwxyz123456", scope: "User", isPathLike: false },
-      { name: "NORMAL_VAR", value: "hello", scope: "User", isPathLike: false },
+      { name: "MY_KEY", value: "ghp_abcdefghijklmnopqrstuvwxyz123456", scope: "User", listSeparator: null },
+      { name: "NORMAL_VAR", value: "hello", scope: "User", listSeparator: null },
     ];
     render(<Sidebar vars={valueSecretVars} selected={null} onSelect={vi.fn()} loading={false} staged={noStaged} />);
     // "GitHub" service badge should appear next to MY_KEY

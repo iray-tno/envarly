@@ -10,7 +10,7 @@ vi.mock("../api", () => ({
 }));
 
 const SAMPLE = [
-  { name: "PATH", value: "C:\\Windows", scope: "User" as const, isPathLike: true },
+  { name: "PATH", value: "C:\\Windows", scope: "User" as const, listSeparator: ";" },
 ];
 
 describe("useEnvVars", () => {
