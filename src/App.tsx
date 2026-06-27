@@ -110,9 +110,12 @@ export default function App() {
   }, [diffEntries.length]);
 
   // Apply all staged changes to registry
-  const handleApplyStaged = async () => {
+  const handleApplyStaged = async (takeSnapshot: boolean) => {
     setStagedBusy(true);
     try {
+      if (takeSnapshot) {
+        await api.createSnapshot("auto: before apply");
+      }
       for (const change of staged.values()) {
         if (change.kind === "delete") {
           await api.deleteEnvVar(change.name, change.scope);
@@ -349,11 +352,13 @@ export default function App() {
 interface StagedModalProps {
   diff: DiffEntry[];
   busy: boolean;
-  onApply: () => void;
+  onApply: (takeSnapshot: boolean) => void;
   onClose: () => void;
 }
 
 function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
+  const [takeSnapshot, setTakeSnapshot] = useState(true);
+
   const byKind = {
     added:   diff.filter((e) => e.kind === "added"),
     removed: diff.filter((e) => e.kind === "removed"),
@@ -410,11 +415,23 @@ function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
         })}
       </div>
 
-      <div className="px-6 py-4 border-t border-rim shrink-0 flex gap-2 justify-end">
-        <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>Cancel</Button>
-        <Button variant="primary" size="md" onClick={onApply} disabled={busy}>
-          {busy ? "Applying…" : `Apply ${diff.length} ${diff.length === 1 ? "change" : "changes"} to registry`}
-        </Button>
+      <div className="px-6 py-4 border-t border-rim shrink-0 flex flex-col gap-3">
+        <label className="flex items-center gap-2 text-xs text-muted cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={takeSnapshot}
+            onChange={(e) => setTakeSnapshot(e.target.checked)}
+            disabled={busy}
+            className="accent-accent"
+          />
+          Take a snapshot before applying (recommended)
+        </label>
+        <div className="flex gap-2 justify-end">
+          <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button variant="primary" size="md" onClick={() => onApply(takeSnapshot)} disabled={busy}>
+            {busy ? "Applying…" : `Apply ${diff.length} ${diff.length === 1 ? "change" : "changes"} to registry`}
+          </Button>
+        </div>
       </div>
     </div>
   );
