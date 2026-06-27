@@ -39,3 +39,6 @@ pnpm-debug.log*
 *.tmp
 *.temp
 *.local
+
+# Windows proc-macro DLLs that git picks up via %USERPROFILE% path expansion
+%USERPROFILE%/
