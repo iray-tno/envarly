@@ -2,138 +2,22 @@ import { useEffect, useState } from "react";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
 import { computeDiff } from "../../lib/diff";
-import type { DiffEntry } from "../../lib/diff";
-import { resolveSecret } from "../../lib/secrets";
 import type { EnvSnapshot, SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/TextInput";
+import { SnapshotCompare } from "./SnapshotCompare";
+import { SnapshotPreview } from "./SnapshotPreview";
+import type { DiffEntry } from "../../lib/diff";
 
 interface Props {
   onStageSnapshot: (snap: EnvSnapshot) => void;
 }
 
-// ── Diff summary row ─────────────────────────────────────────────────────────
-
-function DiffRow({ entry }: { entry: DiffEntry }) {
-  const secret = resolveSecret(entry.name, entry.value ?? entry.newValue ?? "");
-  const [revealed, setRevealed] = useState(false);
-
-  const mask = (v: string) =>
-    secret && !revealed ? "••••••••" : v;
-
-  return (
-    <tr className="border-b border-rim-subtle last:border-0 text-xs">
-      <td className="px-2 py-1.5 w-5 text-center font-mono font-bold shrink-0">
-        {entry.kind === "added"   && <span className="text-success">+</span>}
-        {entry.kind === "removed" && <span className="text-danger">−</span>}
-        {entry.kind === "changed" && <span className="text-warn">~</span>}
-      </td>
-      <td className="px-2 py-1.5 font-mono font-semibold text-fg whitespace-nowrap">
-        <span className="flex items-center gap-1.5">
-          {entry.name}
-          {secret && (
-            <span className="text-[9px] font-medium text-warn/80">{secret.service}</span>
-          )}
-        </span>
-      </td>
-      <td className="px-2 py-1.5 text-muted w-12">{entry.scope[0]}</td>
-      <td className="px-2 py-1.5 font-mono text-muted max-w-xs truncate">
-        {entry.kind === "changed" ? (
-          <span className="flex flex-col gap-0.5">
-            <span className="line-through text-danger/70">{mask(entry.oldValue!)}</span>
-            <span className="text-success/90">{mask(entry.newValue!)}</span>
-          </span>
-        ) : (
-          <span>{mask(entry.value!)}</span>
-        )}
-      </td>
-      {secret && (
-        <td className="px-2 py-1.5">
-          <button
-            type="button"
-            onClick={() => setRevealed((r) => !r)}
-            className="text-[10px] text-dim hover:text-muted transition-colors"
-          >
-            {revealed ? "hide" : "show"}
-          </button>
-        </td>
-      )}
-    </tr>
-  );
-}
-
-// ── Preview panel ─────────────────────────────────────────────────────────────
-
-interface PreviewProps {
-  snap: SnapshotMeta;
+interface CompareResult {
+  from: SnapshotMeta;
+  to: SnapshotMeta;
   diff: DiffEntry[];
-  onRestore: () => void;
-  onCancel: () => void;
 }
-
-function SnapshotPreview({ snap, diff, onRestore, onCancel }: PreviewProps) {
-  const added   = diff.filter((e) => e.kind === "added").length;
-  const removed = diff.filter((e) => e.kind === "removed").length;
-  const changed = diff.filter((e) => e.kind === "changed").length;
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-fg truncate">{snap.label}</p>
-          <p className="text-[11px] text-dim">{new Date(snap.createdAt).toLocaleString()}</p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={onCancel}>← Back</Button>
-      </div>
-
-      {diff.length === 0 ? (
-        <p className="text-xs text-dim py-4 text-center">
-          Current state matches this snapshot — no changes would be made.
-        </p>
-      ) : (
-        <>
-          <div className="flex gap-3 text-xs">
-            {added   > 0 && <span className="text-success">+{added} added</span>}
-            {removed > 0 && <span className="text-danger">−{removed} removed</span>}
-            {changed > 0 && <span className="text-warn">~{changed} changed</span>}
-          </div>
-
-          <div className="rounded border border-rim overflow-hidden max-h-80 overflow-y-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-rim bg-surface text-muted text-[10px] uppercase tracking-wide">
-                  <th className="px-2 py-1.5 w-5" />
-                  <th className="px-2 py-1.5 text-left">Name</th>
-                  <th className="px-2 py-1.5 text-left">Scope</th>
-                  <th className="px-2 py-1.5 text-left">Value</th>
-                  <th className="px-2 py-1.5 w-10" />
-                </tr>
-              </thead>
-              <tbody>
-                {diff.map((entry) => (
-                  <DiffRow key={`${entry.scope}:${entry.name}`} entry={entry} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-
-      <div className="flex gap-2">
-        <Button
-          variant={diff.length === 0 ? "secondary" : "primary"}
-          size="md"
-          onClick={onRestore}
-        >
-          {diff.length === 0 ? "No changes to stage" : "Stage restore"}
-        </Button>
-        <Button variant="ghost" size="md" onClick={onCancel}>Cancel</Button>
-      </div>
-    </div>
-  );
-}
-
-// ── Main panel ────────────────────────────────────────────────────────────────
 
 export function SnapshotPanel({ onStageSnapshot }: Props) {
   const [snapshots, setSnapshots] = useState<SnapshotMeta[]>([]);
@@ -144,6 +28,8 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   const [previewDiff, setPreviewDiff] = useState<DiffEntry[]>([]);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [comparingFrom, setComparingFrom] = useState<SnapshotMeta | null>(null);
+  const [compareResult, setCompareResult] = useState<CompareResult | null>(null);
 
   const load = async () => {
     try {
@@ -176,7 +62,6 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
     setStatus(null);
     try {
       const current = await api.getRegistrySnapshot();
-      // Show what applying snap would change: diff from current → snap
       setPreviewDiff(computeDiff(current, snap.snapshot));
       setPreviewing(snap);
     } catch (e) {
@@ -203,11 +88,32 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
     try {
       await api.deleteSnapshot(id);
       if (previewing?.id === id) { setPreviewing(null); setPreviewDiff([]); }
+      if (comparingFrom?.id === id) setComparingFrom(null);
+      if (compareResult?.from.id === id || compareResult?.to.id === id) setCompareResult(null);
       setConfirmDeleteId(null);
       await load();
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleStartCompare = (snap: SnapshotMeta) => {
+    setComparingFrom(snap);
+    setCompareResult(null);
+    setPreviewing(null);
+    setPreviewDiff([]);
+  };
+
+  const handlePickCompareTarget = (to: SnapshotMeta) => {
+    if (!comparingFrom) return;
+    const diff = computeDiff(comparingFrom.snapshot, to.snapshot);
+    setCompareResult({ from: comparingFrom, to, diff });
+    setComparingFrom(null);
+  };
+
+  const handleCancelCompare = () => {
+    setComparingFrom(null);
+    setCompareResult(null);
   };
 
   const formatDate = (iso: string) => {
@@ -223,7 +129,6 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
         </p>
       </div>
 
-      {/* Create */}
       <div className="flex gap-2">
         <TextInput
           label="Snapshot label"
@@ -245,8 +150,14 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
         </p>
       )}
 
-      {/* Preview or list */}
-      {previewing ? (
+      {compareResult ? (
+        <SnapshotCompare
+          from={compareResult.from}
+          to={compareResult.to}
+          diff={compareResult.diff}
+          onBack={handleCancelCompare}
+        />
+      ) : previewing ? (
         <SnapshotPreview
           snap={previewing}
           diff={previewDiff}
@@ -255,59 +166,86 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
         />
       ) : (
         <div className="flex flex-col gap-2">
+          {comparingFrom && (
+            <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-accent/30 bg-accent/10 text-accent text-xs">
+              <span>Select a snapshot to compare with <strong>{comparingFrom.label}</strong></span>
+              <button
+                type="button"
+                onClick={handleCancelCompare}
+                className="font-medium hover:underline focus:outline-none focus-visible:underline"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
           {snapshots.length === 0 && (
             <p className="text-center text-dim text-xs py-6">
               No snapshots yet. Create one before making changes!
             </p>
           )}
-          {snapshots.map((s) => (
-            <div
-              key={s.id}
-              className="flex items-center gap-3 px-3.5 py-2.5 bg-panel border border-rim rounded"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-fg truncate">{s.label}</p>
-                <p className="text-[11px] text-dim">{formatDate(s.createdAt)}</p>
-              </div>
-              <div className="flex gap-1.5 shrink-0 items-center">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handlePreview(s)}
-                  disabled={loadingPreview}
-                >
-                  {loadingPreview ? "…" : "Preview"}
-                </Button>
-                {confirmDeleteId === s.id ? (
-                  <>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(s.id)}
-                    >
-                      Delete
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setConfirmDeleteId(null)}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDeleteId(s.id)}
-                    className="px-2 py-1 rounded text-dim text-sm hover:text-danger hover:bg-danger/10 transition-colors"
-                    title="Delete snapshot"
-                  >
-                    ×
-                  </button>
+          {snapshots.map((s) => {
+            const isComparingSource = comparingFrom?.id === s.id;
+            return (
+              <div
+                key={s.id}
+                className={cn(
+                  "flex items-center gap-3 px-3.5 py-2.5 bg-panel border rounded",
+                  isComparingSource ? "border-accent/40 bg-accent/5" : "border-rim",
                 )}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-fg truncate">{s.label}</p>
+                  <p className="text-[11px] text-dim">{formatDate(s.createdAt)}</p>
+                </div>
+                <div className="flex gap-1.5 shrink-0 items-center">
+                  {comparingFrom ? (
+                    !isComparingSource && (
+                      <Button variant="secondary" size="sm" onClick={() => handlePickCompareTarget(s)}>
+                        Compare with
+                      </Button>
+                    )
+                  ) : (
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handlePreview(s)}
+                        disabled={loadingPreview}
+                      >
+                        {loadingPreview ? "…" : "Preview"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleStartCompare(s)}
+                        disabled={snapshots.length < 2}
+                        title={snapshots.length < 2 ? "Need at least 2 snapshots to compare" : undefined}
+                      >
+                        Compare
+                      </Button>
+                    </>
+                  )}
+                  {!comparingFrom && (
+                    confirmDeleteId === s.id ? (
+                      <>
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id)}>Delete</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(s.id)}
+                        className="px-2 py-1 rounded text-dim text-sm hover:text-danger hover:bg-danger/10 transition-colors"
+                        title="Delete snapshot"
+                      >
+                        ×
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

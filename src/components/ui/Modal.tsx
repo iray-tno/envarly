@@ -5,7 +5,9 @@ interface Props {
   open: boolean;
   onClose: () => void;
   title?: string;
-  size?: "md" | "lg" | "xl";
+  size?: "md" | "lg" | "xl" | "2xl";
+  /** Make the body a flex column instead of overflow-y-auto. Use for panels that manage their own scrolling. */
+  flex?: boolean;
   children: ReactNode;
 }
 
@@ -13,9 +15,10 @@ const sizeCls = {
   md: "max-w-lg",
   lg: "max-w-2xl",
   xl: "max-w-4xl",
+  "2xl": "max-w-[900px]",
 };
 
-export function Modal({ open, onClose, title, size = "lg", children }: Props) {
+export function Modal({ open, onClose, title, size = "lg", flex = false, children }: Props) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -59,7 +62,7 @@ export function Modal({ open, onClose, title, size = "lg", children }: Props) {
             </button>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto">
+        <div className={flex ? "flex-1 min-h-0 flex flex-col" : "flex-1 overflow-y-auto"}>
           {children}
         </div>
       </div>

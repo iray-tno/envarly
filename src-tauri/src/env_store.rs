@@ -271,11 +271,12 @@ pub fn is_elevated() -> bool {
 
 pub(crate) fn detect_list_separator(name: &str, value: &str) -> Option<String> {
     let upper = name.to_uppercase();
-    if upper == "PATH" {
+    // Well-known semicolon-separated variables (no backslash in values)
+    if matches!(upper.as_str(), "PATH" | "PATHEXT") {
         return Some(";".to_string());
     }
     // Comma-separated list variables
-    if upper == "NO_PROXY" || upper == "NOPROXY" {
+    if matches!(upper.as_str(), "NO_PROXY" | "NOPROXY") {
         return Some(",".to_string());
     }
     // Semicolon-separated path lists: value has ";" and at least one part contains "\"
@@ -348,8 +349,9 @@ mod tests {
     }
 
     #[test]
-    fn pathext_not_detected() {
-        assert_eq!(detect_list_separator("PATHEXT", ".COM;.EXE;.BAT;.CMD"), None);
+    fn pathext_is_semicolon() {
+        assert_eq!(detect_list_separator("PATHEXT", ".COM;.EXE;.BAT;.CMD"), Some(";".to_string()));
+        assert_eq!(detect_list_separator("pathext", ".COM;.EXE"), Some(";".to_string()));
     }
 
     #[test]
@@ -427,7 +429,7 @@ mod tests {
         let map: HashMap<&str, Option<String>> =
             vars.iter().map(|v| (v.name.as_str(), v.list_separator.clone())).collect();
         assert_eq!(map["PATH"], Some(";".to_string()));
-        assert_eq!(map["PATHEXT"], None);
+        assert_eq!(map["PATHEXT"], Some(";".to_string()));
         assert_eq!(map["JAVA_HOME"], None);
         assert_eq!(map["NO_PROXY"], Some(",".to_string()));
     }

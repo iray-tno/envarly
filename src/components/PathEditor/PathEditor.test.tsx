@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../../api";
+import type { EnvVar } from "../../types";
 import { PathEditor } from "./PathEditor";
 
 vi.mock("../../api", () => ({
@@ -70,5 +71,30 @@ describe("PathEditor", () => {
     const removeButtons = await screen.findAllByRole("button", { name: /^remove/i });
     await user.click(removeButtons[0]);
     expect(onChange).toHaveBeenCalledWith(C);
+  });
+
+  it("shows unresolvable reference warning when allVars is provided and a %VAR% is unknown", () => {
+    const knownVars: EnvVar[] = [
+      { name: "SystemRoot", scope: "System", value: "C:\\Windows", listSeparator: null },
+    ];
+    vi.mocked(api.validatePaths).mockResolvedValue([false]);
+    render(<PathEditor rawValue="%CustomSdk%\\bin" onChange={vi.fn()} allVars={knownVars} />);
+    expect(screen.getByRole("alert", { hidden: false })).toHaveTextContent(/unresolvable/i);
+    expect(screen.getByText(/%CustomSdk%/)).toBeInTheDocument();
+  });
+
+  it("does not show unresolvable reference warning when allVars is not provided", () => {
+    vi.mocked(api.validatePaths).mockResolvedValue([false]);
+    render(<PathEditor rawValue="%CustomSdk%\\bin" onChange={vi.fn()} />);
+    expect(screen.queryByText(/unresolvable/i)).not.toBeInTheDocument();
+  });
+
+  it("does not show unresolvable reference warning when all %VAR% refs resolve", () => {
+    const knownVars: EnvVar[] = [
+      { name: "SystemRoot", scope: "System", value: "C:\\Windows", listSeparator: null },
+    ];
+    vi.mocked(api.validatePaths).mockResolvedValue([true]);
+    render(<PathEditor rawValue="%SystemRoot%\\system32" onChange={vi.fn()} allVars={knownVars} />);
+    expect(screen.queryByText(/unresolvable/i)).not.toBeInTheDocument();
   });
 });

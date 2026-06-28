@@ -209,22 +209,41 @@ pub fn validate_paths(paths: Vec<String>) -> Vec<bool> {
 }
 
 pub(crate) fn expand_env_vars(s: &str) -> String {
-    let mut result = s.to_string();
-    while let Some(start) = result.find('%') {
-        if let Some(end) = result[start + 1..].find('%') {
-            let var_name = &result[start + 1..start + 1 + end];
-            if let Ok(val) = std::env::var(var_name) {
-                result = format!(
-                    "{}{}{}",
-                    &result[..start],
-                    val,
-                    &result[start + 1 + end + 1..]
-                );
-            } else {
+    let mut result = String::new();
+    let mut rest = s;
+    while !rest.is_empty() {
+        match rest.find('%') {
+            None => {
+                result.push_str(rest);
                 break;
             }
-        } else {
-            break;
+            Some(start) => {
+                result.push_str(&rest[..start]);
+                rest = &rest[start + 1..];
+                match rest.find('%') {
+                    None => {
+                        // Unmatched % at end of string — keep as-is
+                        result.push('%');
+                        result.push_str(rest);
+                        break;
+                    }
+                    Some(end) => {
+                        let var_name = &rest[..end];
+                        rest = &rest[end + 1..];
+                        if var_name.is_empty() {
+                            // %% → literal %
+                            result.push('%');
+                        } else if let Ok(val) = std::env::var(var_name) {
+                            result.push_str(&val);
+                        } else {
+                            // Unknown var: keep as-is and continue scanning
+                            result.push('%');
+                            result.push_str(var_name);
+                            result.push('%');
+                        }
+                    }
+                }
+            }
         }
     }
     result
@@ -249,10 +268,39 @@ mod tests {
 
     #[test]
     fn expand_unknown_var_passthrough() {
-        // Unknown vars are left unexpanded (loop breaks)
         let input = "%DOES_NOT_EXIST_ZZZ%";
         let result = expand_env_vars(input);
         assert_eq!(result, input);
+    }
+
+    #[test]
+    fn expand_continues_after_unknown_var() {
+        // Regression: unknown var must not stop expansion of subsequent known vars
+        std::env::set_var("_TEST_EXPAND_KNOWN", "found");
+        let result = expand_env_vars("%_UNKNOWN_ZZZ_%\\%_TEST_EXPAND_KNOWN%");
+        assert_eq!(result, "%_UNKNOWN_ZZZ_%\\found");
+        std::env::remove_var("_TEST_EXPAND_KNOWN");
+    }
+
+    #[test]
+    fn expand_multiple_sequential_known_vars() {
+        std::env::set_var("_TEST_EXPAND_A", "alpha");
+        std::env::set_var("_TEST_EXPAND_B", "beta");
+        let result = expand_env_vars("%_TEST_EXPAND_A%\\%_TEST_EXPAND_B%");
+        assert_eq!(result, "alpha\\beta");
+        std::env::remove_var("_TEST_EXPAND_A");
+        std::env::remove_var("_TEST_EXPAND_B");
+    }
+
+    #[test]
+    fn expand_double_percent_yields_literal_percent() {
+        assert_eq!(expand_env_vars("100%%"), "100%");
+        assert_eq!(expand_env_vars("100%%done"), "100%done");
+    }
+
+    #[test]
+    fn expand_unmatched_percent_at_end() {
+        assert_eq!(expand_env_vars("value%"), "value%");
     }
 
     #[test]

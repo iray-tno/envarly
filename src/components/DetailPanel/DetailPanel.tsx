@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
 import type { EnvVar, VarScope } from "../../types";
@@ -10,18 +10,29 @@ import { Textarea } from "../ui/Textarea";
 
 interface Props {
   variable: EnvVar | null;
+  allVars: EnvVar[];
   elevated: boolean;
   staged: Map<string, StagedChange>;
   onStage: (name: string, scope: VarScope, value: string) => void;
   onStageDelete: (name: string, scope: VarScope) => void;
   onUnstage: (name: string, scope: VarScope) => void;
+  /** Called with a discard fn when dirty, null when clean. Lets App wire Ctrl+Z. */
+  onRegisterLocalUndo?: (fn: (() => void) | null) => void;
 }
 
-export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete, onUnstage }: Props) {
+export function DetailPanel({ variable, allVars, elevated, staged, onStage, onStageDelete, onUnstage, onRegisterLocalUndo }: Props) {
   const [value, setValue] = useState("");
   const [dirty, setDirty] = useState(false);
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
+  // Checkpoints pushed AFTER each structural op (drag/add/remove). Text edits don't push.
+  const localHistory = useRef<string[]>([]);
+  // Stale-closure-safe mirror of value state, read inside handleDiscard.
+  const valueRef = useRef("");
+  // Set by onBeforeReorder; consumed in handleValueChange to push checkpoints.
+  const structuralChangeRef = useRef(false);
+  // Value captured at onBeforeReorder time (pre-op snapshot including any text edits).
+  const preOpValueRef = useRef("");
 
   useEffect(() => {
     if (!variable) return;
@@ -29,10 +40,51 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
       prevVarRef.current?.name === variable.name &&
       prevVarRef.current?.scope === variable.scope;
     setValue(variable.value);
+    valueRef.current = variable.value;
     setDirty(false);
+    localHistory.current = [];
     if (!isSameVar) setOverrideSeparator(null);
     prevVarRef.current = { name: variable.name, scope: variable.scope };
   }, [variable?.name, variable?.scope, variable?.value]);
+
+  // Must be before the early return to comply with Rules of Hooks.
+  const handleDiscard = useCallback(() => {
+    const original = variable?.value ?? "";
+    const current = valueRef.current;
+    if (localHistory.current.length === 0) {
+      setValue(original); valueRef.current = original; setDirty(false);
+      return;
+    }
+    const lastCheckpoint = localHistory.current[localHistory.current.length - 1];
+    if (current !== lastCheckpoint) {
+      // Text edits on top of checkpoint → revert to checkpoint only
+      setValue(lastCheckpoint); valueRef.current = lastCheckpoint;
+      setDirty(lastCheckpoint !== original);
+    } else {
+      // Already at checkpoint → undo the structural op itself
+      localHistory.current = localHistory.current.slice(0, -1);
+      const prev = localHistory.current.length > 0
+        ? localHistory.current[localHistory.current.length - 1]
+        : original;
+      setValue(prev); valueRef.current = prev;
+      setDirty(prev !== original);
+    }
+  }, [variable?.value]);
+
+  useEffect(() => {
+    if (!onRegisterLocalUndo) return;
+    onRegisterLocalUndo(dirty ? handleDiscard : null);
+    return () => { onRegisterLocalUndo(null); };
+  }, [dirty, handleDiscard, onRegisterLocalUndo]);
+
+  const expandedValue = useMemo(() => {
+    if (!value.includes("%")) return null;
+    const lookup = new Map<string, string>();
+    allVars.filter((v) => v.scope === "System").forEach((v) => lookup.set(v.name.toUpperCase(), v.value));
+    allVars.filter((v) => v.scope === "User").forEach((v) => lookup.set(v.name.toUpperCase(), v.value));
+    const expanded = value.replace(/%([^%]+)%/g, (match, name: string) => lookup.get(name.toUpperCase()) ?? match);
+    return expanded !== value ? expanded : null;
+  }, [value, allVars]);
 
   if (!variable) {
     return (
@@ -49,17 +101,24 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
   const isStagedSet = stagedChange?.kind === "set";
 
   const handleValueChange = (newVal: string) => {
+    if (structuralChangeRef.current) {
+      // Push pre-op value (with any text edits) then post-op value as checkpoints.
+      // Skip pre-op if it equals the original or is already the top (avoid redundant entries).
+      const preOp = preOpValueRef.current;
+      const top = localHistory.current[localHistory.current.length - 1];
+      const next = [...localHistory.current];
+      if (preOp !== variable.value && preOp !== top) next.push(preOp);
+      next.push(newVal);
+      localHistory.current = next;
+      structuralChangeRef.current = false;
+    }
     setValue(newVal);
+    valueRef.current = newVal;
     setDirty(newVal !== variable.value);
   };
 
   const handleApply = () => {
     onStage(variable.name, variable.scope, value);
-    setDirty(false);
-  };
-
-  const handleDiscard = () => {
-    setValue(variable.value);
     setDirty(false);
   };
 
@@ -99,8 +158,8 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-rim-subtle shrink-0">
+      {/* Header — fixed height so button appearance doesn't shift layout */}
+      <div className="flex items-center gap-3 px-6 h-[60px] border-b border-rim-subtle shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <h2 className="font-mono font-semibold text-base text-fg truncate">{variable.name}</h2>
           <Badge variant={variable.scope === "User" ? "user" : "system"}>
@@ -124,13 +183,13 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
         <div className="flex gap-2 shrink-0">
           {dirty ? (
             <>
-              <Button variant="primary" size="md" onClick={handleApply}>Stage</Button>
-              <Button variant="ghost" size="md" onClick={handleDiscard}>Discard</Button>
+              <Button variant="primary" size="sm" onClick={handleApply}>Stage</Button>
+              <Button variant="ghost" size="sm" onClick={handleDiscard}>Discard</Button>
             </>
           ) : isStagedSet ? (
-            <Button variant="ghost" size="md" onClick={handleUnstage}>Unstage</Button>
+            <Button variant="ghost" size="sm" onClick={handleUnstage}>Unstage</Button>
           ) : !isStagedDelete && !readOnly ? (
-            <Button variant="danger" size="md" onClick={handleDelete}>Delete</Button>
+            <Button variant="danger" size="sm" onClick={handleDelete}>Delete</Button>
           ) : null}
         </div>
       </div>
@@ -183,7 +242,14 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
           </div>
 
           {effectiveSeparator === ";" ? (
-            <PathEditor rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
+            <PathEditor
+              rawValue={value}
+              onChange={handleValueChange}
+              readOnly={readOnly}
+              allVars={allVars}
+              skipPathValidation={variable.name.toUpperCase() === "PATHEXT"}
+              onBeforeReorder={() => { structuralChangeRef.current = true; preOpValueRef.current = valueRef.current; }}
+            />
           ) : effectiveSeparator === "," ? (
             <ListEditor separator="," rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
           ) : (
@@ -205,6 +271,9 @@ export function DetailPanel({ variable, elevated, staged, onStage, onStageDelete
               ["Scope", variable.scope],
               ["Length", `${value.length} chars`],
               ...(entriesCount !== null ? [["Entries", String(entriesCount)]] : []),
+              ...(expandedValue !== null
+                ? [["Expanded", expandedValue.length > 60 ? `${expandedValue.slice(0, 60)}…` : expandedValue]]
+                : []),
               ...(isStagedSet && stagedChange.originalValue !== null
                 ? [["Original", stagedChange.originalValue.length > 40
                     ? `${stagedChange.originalValue.slice(0, 40)}…`

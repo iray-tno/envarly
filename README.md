@@ -1,11 +1,24 @@
 # Envarly
 
+[![Tests](https://github.com/iray-tno/envarly/actions/workflows/test.yml/badge.svg)](https://github.com/iray-tno/envarly/actions/workflows/test.yml)
+[![Security](https://github.com/iray-tno/envarly/actions/workflows/security.yml/badge.svg)](https://github.com/iray-tno/envarly/actions/workflows/security.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg)](https://github.com/iray-tno/envarly/releases)
+[![Tauri v2](https://img.shields.io/badge/Tauri-v2-yellow.svg)](https://tauri.app)
+
 Windows environment variable manager built with Tauri v2, React, TypeScript, and Rust.
+
+## Screenshot
+
+![Envarly dark mode](docs/screenshot-dark.png)
 
 ## Features
 
 - **2-pane UI** — sidebar variable list with search/filter and scope tabs (All / User / System), detail editor on the right
-- **PATH editor** — drag-and-drop reordering, invalid-path detection, per-entry validation
+- **List editor** — drag-and-drop reordering for PATH, PATHEXT, NO\_PROXY, and any semicolon- or comma-separated variable; auto-detects separator from name and value; supports manual override between list and plain-text modes
+- **Path validation** — per-entry existence check (green ✓ / red ✗) for PATH-style entries; PATHEXT skips filesystem checks since its entries are extensions, not paths
+- **`%VAR%` reference lint** — warns on unresolvable `%VAR%` references in path entries; evaluated on focus-out; suppresses false positives for Windows built-in volatile vars (`USERPROFILE`, `APPDATA`, `TEMP`, …)
+- **Local undo (Ctrl+Z)** — multi-step undo of unsaved edits in the detail panel, before staging; drag reorder and text edits are separate undo steps; works even when a text field has focus
 - **Dark / light mode** — follows system preference on first launch; persists across sessions; no flash on load
 - **Snapshot / time-travel** — save named snapshots, restore to any previous state
 - **Diff detection** — detects registry changes made by other processes while Envarly is open; shows a diff with selective apply (accept or revert per entry)
@@ -197,26 +210,34 @@ envarly/
 │   │   └── ThemeContext.tsx      # Dark/light theme context
 │   ├── hooks/
 │   │   ├── useEnvVars.ts         # Variable list data hook
+│   │   ├── useStaged.ts          # Staging area: Map<"Scope:name", StagedChange>; effectiveVars merge
+│   │   ├── useUndoStack.ts       # Generic undo/redo stack (stage-level operations)
+│   │   ├── useStagingHandlers.ts # Orchestrates stageSet/stageDelete/stageImport/stageSnapshot
 │   │   └── useTheme.ts           # Theme persistence + toggle
 │   ├── lib/
 │   │   ├── cn.ts                 # clsx + tailwind-merge helper
 │   │   ├── diff.ts               # Pure diff computation (no side effects)
+│   │   ├── lint.ts               # %VAR% reference lint for path values; Windows built-in allowlist
 │   │   └── secrets.ts            # Secret detection: name-based + value pattern (35+ token formats)
 │   └── components/
 │       ├── ui/                   # Atomic UI primitives
 │       │   ├── Badge.tsx
 │       │   ├── Button.tsx
 │       │   ├── IconButton.tsx
+│       │   ├── Modal.tsx
 │       │   ├── SegmentedControl.tsx
 │       │   ├── TextInput.tsx
 │       │   └── Textarea.tsx
+│       ├── AppHeader/            # Top bar: refresh, staged-changes count, apply/discard, menu
 │       ├── Sidebar/              # Variable list with search, scope filter, ⚠ Secrets tab
-│       ├── DetailPanel/          # Variable editor (plain text + PATH editor)
-│       ├── PathEditor/           # Drag-and-drop PATH entry editor
+│       ├── DetailPanel/          # Variable editor with local undo (Ctrl+Z pre-stage)
+│       ├── PathEditor/           # Drag-and-drop list editor + path validation + %VAR% lint
+│       ├── ListEditor/           # Generic sortable list editor (comma/semicolon separator)
+│       ├── NewVarModal/          # New variable creation dialog
 │       ├── SnapshotPanel/        # Snapshot list, create, restore
 │       ├── DiffPanel/            # External-change diff with selective apply
 │       ├── ImportExportPanel/    # File import / export UI
-│       └── LicensesPanel/        # OSS license list
+│       └── LicensesPanel/        # OSS licenses: Envarly (MIT) + third-party (npm + Rust)
 ├── public/
 │   └── theme-init.js             # Runs before React; sets theme class to avoid flash
 ├── src-tauri/

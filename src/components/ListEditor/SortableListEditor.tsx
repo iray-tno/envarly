@@ -31,9 +31,11 @@ interface RowProps {
   entry: ListEntry;
   onRemove: () => void;
   onEdit: (val: string) => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
-function SortableRow({ entry, onRemove, onEdit }: RowProps) {
+function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: entry.id });
 
@@ -67,7 +69,13 @@ function SortableRow({ entry, onRemove, onEdit }: RowProps) {
           aria-label={`Entry: ${entry.value}`}
           value={entry.value}
           onChange={(e) => onEdit(e.target.value)}
+          onKeyDown={(e) => {
+            if (!e.altKey) return;
+            if (e.key === "ArrowUp")   { e.preventDefault(); onMoveUp(); }
+            if (e.key === "ArrowDown") { e.preventDefault(); onMoveDown(); }
+          }}
           spellCheck={false}
+          title="Alt+↑/↓ to reorder"
           className="w-full bg-transparent font-mono text-[11px] text-fg focus:outline-none"
         />
       </div>
@@ -94,6 +102,8 @@ interface Props {
   separator: ";" | ",";
   entries: ListEntry[];
   onEntriesChange: (entries: ListEntry[]) => void;
+  /** Called before structural changes (drag, remove, add) so callers can snapshot state. */
+  onBeforeChange?: () => void;
   readOnly?: boolean;
   addPlaceholder?: string;
 }
@@ -102,6 +112,7 @@ export function SortableListEditor({
   separator,
   entries,
   onEntriesChange,
+  onBeforeChange,
   readOnly = false,
   addPlaceholder = "Add entry…",
 }: Props) {
@@ -120,6 +131,7 @@ export function SortableListEditor({
   }, [entries]);
 
   const handleDedup = () => {
+    onBeforeChange?.();
     const seen = new Set<string>();
     onEntriesChange(entries.filter((e) => {
       const key = e.value.toLowerCase().trim();
@@ -137,6 +149,7 @@ export function SortableListEditor({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
+    onBeforeChange?.();
     const next = arrayMove(
       entries,
       entries.findIndex((e) => e.id === active.id),
@@ -145,15 +158,27 @@ export function SortableListEditor({
     onEntriesChange(next);
   };
 
-  const removeEntry = (id: string) =>
+  const removeEntry = (id: string) => {
+    onBeforeChange?.();
     onEntriesChange(entries.filter((e) => e.id !== id));
+  };
 
   const editEntry = (id: string, val: string) =>
     onEntriesChange(entries.map((e) => (e.id === id ? { ...e, value: val, exists: null } : e)));
 
+  const moveEntry = (id: string, dir: -1 | 1) => {
+    const idx = entries.findIndex((e) => e.id === id);
+    if (idx === -1) return;
+    const next = idx + dir;
+    if (next < 0 || next >= entries.length) return;
+    onBeforeChange?.();
+    onEntriesChange(arrayMove(entries, idx, next));
+  };
+
   const addEntry = (raw: string) => {
     const trimmed = raw.trim();
     if (!trimmed) return;
+    onBeforeChange?.();
     const parts = trimmed.split(separator).map((s) => s.trim()).filter(Boolean);
     const newEntries = parts.map((value) => ({ id: `new-${Date.now()}-${value}`, value, exists: null }));
     onEntriesChange([...entries, ...newEntries]);
@@ -191,6 +216,8 @@ export function SortableListEditor({
                 entry={entry}
                 onRemove={() => removeEntry(entry.id)}
                 onEdit={(val) => editEntry(entry.id, val)}
+                onMoveUp={() => moveEntry(entry.id, -1)}
+                onMoveDown={() => moveEntry(entry.id, 1)}
               />
             ))}
             {entries.length === 0 && (

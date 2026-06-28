@@ -7,31 +7,41 @@ Architecture decisions, security model, and data format specs. Not a tutorial; r
 ## Architecture
 
 ```
-src/                 React frontend (TypeScript)
-  api.ts             Tauri command bridge — all invoke() calls live here
-  App.tsx            Root: state, layout, dialog orchestration
+src/                    React frontend (TypeScript)
+  api.ts                Tauri command bridge — all invoke() calls live here
+  App.tsx               Root: state, layout, dialog orchestration
   hooks/
-    useStaged.ts     Staging area: Map<"Scope:name", StagedChange>; effectiveVars merge
-    useEnvVars.ts    Registry polling + refresh
-    useTheme.ts      Dark/light theme persistence
+    useStaged.ts        Staging area: Map<"Scope:name", StagedChange>; effectiveVars merge
+    useUndoStack.ts     Generic undo/redo stack (stage-level Ctrl+Z/Y)
+    useStagingHandlers.ts  Orchestrates all stage operations and undo pushes
+    useEnvVars.ts       Registry polling + refresh
+    useTheme.ts         Dark/light theme persistence
+  lib/
+    diff.ts             Pure snapshot diff — no side effects
+    lint.ts             %VAR% reference lint; Windows built-in allowlist
+    secrets.ts          Name-based + value-pattern secret detection (35+ formats)
   components/
-    Sidebar/         Variable list, search, keyboard nav (ARIA listbox); M/A/D staged markers
-    DetailPanel/     Edit → stage locally; Apply staged writes to registry
-    DiffPanel/       Unified diff view (external-change detection)
-    SnapshotPanel/   Snapshot list (rendered in right sidebar)
+    AppHeader/          Top bar: refresh, staged-change count, apply/discard, menu
+    Sidebar/            Variable list, search, keyboard nav (ARIA listbox); M/A/D markers
+    DetailPanel/        Edit → stage locally; local Ctrl+Z undo before staging
+    PathEditor/         Drag-and-drop path list + per-entry validation + %VAR% lint
+    ListEditor/         Generic sortable list editor (semicolon or comma separator)
+    NewVarModal/        New variable creation dialog
+    DiffPanel/          Unified diff view (external-change detection)
+    SnapshotPanel/      Snapshot list (rendered in right sidebar)
     ImportExportPanel/  Import/Export wizard (rendered in modal)
-    LicensesPanel/   OSS license listing (rendered in modal)
-    ui/              Atomic components: Button, TextInput, Textarea, Badge, …
+    LicensesPanel/      Envarly MIT license + third-party OSS listing (rendered in modal)
+    ui/                 Atomic components: Button, TextInput, Textarea, Badge, Modal, …
 
-src-tauri/src/       Rust backend
-  lib.rs             Entry point: CLI dispatch or Tauri run
-  commands.rs        Tauri command handlers (thin — delegate to domain modules)
-  env_store.rs       Registry read/write via winreg
-  snapshot.rs        Snapshot save/list/restore + DPAPI encryption
-  crypto.rs          DPAPI wrapper (protect/unprotect)
-  export.rs          JSON + .reg import/export parsing
-  cli.rs             Read-only CLI subcommands (clap)
-  error.rs           EnvarlyError (thiserror)
+src-tauri/src/          Rust backend
+  lib.rs                Entry point: CLI dispatch or Tauri run
+  commands.rs           Tauri command handlers (thin — delegate to domain modules)
+  env_store.rs          Registry read/write via winreg; EnvBackend trait + MemBackend for tests
+  snapshot.rs           Snapshot save/list/restore + DPAPI encryption
+  crypto.rs             DPAPI wrapper (protect/unprotect)
+  export.rs             JSON + .reg import/export parsing
+  cli.rs                Read-only CLI subcommands (clap)
+  error.rs              EnvarlyError (thiserror)
 ```
 
 ### Frontend ↔ Backend boundary
@@ -49,6 +59,15 @@ All edits are **staged locally** via `useStaged` before any registry write. The 
 5. User clicks **Apply N staged changes** (header) → unified diff modal → click **Apply to registry** → batch `api.setEnvVar`/`api.deleteEnvVar` + `WM_SETTINGCHANGE` broadcast → `clearStaged()`
 
 `effectiveVars` (from `useStaged`) merges registry vars with staged changes; Sidebar and DetailPanel always display this merged view. Staged-deleted vars remain visible with a D marker so they can be unstaged.
+
+### Local pre-stage undo
+
+DetailPanel maintains a second, independent undo stack (`localHistory` ref) for edits that have not yet been staged. Ctrl+Z fires `handleDiscard`, which works at two granularities:
+
+- **Text edits** — revert to the last structural checkpoint (drag/add/remove outcome)
+- **Structural ops** (drag reorder, add, remove) — undo the operation itself, one step at a time
+
+Pre-op and post-op values are both pushed as checkpoints when a structural change is confirmed (in `handleValueChange`, triggered after `onBeforeReorder`). This gives independent undo for interleaved text-then-drag sequences. The local stack is cleared whenever the selected variable changes or a change is staged.
 
 ---
 

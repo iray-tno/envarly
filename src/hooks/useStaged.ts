@@ -17,7 +17,7 @@ type StagedKey = string; // `${VarScope}:${name}`
 
 function inferListSeparator(name: string, value: string): ";" | "," | null {
   const upper = name.toUpperCase();
-  if (upper === "PATH") return ";";
+  if (upper === "PATH" || upper === "PATHEXT") return ";";
   if (upper === "NO_PROXY" || upper === "NOPROXY") return ",";
   if (value.includes(";") && value.split(";").some((p) => p.includes("\\"))) return ";";
   return null;
@@ -144,6 +144,11 @@ export function useStaged(registryVars: EnvVar[]) {
   /** Clear all staged changes. */
   const clearStaged = useCallback(() => setStaged(new Map()), []);
 
+  /** Restore staged map to a previously captured snapshot (used for undo). */
+  const restoreStaged = useCallback((map: Map<string, StagedChange>) => {
+    setStaged(new Map(map));
+  }, []);
+
   /**
    * Effective var list: registry vars merged with staged changes.
    * Staged-deleted vars remain visible so the sidebar can show a D marker
@@ -179,5 +184,6 @@ export function useStaged(registryVars: EnvVar[]) {
     stageSnapshot,
     unstage,
     clearStaged,
+    restoreStaged,
   };
 }
