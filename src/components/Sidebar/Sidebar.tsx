@@ -34,6 +34,8 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
     });
   };
 
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "scope" | "staged">("name-asc");
+
   const filtered = useMemo(
     () =>
       vars.filter((v) => {
@@ -47,6 +49,22 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
       }),
     [vars, search, scopeFilter],
   );
+
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    const byName = (a: EnvVar, b: EnvVar) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    switch (sortBy) {
+      case "name-asc": return arr.sort(byName);
+      case "name-desc": return arr.sort((a, b) => byName(b, a));
+      case "scope": return arr.sort((a, b) => a.scope.localeCompare(b.scope) || byName(a, b));
+      case "staged": return arr.sort((a, b) => {
+        const aS = staged.has(stagedKey(a.name, a.scope)) ? 0 : 1;
+        const bS = staged.has(stagedKey(b.name, b.scope)) ? 0 : 1;
+        return aS - bS || byName(a, b);
+      });
+    }
+  }, [filtered, sortBy, staged]);
 
   const counts: Record<VarScope, number> = {
     User: vars.filter((v) => v.scope === "User").length,
@@ -66,23 +84,23 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
       e.preventDefault();
 
       const currentIdx = selected
-        ? filtered.findIndex((v) => v.name === selected.name && v.scope === selected.scope)
+        ? sorted.findIndex((v) => v.name === selected.name && v.scope === selected.scope)
         : -1;
 
       let nextIdx: number;
-      if (e.key === "ArrowDown") nextIdx = currentIdx < filtered.length - 1 ? currentIdx + 1 : 0;
-      else if (e.key === "ArrowUp") nextIdx = currentIdx > 0 ? currentIdx - 1 : filtered.length - 1;
+      if (e.key === "ArrowDown") nextIdx = currentIdx < sorted.length - 1 ? currentIdx + 1 : 0;
+      else if (e.key === "ArrowUp") nextIdx = currentIdx > 0 ? currentIdx - 1 : sorted.length - 1;
       else if (e.key === "Home") nextIdx = 0;
-      else nextIdx = filtered.length - 1;
+      else nextIdx = sorted.length - 1;
 
-      const next = filtered[nextIdx];
+      const next = sorted[nextIdx];
       if (!next) return;
       onSelect(next);
       const btn = itemRefs.current.get(`${next.scope}:${next.name}`);
       btn?.focus();
       btn?.scrollIntoView({ block: "nearest" });
     },
-    [filtered, selected, onSelect],
+    [sorted, selected, onSelect],
   );
 
   return (
@@ -109,6 +127,20 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         />
       </div>
 
+      <div className="px-4 pb-1.5 flex justify-end">
+        <select
+          aria-label="Sort order"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          className="text-[10px] text-dim bg-transparent cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent rounded"
+        >
+          <option value="name-asc">Name A→Z</option>
+          <option value="name-desc">Name Z→A</option>
+          <option value="scope">Scope</option>
+          <option value="staged">Staged first</option>
+        </select>
+      </div>
+
       <div
         role="listbox"
         aria-label="Environment variables"
@@ -118,10 +150,10 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         {loading && (
           <p className="text-center text-dim text-sm py-8">Loading…</p>
         )}
-        {!loading && filtered.length === 0 && (
+        {!loading && sorted.length === 0 && (
           <p className="text-center text-dim text-sm py-8">No variables found</p>
         )}
-        {filtered.map((v) => {
+        {sorted.map((v) => {
           const key = stagedKey(v.name, v.scope);
           const isSelected = selected?.name === v.name && selected?.scope === v.scope;
           const secret = resolveSecret(v.name, v.value);

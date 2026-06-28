@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "../../lib/cn";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
@@ -107,6 +107,28 @@ export function SortableListEditor({
 }: Props) {
   const [newValue, setNewValue] = useState("");
 
+  const dupCount = useMemo(() => {
+    const seen = new Set<string>();
+    let count = 0;
+    for (const e of entries) {
+      const key = e.value.toLowerCase().trim();
+      if (key === "") continue;
+      if (seen.has(key)) count++;
+      else seen.add(key);
+    }
+    return count;
+  }, [entries]);
+
+  const handleDedup = () => {
+    const seen = new Set<string>();
+    onEntriesChange(entries.filter((e) => {
+      const key = e.value.toLowerCase().trim();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }));
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -148,6 +170,18 @@ export function SortableListEditor({
 
   return (
     <div className="flex flex-col gap-2">
+      {!readOnly && dupCount > 0 && (
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs">
+          <span>{dupCount} duplicate {dupCount === 1 ? "entry" : "entries"}</span>
+          <button
+            type="button"
+            onClick={handleDedup}
+            className="font-medium hover:underline focus:outline-none focus-visible:underline"
+          >
+            Remove
+          </button>
+        </div>
+      )}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={entries.map((e) => e.id)} strategy={verticalListSortingStrategy}>
           <ol aria-label="List entries" className="border border-rim rounded overflow-hidden">
