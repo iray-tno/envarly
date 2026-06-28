@@ -172,7 +172,7 @@ export function SortableListEditor({
             aria-label="New entry"
             className={cn(
               "flex-1 px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
-              "placeholder:text-dim transition-colors",
+              "placeholder:text-muted transition-colors",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",
             )}
             placeholder={addPlaceholder}
