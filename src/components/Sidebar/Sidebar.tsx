@@ -16,12 +16,13 @@ interface Props {
   staged: Map<string, StagedChange>;
 }
 
-const SCOPES = ["All", "User", "System", "Secrets"] as const;
+const SCOPES = ["All", "User", "System"] as const;
 type ScopeFilter = (typeof SCOPES)[number];
 
 export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged }: Props) {
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
+  const [secretsOnly, setSecretsOnly] = useState(false);
   const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,15 +40,12 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
   const filtered = useMemo(
     () =>
       vars.filter((v) => {
-        if (scopeFilter === "Secrets") {
-          if (!resolveSecret(v.name, v.value)) return false;
-        } else if (scopeFilter !== "All") {
-          if (v.scope !== scopeFilter) return false;
-        }
+        if (secretsOnly && !resolveSecret(v.name, v.value)) return false;
+        if (scopeFilter !== "All" && v.scope !== scopeFilter) return false;
         const q = search.toLowerCase();
         return !q || v.name.toLowerCase().includes(q) || v.value.toLowerCase().includes(q);
       }),
-    [vars, search, scopeFilter],
+    [vars, search, scopeFilter, secretsOnly],
   );
 
   const sorted = useMemo(() => {
@@ -74,8 +72,8 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
 
   const scopeOptions = SCOPES.map((s) => ({
     value: s,
-    label: s === "Secrets" ? "⚠ Secrets" : s,
-    count: s === "All" ? vars.length : s === "Secrets" ? secretCount : counts[s as VarScope],
+    label: s,
+    count: s === "All" ? vars.length : counts[s as VarScope],
   }));
 
   const handleKeyDown = useCallback(
@@ -127,7 +125,26 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         />
       </div>
 
-      <div className="px-4 pb-1.5 flex justify-end">
+      <div className="px-3 pb-1.5 flex items-center justify-between">
+        {secretCount > 0 ? (
+          <button
+            type="button"
+            onClick={() => setSecretsOnly((v) => !v)}
+            className={cn(
+              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+              secretsOnly
+                ? "bg-warn/20 text-warn border border-warn/40"
+                : "bg-warn/10 text-warn/70 border border-warn/20 hover:bg-warn/15 hover:text-warn",
+            )}
+          >
+            <span>⚠</span>
+            <span>{secretCount} secret{secretCount !== 1 ? "s" : ""}</span>
+            {secretsOnly && <span className="opacity-60">✕</span>}
+          </button>
+        ) : (
+          <span />
+        )}
         <select
           aria-label="Sort order"
           value={sortBy}
