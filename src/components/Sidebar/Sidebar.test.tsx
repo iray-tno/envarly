@@ -67,9 +67,9 @@ describe("Sidebar", () => {
 
   it("displays scope counts in tabs", () => {
     render(<Sidebar vars={vars} selected={null} onSelect={vi.fn()} onCreateNew={vi.fn()} loading={false} staged={noStaged} />);
-    // All=4, User=2, System=2, Secrets=0 (no secret vars in test data)
+    // All=4, User=2, System=2 — no secret chip when secretCount=0
     const badges = screen.getAllByText(/^\d+$/);
-    expect(badges.map((b) => b.textContent)).toEqual(["4", "2", "2", "0"]);
+    expect(badges.map((b) => b.textContent)).toEqual(["4", "2", "2"]);
   });
 
   it("detects secrets from value pattern even with a generic name", () => {
@@ -82,7 +82,7 @@ describe("Sidebar", () => {
     expect(screen.getByTitle("GitHub Personal Access Token")).toBeInTheDocument();
   });
 
-  it("filters to secret variables only in Secrets tab", async () => {
+  it("filters to secret variables only via secrets chip", async () => {
     const secretVars: EnvVar[] = [
       makeVar("AWS_SECRET_ACCESS_KEY", "User"),
       makeVar("GITHUB_TOKEN", "System"),
@@ -90,7 +90,7 @@ describe("Sidebar", () => {
     ];
     const user = userEvent.setup();
     render(<Sidebar vars={secretVars} selected={null} onSelect={vi.fn()} onCreateNew={vi.fn()} loading={false} staged={noStaged} />);
-    await user.click(screen.getByRole("radio", { name: /secrets/i }));
+    await user.click(screen.getByRole("button", { name: /secrets/i }));
     expect(screen.getByText("AWS_SECRET_ACCESS_KEY")).toBeInTheDocument();
     expect(screen.getByText("GITHUB_TOKEN")).toBeInTheDocument();
     expect(screen.queryByText("JAVA_HOME")).not.toBeInTheDocument();
