@@ -11,6 +11,7 @@ interface Props {
   vars: EnvVar[];
   selected: EnvVar | null;
   onSelect: (v: EnvVar) => void;
+  onCreateNew: () => void;
   loading: boolean;
   staged: Map<string, StagedChange>;
 }
@@ -18,10 +19,20 @@ interface Props {
 const SCOPES = ["All", "User", "System", "Secrets"] as const;
 type ScopeFilter = (typeof SCOPES)[number];
 
-export function Sidebar({ vars, selected, onSelect, loading, staged }: Props) {
+export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged }: Props) {
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
-  const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleCopy = (value: string, rowKey: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedKey(rowKey);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopiedKey(null), 1500);
+    });
+  };
 
   const filtered = useMemo(
     () =>
@@ -119,18 +130,21 @@ export function Sidebar({ vars, selected, onSelect, loading, staged }: Props) {
           const isSet = stagedChange?.kind === "set";
           const isNew = isSet && stagedChange.originalValue === null;
           return (
-            <button
+            <div
               key={key}
               ref={(el) => {
                 if (el) itemRefs.current.set(key, el);
                 else itemRefs.current.delete(key);
               }}
-              type="button"
               role="option"
               aria-selected={isSelected}
+              tabIndex={-1}
               onClick={() => onSelect(v)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(v); }
+              }}
               className={cn(
-                "flex items-center mx-2 w-[calc(100%-1rem)] gap-2 px-4 py-2.5 rounded text-left transition-colors",
+                "group flex items-center mx-2 w-[calc(100%-1rem)] gap-2 px-4 py-2.5 rounded text-left transition-colors cursor-pointer",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
                 isSelected
                   ? "bg-surface text-fg"
@@ -158,6 +172,19 @@ export function Sidebar({ vars, selected, onSelect, loading, staged }: Props) {
               {isSet && !isNew && (
                 <span className="text-[9px] font-bold text-warn shrink-0">M</span>
               )}
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleCopy(v.value, key); }}
+                aria-label={`Copy value of ${v.name}`}
+                title="Copy value"
+                className={cn(
+                  "shrink-0 text-[10px] px-1 py-0.5 rounded transition-all",
+                  "opacity-0 group-hover:opacity-100 focus:opacity-100",
+                  copiedKey === key ? "text-success" : "text-dim hover:text-muted",
+                )}
+              >
+                {copiedKey === key ? "✓" : "⧉"}
+              </button>
               <span
                 className={cn(
                   "text-[10px] font-semibold w-4 h-4 rounded flex items-center justify-center shrink-0",
@@ -168,9 +195,20 @@ export function Sidebar({ vars, selected, onSelect, loading, staged }: Props) {
               >
                 {v.scope[0]}
               </span>
-            </button>
+            </div>
           );
         })}
+      </div>
+
+      {/* Footer: new variable */}
+      <div className="px-3 py-2 border-t border-rim shrink-0">
+        <button
+          type="button"
+          onClick={onCreateNew}
+          className="w-full text-left text-xs text-dim hover:text-muted px-2 py-1.5 rounded hover:bg-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          + New variable
+        </button>
       </div>
     </aside>
   );

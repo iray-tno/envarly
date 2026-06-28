@@ -41,7 +41,7 @@ export const Default: Story = {
   render: () => {
     const [selected, setSelected] = useState<EnvVar | null>(null);
     return (
-      <Sidebar vars={SAMPLE_VARS} selected={selected} onSelect={setSelected} loading={false} staged={noStaged} />
+      <Sidebar vars={SAMPLE_VARS} selected={selected} onSelect={setSelected} onCreateNew={() => {}} loading={false} staged={noStaged} />
     );
   },
 };
@@ -50,15 +50,15 @@ export const WithStagedChanges: Story = {
   render: () => {
     const [selected, setSelected] = useState<EnvVar | null>(null);
     return (
-      <Sidebar vars={SAMPLE_VARS} selected={selected} onSelect={setSelected} loading={false} staged={withStaged} />
+      <Sidebar vars={SAMPLE_VARS} selected={selected} onSelect={setSelected} onCreateNew={() => {}} loading={false} staged={withStaged} />
     );
   },
 };
 
 export const Loading: Story = {
-  args: { vars: [], selected: null, onSelect: () => {}, loading: true, staged: noStaged },
+  args: { vars: [], selected: null, onSelect: () => {}, onCreateNew: () => {}, loading: true, staged: noStaged },
 };
 
 export const Empty: Story = {
-  args: { vars: [], selected: null, onSelect: () => {}, loading: false, staged: noStaged },
+  args: { vars: [], selected: null, onSelect: () => {}, onCreateNew: () => {}, loading: false, staged: noStaged },
 };
