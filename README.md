@@ -1,7 +1,7 @@
 # Envarly
 
 [![Tests](https://github.com/iray-tno/envarly/actions/workflows/test.yml/badge.svg)](https://github.com/iray-tno/envarly/actions/workflows/test.yml)
-[![Security](https://github.com/iray-tno/envarly/actions/workflows/security.yml/badge.svg)](https://github.com/iray-tno/envarly/actions/workflows/security.yml)
+[![Security](https://img.shields.io/github/actions/workflow/status/iray-tno/envarly/security.yml?label=Security)](https://github.com/iray-tno/envarly/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg)](https://github.com/iray-tno/envarly/releases)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-yellow.svg)](https://tauri.app)
