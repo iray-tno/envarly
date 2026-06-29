@@ -16,6 +16,9 @@ src-tauri/gen/
 # Claude Code local settings (may contain local file paths)
 .claude/settings.local.json
 
+# Promo drafts (local only)
+promo/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json
