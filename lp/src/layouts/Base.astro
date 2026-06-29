@@ -9,9 +9,24 @@ interface Props {
 
 const {
   title = 'Envarly — Windows Environment Variable Manager',
-  description = 'Edit, audit, and protect your Windows environment variables. Preview every change before applying. Built with Tauri v2, React, and Rust.',
+  description = 'Free GUI editor for Windows environment variables. Edit PATH, detect secrets, preview changes before applying. Works on Windows 10 and 11. Open source, built with Tauri and Rust.',
   ogImage = '/envarly/og-image.png',
 } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Envarly',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Windows 10, Windows 11',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  description,
+  url: 'https://iray-tno.github.io/envarly/',
+  downloadUrl: 'https://github.com/iray-tno/envarly/releases/latest',
+  softwareVersion: '1.0.0',
+  license: 'https://opensource.org/licenses/MIT',
+  author: { '@type': 'Person', name: 'iray-tno' },
+};
 
 const GA_ID = 'G-SEWBF5H9Y0';
 const CLARITY_ID = 'xeh50yh8uq';
@@ -39,6 +54,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+
+    <!-- JSON-LD structured data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <!-- Google Search Console -->
     <meta name="google-site-verification" content="Bi3E2hIYlL4dUq-rWPnj6Qklwt7RR4_kLA4KZCpN3xI" />
