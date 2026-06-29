@@ -1,4 +1,4 @@
-name: Storybook
+name: Pages
 
 on:
   push:
@@ -15,23 +15,42 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build and deploy Storybook
+    name: Build and deploy GitHub Pages
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci
-      - run: npm run build-storybook
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Install LP dependencies
+        run: npm ci
+        working-directory: lp
+
+      - name: Build LP
+        run: npm run build
+        working-directory: lp
+
       - name: Arrange site structure
-        run: mkdir -p site && mv storybook-static site/storybook
+        run: |
+          mkdir -p site
+          cp -r lp/dist/. site/
+          mv storybook-static site/storybook
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
       - id: deploy
         uses: actions/deploy-pages@v4

@@ -1,0 +1,161 @@
+---
+import Base from '../layouts/Base.astro';
+
+const GITHUB_URL = 'https://github.com/iray-tno/envarly';
+const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest';
+const VERSION = '1.0.0';
+
+const features = [
+  {
+    icon: '⠿',
+    title: 'Drag-and-drop list editor',
+    desc: 'Reorder PATH, PATHEXT, NO_PROXY and any semicolon- or comma-separated variable. Auto-detects separator from the variable name.',
+  },
+  {
+    icon: '✓',
+    title: 'Path validation',
+    desc: 'Each entry in PATH-style variables gets a live ✓ / ✗ existence check so broken paths are caught before you apply.',
+  },
+  {
+    icon: '⚠',
+    title: '%VAR% reference lint',
+    desc: 'Warns on unresolvable %VAR% references in path entries. Evaluated on focus-out; skips Windows built-in volatile vars.',
+  },
+  {
+    icon: '↩',
+    title: 'Local undo before staging',
+    desc: 'Multi-step Ctrl+Z in the detail panel before staging. Drag reorders and text edits are independent undo steps.',
+  },
+  {
+    icon: '⚿',
+    title: 'Secret detection',
+    desc: 'Name-based heuristics and value-pattern matching across 35+ token formats — GitHub, AWS, Anthropic, Stripe, npm, and more.',
+  },
+  {
+    icon: '📸',
+    title: 'Snapshots & time-travel',
+    desc: 'Save named snapshots of your full environment, encrypted with DPAPI. Restore to any previous state in two clicks.',
+  },
+  {
+    icon: '⇄',
+    title: 'Diff detection',
+    desc: 'Detects registry changes made by other processes while Envarly is open. Shows a diff with selective apply per entry.',
+  },
+  {
+    icon: '⇅',
+    title: 'Import / Export',
+    desc: 'Read and write .json and .reg formats. Preview before any write. Merge or Replace strategy on import. Registry is never touched until you click Apply.',
+  },
+];
+---
+
+<Base>
+  <!-- Nav -->
+  <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 backdrop-blur">
+    <div class="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
+      <span class="font-semibold text-[var(--color-text)] tracking-tight">Envarly</span>
+      <nav class="flex items-center gap-6">
+        <a href="#features" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Features</a>
+        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
+        <a
+          href={RELEASE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-sm px-4 py-1.5 rounded-full bg-[var(--color-accent)] text-[var(--color-bg)] font-medium hover:bg-[var(--color-accent-dim)] transition-colors"
+        >
+          Download
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="mx-auto max-w-5xl px-6 pt-24 pb-16 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--color-border)] text-xs text-[var(--color-muted)] mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] inline-block"></span>
+        Windows Environment Variable Manager · v{VERSION}
+      </div>
+
+      <h1 class="text-5xl sm:text-6xl font-bold tracking-tight text-[var(--color-text)] mb-5">
+        Envarly
+      </h1>
+
+      <p class="text-lg sm:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-10 leading-relaxed">
+        Edit, audit, and protect your Windows environment variables.
+        Preview every change before applying — never break your PATH again.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <a
+          href={RELEASE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-6 py-3 rounded-lg bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold text-sm hover:bg-[var(--color-accent-dim)] transition-colors"
+        >
+          Download v{VERSION} for Windows
+        </a>
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-6 py-3 rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] font-medium text-sm hover:border-[var(--color-accent)] hover:text-[var(--color-text)] transition-colors"
+        >
+          View on GitHub →
+        </a>
+      </div>
+
+      <!-- Screenshot -->
+      <div class="rounded-xl overflow-hidden border border-[var(--color-border)] shadow-2xl shadow-[var(--color-accent)]/5 mx-auto">
+        <img
+          src="/envarly/screenshot-dark.png"
+          alt="Envarly dark mode — sidebar variable list and detail editor"
+          width="1200"
+          height="760"
+          class="w-full"
+          loading="eager"
+        />
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="mx-auto max-w-5xl px-6 py-20">
+      <h2 class="text-2xl font-bold text-[var(--color-text)] text-center mb-3">Features</h2>
+      <p class="text-[var(--color-muted)] text-center mb-12">Everything you need to manage environment variables safely.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {features.map((f) => (
+          <div class="p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-colors">
+            <div class="text-2xl mb-3">{f.icon}</div>
+            <h3 class="text-sm font-semibold text-[var(--color-text)] mb-2">{f.title}</h3>
+            <p class="text-xs text-[var(--color-muted)] leading-relaxed">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Stack -->
+    <section class="mx-auto max-w-5xl px-6 py-12 border-t border-[var(--color-border)]">
+      <p class="text-xs text-[var(--color-muted)] text-center mb-5 uppercase tracking-widest">Built with</p>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        {['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'].map((tech) => (
+          <span class="px-3 py-1.5 rounded-full border border-[var(--color-border)] text-xs text-[var(--color-muted)]">
+            {tech}
+          </span>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-[var(--color-border)] mt-12">
+    <div class="mx-auto max-w-5xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span class="text-xs text-[var(--color-muted)]">© 2025 Envarly · MIT License</span>
+      <div class="flex items-center gap-6">
+        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
+        <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Releases</a>
+        <a href={`${GITHUB_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">License</a>
+      </div>
+    </div>
+  </footer>
+</Base>
