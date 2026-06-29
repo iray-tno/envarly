@@ -9,7 +9,7 @@ export default defineConfig({
   base: '/envarly',
   integrations: [
     sitemap(),
-    partytown({ config: { forward: ['dataLayer.push'] } }),
+    partytown({ config: { forward: ['dataLayer.push', 'clarity'] } }),
   ],
   vite: {
     plugins: [tailwindcss()],

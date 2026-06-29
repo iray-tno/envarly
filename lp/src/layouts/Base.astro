@@ -13,7 +13,8 @@ const {
   ogImage = '/envarly/og-image.png',
 } = Astro.props;
 
-const GA_ID = import.meta.env.PUBLIC_GA_ID;
+const GA_ID = 'G-SEWBF5H9Y0';
+const CLARITY_ID = 'xeh50yh8uq';
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -42,21 +43,22 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/envarly/favicon.ico" />
 
-    <!-- Google Analytics (via Partytown — loads off main thread) -->
-    {GA_ID && (
-      <>
-        <script
-          type="text/partytown"
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-        ></script>
-        <script type="text/partytown" define:vars={{ GA_ID }}>
-          window.dataLayer = window.dataLayer || [];
-          function gtag() { dataLayer.push(arguments); }
-          gtag('js', new Date());
-          gtag('config', GA_ID);
-        </script>
-      </>
-    )}
+    <!-- Google Analytics (via Partytown) -->
+    <script type="text/partytown" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+    <script type="text/partytown" define:vars={{ GA_ID }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', GA_ID);
+    </script>
+
+    <!-- Microsoft Clarity (via Partytown) -->
+    <script type="text/partytown" define:vars={{ CLARITY_ID }}>
+      (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window,document,"clarity","script",CLARITY_ID);
+    </script>
   </head>
   <body>
     <slot />
