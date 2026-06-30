@@ -86,7 +86,7 @@ describe("SnapshotPanel", () => {
     const user = userEvent.setup();
     render(<SnapshotPanel onStageSnapshot={onStageSnapshot} />);
     await screen.findByText("Before Node update");
-    await user.click(screen.getByRole("button", { name: "×" }));
+    await user.click(screen.getByRole("button", { name: "Delete snapshot" }));
     await waitFor(() => screen.getByRole("button", { name: /^delete$/i }));
     await user.click(screen.getByRole("button", { name: /^delete$/i }));
     await waitFor(() => {

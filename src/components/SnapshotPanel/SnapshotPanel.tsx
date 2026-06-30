@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
 import { computeDiff } from "../../lib/diff";
+import type { DiffEntry } from "../../lib/diff";
 import type { EnvSnapshot, SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
+import { IconButton } from "../ui/IconButton";
 import { TextInput } from "../ui/TextInput";
 import { SnapshotCompare } from "./SnapshotCompare";
 import { SnapshotPreview } from "./SnapshotPreview";
-import type { DiffEntry } from "../../lib/diff";
 
 interface Props {
   onStageSnapshot: (snap: EnvSnapshot) => void;
@@ -169,13 +170,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
           {comparingFrom && (
             <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-accent/30 bg-accent/10 text-accent text-xs">
               <span>Select a snapshot to compare with <strong>{comparingFrom.label}</strong></span>
-              <button
-                type="button"
-                onClick={handleCancelCompare}
-                className="font-medium hover:underline focus:outline-none focus-visible:underline"
-              >
-                Cancel
-              </button>
+              <Button variant="link" size="xs" onClick={handleCancelCompare}>Cancel</Button>
             </div>
           )}
           {snapshots.length === 0 && (
@@ -232,14 +227,13 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                         <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
                       </>
                     ) : (
-                      <button
-                        type="button"
+                      <IconButton
+                        aria-label="Delete snapshot"
+                        icon="×"
+                        variant="danger"
                         onClick={() => setConfirmDeleteId(s.id)}
-                        className="px-2 py-1 rounded text-dim text-sm hover:text-danger hover:bg-danger/10 transition-colors"
                         title="Delete snapshot"
-                      >
-                        ×
-                      </button>
+                      />
                     )
                   )}
                 </div>

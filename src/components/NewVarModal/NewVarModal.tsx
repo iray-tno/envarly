@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from "react";
-import { cn } from "../../lib/cn";
 import type { EnvVar, VarScope } from "../../types";
 import { Button } from "../ui/Button";
+import { SegmentedControl } from "../ui/SegmentedControl";
 
 interface NewVarModalProps {
   vars: EnvVar[];
@@ -54,25 +54,15 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
 
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-semibold text-muted uppercase tracking-wide">Scope</p>
-        <div className="flex gap-2">
-          {(["User", "System"] as VarScope[]).map((s) => (
-            <button
-              key={s}
-              type="button"
-              disabled={s === "System" && !elevated}
-              onClick={() => setScope(s)}
-              className={cn(
-                "px-3 py-1 rounded text-xs font-medium border transition-colors",
-                scope === s
-                  ? "bg-accent text-white border-accent"
-                  : "bg-surface text-muted border-rim hover:border-accent",
-                s === "System" && !elevated && "opacity-40 cursor-not-allowed",
-              )}
-            >
-              {s}{s === "System" && !elevated && " (admin)"}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          aria-label="Variable scope"
+          options={[
+            { value: "User" as VarScope, label: "User" },
+            { value: "System" as VarScope, label: elevated ? "System" : "System (admin)", disabled: !elevated },
+          ]}
+          value={scope}
+          onChange={setScope}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
