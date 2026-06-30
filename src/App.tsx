@@ -8,11 +8,12 @@ import { NewVarModal } from "./components/NewVarModal/NewVarModal";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
 import { StagedModal } from "./components/StagedModal/StagedModal";
+import { IconButton } from "./components/ui/IconButton";
 import { Modal } from "./components/ui/Modal";
 import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
 import { useEnvVars } from "./hooks/useEnvVars";
-import { useStaged } from "./hooks/useStaged";
+import { useStaged, type StagedChange } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
 import { applyAccepted, computeDiff, snapshotsEqual } from "./lib/diff";
@@ -22,7 +23,7 @@ import type { EnvSnapshot, EnvVar, VarScope } from "./types";
 
 type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | null;
 
-function stagedToDiff(staged: Map<string, import("./hooks/useStaged").StagedChange>): DiffEntry[] {
+function stagedToDiff(staged: Map<string, StagedChange>): DiffEntry[] {
   return Array.from(staged.values()).map((c): DiffEntry => {
     if (c.kind === "delete")
       return { kind: "removed", name: c.name, scope: c.scope, value: c.originalValue! };
@@ -212,14 +213,7 @@ export default function App() {
             <div className="w-[380px] shrink-0 flex flex-col border-l border-rim bg-panel overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-rim shrink-0">
                 <span className="text-sm font-semibold text-fg">Snapshots</span>
-                <button
-                  type="button"
-                  onClick={() => setSnapshotsOpen(false)}
-                  className="text-dim hover:text-fg transition-colors text-lg leading-none px-1"
-                  aria-label="Close snapshots"
-                >
-                  ×
-                </button>
+                <IconButton aria-label="Close snapshots" icon="×" onClick={() => setSnapshotsOpen(false)} />
               </div>
               <div className="flex-1 overflow-hidden">
                 <SnapshotPanel onStageSnapshot={handleStageSnapshot} />

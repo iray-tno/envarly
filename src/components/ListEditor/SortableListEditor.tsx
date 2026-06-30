@@ -16,9 +16,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
-import { cn } from "../../lib/cn";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
+import { cn } from "../../lib/cn";
 
 export interface ListEntry {
   id: string;
@@ -198,13 +198,7 @@ export function SortableListEditor({
       {!readOnly && dupCount > 0 && (
         <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs">
           <span>{dupCount} duplicate {dupCount === 1 ? "entry" : "entries"}</span>
-          <button
-            type="button"
-            onClick={handleDedup}
-            className="font-medium hover:underline focus:outline-none focus-visible:underline"
-          >
-            Remove
-          </button>
+          <Button variant="link" size="xs" onClick={handleDedup}>Remove</Button>
         </div>
       )}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

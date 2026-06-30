@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { DiffEntry } from "../../lib/diff";
+import { Button } from "../ui/Button";
+import { IconButton } from "../ui/IconButton";
 import { EntryRow } from "./EntryRow";
 
 interface Props {
@@ -45,12 +47,7 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
       <div className="px-5 py-4 border-b border-rim shrink-0">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-sm font-semibold text-fg">External changes detected</h2>
-          <button
-            onClick={onDismiss}
-            className="text-dim hover:text-fg text-lg leading-none transition-colors"
-          >
-            ×
-          </button>
+          <IconButton aria-label="Close" icon="×" onClick={onDismiss} />
         </div>
         <p className="text-xs text-muted mb-3">
           The registry was modified outside Envarly.{" "}
@@ -66,21 +63,13 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => toggleAll(true)}
-            disabled={allChecked}
-            className="text-xs text-muted hover:text-fg disabled:opacity-30 transition-colors"
-          >
+          <Button variant="link" size="xs" onClick={() => toggleAll(true)} disabled={allChecked}>
             Select all
-          </button>
+          </Button>
           <span className="text-dim">·</span>
-          <button
-            onClick={() => toggleAll(false)}
-            disabled={noneChecked}
-            className="text-xs text-muted hover:text-fg disabled:opacity-30 transition-colors"
-          >
+          <Button variant="link" size="xs" onClick={() => toggleAll(false)} disabled={noneChecked}>
             Deselect all
-          </button>
+          </Button>
           <span className="text-dim ml-auto text-xs">{acceptedCount}/{entries.length} selected</span>
         </div>
       </div>
@@ -97,19 +86,10 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
       </div>
 
       <div className="px-5 py-3 border-t border-rim shrink-0 flex gap-2 justify-end">
-        <button
-          onClick={onDismiss}
-          className="px-3 py-1.5 rounded text-muted text-xs hover:bg-hover hover:text-fg transition-colors"
-        >
-          Dismiss
-        </button>
-        <button
-          onClick={handleApply}
-          disabled={busy}
-          className="px-4 py-1.5 rounded bg-accent text-canvas text-xs font-medium hover:bg-accent-hi disabled:opacity-50 transition-colors"
-        >
+        <Button variant="ghost" size="sm" onClick={onDismiss}>Dismiss</Button>
+        <Button variant="primary" size="sm" onClick={handleApply} disabled={busy}>
           {busy ? "Applying…" : `Apply (${acceptedCount} accepted, ${entries.length - acceptedCount} reverted)`}
-        </button>
+        </Button>
       </div>
     </div>
   );

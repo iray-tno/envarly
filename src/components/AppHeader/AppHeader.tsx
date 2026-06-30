@@ -89,29 +89,15 @@ export function AppHeader({
         {elevated && (
           <span className="text-xs text-success opacity-60">🛡 Administrator</span>
         )}
-        <button
-          type="button"
-          onClick={() => openUrl("https://github.com/iray-tno/envarly")}
-          className="text-muted hover:text-fg transition-colors text-xs px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-panel"
-          title="View on GitHub"
-        >
+        <Button variant="ghost" size="xs" onClick={() => openUrl("https://github.com/iray-tno/envarly")} title="View on GitHub">
           ↗ GitHub
-        </button>
-        <button
-          type="button"
-          onClick={onToggleTheme}
-          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="px-2 py-1 rounded text-muted hover:bg-hover hover:text-fg transition-colors text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas"
-        >
+        </Button>
+        <Button variant="ghost" size="xs" onClick={onToggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
           {theme === "dark" ? "☀" : "🌙"}
-        </button>
-        <button
-          type="button"
-          onClick={onLicenses}
-          className="text-dim hover:text-muted transition-colors text-xs px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-panel"
-        >
+        </Button>
+        <Button variant="ghost" size="xs" onClick={onLicenses} className="text-dim">
           Licenses
-        </button>
+        </Button>
       </div>
     </header>
   );

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
 import type { EnvVar, VarScope } from "../../types";
@@ -21,55 +22,27 @@ interface Props {
 }
 
 export function DetailPanel({ variable, allVars, elevated, staged, onStage, onStageDelete, onUnstage, onRegisterLocalUndo }: Props) {
-  const [value, setValue] = useState("");
-  const [dirty, setDirty] = useState(false);
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
-  // Checkpoints pushed AFTER each structural op (drag/add/remove). Text edits don't push.
-  const localHistory = useRef<string[]>([]);
-  // Stale-closure-safe mirror of value state, read inside handleDiscard.
-  const valueRef = useRef("");
-  // Set by onBeforeReorder; consumed in handleValueChange to push checkpoints.
-  const structuralChangeRef = useRef(false);
-  // Value captured at onBeforeReorder time (pre-op snapshot including any text edits).
-  const preOpValueRef = useRef("");
 
+  const {
+    value,
+    dirty,
+    onChange: handleValueChange,
+    discard: handleDiscard,
+    onBeforeStructuralChange,
+    reset,
+  } = useLocalHistory(variable?.value ?? "");
+
+  // Reset overrideSeparator only when the variable identity changes (not on value-only updates).
   useEffect(() => {
     if (!variable) return;
     const isSameVar =
       prevVarRef.current?.name === variable.name &&
       prevVarRef.current?.scope === variable.scope;
-    setValue(variable.value);
-    valueRef.current = variable.value;
-    setDirty(false);
-    localHistory.current = [];
     if (!isSameVar) setOverrideSeparator(null);
     prevVarRef.current = { name: variable.name, scope: variable.scope };
-  }, [variable?.name, variable?.scope, variable?.value]);
-
-  // Must be before the early return to comply with Rules of Hooks.
-  const handleDiscard = useCallback(() => {
-    const original = variable?.value ?? "";
-    const current = valueRef.current;
-    if (localHistory.current.length === 0) {
-      setValue(original); valueRef.current = original; setDirty(false);
-      return;
-    }
-    const lastCheckpoint = localHistory.current[localHistory.current.length - 1];
-    if (current !== lastCheckpoint) {
-      // Text edits on top of checkpoint → revert to checkpoint only
-      setValue(lastCheckpoint); valueRef.current = lastCheckpoint;
-      setDirty(lastCheckpoint !== original);
-    } else {
-      // Already at checkpoint → undo the structural op itself
-      localHistory.current = localHistory.current.slice(0, -1);
-      const prev = localHistory.current.length > 0
-        ? localHistory.current[localHistory.current.length - 1]
-        : original;
-      setValue(prev); valueRef.current = prev;
-      setDirty(prev !== original);
-    }
-  }, [variable?.value]);
+  }, [variable?.name, variable?.scope]);
 
   useEffect(() => {
     if (!onRegisterLocalUndo) return;
@@ -100,26 +73,8 @@ export function DetailPanel({ variable, allVars, elevated, staged, onStage, onSt
   const isStagedDelete = stagedChange?.kind === "delete";
   const isStagedSet = stagedChange?.kind === "set";
 
-  const handleValueChange = (newVal: string) => {
-    if (structuralChangeRef.current) {
-      // Push pre-op value (with any text edits) then post-op value as checkpoints.
-      // Skip pre-op if it equals the original or is already the top (avoid redundant entries).
-      const preOp = preOpValueRef.current;
-      const top = localHistory.current[localHistory.current.length - 1];
-      const next = [...localHistory.current];
-      if (preOp !== variable.value && preOp !== top) next.push(preOp);
-      next.push(newVal);
-      localHistory.current = next;
-      structuralChangeRef.current = false;
-    }
-    setValue(newVal);
-    valueRef.current = newVal;
-    setDirty(newVal !== variable.value);
-  };
-
   const handleApply = () => {
     onStage(variable.name, variable.scope, value);
-    setDirty(false);
   };
 
   const handleDelete = () => {
@@ -129,9 +84,7 @@ export function DetailPanel({ variable, allVars, elevated, staged, onStage, onSt
 
   const handleUnstage = () => {
     onUnstage(variable.name, variable.scope);
-    const original = stagedChange?.originalValue ?? variable.value;
-    setValue(original);
-    setDirty(false);
+    reset(stagedChange?.originalValue ?? variable.value);
   };
 
   /** Auto-detect list separator from pasted text. */
@@ -248,7 +201,7 @@ export function DetailPanel({ variable, allVars, elevated, staged, onStage, onSt
               readOnly={readOnly}
               allVars={allVars}
               skipPathValidation={variable.name.toUpperCase() === "PATHEXT"}
-              onBeforeReorder={() => { structuralChangeRef.current = true; preOpValueRef.current = valueRef.current; }}
+              onBeforeReorder={onBeforeStructuralChange}
             />
           ) : effectiveSeparator === "," ? (
             <ListEditor separator="," rawValue={value} onChange={handleValueChange} readOnly={readOnly} />

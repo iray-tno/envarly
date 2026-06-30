@@ -4,6 +4,7 @@ interface Option<T extends string> {
   value: T;
   label: string;
   count?: number;
+  disabled?: boolean;
 }
 
 interface Props<T extends string> {
@@ -29,10 +30,12 @@ export function SegmentedControl<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === opt.value}
+          disabled={opt.disabled}
           onClick={() => onChange(opt.value)}
           className={cn(
             "flex items-center gap-1.5 px-4 py-2 rounded text-sm transition-colors",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
+            "disabled:opacity-40 disabled:cursor-not-allowed",
             value === opt.value
               ? "bg-surface text-fg"
               : "text-muted hover:bg-hover hover:text-fg",
