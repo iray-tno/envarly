@@ -5,7 +5,45 @@ import type { EnvVar } from "../../types";
 import { Button } from "../ui/Button";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { SecretBanner, VarTable } from "./VarTable";
-import { type ExportFormat, type ExportScope, type FlatVar, formatOptions, scopeOptions, varKey } from "./types";
+import { type ExportFormat, type ExportScope, type FlatVar, type IacFormat, formatOptions, scopeOptions, varKey } from "./types";
+
+const IAC_FORMATS: { id: IacFormat; label: string; ext: string }[] = [
+  { id: "ps1",     label: "PowerShell",  ext: ".ps1" },
+  { id: "dsc_v2",  label: "DSC v2",      ext: ".ps1" },
+  { id: "dsc_v3",  label: "DSC v3",      ext: ".dsc.yaml" },
+  { id: "ansible", label: "Ansible",     ext: ".yml" },
+];
+
+function IacSection({ disabled, onExport }: { disabled: boolean; onExport: (fmt: IacFormat) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-t border-rim-subtle pt-4 flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-fg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded self-start"
+      >
+        <span>{open ? "▾" : "▸"}</span>
+        <span>Script / IaC formats</span>
+      </button>
+      {open && (
+        <div className="flex flex-wrap gap-2 pl-3">
+          {IAC_FORMATS.map(({ id, label, ext }) => (
+            <Button
+              key={id}
+              variant="secondary"
+              size="sm"
+              disabled={disabled}
+              onClick={() => onExport(id)}
+            >
+              {label} <span className="text-dim font-normal">{ext}</span>
+            </Button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface ExportConfirmProps {
   secretServices: string[];
@@ -74,16 +112,16 @@ export function ExportTab({ onStatus }: ExportTabProps) {
       ? selectedCustomVars.filter((v) => resolveSecret(v.name, v.value) !== null).length
       : 0;
 
-  const doExport = async () => {
+  const doExport = async (fmt: string) => {
     setPendingExport(false);
     setBusy(true);
     onStatus(null);
     try {
       let savedPath: string | null;
       if (scope === "Custom") {
-        savedPath = await api.exportCustomVars(selectedCustomVars, format);
+        savedPath = await api.exportCustomVars(selectedCustomVars, fmt);
       } else {
-        savedPath = await api.exportVars(scope, format);
+        savedPath = await api.exportVars(scope, fmt);
       }
       onStatus(savedPath ? `Saved to ${savedPath}` : null);
     } catch (e) {
@@ -93,7 +131,10 @@ export function ExportTab({ onStatus }: ExportTabProps) {
     }
   };
 
-  const handleExport = async () => {
+  const [pendingFormat, setPendingFormat] = useState<string>(format);
+
+  const handleExport = async (fmt: string) => {
+    setPendingFormat(fmt);
     if (scope === "Custom") {
       if (secretCount > 0) {
         const services = [
@@ -107,7 +148,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
         setPendingSecretServices(services);
         setPendingExport(true);
       } else {
-        void doExport();
+        void doExport(fmt);
       }
       return;
     }
@@ -128,10 +169,10 @@ export function ExportTab({ onStatus }: ExportTabProps) {
         setPendingSecretServices(services);
         setPendingExport(true);
       } else {
-        void doExport();
+        void doExport(fmt);
       }
     } catch {
-      void doExport();
+      void doExport(fmt);
     } finally {
       setCheckingSecrets(false);
     }
@@ -176,20 +217,25 @@ export function ExportTab({ onStatus }: ExportTabProps) {
       {pendingExport ? (
         <ExportConfirm
           secretServices={pendingSecretServices}
-          onConfirm={() => void doExport()}
+          onConfirm={() => void doExport(pendingFormat)}
           onCancel={() => { setPendingExport(false); setPendingSecretServices([]); }}
         />
       ) : (
         <Button
           variant="primary"
           size="md"
-          onClick={() => void handleExport()}
+          onClick={() => void handleExport(format)}
           disabled={busy || !canExport || checkingSecrets}
           className="self-start"
         >
           {checkingSecrets ? "Checking…" : busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → .${format}` : `Export ${scope} → .${format}`}
         </Button>
       )}
+
+      <IacSection
+        disabled={busy || !canExport || checkingSecrets}
+        onExport={(fmt) => void handleExport(fmt)}
+      />
     </div>
   );
 }

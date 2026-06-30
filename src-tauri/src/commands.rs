@@ -106,21 +106,18 @@ pub async fn export_vars(
     use tauri_plugin_dialog::{DialogExt, FilePath};
 
     let snapshot = env_store::read_snapshot()?;
-    let (content, ext, filter_name) = match format.as_str() {
-        "reg" => (
-            crate::export::to_reg(&snapshot, &scope),
-            "reg",
-            "Registry files",
-        ),
-        _ => (
-            crate::export::to_json(&snapshot, &scope),
-            "json",
-            "JSON files",
-        ),
+    let (content, ext, default_stem, filter_name) = match format.as_str() {
+        "reg"     => (crate::export::to_reg(&snapshot, &scope),     "reg",      "envarly",         "Registry files"),
+        "ps1"     => (crate::export::to_ps1(&snapshot, &scope),     "ps1",      "envarly",         "PowerShell Script"),
+        "dsc_v2"  => (crate::export::to_dsc_v2(&snapshot, &scope),  "ps1",      "envarly-dsc",     "PowerShell DSC Configuration"),
+        "dsc_v3"  => (crate::export::to_dsc_v3(&snapshot, &scope),  "dsc.yaml", "envarly-dsc3",    "DSC v3 Configuration"),
+        "ansible" => (crate::export::to_ansible(&snapshot, &scope), "yml",      "envarly-ansible", "Ansible Playbook"),
+        _         => (crate::export::to_json(&snapshot, &scope),    "json",     "envarly",         "JSON files"),
     };
 
     let default_name = format!(
-        "envarly-{}.{}",
+        "{}-{}.{}",
+        default_stem,
         chrono::Local::now().format("%Y%m%d"),
         ext
     );
@@ -173,13 +170,18 @@ pub async fn export_custom(
         }
     }
 
-    let (content, ext, filter_name) = match format.as_str() {
-        "reg" => (crate::export::to_reg(&snapshot, "All"), "reg", "Registry files"),
-        _     => (crate::export::to_json(&snapshot, "All"), "json", "JSON files"),
+    let (content, ext, default_stem, filter_name) = match format.as_str() {
+        "reg"     => (crate::export::to_reg(&snapshot, "All"),     "reg",      "envarly-custom",         "Registry files"),
+        "ps1"     => (crate::export::to_ps1(&snapshot, "All"),     "ps1",      "envarly-custom",         "PowerShell Script"),
+        "dsc_v2"  => (crate::export::to_dsc_v2(&snapshot, "All"),  "ps1",      "envarly-custom-dsc",     "PowerShell DSC Configuration"),
+        "dsc_v3"  => (crate::export::to_dsc_v3(&snapshot, "All"),  "dsc.yaml", "envarly-custom-dsc3",    "DSC v3 Configuration"),
+        "ansible" => (crate::export::to_ansible(&snapshot, "All"), "yml",      "envarly-custom-ansible", "Ansible Playbook"),
+        _         => (crate::export::to_json(&snapshot, "All"),    "json",     "envarly-custom",         "JSON files"),
     };
 
     let default_name = format!(
-        "envarly-custom-{}.{}",
+        "{}-{}.{}",
+        default_stem,
         chrono::Local::now().format("%Y%m%d"),
         ext
     );

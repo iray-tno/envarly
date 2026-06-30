@@ -3,6 +3,7 @@ import type { EnvSnapshot, VarScope } from "../../types";
 export type Mode = "export" | "import";
 export type ExportScope = "All" | "User" | "System" | "Custom";
 export type ExportFormat = "json" | "reg";
+export type IacFormat = "ps1" | "dsc_v2" | "dsc_v3" | "ansible";
 export type MergeStrategy = "merge" | "replace";
 
 export interface FlatVar {
