@@ -56,6 +56,10 @@ enum ExportFormat {
     #[default]
     Json,
     Reg,
+    Ps1,
+    DscV2,
+    DscV3,
+    Ansible,
 }
 
 /// Parse CLI args and execute the subcommand. Never returns — exits the process.
@@ -133,8 +137,12 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
                 ScopeArg::All => "All",
             };
             let content = match format {
-                ExportFormat::Json => export::to_json(&snapshot, scope_str),
-                ExportFormat::Reg => export::to_reg(&snapshot, scope_str),
+                ExportFormat::Json    => export::to_json(&snapshot, scope_str),
+                ExportFormat::Reg     => export::to_reg(&snapshot, scope_str),
+                ExportFormat::Ps1     => export::to_ps1(&snapshot, scope_str),
+                ExportFormat::DscV2   => export::to_dsc_v2(&snapshot, scope_str),
+                ExportFormat::DscV3   => export::to_dsc_v3(&snapshot, scope_str),
+                ExportFormat::Ansible => export::to_ansible(&snapshot, scope_str),
             };
             match output {
                 Some(path) => std::fs::write(&path, content.as_bytes())
