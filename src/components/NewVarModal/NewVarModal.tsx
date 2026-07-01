@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { cn } from "../../lib/cn";
 import type { EnvVar, VarScope } from "../../types";
 import { Button } from "../ui/Button";
 import { SegmentedControl } from "../ui/SegmentedControl";
