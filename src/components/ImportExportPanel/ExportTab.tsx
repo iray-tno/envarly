@@ -5,7 +5,25 @@ import type { EnvVar } from "../../types";
 import { Button } from "../ui/Button";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { SecretBanner, VarTable } from "./VarTable";
-import { type ExportFormat, type ExportScope, type FlatVar, formatOptions, scopeOptions, varKey } from "./types";
+import { type AnyFormat, type ExportScope, type FlatVar, formatOptions, scopeOptions, varKey } from "./types";
+
+const FORMAT_EXT: Record<AnyFormat, string> = {
+  json:    ".json",
+  reg:     ".reg",
+  ps1:     ".ps1",
+  dsc_v2:  ".ps1",
+  dsc_v3:  ".dsc.yaml",
+  ansible: ".yml",
+};
+
+const FORMAT_DESC: Record<AnyFormat, string> = {
+  json:    "Envarly JSON — can be re-imported into Envarly.",
+  reg:     "Windows Registry Editor format — double-click to merge into the registry directly.",
+  ps1:     "PowerShell script — SetEnvironmentVariable calls.",
+  dsc_v2:  "PowerShell DSC v2 — Configuration block using PSDscResources.",
+  dsc_v3:  "DSC v3 YAML — Microsoft's cross-platform DSC format.",
+  ansible: "Ansible playbook — win_environment tasks.",
+};
 
 interface ExportConfirmProps {
   secretServices: string[];
@@ -37,7 +55,7 @@ interface ExportTabProps {
 
 export function ExportTab({ onStatus }: ExportTabProps) {
   const [scope, setScope] = useState<ExportScope>("All");
-  const [format, setFormat] = useState<ExportFormat>("json");
+  const [format, setFormat] = useState<AnyFormat>("json");
   const [busy, setBusy] = useState(false);
   const [allVars, setAllVars] = useState<FlatVar[] | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -138,6 +156,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
   };
 
   const canExport = scope !== "Custom" || selectedCustomVars.length > 0;
+  const ext = FORMAT_EXT[format];
 
   return (
     <div className="flex flex-col gap-5">
@@ -148,12 +167,8 @@ export function ExportTab({ onStatus }: ExportTabProps) {
 
       <div className="flex flex-col gap-2">
         <span className="text-xs font-medium text-muted uppercase tracking-wide">Format</span>
-        <SegmentedControl aria-label="Export format" options={formatOptions} value={format} onChange={setFormat} />
-        <p className="text-xs text-dim">
-          {format === "json"
-            ? "Envarly JSON — can be re-imported into Envarly."
-            : "Windows Registry Editor format — double-click to merge into the registry directly."}
-        </p>
+        <SegmentedControl aria-label="Export format" options={formatOptions} value={format} onChange={setFormat} className="flex-wrap" />
+        <p className="text-xs text-dim">{FORMAT_DESC[format]}</p>
       </div>
 
       {scope === "Custom" && (
@@ -187,7 +202,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
           disabled={busy || !canExport || checkingSecrets}
           className="self-start"
         >
-          {checkingSecrets ? "Checking…" : busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → .${format}` : `Export ${scope} → .${format}`}
+          {checkingSecrets ? "Checking…" : busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → ${ext}` : `Export ${scope} → ${ext}`}
         </Button>
       )}
     </div>

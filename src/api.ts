@@ -36,11 +36,11 @@ export const api = {
   restartAsAdmin: () => invoke<void>('restart_as_admin'),
 
   /** Opens a native save dialog, writes the file, and returns the saved path (null = cancelled). */
-  exportVars: (scope: 'All' | 'User' | 'System', format: 'json' | 'reg') =>
+  exportVars: (scope: 'All' | 'User' | 'System', format: string) =>
     invoke<string | null>('export_vars', { scope, format }),
 
   /** Export a hand-picked list of variables. Values come from the frontend. */
-  exportCustomVars: (vars: { name: string; value: string; scope: string }[], format: 'json' | 'reg') =>
+  exportCustomVars: (vars: { name: string; value: string; scope: string }[], format: string) =>
     invoke<string | null>('export_custom', { vars, format }),
 
   /** Parses file content and returns a snapshot. Does NOT write to the registry. */
