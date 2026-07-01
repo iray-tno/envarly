@@ -6,7 +6,7 @@ import { Button } from "../ui/Button";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { Textarea } from "../ui/Textarea";
 import { SecretBanner, VarTable } from "./VarTable";
-import { type ExportFormat, type FlatVar, type MergeStrategy, flattenSnapshot, formatOptions, strategyOptions, varKey } from "./types";
+import { type ExportFormat, type FlatVar, type MergeStrategy, flattenSnapshot, importFormatOptions, strategyOptions, varKey } from "./types";
 
 interface ImportTabProps {
   onStage: (
@@ -109,7 +109,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <Button variant="secondary" onClick={() => fileRef.current?.click()}>Choose file…</Button>
-        <SegmentedControl aria-label="Import format" options={formatOptions} value={format} onChange={setFormat} />
+        <SegmentedControl aria-label="Import format" options={importFormatOptions} value={format} onChange={setFormat} />
         <input ref={fileRef} type="file" accept=".json,.reg" className="hidden" onChange={handleFileChange} aria-label="Import file" />
       </div>
 

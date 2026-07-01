@@ -5,45 +5,25 @@ import type { EnvVar } from "../../types";
 import { Button } from "../ui/Button";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { SecretBanner, VarTable } from "./VarTable";
-import { type ExportFormat, type ExportScope, type FlatVar, type IacFormat, formatOptions, scopeOptions, varKey } from "./types";
+import { type AnyFormat, type ExportScope, type FlatVar, formatOptions, scopeOptions, varKey } from "./types";
 
-const IAC_FORMATS: { id: IacFormat; label: string; ext: string }[] = [
-  { id: "ps1",     label: "PowerShell",  ext: ".ps1" },
-  { id: "dsc_v2",  label: "DSC v2",      ext: ".ps1" },
-  { id: "dsc_v3",  label: "DSC v3",      ext: ".dsc.yaml" },
-  { id: "ansible", label: "Ansible",     ext: ".yml" },
-];
+const FORMAT_EXT: Record<AnyFormat, string> = {
+  json:    ".json",
+  reg:     ".reg",
+  ps1:     ".ps1",
+  dsc_v2:  ".ps1",
+  dsc_v3:  ".dsc.yaml",
+  ansible: ".yml",
+};
 
-function IacSection({ disabled, onExport }: { disabled: boolean; onExport: (fmt: IacFormat) => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-t border-rim-subtle pt-4 flex flex-col gap-2">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-fg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded self-start"
-      >
-        <span>{open ? "▾" : "▸"}</span>
-        <span>Script / IaC formats</span>
-      </button>
-      {open && (
-        <div className="flex flex-wrap gap-2 pl-3">
-          {IAC_FORMATS.map(({ id, label, ext }) => (
-            <Button
-              key={id}
-              variant="secondary"
-              size="sm"
-              disabled={disabled}
-              onClick={() => onExport(id)}
-            >
-              {label} <span className="text-dim font-normal">{ext}</span>
-            </Button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+const FORMAT_DESC: Record<AnyFormat, string> = {
+  json:    "Envarly JSON — can be re-imported into Envarly.",
+  reg:     "Windows Registry Editor format — double-click to merge into the registry directly.",
+  ps1:     "PowerShell script — SetEnvironmentVariable calls.",
+  dsc_v2:  "PowerShell DSC v2 — Configuration block using PSDscResources.",
+  dsc_v3:  "DSC v3 YAML — Microsoft's cross-platform DSC format.",
+  ansible: "Ansible playbook — win_environment tasks.",
+};
 
 interface ExportConfirmProps {
   secretServices: string[];
@@ -75,7 +55,7 @@ interface ExportTabProps {
 
 export function ExportTab({ onStatus }: ExportTabProps) {
   const [scope, setScope] = useState<ExportScope>("All");
-  const [format, setFormat] = useState<ExportFormat>("json");
+  const [format, setFormat] = useState<AnyFormat>("json");
   const [busy, setBusy] = useState(false);
   const [allVars, setAllVars] = useState<FlatVar[] | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -112,16 +92,16 @@ export function ExportTab({ onStatus }: ExportTabProps) {
       ? selectedCustomVars.filter((v) => resolveSecret(v.name, v.value) !== null).length
       : 0;
 
-  const doExport = async (fmt: string) => {
+  const doExport = async () => {
     setPendingExport(false);
     setBusy(true);
     onStatus(null);
     try {
       let savedPath: string | null;
       if (scope === "Custom") {
-        savedPath = await api.exportCustomVars(selectedCustomVars, fmt);
+        savedPath = await api.exportCustomVars(selectedCustomVars, format);
       } else {
-        savedPath = await api.exportVars(scope, fmt);
+        savedPath = await api.exportVars(scope, format);
       }
       onStatus(savedPath ? `Saved to ${savedPath}` : null);
     } catch (e) {
@@ -131,10 +111,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
     }
   };
 
-  const [pendingFormat, setPendingFormat] = useState<string>(format);
-
-  const handleExport = async (fmt: string) => {
-    setPendingFormat(fmt);
+  const handleExport = async () => {
     if (scope === "Custom") {
       if (secretCount > 0) {
         const services = [
@@ -148,7 +125,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
         setPendingSecretServices(services);
         setPendingExport(true);
       } else {
-        void doExport(fmt);
+        void doExport();
       }
       return;
     }
@@ -169,16 +146,17 @@ export function ExportTab({ onStatus }: ExportTabProps) {
         setPendingSecretServices(services);
         setPendingExport(true);
       } else {
-        void doExport(fmt);
+        void doExport();
       }
     } catch {
-      void doExport(fmt);
+      void doExport();
     } finally {
       setCheckingSecrets(false);
     }
   };
 
   const canExport = scope !== "Custom" || selectedCustomVars.length > 0;
+  const ext = FORMAT_EXT[format];
 
   return (
     <div className="flex flex-col gap-5">
@@ -189,12 +167,8 @@ export function ExportTab({ onStatus }: ExportTabProps) {
 
       <div className="flex flex-col gap-2">
         <span className="text-xs font-medium text-muted uppercase tracking-wide">Format</span>
-        <SegmentedControl aria-label="Export format" options={formatOptions} value={format} onChange={setFormat} />
-        <p className="text-xs text-dim">
-          {format === "json"
-            ? "Envarly JSON — can be re-imported into Envarly."
-            : "Windows Registry Editor format — double-click to merge into the registry directly."}
-        </p>
+        <SegmentedControl aria-label="Export format" options={formatOptions} value={format} onChange={setFormat} className="flex-wrap" />
+        <p className="text-xs text-dim">{FORMAT_DESC[format]}</p>
       </div>
 
       {scope === "Custom" && (
@@ -217,25 +191,20 @@ export function ExportTab({ onStatus }: ExportTabProps) {
       {pendingExport ? (
         <ExportConfirm
           secretServices={pendingSecretServices}
-          onConfirm={() => void doExport(pendingFormat)}
+          onConfirm={() => void doExport()}
           onCancel={() => { setPendingExport(false); setPendingSecretServices([]); }}
         />
       ) : (
         <Button
           variant="primary"
           size="md"
-          onClick={() => void handleExport(format)}
+          onClick={() => void handleExport()}
           disabled={busy || !canExport || checkingSecrets}
           className="self-start"
         >
-          {checkingSecrets ? "Checking…" : busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → .${format}` : `Export ${scope} → .${format}`}
+          {checkingSecrets ? "Checking…" : busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → ${ext}` : `Export ${scope} → ${ext}`}
         </Button>
       )}
-
-      <IacSection
-        disabled={busy || !canExport || checkingSecrets}
-        onExport={(fmt) => void handleExport(fmt)}
-      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ export type Mode = "export" | "import";
 export type ExportScope = "All" | "User" | "System" | "Custom";
 export type ExportFormat = "json" | "reg";
 export type IacFormat = "ps1" | "dsc_v2" | "dsc_v3" | "ansible";
+export type AnyFormat = ExportFormat | IacFormat;
 export type MergeStrategy = "merge" | "replace";
 
 export interface FlatVar {
@@ -30,9 +31,18 @@ export const scopeOptions: { value: ExportScope; label: string }[] = [
   { value: "Custom", label: "Custom…" },
 ];
 
-export const formatOptions: { value: ExportFormat; label: string }[] = [
+export const formatOptions: { value: AnyFormat; label: string }[] = [
+  { value: "json",    label: ".json" },
+  { value: "reg",     label: ".reg" },
+  { value: "ps1",     label: ".ps1" },
+  { value: "dsc_v2",  label: "DSC v2" },
+  { value: "dsc_v3",  label: "DSC v3" },
+  { value: "ansible", label: "Ansible" },
+];
+
+export const importFormatOptions: { value: ExportFormat; label: string }[] = [
   { value: "json", label: ".json" },
-  { value: "reg", label: ".reg" },
+  { value: "reg",  label: ".reg" },
 ];
 
 export const strategyOptions: { value: MergeStrategy; label: string }[] = [
