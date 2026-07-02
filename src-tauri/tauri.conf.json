@@ -38,7 +38,7 @@
       "wix": {
         "bannerPath": "wix/banner.bmp",
         "dialogImagePath": "wix/dialog.bmp",
-        "fragmentPaths": ["wix/path_cleanup.wxs", "wix/ui_text_white.wxs"]
+        "fragmentPaths": ["wix/path_cleanup.wxs"]
       },
       "nsis": {
         "headerImage": "nsis/header.bmp",
