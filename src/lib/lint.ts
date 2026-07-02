@@ -1,8 +1,8 @@
 import type { EnvVar } from "../types";
 
 export interface LintDiagnostic {
-  kind: "unresolved-ref";
-  /** The %VAR% name that could not be resolved. */
+  kind: "unresolved-ref" | "whitespace";
+  /** The %VAR% name that could not be resolved. Only set for "unresolved-ref". */
   varName: string;
   /** Index into the non-empty entries of the split value. */
   entryIndex: number;
@@ -32,6 +32,9 @@ export function lintPathValue(rawValue: string, allVars: EnvVar[]): LintDiagnost
     .split(";")
     .filter((entry) => entry.trim().length > 0)
     .forEach((entry, entryIndex) => {
+      if (entry !== entry.trim()) {
+        diagnostics.push({ kind: "whitespace", varName: "", entryIndex });
+      }
       for (const match of entry.matchAll(/%([^%]+)%/g)) {
         const varName = match[1];
         if (!known.has(varName.toUpperCase()) && !WINDOWS_BUILTIN.has(varName.toUpperCase())) {
