@@ -207,7 +207,10 @@ pub async fn export_custom(
 pub fn validate_paths(paths: Vec<String>) -> Vec<bool> {
     paths
         .iter()
-        .map(|p| std::path::Path::new(&expand_env_vars(p.trim())).exists())
+        .map(|p| {
+            let cleaned = p.trim_matches(|c: char| c.is_whitespace() || c == '\0');
+            std::path::Path::new(&expand_env_vars(cleaned)).exists()
+        })
         .collect()
 }
 

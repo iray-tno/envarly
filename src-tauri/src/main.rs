@@ -1,21 +1,23 @@
-// Prevents an extra console window in release GUI builds.
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// Build as a console subsystem app so the shell waits for the process when CLI
+// args are present. For GUI-only launches (no args), we hide the console window
+// immediately so users never see a flash.
 
 fn main() {
-    // Release builds use the "windows" subsystem and have no console by default.
-    // When CLI args are present, attach to the parent terminal so stdout/stderr
-    // are visible (e.g. `envarly --help`, `envarly list`).
-    #[cfg(all(windows, not(debug_assertions)))]
-    if std::env::args().len() > 1 {
+    #[cfg(windows)]
+    if std::env::args().len() <= 1 {
+        // GUI mode: hide the console window that Windows allocated for us, then
+        // detach from it so it doesn't linger.
         unsafe {
-            windows_sys::Win32::System::Console::AttachConsole(
-                windows_sys::Win32::System::Console::ATTACH_PARENT_PROCESS,
-            );
+            let hwnd = windows_sys::Win32::System::Console::GetConsoleWindow();
+            if !hwnd.is_null() {
+                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(hwnd, 0); // SW_HIDE
+                windows_sys::Win32::System::Console::FreeConsole();
+            }
         }
     }
 
-    // If a CLI subcommand is present (e.g. `envarly get PATH`), handle it and exit.
-    // With no args, this returns and the GUI launches below.
+    // If a CLI subcommand is present (e.g. `envarly --help`, `envarly list`),
+    // handle it and exit. The console subsystem ensures the shell waits for us.
     #[cfg(windows)]
     envarly_lib::try_run_cli();
     #[cfg(windows)]
