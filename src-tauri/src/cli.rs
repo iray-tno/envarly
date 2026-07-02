@@ -34,6 +34,9 @@ enum Command {
         #[arg(short, long)]
         output: Option<std::path::PathBuf>,
     },
+    /// Internal: remove Envarly install directory from PATH. Called by the uninstaller.
+    #[command(name = "path-cleanup", hide = true)]
+    PathCleanup,
 }
 
 #[derive(Clone, ValueEnum, Default)]
@@ -127,6 +130,10 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
                     }
                 }
             }
+        }
+
+        Command::PathCleanup => {
+            crate::path_manage::cleanup_path();
         }
 
         Command::Export { scope, format, output } => {

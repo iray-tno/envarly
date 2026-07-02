@@ -1,5 +1,6 @@
 use crate::env_store::{self, EnvSnapshot, EnvVar, VarScope};
 use crate::error::EnvarlyError;
+use crate::path_manage;
 use crate::snapshot::{self, SnapshotMeta};
 use serde::Deserialize;
 
@@ -249,6 +250,21 @@ pub(crate) fn expand_env_vars(s: &str) -> String {
         }
     }
     result
+}
+
+/// Returns whether the install directory is currently in User / System PATH.
+#[tauri::command]
+pub fn get_path_status() -> path_manage::PathStatus {
+    path_manage::path_status()
+}
+
+/// Returns the proposed new PATH value (with envarly added) for the given scope,
+/// or None if the install directory is already present.
+/// scope: "User" | "System"
+#[tauri::command]
+pub fn get_path_proposal(scope: String) -> Result<Option<String>, EnvarlyError> {
+    let user = scope != "System";
+    path_manage::propose_add(user)
 }
 
 #[cfg(test)]

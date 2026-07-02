@@ -6,6 +6,7 @@ mod crypto;
 mod env_store;
 mod error;
 pub mod export;
+mod path_manage;
 #[cfg(windows)]
 mod snapshot;
 
@@ -40,6 +41,8 @@ pub fn run() {
             commands::parse_import,
             commands::is_elevated,
             commands::restart_as_admin,
+            commands::get_path_status,
+            commands::get_path_proposal,
         ])
         .run(tauri::generate_context!())
         .expect("error while running envarly");

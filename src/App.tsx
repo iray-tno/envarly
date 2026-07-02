@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "./components/AppHeader/AppHeader";
+import { PathBanner } from "./components/PathBanner/PathBanner";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
 import { DiffPanel } from "./components/DiffPanel/DiffPanel";
 import { ImportExportPanel } from "./components/ImportExportPanel/ImportExportPanel";
@@ -40,6 +41,10 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+  const [pathInEnv, setPathInEnv] = useState(true);
+  const [pathBannerDismissed, setPathBannerDismissed] = useState(
+    () => localStorage.getItem("envarly.pathBannerDismissed") === "1",
+  );
 
   const { staged, effectiveVars, stageSet, stageDelete, stageImport, stageSnapshot, unstage, clearStaged, restoreStaged } =
     useStaged(vars);
@@ -67,7 +72,12 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
-      try { setElevated(await api.isElevated()); } catch { }
+      let isAdmin = false;
+      try { isAdmin = await api.isElevated(); setElevated(isAdmin); } catch { }
+      try {
+        const ps = await api.getPathStatus();
+        setPathInEnv(isAdmin ? ps.systemHasEntry : ps.userHasEntry);
+      } catch { }
       refresh();
     })();
   }, []);
@@ -160,6 +170,22 @@ export default function App() {
 
   const stagedDiff = useMemo(() => stagedToDiff(staged), [staged]);
 
+  const handleStageAddToPath = useCallback(async (scope: "User" | "System") => {
+    try {
+      const proposed = await api.getPathProposal(scope);
+      if (proposed === null) return; // already in PATH
+      stageSet("Path", scope, proposed);
+      setPathInEnv(true); // optimistic: suppress banner after staging
+    } catch (err) {
+      console.error("Failed to get PATH proposal", err);
+    }
+  }, [stageSet]);
+
+  const handleDismissPathBanner = useCallback(() => {
+    localStorage.setItem("envarly.pathBannerDismissed", "1");
+    setPathBannerDismissed(true);
+  }, []);
+
   return (
     <ThemeContext.Provider value={theme}>
       <div className="flex flex-col h-screen overflow-hidden">
@@ -168,6 +194,7 @@ export default function App() {
           stagedCount={staged.size}
           diffCount={diffEntries.length}
           elevated={elevated}
+          pathInEnv={pathInEnv}
           snapshotsOpen={snapshotsOpen}
           theme={theme}
           onRefresh={handleRefresh}
@@ -178,7 +205,16 @@ export default function App() {
           onToggleSnapshots={() => setSnapshotsOpen((o) => !o)}
           onToggleTheme={toggleTheme}
           onLicenses={() => setDialog("licenses")}
+          onStageAddToPath={() => handleStageAddToPath(elevated ? "System" : "User")}
         />
+
+        {!pathInEnv && !pathBannerDismissed && (
+          <PathBanner
+            elevated={elevated}
+            onStageAddToPath={handleStageAddToPath}
+            onDismiss={handleDismissPathBanner}
+          />
+        )}
 
         {error && (
           <div className="px-4 py-2 bg-danger/15 border-b border-danger text-danger text-sm shrink-0">
