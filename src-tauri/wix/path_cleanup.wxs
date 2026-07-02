@@ -10,8 +10,7 @@
     <CustomAction Id="PathCleanup"
                   FileKey="Path"
                   ExeCommand="path-cleanup"
-                  Execute="deferred"
-                  Impersonate="yes"
+                  Execute="immediate"
                   Return="ignore" />
     <InstallExecuteSequence>
       <Custom Action="PathCleanup" Before="RemoveFiles">REMOVE~="ALL"</Custom>

@@ -36,7 +36,11 @@ enum Command {
     },
     /// Internal: remove Envarly install directory from PATH. Called by the uninstaller.
     #[command(name = "path-cleanup", hide = true)]
-    PathCleanup,
+    PathCleanup {
+        /// Print what would change without modifying the registry.
+        #[arg(long)]
+        dry_run: bool,
+    },
 }
 
 #[derive(Clone, ValueEnum, Default)]
@@ -132,8 +136,8 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
             }
         }
 
-        Command::PathCleanup => {
-            crate::path_manage::cleanup_path();
+        Command::PathCleanup { dry_run } => {
+            crate::path_manage::cleanup_path(dry_run);
         }
 
         Command::Export { scope, format, output } => {
