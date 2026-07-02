@@ -13,15 +13,17 @@ interface Props {
   variable: EnvVar | null;
   allVars: EnvVar[];
   elevated: boolean;
+  pathInEnv: boolean;
   staged: Map<string, StagedChange>;
   onStage: (name: string, scope: VarScope, value: string) => void;
   onStageDelete: (name: string, scope: VarScope) => void;
   onUnstage: (name: string, scope: VarScope) => void;
+  onStageAddToPath: () => void;
   /** Called with a discard fn when dirty, null when clean. Lets App wire Ctrl+Z. */
   onRegisterLocalUndo?: (fn: (() => void) | null) => void;
 }
 
-export function DetailPanel({ variable, allVars, elevated, staged, onStage, onStageDelete, onUnstage, onRegisterLocalUndo }: Props) {
+export function DetailPanel({ variable, allVars, elevated, pathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
 
@@ -99,6 +101,8 @@ export function DetailPanel({ variable, allVars, elevated, staged, onStage, onSt
 
   const effectiveSeparator = overrideSeparator ?? variable.listSeparator;
   const readOnly = variable.scope === "System" && !elevated;
+  const isPathVar = variable.name.toUpperCase() === "PATH";
+  const showAddToPathHint = isPathVar && !pathInEnv && !isStagedDelete;
 
   const editorLabel =
     effectiveSeparator === ";" ? "Path entries (drag to reorder)" :
@@ -163,7 +167,19 @@ export function DetailPanel({ variable, allVars, elevated, staged, onStage, onSt
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
           {/* Editor label + mode toggle */}
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-muted uppercase tracking-wide">{editorLabel}</p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-semibold text-muted uppercase tracking-wide">{editorLabel}</p>
+              {showAddToPathHint && (
+                <button
+                  type="button"
+                  onClick={onStageAddToPath}
+                  className="text-[10px] text-accent/70 hover:text-accent px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors"
+                  title="Stage adding Envarly install directory to this PATH variable"
+                >
+                  + Add Envarly to PATH
+                </button>
+              )}
+            </div>
             <div className="flex gap-1">
               {effectiveSeparator !== null ? (
                 <button
