@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <!--
+    Override WiX UI title TextStyles to white for the dark installer theme.
+    Product fragment definitions take precedence over wixui.wixlib symbols,
+    so these replace the library's black defaults.
+  -->
+  <Fragment>
+    <UI>
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" Bold="yes"
+                 Red="255" Green="255" Blue="255" />
+      <TextStyle Id="WixUI_Font_Big"    FaceName="Tahoma" Size="9"  Bold="yes"
+                 Red="255" Green="255" Blue="255" />
+    </UI>
+  </Fragment>
+</Wix>

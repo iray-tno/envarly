@@ -72,10 +72,13 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
 
   const invalidCount = entries.filter((e) => e.exists === false).length;
 
-  const unresolvedRefs = useMemo(() => {
-    if (!allVars) return [];
+  const { unresolvedRefs, hasWhitespace } = useMemo(() => {
+    if (!allVars) return { unresolvedRefs: [], hasWhitespace: false };
     const diags = lintPathValue(lintedValue, allVars);
-    return [...new Set(diags.map((d) => d.varName))];
+    return {
+      unresolvedRefs: [...new Set(diags.filter((d) => d.kind === "unresolved-ref").map((d) => d.varName))],
+      hasWhitespace: diags.some((d) => d.kind === "whitespace"),
+    };
   }, [lintedValue, allVars]);
 
   return (
@@ -89,6 +92,11 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
         }
       }}
     >
+      {hasWhitespace && (
+        <div className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs" role="alert">
+          Some entries have leading or trailing spaces — remove them to avoid lookup failures
+        </div>
+      )}
       {unresolvedRefs.length > 0 && (
         <div className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs" role="alert">
           {unresolvedRefs.length} unresolvable {unresolvedRefs.length === 1 ? "reference" : "references"}:{" "}

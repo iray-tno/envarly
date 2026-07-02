@@ -237,10 +237,12 @@ export default function App() {
               variable={effectiveSelected}
               allVars={effectiveVars}
               elevated={elevated}
+              pathInEnv={pathInEnv}
               staged={staged}
               onStage={handleStage}
               onStageDelete={handleStageDelete}
               onUnstage={handleUnstage}
+              onStageAddToPath={() => handleStageAddToPath(elevated ? "System" : "User")}
               onRegisterLocalUndo={handleRegisterLocalUndo}
             />
           </div>
