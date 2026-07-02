@@ -209,9 +209,27 @@ pub fn validate_paths(paths: Vec<String>) -> Vec<bool> {
         .iter()
         .map(|p| {
             let cleaned = p.trim_matches(|c: char| c.is_whitespace() || c == '\0');
-            std::path::Path::new(&expand_env_vars(cleaned)).exists()
+            let expanded = expand_env_vars(cleaned);
+            dir_exists(&expanded)
         })
         .collect()
+}
+
+/// Check whether a directory path exists using GetFileAttributesW directly.
+/// This matches PowerShell's Test-Path behavior and avoids false negatives
+/// that Rust's Path::exists() (which uses GetFileAttributesExW) can produce
+/// under certain Windows filesystem filter drivers or security software.
+#[cfg(windows)]
+fn dir_exists(path: &str) -> bool {
+    let wide: Vec<u16> = path.encode_utf16().chain(std::iter::once(0)).collect();
+    let attrs = unsafe { windows_sys::Win32::Storage::FileSystem::GetFileAttributesW(wide.as_ptr()) };
+    // INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF means the call failed (path not found etc.)
+    attrs != u32::MAX
+}
+
+#[cfg(not(windows))]
+fn dir_exists(path: &str) -> bool {
+    std::path::Path::new(path).exists()
 }
 
 pub(crate) fn expand_env_vars(s: &str) -> String {
