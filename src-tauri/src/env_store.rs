@@ -298,7 +298,7 @@ fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, String)> + 
 }
 
 #[cfg(windows)]
-fn broadcast_settings_change() {
+pub(crate) fn broadcast_settings_change() {
     #[cfg(target_os = "windows")]
     unsafe {
         use windows_sys::Win32::UI::WindowsAndMessaging::{

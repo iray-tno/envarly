@@ -37,11 +37,13 @@
     "windows": {
       "wix": {
         "bannerPath": "wix/banner.bmp",
-        "dialogImagePath": "wix/dialog.bmp"
+        "dialogImagePath": "wix/dialog.bmp",
+        "fragmentPaths": ["wix/path_cleanup.wxs"]
       },
       "nsis": {
         "headerImage": "nsis/header.bmp",
-        "sidebarImage": "nsis/sidebar.bmp"
+        "sidebarImage": "nsis/sidebar.bmp",
+        "installerHooks": "nsis/installer_hooks.nsh"
       }
     }
   }

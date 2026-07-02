@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <!--
+      Remove Envarly install dir from PATH before files are deleted.
+      Return="ignore" means the uninstaller proceeds even if cleanup fails
+      (worst case: a harmless dead PATH entry remains).
+      FileKey="Path" matches the Id of envarly.exe in the generated main.wxs.
+    -->
+    <CustomAction Id="PathCleanup"
+                  FileKey="Path"
+                  ExeCommand="path-cleanup"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="PathCleanup" Before="RemoveFiles">REMOVE~="ALL"</Custom>
+    </InstallExecuteSequence>
+  </Fragment>
+</Wix>

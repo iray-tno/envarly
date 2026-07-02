@@ -46,4 +46,12 @@ export const api = {
   /** Parses file content and returns a snapshot. Does NOT write to the registry. */
   parseImport: (content: string, format: 'json' | 'reg') =>
     invoke<import('./types').EnvSnapshot>('parse_import', { content, format }),
+
+  /** Returns whether the Envarly install directory is currently in User/System PATH. */
+  getPathStatus: () =>
+    invoke<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>('get_path_status'),
+
+  /** Returns proposed new PATH value with Envarly added, or null if already present. */
+  getPathProposal: (scope: 'User' | 'System') =>
+    invoke<string | null>('get_path_proposal', { scope }),
 };
