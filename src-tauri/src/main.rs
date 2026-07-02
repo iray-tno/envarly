@@ -5,13 +5,14 @@
 fn main() {
     #[cfg(windows)]
     if std::env::args().len() <= 1 {
-        // GUI mode: hide the console window that Windows allocated for us, then
-        // detach from it so it doesn't linger.
+        // GUI mode: detach from the console Windows allocated so its window
+        // closes without a minimize/hide animation, then restore focus to
+        // whatever was active before our console stole it.
         unsafe {
-            let hwnd = windows_sys::Win32::System::Console::GetConsoleWindow();
-            if !hwnd.is_null() {
-                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(hwnd, 0); // SW_HIDE
-                windows_sys::Win32::System::Console::FreeConsole();
+            let prev = windows_sys::Win32::UI::WindowsAndMessaging::GetForegroundWindow();
+            windows_sys::Win32::System::Console::FreeConsole();
+            if !prev.is_null() {
+                windows_sys::Win32::UI::WindowsAndMessaging::SetForegroundWindow(prev);
             }
         }
     }
