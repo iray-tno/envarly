@@ -75,21 +75,25 @@ pub fn is_elevated() -> bool {
 pub fn restart_as_admin(app: tauri::AppHandle) -> Result<(), EnvarlyError> {
     #[cfg(target_os = "windows")]
     {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
         let exe = std::env::current_exe().map_err(EnvarlyError::Registry)?;
-        std::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-WindowStyle",
-                "Hidden",
-                "-Command",
-                &format!("Start-Process '{}' -Verb RunAs", exe.display()),
-            ])
-            .creation_flags(CREATE_NO_WINDOW)
-            .spawn()
-            .map_err(EnvarlyError::Registry)?;
-        app.exit(0);
+        let exe_wide: Vec<u16> = exe.to_string_lossy().encode_utf16().chain(Some(0)).collect();
+        let verb: Vec<u16> = "runas\0".encode_utf16().collect();
+        // ShellExecuteW with "runas" verb triggers UAC elevation directly
+        // without needing an intermediate PowerShell process.
+        let result = unsafe {
+            windows_sys::Win32::UI::Shell::ShellExecuteW(
+                std::ptr::null_mut(),
+                verb.as_ptr(),
+                exe_wide.as_ptr(),
+                std::ptr::null(),
+                std::ptr::null(),
+                windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL,
+            )
+        };
+        // ShellExecuteW returns > 32 on success
+        if result as usize > 32 {
+            app.exit(0);
+        }
     }
     #[cfg(not(target_os = "windows"))]
     let _ = app;

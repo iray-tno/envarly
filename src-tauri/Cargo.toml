@@ -33,6 +33,7 @@ tauri-plugin-dialog = "2.7.1"
 winreg = "0.55"
 windows-sys = { version = "0.59", features = [
   "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Shell",
   "Win32_Foundation",
   "Win32_Security_Cryptography",
   "Win32_System_Console",
