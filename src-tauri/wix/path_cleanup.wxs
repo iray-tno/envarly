@@ -3,17 +3,31 @@
   <Fragment>
     <!--
       Remove Envarly install dir from PATH before files are deleted.
-      Return="ignore" means the uninstaller proceeds even if cleanup fails
+
+      Two-step pattern required for deferred CAs:
+        1. SetPathCleanupExe  (immediate) — captures [INSTALLDIR]envarly.exe into
+           a property while the file table is still resolvable.
+        2. PathCleanup        (deferred)  — runs the captured path with "path-cleanup"
+           before RemoveFiles deletes the exe.
+
+      Return="ignore" lets the uninstaller continue even if cleanup fails
       (worst case: a harmless dead PATH entry remains).
-      FileKey="Path" matches the Id of envarly.exe in the generated main.wxs.
     -->
+    <CustomAction Id="SetPathCleanupExe"
+                  Property="PathCleanup"
+                  Value="[INSTALLDIR]envarly.exe"
+                  Execute="immediate" />
+
     <CustomAction Id="PathCleanup"
-                  FileKey="Path"
+                  Property="PathCleanup"
                   ExeCommand="path-cleanup"
-                  Execute="immediate"
+                  Execute="deferred"
+                  Impersonate="yes"
                   Return="ignore" />
+
     <InstallExecuteSequence>
-      <Custom Action="PathCleanup" Before="RemoveFiles">REMOVE~="ALL"</Custom>
+      <Custom Action="SetPathCleanupExe" Before="PathCleanup">Installed AND REMOVE="ALL"</Custom>
+      <Custom Action="PathCleanup" Before="RemoveFiles">Installed AND REMOVE="ALL"</Custom>
     </InstallExecuteSequence>
   </Fragment>
 </Wix>
