@@ -107,17 +107,58 @@ const features = [
         </a>
       </div>
 
-      <!-- Screenshot -->
-      <div class="rounded-xl overflow-hidden border border-[var(--color-border)] shadow-2xl shadow-[var(--color-accent)]/5 mx-auto">
-        <img
-          src="/envarly/screenshot-dark.png"
-          alt="Envarly dark mode — sidebar variable list and detail editor"
-          width="1200"
-          height="760"
-          class="w-full"
-          loading="eager"
-        />
+      <!-- Screenshot carousel -->
+      <div class="mx-auto">
+        <div class="relative overflow-hidden rounded-xl shadow-2xl shadow-[var(--color-accent)]/5">
+          <div id="carousel-track" class="flex" style="transition: transform 0.45s cubic-bezier(.4,0,.2,1)">
+            <img
+              src="/envarly/screenshot-path-editor.png"
+              alt="Envarly — PATH editor with per-entry validation and staged change"
+              width="1196"
+              height="803"
+              class="w-full shrink-0"
+              loading="eager"
+            />
+            <img
+              src="/envarly/screenshot-apply-modal.png"
+              alt="Envarly — Apply confirmation modal with Full diff view for PATH entries"
+              width="1196"
+              height="803"
+              class="w-full shrink-0"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <!-- Dots -->
+        <div class="flex justify-center gap-2 mt-4">
+          <button id="dot-0" aria-label="Screenshot 1" class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-accent)"></button>
+          <button id="dot-1" aria-label="Screenshot 2" class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-muted);opacity:0.4"></button>
+        </div>
       </div>
+      <script>
+        {
+          const track = document.getElementById('carousel-track');
+          const dots  = [document.getElementById('dot-0'), document.getElementById('dot-1')];
+          let current = 0;
+          let timer: ReturnType<typeof setInterval>;
+
+          function goTo(i: number) {
+            current = i;
+            (track as HTMLElement).style.transform = `translateX(-${i * 100}%)`;
+            dots.forEach((d, j) => {
+              (d as HTMLElement).style.background = j === i ? 'var(--color-accent)' : 'var(--color-muted)';
+              (d as HTMLElement).style.opacity    = j === i ? '1' : '0.4';
+            });
+          }
+
+          function startAuto() {
+            timer = setInterval(() => goTo((current + 1) % dots.length), 5000);
+          }
+
+          dots.forEach((d, i) => d?.addEventListener('click', () => { clearInterval(timer); goTo(i); startAuto(); }));
+          startAuto();
+        }
+      </script>
     </section>
 
     <!-- Features -->
