@@ -1,6 +1,6 @@
 [package]
 name = "envarly"
-version = "1.0.0"
+version = "1.1.0"
 description = "Modern Windows environment variable manager"
 authors = ["zigza"]
 edition = "2021"
