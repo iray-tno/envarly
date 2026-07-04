@@ -5,6 +5,8 @@ import { Button } from "../ui/Button";
 
 const CRITICAL_VARS = new Set(["SYSTEMROOT", "WINDIR", "COMSPEC"]);
 
+type ViewMode = "delta" | "full";
+
 interface StagedModalProps {
   diff: DiffEntry[];
   busy: boolean;
@@ -12,10 +14,95 @@ interface StagedModalProps {
   onClose: () => void;
 }
 
+function splitList(value: string): string[] {
+  return value.split(";").map((e) => e.trim()).filter(Boolean);
+}
+
+function isList(value: string): boolean {
+  return value.includes(";") && splitList(value).length > 1;
+}
+
+function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: string }) {
+  const oldEntries = splitList(oldValue);
+  const newEntries = splitList(newValue);
+  const removed = oldEntries.filter((e) => !newEntries.includes(e));
+  const added   = newEntries.filter((e) => !oldEntries.includes(e));
+
+  if (removed.length === 0 && added.length === 0) {
+    return (
+      <p className="font-mono text-[11px] text-muted mt-1">
+        Order changed ({oldEntries.length} entries)
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
+      {removed.map((e, i) => (
+        <p key={`r${i}`} className="font-mono text-[11px] text-danger/80 break-all">
+          <span className="select-none mr-1 opacity-70">−</span>{e}
+        </p>
+      ))}
+      {added.map((e, i) => (
+        <p key={`a${i}`} className="font-mono text-[11px] text-success break-all">
+          <span className="select-none mr-1 opacity-70">+</span>{e}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: string }) {
+  const oldEntries = splitList(oldValue);
+  const newEntries = splitList(newValue);
+  const removedSet = new Set(oldEntries.filter((e) => !newEntries.includes(e)));
+  const addedSet   = new Set(newEntries.filter((e) => !oldEntries.includes(e)));
+
+  const rows: { entry: string; status: "added" | "removed" | "unchanged" }[] = [
+    ...Array.from(removedSet).map((e) => ({ entry: e, status: "removed" as const })),
+    ...newEntries.map((e) => ({ entry: e, status: addedSet.has(e) ? "added" as const : "unchanged" as const })),
+  ];
+
+  return (
+    <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
+      {rows.map((r, i) => (
+        <p
+          key={i}
+          className={cn(
+            "font-mono text-[11px] break-all",
+            r.status === "removed"   && "text-danger/80 line-through",
+            r.status === "added"     && "text-success",
+            r.status === "unchanged" && "text-muted",
+          )}
+        >
+          <span className="select-none mr-1 opacity-50">
+            {r.status === "added" ? "+" : r.status === "removed" ? "−" : " "}
+          </span>
+          {r.entry}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function ListEntries({ value, className }: { value: string; className?: string }) {
+  return (
+    <div className={cn("flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto", className)}>
+      {splitList(value).map((e, i) => (
+        <p key={i} className="font-mono text-[11px] break-all">{e}</p>
+      ))}
+    </div>
+  );
+}
+
 export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
   const [takeSnapshot, setTakeSnapshot] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>("delta");
 
   const criticalChanges = diff.filter((e) => CRITICAL_VARS.has(e.name.toUpperCase()));
+  const hasListValues = diff.some(
+    (e) => isList(e.value ?? "") || isList(e.oldValue ?? "") || isList(e.newValue ?? ""),
+  );
 
   const byKind = {
     added:   diff.filter((e) => e.kind === "added"),
@@ -41,10 +128,31 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
         <p className="text-xs text-muted mb-3">
           These changes will be written to the Windows registry and broadcast to running applications.
         </p>
-        <div className="flex gap-3 text-xs">
-          {byKind.added.length > 0   && <span className="text-success">+{byKind.added.length} added</span>}
-          {byKind.removed.length > 0 && <span className="text-danger">−{byKind.removed.length} removed</span>}
-          {byKind.changed.length > 0 && <span className="text-warn">~{byKind.changed.length} changed</span>}
+        <div className="flex items-center justify-between">
+          <div className="flex gap-3 text-xs">
+            {byKind.added.length > 0   && <span className="text-success">+{byKind.added.length} added</span>}
+            {byKind.removed.length > 0 && <span className="text-danger">−{byKind.removed.length} removed</span>}
+            {byKind.changed.length > 0 && <span className="text-warn">~{byKind.changed.length} changed</span>}
+          </div>
+          {hasListValues && (
+            <div className="flex rounded border border-rim overflow-hidden text-[10px]">
+              {(["delta", "full"] as ViewMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setViewMode(mode)}
+                  className={cn(
+                    "px-2.5 py-0.5 capitalize transition-colors",
+                    viewMode === mode
+                      ? "bg-accent text-bg font-semibold"
+                      : "text-muted hover:text-fg hover:bg-hover",
+                  )}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -66,17 +174,36 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
                 <span className="opacity-60 text-[10px]">{entry.scope}</span>
                 <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">{entry.kind}</span>
               </div>
+
               {entry.kind === "removed" && (
-                <p className="font-mono text-[11px] opacity-70 line-through truncate">{entry.value}</p>
+                isList(entry.value!) ? (
+                  <ListEntries value={entry.value!} className="opacity-70 line-through" />
+                ) : (
+                  <p className="font-mono text-[11px] opacity-70 line-through break-all">{entry.value}</p>
+                )
               )}
+
               {entry.kind === "added" && (
-                <p className="font-mono text-[11px] truncate">{entry.value}</p>
+                isList(entry.value!) ? (
+                  <ListEntries value={entry.value!} />
+                ) : (
+                  <p className="font-mono text-[11px] break-all">{entry.value}</p>
+                )
               )}
+
               {entry.kind === "changed" && (
-                <div className="flex flex-col gap-0.5">
-                  <p className="font-mono text-[11px] text-danger/70 line-through truncate">{entry.oldValue}</p>
-                  <p className="font-mono text-[11px] text-success truncate">{entry.newValue}</p>
-                </div>
+                isList(entry.oldValue ?? "") || isList(entry.newValue ?? "") ? (
+                  viewMode === "delta" ? (
+                    <ListDiffDelta oldValue={entry.oldValue ?? ""} newValue={entry.newValue ?? ""} />
+                  ) : (
+                    <ListDiffFull oldValue={entry.oldValue ?? ""} newValue={entry.newValue ?? ""} />
+                  )
+                ) : (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="font-mono text-[11px] text-danger/70 line-through break-all">{entry.oldValue}</p>
+                    <p className="font-mono text-[11px] text-success break-all">{entry.newValue}</p>
+                  </div>
+                )
               )}
             </div>
           );
