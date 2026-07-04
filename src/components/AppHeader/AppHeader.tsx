@@ -7,8 +7,6 @@ interface AppHeaderProps {
   stagedCount: number;
   diffCount: number;
   elevated: boolean;
-  userPathInEnv: boolean;
-  systemPathInEnv: boolean;
   snapshotsOpen: boolean;
   theme: "dark" | "light";
   onRefresh: () => void;
@@ -19,13 +17,12 @@ interface AppHeaderProps {
   onToggleSnapshots: () => void;
   onToggleTheme: () => void;
   onLicenses: () => void;
-  onStageAddToPath: (scope: "User" | "System") => void;
 }
 
 export function AppHeader({
-  loading, stagedCount, diffCount, elevated, userPathInEnv, systemPathInEnv, snapshotsOpen, theme,
+  loading, stagedCount, diffCount, elevated, snapshotsOpen, theme,
   onRefresh, onApplyStaged, onDiscard, onShowChanges, onImportExport,
-  onToggleSnapshots, onToggleTheme, onLicenses, onStageAddToPath,
+  onToggleSnapshots, onToggleTheme, onLicenses,
 }: AppHeaderProps) {
   return (
     <header
@@ -91,26 +88,6 @@ export function AppHeader({
         )}
         {elevated && (
           <span className="text-xs text-success opacity-60">🛡 Administrator</span>
-        )}
-        {!userPathInEnv && (
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={() => onStageAddToPath("User")}
-            title="Stage adding Envarly to User PATH so it can be run from a terminal"
-          >
-            + User PATH
-          </Button>
-        )}
-        {elevated && !systemPathInEnv && (
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={() => onStageAddToPath("System")}
-            title="Stage adding Envarly to System PATH"
-          >
-            + System PATH
-          </Button>
         )}
         <Button variant="ghost" size="xs" onClick={() => openUrl("https://github.com/iray-tno/envarly")} title="View on GitHub">
           ↗ GitHub

@@ -14,7 +14,7 @@ import { Modal } from "./components/ui/Modal";
 import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
 import { useEnvVars } from "./hooks/useEnvVars";
-import { useStaged, type StagedChange } from "./hooks/useStaged";
+import { useStaged, stagedKey, type StagedChange } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
 import { applyAccepted, computeDiff, snapshotsEqual } from "./lib/diff";
@@ -41,14 +41,20 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
-  const [userPathInEnv, setUserPathInEnv] = useState(true);
-  const [systemPathInEnv, setSystemPathInEnv] = useState(true);
+  const [actualUserPathInEnv, setActualUserPathInEnv] = useState(true);
+  const [actualSystemPathInEnv, setActualSystemPathInEnv] = useState(true);
   const [pathBannerDismissed, setPathBannerDismissed] = useState(
     () => localStorage.getItem("envarly.pathBannerDismissed") === "1",
   );
 
   const { staged, effectiveVars, stageSet, stageDelete, stageImport, stageSnapshot, unstage, clearStaged, restoreStaged } =
     useStaged(vars);
+
+  // Computed: Envarly is in PATH if the registry already has it OR it's currently staged.
+  // This means the "Add Envarly to PATH" button disappears when staged and reappears when unstaged,
+  // without any optimistic state that can get stuck.
+  const userPathInEnv = actualUserPathInEnv || staged.has(stagedKey("Path", "User"));
+  const systemPathInEnv = actualSystemPathInEnv || staged.has(stagedKey("Path", "System"));
 
   const { push, undo, redo } = useUndo();
 
@@ -77,8 +83,8 @@ export default function App() {
       try { isAdmin = await api.isElevated(); setElevated(isAdmin); } catch { }
       try {
         const ps = await api.getPathStatus();
-        setUserPathInEnv(ps.userHasEntry);
-        setSystemPathInEnv(ps.systemHasEntry);
+        setActualUserPathInEnv(ps.userHasEntry);
+        setActualSystemPathInEnv(ps.systemHasEntry);
       } catch { }
       refresh();
     })();
@@ -163,6 +169,11 @@ export default function App() {
       setDialog(null);
       await refresh();
       try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
+      try {
+        const ps = await api.getPathStatus();
+        setActualUserPathInEnv(ps.userHasEntry);
+        setActualSystemPathInEnv(ps.systemHasEntry);
+      } catch { }
     } catch (err) {
       console.error("Failed to apply staged changes", err);
     } finally {
@@ -177,8 +188,6 @@ export default function App() {
       const proposed = await api.getPathProposal(scope);
       if (proposed === null) return; // already in PATH
       stageSet("Path", scope, proposed);
-      if (scope === "User") setUserPathInEnv(true);
-      else setSystemPathInEnv(true);
     } catch (err) {
       console.error("Failed to get PATH proposal", err);
     }
@@ -197,8 +206,6 @@ export default function App() {
           stagedCount={staged.size}
           diffCount={diffEntries.length}
           elevated={elevated}
-          userPathInEnv={userPathInEnv}
-          systemPathInEnv={systemPathInEnv}
           snapshotsOpen={snapshotsOpen}
           theme={theme}
           onRefresh={handleRefresh}
@@ -209,15 +216,12 @@ export default function App() {
           onToggleSnapshots={() => setSnapshotsOpen((o) => !o)}
           onToggleTheme={toggleTheme}
           onLicenses={() => setDialog("licenses")}
-          onStageAddToPath={handleStageAddToPath}
         />
 
-        {(!userPathInEnv || (elevated && !systemPathInEnv)) && !pathBannerDismissed && (
+        {(elevated ? !systemPathInEnv : !userPathInEnv) && !pathBannerDismissed && (
           <PathBanner
-            elevated={elevated}
-            userPathInEnv={userPathInEnv}
-            systemPathInEnv={systemPathInEnv}
-            onStageAddToPath={handleStageAddToPath}
+            scope={elevated ? "System" : "User"}
+            onStageAddToPath={() => handleStageAddToPath(elevated ? "System" : "User")}
             onDismiss={handleDismissPathBanner}
           />
         )}
