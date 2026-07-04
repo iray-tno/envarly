@@ -2,16 +2,31 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
     <!--
-      Remove Envarly install dir from PATH before files are deleted.
+      A component must be referenced from a Feature for this fragment to be
+      considered "reachable" by the WiX linker. Without it, the linker silently
+      strips the entire fragment — including the CustomAction table entries —
+      even though the build succeeds without errors.
 
-      Two-step pattern required for deferred CAs:
-        1. SetPathCleanupExe  (immediate) — captures [INSTALLDIR]envarly.exe into
-           a property while the file table is still resolvable.
-        2. PathCleanup        (deferred)  — runs the captured path with "path-cleanup"
-           before RemoveFiles deletes the exe.
+      This component serves as the anchor. The Environment feature already exists
+      in the generated main.wxs (Level=1, Absent=allow), so referencing it here
+      is enough to make this whole fragment live.
+    -->
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="EnvarlyPathAnchor" Guid="{DE0349D9-7C95-464D-9A66-977A3D3E03B3}">
+        <RegistryValue Root="HKCU" Key="Software\envarly\Envarly"
+                       Name="PathManaged" Value="1" Type="integer" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <FeatureRef Id="MainProgram">
+      <ComponentRef Id="EnvarlyPathAnchor" />
+    </FeatureRef>
 
-      Return="ignore" lets the uninstaller continue even if cleanup fails
-      (worst case: a harmless dead PATH entry remains).
+    <!--
+      Two-step pattern for reliable uninstall PATH cleanup:
+        1. SetPathCleanupExe (immediate) — resolves [INSTALLDIR]envarly.exe into
+           a property while the file table is still valid.
+        2. PathCleanup (deferred Type-50) — runs the captured exe with
+           "path-cleanup" before RemoveFiles deletes it.
     -->
     <CustomAction Id="SetPathCleanupExe"
                   Property="PathCleanup"
