@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { SnapshotPanel } from "./SnapshotPanel";
 
 const meta: Meta<typeof SnapshotPanel> = {

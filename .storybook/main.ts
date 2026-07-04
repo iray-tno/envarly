@@ -4,20 +4,17 @@ const isProd = process.env.NODE_ENV === "production";
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(ts|tsx)"],
-  addons: [
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
-    "@storybook/addon-a11y",
-  ],
+  addons: ["@storybook/addon-a11y", "@storybook/addon-docs"],
+
   framework: {
     name: "@storybook/react-vite",
     options: {},
   },
-  docs: { autodocs: "tag" },
+
   viteFinal: (config) => {
     if (isProd) config.base = "/envarly/storybook/";
     return config;
-  },
+  }
 };
 
 export default config;

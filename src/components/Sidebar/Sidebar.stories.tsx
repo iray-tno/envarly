@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import type { StagedChange } from "../../hooks/useStaged";
 import type { EnvVar } from "../../types";
