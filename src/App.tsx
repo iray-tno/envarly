@@ -41,7 +41,8 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
-  const [pathInEnv, setPathInEnv] = useState(true);
+  const [userPathInEnv, setUserPathInEnv] = useState(true);
+  const [systemPathInEnv, setSystemPathInEnv] = useState(true);
   const [pathBannerDismissed, setPathBannerDismissed] = useState(
     () => localStorage.getItem("envarly.pathBannerDismissed") === "1",
   );
@@ -76,7 +77,8 @@ export default function App() {
       try { isAdmin = await api.isElevated(); setElevated(isAdmin); } catch { }
       try {
         const ps = await api.getPathStatus();
-        setPathInEnv(isAdmin ? ps.systemHasEntry : ps.userHasEntry);
+        setUserPathInEnv(ps.userHasEntry);
+        setSystemPathInEnv(ps.systemHasEntry);
       } catch { }
       refresh();
     })();
@@ -175,7 +177,8 @@ export default function App() {
       const proposed = await api.getPathProposal(scope);
       if (proposed === null) return; // already in PATH
       stageSet("Path", scope, proposed);
-      setPathInEnv(true); // optimistic: suppress banner after staging
+      if (scope === "User") setUserPathInEnv(true);
+      else setSystemPathInEnv(true);
     } catch (err) {
       console.error("Failed to get PATH proposal", err);
     }
@@ -194,7 +197,8 @@ export default function App() {
           stagedCount={staged.size}
           diffCount={diffEntries.length}
           elevated={elevated}
-          pathInEnv={pathInEnv}
+          userPathInEnv={userPathInEnv}
+          systemPathInEnv={systemPathInEnv}
           snapshotsOpen={snapshotsOpen}
           theme={theme}
           onRefresh={handleRefresh}
@@ -205,12 +209,14 @@ export default function App() {
           onToggleSnapshots={() => setSnapshotsOpen((o) => !o)}
           onToggleTheme={toggleTheme}
           onLicenses={() => setDialog("licenses")}
-          onStageAddToPath={() => handleStageAddToPath(elevated ? "System" : "User")}
+          onStageAddToPath={handleStageAddToPath}
         />
 
-        {!pathInEnv && !pathBannerDismissed && (
+        {(!userPathInEnv || (elevated && !systemPathInEnv)) && !pathBannerDismissed && (
           <PathBanner
             elevated={elevated}
+            userPathInEnv={userPathInEnv}
+            systemPathInEnv={systemPathInEnv}
             onStageAddToPath={handleStageAddToPath}
             onDismiss={handleDismissPathBanner}
           />
@@ -237,12 +243,13 @@ export default function App() {
               variable={effectiveSelected}
               allVars={effectiveVars}
               elevated={elevated}
-              pathInEnv={pathInEnv}
+              userPathInEnv={userPathInEnv}
+              systemPathInEnv={systemPathInEnv}
               staged={staged}
               onStage={handleStage}
               onStageDelete={handleStageDelete}
               onUnstage={handleUnstage}
-              onStageAddToPath={() => handleStageAddToPath(elevated ? "System" : "User")}
+              onStageAddToPath={handleStageAddToPath}
               onRegisterLocalUndo={handleRegisterLocalUndo}
             />
           </div>

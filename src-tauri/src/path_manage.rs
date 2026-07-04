@@ -153,26 +153,42 @@ pub fn propose_add(user: bool) -> Result<Option<String>, EnvarlyError> {
 }
 
 /// Remove the install dir from User PATH and/or System PATH (if elevated).
-/// Always returns Ok — partial failures are logged but not fatal so the
-/// uninstaller can proceed.
+/// When `dry_run` is true, prints what would change without modifying the registry.
 #[cfg(windows)]
-pub fn cleanup_path() {
+pub fn cleanup_path(dry_run: bool) {
     let dir = match install_dir() {
         Some(d) => d.to_string_lossy().into_owned(),
-        None => return,
+        None => {
+            eprintln!("path-cleanup: could not determine install directory");
+            return;
+        }
     };
+    println!("install dir: {}", dir);
 
-    for user in [true, false] {
-        let Ok(key) = open_path_key(user, true) else { continue };
+    for (user, label) in [(true, "User"), (false, "System")] {
+        let Ok(key) = open_path_key(user, !dry_run) else {
+            println!("{} PATH: (no access, skipping)", label);
+            continue;
+        };
         let current = read_path_str(&key);
-        if let Some(new_val) = compute_remove(&current, &dir) {
-            let _ = write_path_str(&key, &new_val);
+        match compute_remove(&current, &dir) {
+            None => println!("{} PATH: not present, nothing to remove", label),
+            Some(new_val) => {
+                if dry_run {
+                    println!("{} PATH: would remove '{}'", label, dir);
+                } else {
+                    match write_path_str(&key, &new_val) {
+                        Ok(()) => println!("{} PATH: removed '{}'", label, dir),
+                        Err(e) => eprintln!("{} PATH: write failed: {}", label, e),
+                    }
+                }
+            }
         }
     }
 
-    // Notify running processes that environment changed
-    #[cfg(windows)]
-    crate::env_store::broadcast_settings_change();
+    if !dry_run {
+        crate::env_store::broadcast_settings_change();
+    }
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────

@@ -75,21 +75,25 @@ pub fn is_elevated() -> bool {
 pub fn restart_as_admin(app: tauri::AppHandle) -> Result<(), EnvarlyError> {
     #[cfg(target_os = "windows")]
     {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
         let exe = std::env::current_exe().map_err(EnvarlyError::Registry)?;
-        std::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-WindowStyle",
-                "Hidden",
-                "-Command",
-                &format!("Start-Process '{}' -Verb RunAs", exe.display()),
-            ])
-            .creation_flags(CREATE_NO_WINDOW)
-            .spawn()
-            .map_err(EnvarlyError::Registry)?;
-        app.exit(0);
+        let exe_wide: Vec<u16> = exe.to_string_lossy().encode_utf16().chain(Some(0)).collect();
+        let verb: Vec<u16> = "runas\0".encode_utf16().collect();
+        // ShellExecuteW with "runas" verb triggers UAC elevation directly
+        // without needing an intermediate PowerShell process.
+        let result = unsafe {
+            windows_sys::Win32::UI::Shell::ShellExecuteW(
+                std::ptr::null_mut(),
+                verb.as_ptr(),
+                exe_wide.as_ptr(),
+                std::ptr::null(),
+                std::ptr::null(),
+                windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL,
+            )
+        };
+        // ShellExecuteW returns > 32 on success
+        if result as usize > 32 {
+            app.exit(0);
+        }
     }
     #[cfg(not(target_os = "windows"))]
     let _ = app;
@@ -207,8 +211,29 @@ pub async fn export_custom(
 pub fn validate_paths(paths: Vec<String>) -> Vec<bool> {
     paths
         .iter()
-        .map(|p| std::path::Path::new(&expand_env_vars(p.trim())).exists())
+        .map(|p| {
+            let cleaned = p.trim_matches(|c: char| c.is_whitespace() || c == '\0');
+            let expanded = expand_env_vars(cleaned);
+            dir_exists(&expanded)
+        })
         .collect()
+}
+
+/// Check whether a directory path exists using GetFileAttributesW directly.
+/// This matches PowerShell's Test-Path behavior and avoids false negatives
+/// that Rust's Path::exists() (which uses GetFileAttributesExW) can produce
+/// under certain Windows filesystem filter drivers or security software.
+#[cfg(windows)]
+fn dir_exists(path: &str) -> bool {
+    let wide: Vec<u16> = path.encode_utf16().chain(std::iter::once(0)).collect();
+    let attrs = unsafe { windows_sys::Win32::Storage::FileSystem::GetFileAttributesW(wide.as_ptr()) };
+    // INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF means the call failed (path not found etc.)
+    attrs != u32::MAX
+}
+
+#[cfg(not(windows))]
+fn dir_exists(path: &str) -> bool {
+    std::path::Path::new(path).exists()
 }
 
 pub(crate) fn expand_env_vars(s: &str) -> String {
