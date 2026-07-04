@@ -45,6 +45,8 @@ describe("DetailPanel", () => {
       <DetailPanel
         variable={variable}
         elevated={elevated}
+        userPathInEnv={true}
+        systemPathInEnv={true}
         staged={staged}
         onStage={onStage}
         onStageDelete={onStageDelete}
@@ -107,7 +109,7 @@ describe("DetailPanel", () => {
   it("hides edit controls for System variable when not elevated", () => {
     const sysVar: EnvVar = { ...simpleVar, scope: "System" };
     render_(sysVar, false);
-    expect(screen.getByText(/requires admin/i)).toBeInTheDocument();
+    expect(screen.getByText(/restart as admin/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
   });
 
