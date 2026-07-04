@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 
 const GITHUB_URL = 'https://github.com/iray-tno/envarly';
 const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest';
+const STORYBOOK_URL = '/envarly/storybook/';
 const VERSION = '1.0.0';
 
 const features = [
@@ -56,6 +57,7 @@ const features = [
       <span class="font-semibold text-[var(--color-text)] tracking-tight">Envarly</span>
       <nav class="flex items-center gap-6">
         <a href="#features" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Features</a>
+        <a href={STORYBOOK_URL} class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Storybook</a>
         <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
         <a
           href={RELEASE_URL}
@@ -169,6 +171,7 @@ const features = [
       <div class="flex items-center gap-6">
         <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
         <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Releases</a>
+        <a href={STORYBOOK_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Storybook</a>
         <a href={`${GITHUB_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">License</a>
       </div>
     </div>
