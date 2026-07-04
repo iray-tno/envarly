@@ -9,9 +9,11 @@ interface Props {
 
 const {
   title = 'Envarly — Windows Environment Variable Manager',
-  description = 'Free GUI editor for Windows environment variables. Edit PATH, detect secrets, preview changes before applying. Works on Windows 10 and 11. Open source, built with Tauri and Rust.',
+  description = 'Windows environment variable manager — edit PATH, detect secrets, and preview changes before applying. Free & open source on Windows 10 and 11.',
   ogImage = '/envarly/og-image.png',
 } = Astro.props;
+
+const ogDescription = 'Windows environment variable manager — edit PATH, detect secrets, and preview changes before applying. Free & open source.';
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -44,15 +46,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
     <!-- OGP -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Envarly" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={ogDescription} />
     <meta property="og:image" content={new URL(ogImage, Astro.site)} />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={ogDescription} />
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
 
     <!-- JSON-LD structured data -->
