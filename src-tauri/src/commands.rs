@@ -171,7 +171,7 @@ pub async fn export_custom(
         match v.scope.as_str() {
             "User"   => { snapshot.user.insert(v.name.clone(), v.value.clone()); }
             "System" => { snapshot.system.insert(v.name.clone(), v.value.clone()); }
-            _ => {}
+            other => return Err(EnvarlyError::InvalidInput(format!("invalid scope: {other:?}"))),
         }
     }
 
@@ -288,7 +288,11 @@ pub fn get_path_status() -> path_manage::PathStatus {
 /// scope: "User" | "System"
 #[tauri::command]
 pub fn get_path_proposal(scope: String) -> Result<Option<String>, EnvarlyError> {
-    let user = scope != "System";
+    let user = match scope.as_str() {
+        "User"   => true,
+        "System" => false,
+        other    => return Err(EnvarlyError::InvalidInput(format!("invalid scope: {other:?}"))),
+    };
     path_manage::propose_add(user)
 }
 
