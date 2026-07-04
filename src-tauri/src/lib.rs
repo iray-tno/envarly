@@ -34,7 +34,6 @@ pub fn run() {
             commands::create_snapshot,
             commands::list_snapshots,
             commands::delete_snapshot,
-            commands::restore_snapshot,
             commands::validate_paths,
             commands::export_vars,
             commands::export_custom,
