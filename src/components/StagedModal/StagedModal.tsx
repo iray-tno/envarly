@@ -3,6 +3,8 @@ import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
 import { Button } from "../ui/Button";
 
+const CRITICAL_VARS = new Set(["SYSTEMROOT", "WINDIR", "COMSPEC"]);
+
 interface StagedModalProps {
   diff: DiffEntry[];
   busy: boolean;
@@ -13,6 +15,8 @@ interface StagedModalProps {
 export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
   const [takeSnapshot, setTakeSnapshot] = useState(true);
 
+  const criticalChanges = diff.filter((e) => CRITICAL_VARS.has(e.name.toUpperCase()));
+
   const byKind = {
     added:   diff.filter((e) => e.kind === "added"),
     removed: diff.filter((e) => e.kind === "removed"),
@@ -21,6 +25,18 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {criticalChanges.length > 0 && (
+        <div className="px-6 py-3 bg-danger/10 border-b border-danger/30 shrink-0">
+          <p className="text-xs font-semibold text-danger mb-1">
+            ⚠ Critical system variable{criticalChanges.length > 1 ? "s" : ""} will be modified
+          </p>
+          <p className="text-xs text-danger/80">
+            {criticalChanges.map((e) => e.name).join(", ")} — changing {criticalChanges.length > 1 ? "these" : "this"} can break Windows or running applications.
+            A snapshot is strongly recommended.
+          </p>
+        </div>
+      )}
+
       <div className="px-6 py-4 border-b border-rim shrink-0">
         <p className="text-xs text-muted mb-3">
           These changes will be written to the Windows registry and broadcast to running applications.

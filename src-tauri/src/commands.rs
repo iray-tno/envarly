@@ -47,23 +47,6 @@ pub fn delete_snapshot(id: String) -> Result<(), EnvarlyError> {
     snapshot::delete_snapshot(&id)
 }
 
-#[tauri::command]
-pub fn restore_snapshot(id: String) -> Result<(), EnvarlyError> {
-    let snaps = snapshot::list_snapshots()?;
-    let target = snaps
-        .into_iter()
-        .find(|s| s.id == id)
-        .ok_or_else(|| EnvarlyError::Snapshot(format!("Snapshot '{id}' not found")))?;
-
-    for (name, value) in &target.snapshot.user {
-        env_store::write_var(name, value, &VarScope::User)?;
-    }
-    for (name, value) in &target.snapshot.system {
-        env_store::write_var(name, value, &VarScope::System)?;
-    }
-    Ok(())
-}
-
 /// Returns true when the process has write access to HKLM (admin / elevated).
 #[tauri::command]
 pub fn is_elevated() -> bool {

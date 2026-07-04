@@ -20,9 +20,6 @@ export const api = {
   deleteSnapshot: (id: string) =>
     invoke<void>('delete_snapshot', { id }),
 
-  restoreSnapshot: (id: string) =>
-    invoke<void>('restore_snapshot', { id }),
-
   validatePaths: (paths: string[]) =>
     invoke<boolean[]>('validate_paths', { paths }),
 
