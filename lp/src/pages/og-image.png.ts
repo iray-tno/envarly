@@ -28,6 +28,10 @@ export const GET: APIRoute = async () => {
   const screenshotBuf = readFileSync(join(process.cwd(), 'public', 'screenshot-path-editor.png'));
   const screenshotSrc = `data:image/png;base64,${screenshotBuf.toString('base64')}`;
 
+  // App icon (src-tauri/icons/icon.png — one level up from lp/)
+  const iconBuf = readFileSync(join(process.cwd(), '../src-tauri/icons/icon.png'));
+  const iconSrc = `data:image/png;base64,${iconBuf.toString('base64')}`;
+
   const svg = await satori(
     el('div', {
       display: 'flex',
@@ -47,21 +51,19 @@ export const GET: APIRoute = async () => {
         width: '490px',
         flexShrink: 0,
       }, [
-        // Logo icon
-        el('div', {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '72px',
-          height: '72px',
-          borderRadius: '18px',
-          backgroundColor: '#1a2d42',
-          border: '1.5px solid rgba(255,255,255,0.12)',
-          marginBottom: '32px',
-          fontSize: '38px',
-          fontWeight: 800,
-          color: 'white',
-        }, 'E'),
+        // App icon
+        {
+          type: 'img',
+          props: {
+            src: iconSrc,
+            style: {
+              width: '80px',
+              height: '80px',
+              borderRadius: '20px',
+              marginBottom: '32px',
+            },
+          },
+        },
 
         // Title
         el('div', {
