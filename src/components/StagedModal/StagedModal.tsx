@@ -12,6 +12,53 @@ interface StagedModalProps {
   onClose: () => void;
 }
 
+function splitList(value: string): string[] {
+  return value.split(";").map((e) => e.trim()).filter(Boolean);
+}
+
+function isList(value: string): boolean {
+  return value.includes(";") && splitList(value).length > 1;
+}
+
+/** For a changed list value, show only the added/removed entries. */
+function ListDiff({ oldValue, newValue }: { oldValue: string; newValue: string }) {
+  const oldEntries = splitList(oldValue);
+  const newEntries = splitList(newValue);
+  const removed = oldEntries.filter((e) => !newEntries.includes(e));
+  const added   = newEntries.filter((e) => !oldEntries.includes(e));
+
+  if (removed.length === 0 && added.length === 0) {
+    return (
+      <p className="font-mono text-[11px] text-muted mt-1">
+        Order changed ({oldEntries.length} entries)
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
+      {removed.map((e, i) => (
+        <p key={`r${i}`} className="font-mono text-[11px] text-danger/80 line-through break-all">{e}</p>
+      ))}
+      {added.map((e, i) => (
+        <p key={`a${i}`} className="font-mono text-[11px] text-success break-all">{e}</p>
+      ))}
+    </div>
+  );
+}
+
+/** For an added/removed list value, show each entry on its own line. */
+function ListEntries({ value, className }: { value: string; className?: string }) {
+  const entries = splitList(value);
+  return (
+    <div className={cn("flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto", className)}>
+      {entries.map((e, i) => (
+        <p key={i} className="font-mono text-[11px] break-all">{e}</p>
+      ))}
+    </div>
+  );
+}
+
 export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
   const [takeSnapshot, setTakeSnapshot] = useState(true);
 
@@ -66,17 +113,32 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
                 <span className="opacity-60 text-[10px]">{entry.scope}</span>
                 <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">{entry.kind}</span>
               </div>
+
               {entry.kind === "removed" && (
-                <p className="font-mono text-[11px] opacity-70 line-through truncate">{entry.value}</p>
+                isList(entry.value!) ? (
+                  <ListEntries value={entry.value!} className="opacity-70 line-through" />
+                ) : (
+                  <p className="font-mono text-[11px] opacity-70 line-through break-all">{entry.value}</p>
+                )
               )}
+
               {entry.kind === "added" && (
-                <p className="font-mono text-[11px] truncate">{entry.value}</p>
+                isList(entry.value!) ? (
+                  <ListEntries value={entry.value!} />
+                ) : (
+                  <p className="font-mono text-[11px] break-all">{entry.value}</p>
+                )
               )}
+
               {entry.kind === "changed" && (
-                <div className="flex flex-col gap-0.5">
-                  <p className="font-mono text-[11px] text-danger/70 line-through truncate">{entry.oldValue}</p>
-                  <p className="font-mono text-[11px] text-success truncate">{entry.newValue}</p>
-                </div>
+                isList(entry.oldValue ?? "") || isList(entry.newValue ?? "") ? (
+                  <ListDiff oldValue={entry.oldValue ?? ""} newValue={entry.newValue ?? ""} />
+                ) : (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="font-mono text-[11px] text-danger/70 line-through break-all">{entry.oldValue}</p>
+                    <p className="font-mono text-[11px] text-success break-all">{entry.newValue}</p>
+                  </div>
+                )
               )}
             </div>
           );
