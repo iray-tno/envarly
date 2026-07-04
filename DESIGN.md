@@ -26,6 +26,8 @@ src/                    React frontend (TypeScript)
     DetailPanel/        Edit → stage locally; local Ctrl+Z undo before staging
     PathEditor/         Drag-and-drop path list + per-entry validation + %VAR% lint
     ListEditor/         Generic sortable list editor (semicolon or comma separator)
+    PathBanner/         Banner shown on launch when Envarly is not yet in User/System PATH
+    StagedModal/        Apply confirmation: Delta/Full diff view for semicolon-separated values
     NewVarModal/        New variable creation dialog
     DiffPanel/          Unified diff view (external-change detection)
     SnapshotPanel/      Snapshot list (rendered in right sidebar)
@@ -37,10 +39,11 @@ src-tauri/src/          Rust backend
   lib.rs                Entry point: CLI dispatch or Tauri run
   commands.rs           Tauri command handlers (thin — delegate to domain modules)
   env_store.rs          Registry read/write via winreg; EnvBackend trait + MemBackend for tests
+  path_manage.rs        PATH status check (userHasEntry / systemHasEntry) + propose-add
   snapshot.rs           Snapshot save/list/restore + DPAPI encryption
   crypto.rs             DPAPI wrapper (protect/unprotect)
-  export.rs             JSON + .reg import/export parsing
-  cli.rs                Read-only CLI subcommands (clap)
+  export.rs             JSON, .reg, and IaC format (PS1, DSC v2/v3, Ansible) import/export
+  cli.rs                Read-only CLI subcommands (clap); export supports all GUI formats
   error.rs              EnvarlyError (thiserror)
 ```
 
