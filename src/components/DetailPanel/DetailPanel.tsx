@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { api } from "../../api";
 import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
@@ -13,17 +14,18 @@ interface Props {
   variable: EnvVar | null;
   allVars: EnvVar[];
   elevated: boolean;
-  pathInEnv: boolean;
+  userPathInEnv: boolean;
+  systemPathInEnv: boolean;
   staged: Map<string, StagedChange>;
   onStage: (name: string, scope: VarScope, value: string) => void;
   onStageDelete: (name: string, scope: VarScope) => void;
   onUnstage: (name: string, scope: VarScope) => void;
-  onStageAddToPath: () => void;
+  onStageAddToPath: (scope: "User" | "System") => void;
   /** Called with a discard fn when dirty, null when clean. Lets App wire Ctrl+Z. */
   onRegisterLocalUndo?: (fn: (() => void) | null) => void;
 }
 
-export function DetailPanel({ variable, allVars, elevated, pathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
+export function DetailPanel({ variable, allVars, elevated, userPathInEnv, systemPathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
 
@@ -102,7 +104,9 @@ export function DetailPanel({ variable, allVars, elevated, pathInEnv, staged, on
   const effectiveSeparator = overrideSeparator ?? variable.listSeparator;
   const readOnly = variable.scope === "System" && !elevated;
   const isPathVar = variable.name.toUpperCase() === "PATH";
-  const showAddToPathHint = isPathVar && !pathInEnv && !isStagedDelete;
+  const pathInEnvForScope = variable.scope === "System" ? systemPathInEnv : userPathInEnv;
+  const showAddToPathHint = isPathVar && !pathInEnvForScope && !isStagedDelete
+    && (variable.scope === "User" || elevated);
 
   const editorLabel =
     effectiveSeparator === ";" ? "Path entries (drag to reorder)" :
@@ -123,7 +127,17 @@ export function DetailPanel({ variable, allVars, elevated, pathInEnv, staged, on
             {variable.scope}
           </Badge>
           {readOnly && (
-            <Badge variant="readonly">read-only · requires admin</Badge>
+            <>
+              <Badge variant="readonly">read-only</Badge>
+              <button
+                type="button"
+                onClick={() => api.restartAsAdmin()}
+                className="text-[10px] text-accent/70 hover:text-accent px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors shrink-0"
+                title="Restart as administrator to edit system variables"
+              >
+                🛡 Restart as admin →
+              </button>
+            </>
           )}
           {isStagedSet && !dirty && (
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-accent/15 text-accent shrink-0">
@@ -172,7 +186,7 @@ export function DetailPanel({ variable, allVars, elevated, pathInEnv, staged, on
               {showAddToPathHint && (
                 <button
                   type="button"
-                  onClick={onStageAddToPath}
+                  onClick={() => onStageAddToPath(variable.scope as "User" | "System")}
                   className="text-[10px] text-accent/70 hover:text-accent px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors"
                   title="Stage adding Envarly install directory to this PATH variable"
                 >
