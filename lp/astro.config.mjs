@@ -5,8 +5,9 @@ import sitemap from '@astrojs/sitemap';
 import partytown from '@astrojs/partytown';
 
 export default defineConfig({
-  site: 'https://iray-tno.github.io/envarly',
+  site: 'https://iray-tno.github.io',
   base: '/envarly',
+  trailingSlash: 'always',
   integrations: [
     sitemap(),
     partytown({ config: { forward: ['dataLayer.push', 'clarity'] } }),
