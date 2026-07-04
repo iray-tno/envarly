@@ -22,12 +22,15 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 - **Dark / light mode** — follows system preference on first launch; persists across sessions; no flash on load
 - **Snapshot / time-travel** — save named snapshots, restore to any previous state
 - **Diff detection** — detects registry changes made by other processes while Envarly is open; shows a diff with selective apply (accept or revert per entry)
-- **Import / Export** — read/write `.json` and `.reg` formats
+- **Import / Export** — read/write `.json` and `.reg` formats; export to IaC formats (PowerShell script, DSC v2/v3, Ansible playbook)
   - *Custom export*: pick individual variables, with secret-variable warnings
   - *Import merge strategy*: Merge (additive) or Replace (sync — removes variables not in the file)
   - Preview before any write; registry is never touched until you explicitly click Apply
+- **PATH management** — stage adding Envarly's install directory to User or System PATH directly from within the app; PATH banner on launch if not yet added; button in the PATH variable detail panel
+- **Apply confirmation diff** — Delta view (git-diff-style `+`/`−` per entry) and Full view (all entries with change markers) for semicolon-separated values like PATH; non-list values shown in full without truncation
+- **Critical variable warning** — staging changes to `SYSTEMROOT`, `WINDIR`, or `COMSPEC` shows a prominent warning in the Apply confirmation dialog
 - **Secret detection** — name-based + value-pattern detection across 35+ token formats (GitHub `ghp_`, GitLab `glpat-`, Slack `xoxb-`, Anthropic `sk-ant-`, npm `npm_`, PyPI `pypi-`, …); service badge shown on each match; **⚠ Secrets** sidebar tab; export confirmation lists affected services
-- **Admin elevation** — "Run as admin" button restarts the process elevated; system variables become editable
+- **Admin elevation** — "Run as admin" button restarts the process elevated via UAC; system variables become editable; "Restart as admin →" inline hint appears in the detail panel when viewing a System variable without elevation
 - **CLI mode** — read-only subcommands (`get`, `list`, `export`) run from a terminal without launching the GUI
 - **WM\_SETTINGCHANGE broadcast** — running apps pick up changes without a restart
 
@@ -42,7 +45,7 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 | Linter / formatter | Biome |
 | JS tests | Vitest + @testing-library/react |
 | Rust tests | cargo test (MemBackend — no real registry writes) |
-| Component explorer | [Storybook 8](https://iray-tno.github.io/envarly/storybook/) + addon-a11y |
+| Component explorer | [Storybook 10](https://iray-tno.github.io/envarly/storybook/) + addon-a11y |
 | Runtime versions | mise (Node 22, Rust stable) |
 
 ## Prerequisites
@@ -118,8 +121,12 @@ envarly list
 envarly list --scope system --format json
 
 # Export to file or stdout (read-only — does not modify the registry)
-envarly export --format json --output backup.json
-envarly export --format reg  --output backup.reg
+envarly export --format json     --output backup.json
+envarly export --format reg      --output backup.reg
+envarly export --format ps1      --output backup.ps1      # PowerShell [Environment]::SetEnvironmentVariable
+envarly export --format dsc_v2   --output backup.ps1      # PowerShell DSC v2 configuration
+envarly export --format dsc_v3   --output backup.dsc.yaml # DSC v3 YAML
+envarly export --format ansible  --output backup.yml      # Ansible environment playbook
 envarly export --format json | jq '.user.PATH'
 ```
 
@@ -136,7 +143,16 @@ Open the **Import / Export** tab.
 | System | System variables only |
 | Custom | Hand-pick individual variables from a checklist |
 
-Supported formats: `.json` (Envarly-native) and `.reg` (Windows Registry Script).
+Supported formats:
+
+| Format | Description |
+|---|---|
+| `.json` | Envarly-native |
+| `.reg` | Windows Registry Script |
+| `.ps1` (PowerShell) | `[Environment]::SetEnvironmentVariable` calls |
+| `.ps1` (DSC v2) | PowerShell Desired State Configuration v2 |
+| `.dsc.yaml` (DSC v3) | DSC v3 YAML |
+| `.yml` (Ansible) | Ansible playbook with `ansible.builtin.set_fact` |
 
 In **Custom** mode, variables whose names or values match known secret patterns are flagged with a `⚠ ServiceName` badge.
 
@@ -233,6 +249,8 @@ envarly/
 │       ├── DetailPanel/          # Variable editor with local undo (Ctrl+Z pre-stage)
 │       ├── PathEditor/           # Drag-and-drop list editor + path validation + %VAR% lint
 │       ├── ListEditor/           # Generic sortable list editor (comma/semicolon separator)
+│       ├── PathBanner/           # Banner shown when Envarly is not yet in PATH
+│       ├── StagedModal/          # Apply confirmation: per-entry Delta/Full diff for list values
 │       ├── NewVarModal/          # New variable creation dialog
 │       ├── SnapshotPanel/        # Snapshot list, create, restore
 │       ├── DiffPanel/            # External-change diff with selective apply
@@ -242,13 +260,15 @@ envarly/
 │   └── theme-init.js             # Runs before React; sets theme class to avoid flash
 ├── src-tauri/
 │   ├── icons/source/             # Logo SVG sources (aurora + monochrome)
+│   ├── wix/                      # WiX installer template + branded images; PATH cleanup CA
 │   └── src/                      # Rust backend
 │       ├── main.rs               # Entry point; CLI dispatch then GUI launch
 │       ├── lib.rs                # Tauri builder + command registration
 │       ├── cli.rs                # clap CLI (get / list / export)
 │       ├── commands.rs           # Tauri commands
 │       ├── env_store.rs          # Registry read/write + EnvBackend trait + MemBackend
-│       ├── export.rs             # JSON and .reg serialisation / parsing
+│       ├── export.rs             # JSON, .reg, and IaC format serialisation / parsing
+│       ├── path_manage.rs        # PATH status check + propose-add logic (install dir detection)
 │       ├── snapshot.rs           # Snapshot persistence (%LOCALAPPDATA%\Envarly)
 │       └── error.rs              # EnvarlyError (thiserror + Serialize)
 ├── scripts/
