@@ -51,8 +51,8 @@
   },
   "sidebar": {
     "search_placeholder": "Search variables...",
-    "secret_one": "⚠ {{count}} secret",
-    "secret_other": "⚠ {{count}} secrets",
+    "secret_one": "{{count}} secret",
+    "secret_other": "{{count}} secrets",
     "sort_name_asc": "Name A→Z",
     "sort_name_desc": "Name Z→A",
     "sort_scope": "Scope",
@@ -212,7 +212,8 @@
       "aws": "AWS",
       "gcp": "GCP",
       "azure": "Azure",
-      "devtools": "Dev tools"
+      "devtools": "Dev tools",
+      "gpu": "GPU / CUDA"
     },
     "PATH": "Directories searched for executable files. Programs like Node, Python, and Git are found here.",
     "PATHEXT": "File extensions treated as executables by the shell (e.g. .COM;.EXE;.BAT).",
@@ -239,8 +240,14 @@
     "PUBLIC": "Shared public profile directory accessible to all users (e.g. C:\\Users\\Public).",
     "ALLUSERSPROFILE": "Legacy alias for C:\\ProgramData. Points to the per-machine shared data directory.",
     "ONEDRIVE": "Path to the user's OneDrive sync folder. Set by the OneDrive client.",
+    "ONEDRIVECONSUMER": "Path to the personal OneDrive sync folder. Variant set by the OneDrive consumer client.",
+    "ONEDRIVECOMMERCIAL": "Path to the OneDrive for Business sync folder. Set by the OneDrive commercial client.",
     "PSMODULEPATH": "Semicolon-separated list of directories where PowerShell looks for modules.",
     "DRIVERDATA": "Directory for driver data files shared between kernel and user mode.",
+    "PROCESSOR_IDENTIFIER": "Full description string of the CPU model (e.g. Intel64 Family 6 Model 186 Stepping 2).",
+    "PROCESSOR_LEVEL": "Processor family level number. Used by legacy applications to determine CPU generation.",
+    "PROCESSOR_REVISION": "Processor model and stepping packed into a hex word. Complements PROCESSOR_LEVEL.",
+    "POWERSHELL_DISTRIBUTION_CHANNEL": "Identifies the PowerShell distribution channel (e.g. MSI, Store, dotnet-global-tool). Used by telemetry.",
     "HTTP_PROXY": "HTTP proxy URL used by curl, wget, Python requests, and many CLI tools.",
     "HTTPS_PROXY": "HTTPS proxy URL. Takes precedence over HTTP_PROXY for HTTPS requests.",
     "NO_PROXY": "Comma-separated list of hostnames/domains that bypass the proxy.",
@@ -335,6 +342,15 @@
     "PORT": "TCP port the server process should listen on. Used by many web frameworks by convention.",
     "HOST": "Hostname or IP address the server should bind to (e.g. 0.0.0.0 or localhost).",
     "TZ": "IANA timezone name (e.g. America/New_York). Overrides the system timezone for the process.",
-    "LANG": "Default locale for the process (e.g. en_US.UTF-8). Affects character encoding and sorting."
+    "LANG": "Default locale for the process (e.g. en_US.UTF-8). Affects character encoding and sorting.",
+    "CUDA_PATH": "CUDA toolkit installation directory. Used by compilers and libraries to locate CUDA headers and libs.",
+    "CUDA_HOME": "Alias for CUDA_PATH used by some frameworks (PyTorch, TensorFlow). Points to the CUDA toolkit root.",
+    "CUDA_VISIBLE_DEVICES": "Comma-separated list of GPU indices visible to CUDA applications. Use to restrict GPU usage.",
+    "NVIDIA_VISIBLE_DEVICES": "GPUs exposed inside Docker containers with NVIDIA Container Toolkit. Similar to CUDA_VISIBLE_DEVICES.",
+    "NVIDIA_DRIVER_CAPABILITIES": "Docker GPU capabilities to expose (e.g. compute,utility). Requires NVIDIA Container Toolkit.",
+    "ROCM_PATH": "AMD ROCm installation root. Used by HIP compilers and ROCm-aware frameworks.",
+    "HIP_PATH": "HIP toolkit installation directory. Points to AMD's CUDA-compatible GPU programming layer.",
+    "HIP_VISIBLE_DEVICES": "GPU indices visible to HIP/ROCm applications. Analogous to CUDA_VISIBLE_DEVICES.",
+    "OPENCL_VENDOR_PATH": "Directory containing OpenCL ICD (Installable Client Driver) vendor files."
   }
 }

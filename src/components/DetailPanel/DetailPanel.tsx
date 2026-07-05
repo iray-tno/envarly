@@ -172,10 +172,12 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
       {description && (
         <div className="flex items-start gap-2.5 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
           <span className="text-dim text-xs mt-px select-none">ℹ</span>
-          <p className="text-xs text-muted leading-relaxed">
-            <span className="font-semibold text-dim mr-1.5">{t(description.categoryKey)}</span>
-            {t(description.summaryKey)}
-          </p>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-surface border border-rim text-dim shrink-0 select-none">
+              {t(description.categoryKey)}
+            </span>
+            <p className="text-xs text-muted leading-relaxed">{t(description.summaryKey)}</p>
+          </div>
         </div>
       )}
 
