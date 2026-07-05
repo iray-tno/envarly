@@ -54,6 +54,7 @@
     "storybook": "^10.4.6",
     "typescript": "~5.8.3",
     "vite": "^6.4.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "xunit-viewer": "^8.0.5"
   }
 }

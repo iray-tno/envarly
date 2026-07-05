@@ -35,11 +35,44 @@ jobs:
         run: npm run build
         working-directory: lp
 
+      - name: Report (Vitest)
+        run: |
+          mkdir -p junit-reports
+          npx vitest run --reporter=junit --outputFile=junit-reports/vitest.xml || true
+
+      - name: Report (Biome)
+        run: npx biome check --reporter=json src 2>/dev/null | node scripts/biome-to-junit.mjs > junit-reports/biome.xml || true
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - uses: taiki-e/install-action@nextest
+
+      - name: Report (cargo nextest)
+        run: cargo nextest run --profile ci || true
+        working-directory: src-tauri
+        continue-on-error: true
+
+      - name: Copy nextest JUnit
+        run: cp src-tauri/target/nextest/ci/nextest.xml junit-reports/nextest.xml || true
+
+      - name: Report (Clippy)
+        run: cargo clippy --message-format=json 2>/dev/null | node ../../scripts/clippy-to-junit.mjs > ../../junit-reports/clippy.xml || true
+        working-directory: src-tauri
+
       - name: Arrange site structure
         run: |
           mkdir -p site
           cp -r lp/dist/. site/
           mv storybook-static site/storybook
+
+      - name: Build HTML reports
+        run: npx xunit-viewer --results junit-reports --output site/reports/index.html --title "Envarly — Reports"
 
       - uses: actions/upload-pages-artifact@v3
         with:
