@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import type { DiffEntry } from "../../lib/diff";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [accepted, setAccepted] = useState<Record<string, boolean>>(
     () => Object.fromEntries(entries.map((e) => [`${e.scope}:${e.name}`, true])),
   );

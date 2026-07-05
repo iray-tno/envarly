@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { type SecretInfo, resolveSecret } from "../../lib/secrets";
 import type { EnvVar } from "../../types";
@@ -33,7 +33,7 @@ interface ExportConfirmProps {
 }
 
 function ExportConfirm({ secretServices, onConfirm, onCancel }: ExportConfirmProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   return (
     <div className="flex flex-col gap-3 p-3 rounded border border-warn/40 bg-warn/10">
       <p className="flex gap-2 text-warn text-xs">
@@ -55,7 +55,7 @@ interface ExportTabProps {
 }
 
 export function ExportTab({ onStatus }: ExportTabProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [scope, setScope] = useState<ExportScope>("All");
   const [format, setFormat] = useState<AnyFormat>("json");
   const [busy, setBusy] = useState(false);

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
 import { cn } from "../../lib/cn";
@@ -21,7 +21,7 @@ const SCOPES = ["All", "User", "System"] as const;
 type ScopeFilter = (typeof SCOPES)[number];
 
 export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged }: Props) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
   const [secretsOnly, setSecretsOnly] = useState(false);

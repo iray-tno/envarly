@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import type { VarScope } from "../../types";
 import { SegmentedControl } from "../ui/SegmentedControl";
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function ImportExportPanel({ onStage }: Props) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [mode, setMode] = useState<Mode>("export");
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
 

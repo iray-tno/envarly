@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "./hooks/useI18n";
 import { AppHeader } from "./components/AppHeader/AppHeader";
 import { AppModals } from "./components/AppModals/AppModals";
 import { PathBanner } from "./components/PathBanner/PathBanner";
@@ -25,7 +25,7 @@ import type { EnvVar } from "./types";
 type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | null;
 
 export default function App() {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const { theme, toggle: toggleTheme } = useTheme();
   const { vars, loading, error, refresh } = useEnvVars();
   const [selected, setSelected] = useState<EnvVar | null>(null);

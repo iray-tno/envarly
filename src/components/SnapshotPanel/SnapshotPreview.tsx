@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import type { DiffEntry } from "../../lib/diff";
 import type { SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
@@ -12,7 +12,7 @@ interface SnapshotPreviewProps {
 }
 
 export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPreviewProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-2">

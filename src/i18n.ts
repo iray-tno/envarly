@@ -3,8 +3,10 @@ import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 import ja from "./locales/ja.json";
 
+const STORAGE_KEY = "envarly-language";
+const stored = localStorage.getItem(STORAGE_KEY);
 const detected = navigator.language;
-const lng = detected.startsWith("ja") ? "ja" : "en";
+const lng = stored === "ja" || stored === "en" ? stored : detected.startsWith("ja") ? "ja" : "en";
 
 i18n
   .use(initReactI18next)

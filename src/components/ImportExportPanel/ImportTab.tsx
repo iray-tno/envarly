@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { resolveSecret } from "../../lib/secrets";
 import type { VarScope } from "../../types";
@@ -18,7 +18,7 @@ interface ImportTabProps {
 }
 
 export function ImportTab({ onStage, onStatus }: ImportTabProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const fileRef = useRef<HTMLInputElement>(null);
   const [format, setFormat] = useState<ExportFormat>("json");
   const [text, setText] = useState("");

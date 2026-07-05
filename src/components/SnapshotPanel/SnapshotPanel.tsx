@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
 import { computeDiff } from "../../lib/diff";
@@ -22,7 +22,7 @@ interface CompareResult {
 }
 
 export function SnapshotPanel({ onStageSnapshot }: Props) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [snapshots, setSnapshots] = useState<SnapshotMeta[]>([]);
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);

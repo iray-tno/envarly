@@ -1,5 +1,5 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { Button } from "../ui/Button";
 
@@ -25,7 +25,7 @@ export function AppHeader({
   onRefresh, onApplyStaged, onDiscard, onShowChanges, onImportExport,
   onToggleSnapshots, onToggleTheme, onLicenses,
 }: AppHeaderProps) {
-  const { t } = useTranslation();
+  const { t, language, toggleLanguage } = useI18n();
 
   return (
     <header
@@ -94,6 +94,9 @@ export function AppHeader({
         )}
         <Button variant="ghost" size="xs" onClick={() => openUrl("https://github.com/iray-tno/envarly")} title="View on GitHub">
           ↗ GitHub
+        </Button>
+        <Button variant="ghost" size="xs" onClick={toggleLanguage} title={language === "ja" ? "Switch to English" : "日本語に切り替え"}>
+          {language === "ja" ? "EN" : "JA"}
         </Button>
         <Button variant="ghost" size="xs" onClick={onToggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
           {theme === "dark" ? "☀" : "🌙"}
