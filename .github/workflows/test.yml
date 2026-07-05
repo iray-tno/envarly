@@ -9,6 +9,8 @@ jobs:
   frontend:
     name: Frontend (vitest)
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -17,16 +19,40 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check-version
-      - run: npx vitest run
+      - name: Test (Vitest)
+        run: npx vitest run --reporter=junit --outputFile=test-results.xml
+        continue-on-error: true
+      - name: Report Vitest results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Vitest
+          path: test-results.xml
+          reporter: java-junit
+      - name: Lint (Biome)
+        run: npx biome check --reporter=github src
+        continue-on-error: true
 
   rust:
-    name: Rust (cargo test)
+    name: Rust (cargo nextest)
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-      - run: cargo test
+      - uses: taiki-e/install-action@nextest
+      - name: Test (cargo nextest)
+        run: cargo nextest run --profile ci
         working-directory: src-tauri
+        continue-on-error: true
+      - name: Report nextest results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Cargo Nextest
+          path: src-tauri/target/nextest/ci/nextest.xml
+          reporter: java-junit
