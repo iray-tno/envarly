@@ -72,9 +72,7 @@ jobs:
           mv storybook-static site/storybook
 
       - name: Build HTML reports
-        run: |
-          mkdir -p site/reports
-          npx xunit-viewer --results junit-reports --output site/reports/index.html --title "Envarly — Reports"
+        run: npx allure generate junit-reports --clean -o site/reports
 
       - uses: actions/upload-pages-artifact@v3
         with:
