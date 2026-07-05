@@ -11,8 +11,11 @@ const vars: Record<string, string> = {
   PROGRAMFILES: "windows", "PROGRAMFILES(X86)": "windows", PROGRAMDATA: "windows",
   COMPUTERNAME: "windows", USERNAME: "windows", USERDOMAIN: "windows", OS: "windows",
   PROCESSOR_ARCHITECTURE: "windows", NUMBER_OF_PROCESSORS: "windows", SYSTEMDRIVE: "windows",
-  PUBLIC: "windows", ALLUSERSPROFILE: "windows", ONEDRIVE: "windows",
+  PUBLIC: "windows", ALLUSERSPROFILE: "windows",
+  ONEDRIVE: "windows", ONEDRIVECONSUMER: "windows", ONEDRIVECOMMERCIAL: "windows",
   PSMODULEPATH: "windows", DRIVERDATA: "windows",
+  PROCESSOR_IDENTIFIER: "windows", PROCESSOR_LEVEL: "windows", PROCESSOR_REVISION: "windows",
+  POWERSHELL_DISTRIBUTION_CHANNEL: "windows",
 
   // Network
   HTTP_PROXY: "network", HTTPS_PROXY: "network", NO_PROXY: "network", ALL_PROXY: "network",
@@ -69,6 +72,12 @@ const vars: Record<string, string> = {
   // Azure
   AZURE_SUBSCRIPTION_ID: "azure", AZURE_TENANT_ID: "azure",
   AZURE_CLIENT_ID: "azure", AZURE_CLIENT_SECRET: "azure",
+
+  // GPU / CUDA
+  CUDA_PATH: "gpu", CUDA_HOME: "gpu", CUDA_VISIBLE_DEVICES: "gpu",
+  NVIDIA_VISIBLE_DEVICES: "gpu", NVIDIA_DRIVER_CAPABILITIES: "gpu",
+  ROCM_PATH: "gpu", HIP_PATH: "gpu", HIP_VISIBLE_DEVICES: "gpu",
+  OPENCL_VENDOR_PATH: "gpu",
 
   // Dev tools
   EDITOR: "devtools", VISUAL: "devtools", DATABASE_URL: "devtools", DEBUG: "devtools",

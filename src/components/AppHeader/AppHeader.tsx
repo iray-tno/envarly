@@ -25,7 +25,7 @@ export function AppHeader({
   onRefresh, onApplyStaged, onDiscard, onShowChanges, onImportExport,
   onToggleSnapshots, onToggleTheme, onLicenses,
 }: AppHeaderProps) {
-  const { t, language, toggleLanguage } = useI18n();
+  const { t, language, setLanguage } = useI18n();
 
   return (
     <header
@@ -95,9 +95,17 @@ export function AppHeader({
         <Button variant="ghost" size="xs" onClick={() => openUrl("https://github.com/iray-tno/envarly")} title="View on GitHub">
           ↗ GitHub
         </Button>
-        <Button variant="ghost" size="xs" onClick={toggleLanguage} title={language === "ja" ? "Switch to English" : "日本語に切り替え"}>
-          {language === "ja" ? "EN" : "JA"}
-        </Button>
+        <label className="flex items-center gap-1 text-xs text-dim cursor-pointer">
+          <span title="Language">🌐</span>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as "en" | "ja")}
+            className="bg-transparent text-xs text-dim cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent rounded"
+          >
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+          </select>
+        </label>
         <Button variant="ghost" size="xs" onClick={onToggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
           {theme === "dark" ? "☀" : "🌙"}
         </Button>

@@ -212,7 +212,8 @@
       "aws": "AWS",
       "gcp": "GCP",
       "azure": "Azure",
-      "devtools": "開発ツール"
+      "devtools": "開発ツール",
+      "gpu": "GPU / CUDA"
     },
     "PATH": "実行ファイルを検索するディレクトリのリスト。Node、Python、Git などのプログラムはここで見つかります。",
     "PATHEXT": "シェルが実行可能として扱うファイル拡張子（例: .COM;.EXE;.BAT）。",
@@ -239,8 +240,14 @@
     "PUBLIC": "全ユーザーがアクセスできる共有パブリックプロファイルディレクトリ（例: C:\\Users\\Public）。",
     "ALLUSERSPROFILE": "C:\\ProgramData の旧エイリアス。マシンごとの共有データディレクトリを指す。",
     "ONEDRIVE": "ユーザーの OneDrive 同期フォルダーへのパス。OneDrive クライアントによって設定。",
+    "ONEDRIVECONSUMER": "個人用 OneDrive 同期フォルダーへのパス。OneDrive コンシューマークライアントが設定するバリアント。",
+    "ONEDRIVECOMMERCIAL": "OneDrive for Business 同期フォルダーへのパス。OneDrive 商用クライアントが設定。",
     "PSMODULEPATH": "PowerShell がモジュールを検索するディレクトリのセミコロン区切りリスト。",
     "DRIVERDATA": "カーネルモードとユーザーモード間で共有されるドライバーデータファイルのディレクトリ。",
+    "PROCESSOR_IDENTIFIER": "CPU モデルの完全な説明文字列（例: Intel64 Family 6 Model 186 Stepping 2）。",
+    "PROCESSOR_LEVEL": "プロセッサーファミリーレベル番号。レガシーアプリが CPU 世代を判定するために使用。",
+    "PROCESSOR_REVISION": "プロセッサーのモデルとステッピングを16進数にパック。PROCESSOR_LEVEL を補完。",
+    "POWERSHELL_DISTRIBUTION_CHANNEL": "PowerShell の配布チャンネルを識別（例: MSI、Store、dotnet-global-tool）。テレメトリで使用。",
     "HTTP_PROXY": "curl、wget、Python requests など多くの CLI ツールが使用する HTTP プロキシ URL。",
     "HTTPS_PROXY": "HTTPS プロキシ URL。HTTPS リクエストでは HTTP_PROXY より優先される。",
     "NO_PROXY": "プロキシをバイパスするホスト名/ドメインのカンマ区切りリスト。",
@@ -335,6 +342,15 @@
     "PORT": "サーバープロセスがリッスンする TCP ポート。多くの Web フレームワークが慣習として使用。",
     "HOST": "サーバーがバインドするホスト名または IP アドレス（例: 0.0.0.0 または localhost）。",
     "TZ": "IANA タイムゾーン名（例: America/New_York）。プロセスのシステムタイムゾーンを上書き。",
-    "LANG": "プロセスのデフォルトロケール（例: en_US.UTF-8）。文字エンコーディングとソートに影響。"
+    "LANG": "プロセスのデフォルトロケール（例: en_US.UTF-8）。文字エンコーディングとソートに影響。",
+    "CUDA_PATH": "CUDA ツールキットのインストールディレクトリ。コンパイラやライブラリが CUDA ヘッダーとライブラリを見つけるために使用。",
+    "CUDA_HOME": "一部のフレームワーク（PyTorch、TensorFlow）が使用する CUDA_PATH の別名。CUDA ツールキットルートを指す。",
+    "CUDA_VISIBLE_DEVICES": "CUDA アプリケーションに見えるGPUインデックスのカンマ区切りリスト。GPU 使用を制限するために使用。",
+    "NVIDIA_VISIBLE_DEVICES": "NVIDIA Container Toolkit を使用した Docker コンテナ内で公開する GPU。CUDA_VISIBLE_DEVICES に相当。",
+    "NVIDIA_DRIVER_CAPABILITIES": "公開する Docker GPU 機能（例: compute,utility）。NVIDIA Container Toolkit が必要。",
+    "ROCM_PATH": "AMD ROCm インストールルート。HIP コンパイラと ROCm 対応フレームワークが使用。",
+    "HIP_PATH": "HIP ツールキットのインストールディレクトリ。AMD の CUDA 互換 GPU プログラミング層を指す。",
+    "HIP_VISIBLE_DEVICES": "HIP/ROCm アプリケーションに見える GPU インデックス。CUDA_VISIBLE_DEVICES に相当。",
+    "OPENCL_VENDOR_PATH": "OpenCL ICD（インストール可能クライアントドライバー）ベンダーファイルを含むディレクトリ。"
   }
 }
