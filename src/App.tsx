@@ -1,38 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "./components/AppHeader/AppHeader";
+import { AppModals } from "./components/AppModals/AppModals";
 import { PathBanner } from "./components/PathBanner/PathBanner";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
-import { DiffPanel } from "./components/DiffPanel/DiffPanel";
-import { ImportExportPanel } from "./components/ImportExportPanel/ImportExportPanel";
-import { LicensesPanel } from "./components/LicensesPanel/LicensesPanel";
-import { NewVarModal } from "./components/NewVarModal/NewVarModal";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
-import { StagedModal } from "./components/StagedModal/StagedModal";
 import { IconButton } from "./components/ui/IconButton";
-import { Modal } from "./components/ui/Modal";
 import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
 import { useEnvVars } from "./hooks/useEnvVars";
-import { useStaged, stagedKey, type StagedChange } from "./hooks/useStaged";
+import { useStaged } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
-import { applyAccepted, computeDiff, snapshotsEqual } from "./lib/diff";
-import type { DiffEntry } from "./lib/diff";
+import { usePathStatus } from "./hooks/usePathStatus";
+import { useDiff } from "./hooks/useDiff";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { stagedToDiff } from "./lib/stagedToDiff";
 import { api } from "./api";
-import type { EnvSnapshot, EnvVar, VarScope } from "./types";
+import type { EnvVar } from "./types";
 
 type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | null;
-
-function stagedToDiff(staged: Map<string, StagedChange>): DiffEntry[] {
-  return Array.from(staged.values()).map((c): DiffEntry => {
-    if (c.kind === "delete")
-      return { kind: "removed", name: c.name, scope: c.scope, value: c.originalValue! };
-    if (c.originalValue === null)
-      return { kind: "added", name: c.name, scope: c.scope, value: c.newValue! };
-    return { kind: "changed", name: c.name, scope: c.scope, oldValue: c.originalValue, newValue: c.newValue! };
-  }).sort((a, b) => a.scope.localeCompare(b.scope) || a.name.localeCompare(b.name));
-}
 
 export default function App() {
   const { theme, toggle: toggleTheme } = useTheme();
@@ -41,51 +28,31 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
-  const [actualUserPathInEnv, setActualUserPathInEnv] = useState(true);
-  const [actualSystemPathInEnv, setActualSystemPathInEnv] = useState(true);
-  const [pathBannerDismissed, setPathBannerDismissed] = useState(
-    () => localStorage.getItem("envarly.pathBannerDismissed") === "1",
-  );
+  const [stagedBusy, setStagedBusy] = useState(false);
 
   const { staged, effectiveVars, stageSet, stageDelete, stageImport, stageSnapshot, unstage, clearStaged, restoreStaged } =
     useStaged(vars);
 
-  // Computed: Envarly is in PATH if the registry already has it OR it's currently staged.
-  // This means the "Add Envarly to PATH" button disappears when staged and reappears when unstaged,
-  // without any optimistic state that can get stuck.
-  const userPathInEnv = actualUserPathInEnv || staged.has(stagedKey("Path", "User"));
-  const systemPathInEnv = actualSystemPathInEnv || staged.has(stagedKey("Path", "System"));
-
   const { push, undo, redo } = useUndo();
+
+  const {
+    userPathInEnv, systemPathInEnv, pathBannerDismissed,
+    refreshPathStatus, handleStageAddToPath, handleDismissPathBanner,
+  } = usePathStatus(staged, stageSet);
+
+  const { diffEntries, baselineRef, checkForExternalChanges, handleDiffApply, handleDiffDismiss, applyBusy } =
+    useDiff(refresh, setDialog);
 
   const localUndoRef = useRef<(() => void) | null>(null);
   const handleRegisterLocalUndo = useCallback((fn: (() => void) | null) => {
     localUndoRef.current = fn;
   }, []);
 
-  const baselineRef = useRef<EnvSnapshot | null>(null);
-  const [diffEntries, setDiffEntries] = useState<DiffEntry[]>([]);
-  const [applyBusy, setApplyBusy] = useState(false);
-  const [stagedBusy, setStagedBusy] = useState(false);
-
-  const checkForExternalChanges = useCallback(async () => {
-    if (!baselineRef.current) return;
-    try {
-      const current = await api.getRegistrySnapshot();
-      setDiffEntries(snapshotsEqual(baselineRef.current, current) ? [] : computeDiff(baselineRef.current, current));
-    } catch {}
-  }, []);
-
   useEffect(() => {
     (async () => {
       try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
-      let isAdmin = false;
-      try { isAdmin = await api.isElevated(); setElevated(isAdmin); } catch { }
-      try {
-        const ps = await api.getPathStatus();
-        setActualUserPathInEnv(ps.userHasEntry);
-        setActualSystemPathInEnv(ps.systemHasEntry);
-      } catch { }
+      try { setElevated(await api.isElevated()); } catch { }
+      await refreshPathStatus();
       refresh();
     })();
   }, []);
@@ -95,23 +62,7 @@ export default function App() {
     await checkForExternalChanges();
   }, [refresh, checkForExternalChanges]);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (!e.ctrlKey) return;
-      // Local discard takes priority even when a text field has focus.
-      if (e.key === "z" && !e.shiftKey && localUndoRef.current) {
-        e.preventDefault();
-        localUndoRef.current();
-        return;
-      }
-      const active = document.activeElement;
-      if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
-      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
-      if (e.key === "y" || (e.key === "z" && e.shiftKey)) { e.preventDefault(); redo(); }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo]);
+  useKeyboardShortcuts(undo, redo, localUndoRef);
 
   const {
     handleStage, handleStageDelete, handleUnstage, handleClearStaged,
@@ -127,36 +78,6 @@ export default function App() {
     return effectiveVars.find((v) => v.name === selected.name && v.scope === selected.scope) ?? null;
   }, [selected, effectiveVars]);
 
-  const handleDiffApply = async (accepted: DiffEntry[], reverted: DiffEntry[]) => {
-    setApplyBusy(true);
-    try {
-      for (const entry of reverted) {
-        const scope = entry.scope as VarScope;
-        if (entry.kind === "added") await api.deleteEnvVar(entry.name, scope);
-        else if (entry.kind === "removed") await api.setEnvVar(entry.name, entry.value!, scope);
-        else await api.setEnvVar(entry.name, entry.oldValue!, scope);
-      }
-      if (baselineRef.current) baselineRef.current = applyAccepted(baselineRef.current, accepted);
-      setDiffEntries([]);
-      setDialog(null);
-      await refresh();
-    } catch (err) {
-      console.error("Failed to apply diff", err);
-    } finally {
-      setApplyBusy(false);
-    }
-  };
-
-  const handleDiffDismiss = () => {
-    if (baselineRef.current) baselineRef.current = applyAccepted(baselineRef.current, diffEntries);
-    setDiffEntries([]);
-    setDialog(null);
-  };
-
-  useEffect(() => {
-    if (diffEntries.length > 0) setDialog("changes");
-  }, [diffEntries.length]);
-
   const handleApplyStaged = async (takeSnapshot: boolean) => {
     setStagedBusy(true);
     try {
@@ -169,11 +90,7 @@ export default function App() {
       setDialog(null);
       await refresh();
       try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
-      try {
-        const ps = await api.getPathStatus();
-        setActualUserPathInEnv(ps.userHasEntry);
-        setActualSystemPathInEnv(ps.systemHasEntry);
-      } catch { }
+      await refreshPathStatus();
     } catch (err) {
       console.error("Failed to apply staged changes", err);
     } finally {
@@ -182,21 +99,6 @@ export default function App() {
   };
 
   const stagedDiff = useMemo(() => stagedToDiff(staged), [staged]);
-
-  const handleStageAddToPath = useCallback(async (scope: "User" | "System") => {
-    try {
-      const proposed = await api.getPathProposal(scope);
-      if (proposed === null) return; // already in PATH
-      stageSet("Path", scope, proposed);
-    } catch (err) {
-      console.error("Failed to get PATH proposal", err);
-    }
-  }, [stageSet]);
-
-  const handleDismissPathBanner = useCallback(() => {
-    localStorage.setItem("envarly.pathBannerDismissed", "1");
-    setPathBannerDismissed(true);
-  }, []);
 
   return (
     <ThemeContext.Provider value={theme}>
@@ -271,32 +173,22 @@ export default function App() {
           )}
         </main>
 
-        <Modal open={dialog === "importexport"} onClose={() => setDialog(null)} title="Import / Export" size="xl">
-          <ImportExportPanel onStage={handleStageImport} />
-        </Modal>
-
-        <Modal
-          open={dialog === "staged"}
-          onClose={() => setDialog(null)}
-          title={`Apply ${staged.size} staged ${staged.size === 1 ? "change" : "changes"}`}
-          size="xl"
-        >
-          <StagedModal diff={stagedDiff} busy={stagedBusy} onApply={handleApplyStaged} onClose={() => setDialog(null)} />
-        </Modal>
-
-        <Modal open={dialog === "changes"} onClose={handleDiffDismiss} title={`External changes detected (${diffEntries.length})`} size="xl">
-          <div className="px-6 py-5">
-            <DiffPanel entries={diffEntries} onApply={handleDiffApply} onDismiss={handleDiffDismiss} busy={applyBusy} />
-          </div>
-        </Modal>
-
-        <Modal open={dialog === "newvar"} onClose={() => setDialog(null)} title="New variable" size="md">
-          <NewVarModal vars={effectiveVars} elevated={elevated} onStage={handleNewVarStage} onClose={() => setDialog(null)} />
-        </Modal>
-
-        <Modal open={dialog === "licenses"} onClose={() => setDialog(null)} title="Open Source Licenses" size="2xl" flex>
-          <LicensesPanel />
-        </Modal>
+        <AppModals
+          dialog={dialog}
+          setDialog={setDialog}
+          staged={staged}
+          stagedDiff={stagedDiff}
+          stagedBusy={stagedBusy}
+          onApplyStaged={handleApplyStaged}
+          diffEntries={diffEntries}
+          applyBusy={applyBusy}
+          onDiffApply={handleDiffApply}
+          onDiffDismiss={handleDiffDismiss}
+          onStageImport={handleStageImport}
+          effectiveVars={effectiveVars}
+          elevated={elevated}
+          onNewVarStage={handleNewVarStage}
+        />
       </div>
     </ThemeContext.Provider>
   );
