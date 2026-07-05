@@ -207,7 +207,7 @@ pub fn read_all_with(backend: &dyn EnvBackend) -> Result<Vec<EnvVar>, EnvarlyErr
         vars.push(EnvVar { name, value, scope: VarScope::System, list_separator });
     }
 
-    vars.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    vars.sort_by_key(|a| a.name.to_lowercase());
     Ok(vars)
 }
 
