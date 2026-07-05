@@ -2,6 +2,7 @@
 mod cli;
 #[cfg(windows)]
 mod commands;
+#[cfg(windows)]
 mod crypto;
 mod env_store;
 mod error;
