@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
 import { Button } from "../ui/Button";
@@ -23,6 +24,7 @@ function isList(value: string): boolean {
 }
 
 function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: string }) {
+  const { t } = useTranslation();
   const oldEntries = splitList(oldValue);
   const newEntries = splitList(newValue);
   const removed = oldEntries.filter((e) => !newEntries.includes(e));
@@ -31,7 +33,7 @@ function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: str
   if (removed.length === 0 && added.length === 0) {
     return (
       <p className="font-mono text-[11px] text-muted mt-1">
-        Order changed ({oldEntries.length} entries)
+        {t("staged.order_changed", { count: oldEntries.length })}
       </p>
     );
   }
@@ -96,6 +98,7 @@ function ListEntries({ value, className }: { value: string; className?: string }
 }
 
 export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
+  const { t } = useTranslation();
   const [takeSnapshot, setTakeSnapshot] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("delta");
 
@@ -115,24 +118,23 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
       {criticalChanges.length > 0 && (
         <div className="px-6 py-3 bg-danger/10 border-b border-danger/30 shrink-0">
           <p className="text-xs font-semibold text-danger mb-1">
-            ⚠ Critical system variable{criticalChanges.length > 1 ? "s" : ""} will be modified
+            {t("staged.critical", { count: criticalChanges.length })}
           </p>
           <p className="text-xs text-danger/80">
-            {criticalChanges.map((e) => e.name).join(", ")} — changing {criticalChanges.length > 1 ? "these" : "this"} can break Windows or running applications.
-            A snapshot is strongly recommended.
+            {t("staged.critical_detail", { count: criticalChanges.length, vars: criticalChanges.map((e) => e.name).join(", ") })}
           </p>
         </div>
       )}
 
       <div className="px-6 py-4 border-b border-rim shrink-0">
         <p className="text-xs text-muted mb-3">
-          These changes will be written to the Windows registry and broadcast to running applications.
+          {t("staged.broadcast")}
         </p>
         <div className="flex items-center justify-between">
           <div className="flex gap-3 text-xs">
-            {byKind.added.length > 0   && <span className="text-success">+{byKind.added.length} added</span>}
-            {byKind.removed.length > 0 && <span className="text-danger">−{byKind.removed.length} removed</span>}
-            {byKind.changed.length > 0 && <span className="text-warn">~{byKind.changed.length} changed</span>}
+            {byKind.added.length > 0   && <span className="text-success">{t("staged.added", { count: byKind.added.length })}</span>}
+            {byKind.removed.length > 0 && <span className="text-danger">{t("staged.removed", { count: byKind.removed.length })}</span>}
+            {byKind.changed.length > 0 && <span className="text-warn">{t("staged.changed", { count: byKind.changed.length })}</span>}
           </div>
           {hasListValues && (
             <div className="flex rounded border border-rim overflow-hidden text-[10px]">
@@ -148,7 +150,7 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
                       : "text-muted hover:text-fg hover:bg-hover",
                   )}
                 >
-                  {mode}
+                  {mode === "delta" ? t("staged.view_delta") : t("staged.view_full")}
                 </button>
               ))}
             </div>
@@ -172,7 +174,7 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-mono font-semibold text-fg">{entry.name}</span>
                 <span className="opacity-60 text-[10px]">{entry.scope}</span>
-                <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">{entry.kind}</span>
+                <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">{t(`staged.kind_${entry.kind}`)}</span>
               </div>
 
               {entry.kind === "removed" && (
@@ -219,12 +221,12 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
             disabled={busy}
             className="accent-accent"
           />
-          Take a snapshot before applying (recommended)
+          {t("staged.take_snapshot")}
         </label>
         <div className="flex gap-2 justify-end">
-          <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>{t("staged.cancel")}</Button>
           <Button variant="primary" size="md" onClick={() => onApply(takeSnapshot)} disabled={busy}>
-            {busy ? "Applying…" : `Apply ${diff.length} ${diff.length === 1 ? "change" : "changes"} to registry`}
+            {busy ? t("staged.applying") : t("staged.apply", { count: diff.length })}
           </Button>
         </div>
       </div>

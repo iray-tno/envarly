@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { resolveSecret } from "../../lib/secrets";
 import type { VarScope } from "../../types";
@@ -17,6 +18,7 @@ interface ImportTabProps {
 }
 
 export function ImportTab({ onStage, onStatus }: ImportTabProps) {
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [format, setFormat] = useState<ExportFormat>("json");
   const [text, setText] = useState("");
@@ -40,13 +42,13 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
 
   const handleParse = async () => {
     const content = text.trim();
-    if (!content) { onStatus("Paste or upload a file first."); return; }
+    if (!content) { onStatus(t("import.no_content")); return; }
     setParsing(true);
     onStatus(null);
     try {
       const snap = await api.parseImport(content, format);
       const vars = flattenSnapshot(snap);
-      if (vars.length === 0) { onStatus("No environment variables found in file."); setPreview(null); return; }
+      if (vars.length === 0) { onStatus(t("import.no_vars")); setPreview(null); return; }
       setPreview(vars);
       setChecked(Object.fromEntries(vars.map((v) => [varKey(v), true])));
     } catch (e) {
@@ -60,7 +62,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
   const handleApply = async () => {
     if (!preview) return;
     const selected = preview.filter((v) => checked[varKey(v)]);
-    if (selected.length === 0) { onStatus("No variables selected."); return; }
+    if (selected.length === 0) { onStatus(t("import.no_selected")); return; }
     setApplying(true);
     onStatus(null);
     try {
@@ -84,10 +86,10 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
       }
 
       onStage(sets, deletes);
-      const suffix = strategy === "replace" && deletes.length > 0
-        ? ` (+${deletes.length} deletions staged)`
+      const extra = strategy === "replace" && deletes.length > 0
+        ? t("import.result_extra", { count: deletes.length })
         : "";
-      onStatus(`${selected.length} variable${selected.length !== 1 ? "s" : ""} staged${suffix}. Use "Apply staged" to commit.`);
+      onStatus(t("import.result", { count: selected.length, extra }));
       setPreview(null);
       setText("");
     } catch (e) {
@@ -108,7 +110,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <Button variant="secondary" onClick={() => fileRef.current?.click()}>Choose file…</Button>
+        <Button variant="secondary" onClick={() => fileRef.current?.click()}>{t("import.choose_file")}</Button>
         <SegmentedControl aria-label="Import format" options={importFormatOptions} value={format} onChange={setFormat} />
         <input ref={fileRef} type="file" accept=".json,.reg" className="hidden" onChange={handleFileChange} aria-label="Import file" />
       </div>
@@ -118,12 +120,12 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
         labelHidden
         value={text}
         onChange={(e) => { setText(e.target.value); setPreview(null); }}
-        placeholder="…or paste file contents here"
+        placeholder={t("import.paste_placeholder")}
         rows={5}
       />
 
       <Button variant="secondary" onClick={handleParse} disabled={parsing || !text.trim()} className="self-start">
-        {parsing ? "Parsing…" : "Parse"}
+        {parsing ? t("import.parsing") : t("import.parse")}
       </Button>
 
       {preview && (
@@ -138,12 +140,12 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
           />
 
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium text-muted uppercase tracking-wide">Merge strategy</span>
+            <span className="text-xs font-medium text-muted uppercase tracking-wide">{t("import.merge_strategy")}</span>
             <SegmentedControl aria-label="Merge strategy" options={strategyOptions} value={strategy} onChange={setStrategy} />
             <p className="text-xs text-dim">
               {strategy === "merge"
-                ? "Add and update selected variables. Variables not in this file are left unchanged."
-                : "Make the selected scope(s) exactly match this file. Variables currently in the scope but not selected here will be deleted."}
+                ? t("import.merge_desc")
+                : t("import.replace_desc")}
             </p>
           </div>
 
@@ -151,8 +153,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
             <div className="flex gap-2 px-3 py-2 rounded border border-danger/40 bg-danger/10 text-danger text-xs">
               <span className="shrink-0">⚠</span>
               <span>
-                Replace will delete all <strong>{affectedScopes.join(" and ")}</strong> variables
-                not present in your selection. This cannot be undone — consider creating a snapshot first.
+                {t("import.replace_warning", { scopes: affectedScopes.join(" and ") })}
               </span>
             </div>
           )}
@@ -164,7 +165,9 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
             disabled={applying || noneChecked}
             className="self-start"
           >
-            {applying ? "Staging…" : `Stage ${checkedCount} variable${checkedCount !== 1 ? "s" : ""}${strategy === "replace" ? " (Replace)" : ""}`}
+            {applying ? t("import.staging") : strategy === "replace"
+              ? t("import.stage_replace", { count: checkedCount })
+              : t("import.stage", { count: checkedCount })}
           </Button>
         </div>
       )}

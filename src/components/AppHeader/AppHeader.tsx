@@ -1,4 +1,5 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { Button } from "../ui/Button";
 
@@ -24,6 +25,8 @@ export function AppHeader({
   onRefresh, onApplyStaged, onDiscard, onShowChanges, onImportExport,
   onToggleSnapshots, onToggleTheme, onLicenses,
 }: AppHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <header
       className="flex items-center gap-2 h-13 px-5 bg-panel border-b border-rim shrink-0"
@@ -39,28 +42,28 @@ export function AppHeader({
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
         <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
-          ↻ Refresh
+          {t("header.refresh")}
         </Button>
 
         {stagedCount > 0 && (
           <>
             <Button variant="primary" size="sm" onClick={onApplyStaged}>
-              Apply {stagedCount} staged {stagedCount === 1 ? "change" : "changes"}
+              {t("header.apply_staged", { count: stagedCount })}
             </Button>
             <Button variant="ghost" size="sm" onClick={onDiscard}>
-              Discard all
+              {t("header.discard_all")}
             </Button>
           </>
         )}
 
         {diffCount > 0 && (
           <Button variant="warn" size="sm" onClick={onShowChanges}>
-            ⚠ {diffCount} external {diffCount === 1 ? "change" : "changes"}
+            {t("header.external_changes", { count: diffCount })}
           </Button>
         )}
 
         <Button variant="ghost" size="sm" onClick={onImportExport}>
-          Import / Export
+          {t("header.import_export")}
         </Button>
 
         <Button
@@ -68,7 +71,7 @@ export function AppHeader({
           size="sm"
           onClick={onToggleSnapshots}
         >
-          Snapshots
+          {t("header.snapshots")}
         </Button>
       </div>
 
@@ -81,13 +84,13 @@ export function AppHeader({
             variant="warn"
             size="sm"
             onClick={() => api.restartAsAdmin()}
-            title="System variables are read-only. Restart as administrator to edit them."
+            title={t("header.run_as_admin_title")}
           >
-            🛡 Run as admin
+            {t("header.run_as_admin")}
           </Button>
         )}
         {elevated && (
-          <span className="text-xs text-success opacity-60">🛡 Administrator</span>
+          <span className="text-xs text-success opacity-60">{t("header.administrator")}</span>
         )}
         <Button variant="ghost" size="xs" onClick={() => openUrl("https://github.com/iray-tno/envarly")} title="View on GitHub">
           ↗ GitHub
@@ -96,7 +99,7 @@ export function AppHeader({
           {theme === "dark" ? "☀" : "🌙"}
         </Button>
         <Button variant="ghost" size="xs" onClick={onLicenses} className="text-dim">
-          Licenses
+          {t("header.licenses")}
         </Button>
       </div>
     </header>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { cn } from "../../lib/cn";
 import { computeDiff } from "../../lib/diff";
@@ -21,6 +22,7 @@ interface CompareResult {
 }
 
 export function SnapshotPanel({ onStageSnapshot }: Props) {
+  const { t } = useTranslation();
   const [snapshots, setSnapshots] = useState<SnapshotMeta[]>([]);
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
@@ -49,10 +51,10 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
     try {
       await api.createSnapshot(snapshotLabel);
       setLabel("");
-      setStatus("Snapshot saved.");
+      setStatus(t("snapshot.saved"));
       await load();
     } catch (e) {
-      setStatus(`Error: ${e}`);
+      setStatus(t("snapshot.error_save", { error: e }));
     } finally {
       setBusy(false);
     }
@@ -66,7 +68,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
       setPreviewDiff(computeDiff(current, snap.snapshot));
       setPreviewing(snap);
     } catch (e) {
-      setStatus(`Error loading preview: ${e}`);
+      setStatus(t("snapshot.error_preview", { error: e }));
     } finally {
       setLoadingPreview(false);
     }
@@ -78,8 +80,8 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
     const count = previewDiff.length;
     setStatus(
       count === 0
-        ? `"${previewing.label}" matches current state — nothing to stage.`
-        : `"${previewing.label}" staged (${count} change${count !== 1 ? "s" : ""}). Use "Apply staged" to commit.`,
+        ? t("snapshot.matches_current", { label: previewing.label })
+        : t("snapshot.staged", { count, label: previewing.label }),
     );
     setPreviewing(null);
     setPreviewDiff([]);
@@ -124,24 +126,22 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   return (
     <div className="w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto">
       <div>
-        <h2 className="text-sm font-semibold text-fg mb-1">Snapshots</h2>
-        <p className="text-xs text-muted">
-          Save the current state of all environment variables. Preview and restore any snapshot.
-        </p>
+        <h2 className="text-sm font-semibold text-fg mb-1">{t("snapshot.title")}</h2>
+        <p className="text-xs text-muted">{t("snapshot.description")}</p>
       </div>
 
       <div className="flex gap-2">
         <TextInput
           label="Snapshot label"
           labelHidden
-          placeholder="Snapshot label (optional)…"
+          placeholder={t("snapshot.label_placeholder")}
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           className="flex-1"
         />
         <Button variant="primary" size="md" onClick={handleCreate} disabled={busy}>
-          {busy && !previewing ? "…" : "Save snapshot"}
+          {busy && !previewing ? t("snapshot.saving") : t("snapshot.save")}
         </Button>
       </div>
 
@@ -169,14 +169,12 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
         <div className="flex flex-col gap-2">
           {comparingFrom && (
             <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-accent/30 bg-accent/10 text-accent text-xs">
-              <span>Select a snapshot to compare with <strong>{comparingFrom.label}</strong></span>
-              <Button variant="link" size="xs" onClick={handleCancelCompare}>Cancel</Button>
+              <span>{t("snapshot.comparing_hint", { label: comparingFrom.label })}</span>
+              <Button variant="link" size="xs" onClick={handleCancelCompare}>{t("snapshot.cancel")}</Button>
             </div>
           )}
           {snapshots.length === 0 && (
-            <p className="text-center text-dim text-xs py-6">
-              No snapshots yet. Create one before making changes!
-            </p>
+            <p className="text-center text-dim text-xs py-6">{t("snapshot.no_snapshots")}</p>
           )}
           {snapshots.map((s) => {
             const isComparingSource = comparingFrom?.id === s.id;
@@ -196,7 +194,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                   {comparingFrom ? (
                     !isComparingSource && (
                       <Button variant="secondary" size="sm" onClick={() => handlePickCompareTarget(s)}>
-                        Compare with
+                        {t("snapshot.compare_with")}
                       </Button>
                     )
                   ) : (
@@ -207,24 +205,24 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                         onClick={() => handlePreview(s)}
                         disabled={loadingPreview}
                       >
-                        {loadingPreview ? "…" : "Preview"}
+                        {loadingPreview ? "…" : t("snapshot.preview")}
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleStartCompare(s)}
                         disabled={snapshots.length < 2}
-                        title={snapshots.length < 2 ? "Need at least 2 snapshots to compare" : undefined}
+                        title={snapshots.length < 2 ? t("snapshot.need_two") : undefined}
                       >
-                        Compare
+                        {t("snapshot.compare")}
                       </Button>
                     </>
                   )}
                   {!comparingFrom && (
                     confirmDeleteId === s.id ? (
                       <>
-                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id)}>Delete</Button>
-                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id)}>{t("snapshot.delete")}</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)}>{t("snapshot.cancel")}</Button>
                       </>
                     ) : (
                       <IconButton

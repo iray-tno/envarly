@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { DiffEntry } from "../../lib/diff";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
+  const { t } = useTranslation();
   const [accepted, setAccepted] = useState<Record<string, boolean>>(
     () => Object.fromEntries(entries.map((e) => [`${e.scope}:${e.name}`, true])),
   );
@@ -46,31 +48,26 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-5 py-4 border-b border-rim shrink-0">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-sm font-semibold text-fg">External changes detected</h2>
+          <h2 className="text-sm font-semibold text-fg">{t("diff.title")}</h2>
           <IconButton aria-label="Close" icon="×" onClick={onDismiss} />
         </div>
-        <p className="text-xs text-muted mb-3">
-          The registry was modified outside Envarly.{" "}
-          <span className="text-fg font-medium">Check</span> the changes you want to{" "}
-          <span className="text-success">accept</span>, uncheck to{" "}
-          <span className="text-danger">revert</span> them.
-        </p>
+        <p className="text-xs text-muted mb-3">{t("diff.description")}</p>
 
         <div className="flex gap-3 text-xs mb-3">
-          {byKind.added.length > 0   && <span className="text-success">+{byKind.added.length} added</span>}
-          {byKind.removed.length > 0 && <span className="text-danger">−{byKind.removed.length} removed</span>}
-          {byKind.changed.length > 0 && <span className="text-warn">~{byKind.changed.length} changed</span>}
+          {byKind.added.length > 0   && <span className="text-success">{t("staged.added", { count: byKind.added.length })}</span>}
+          {byKind.removed.length > 0 && <span className="text-danger">{t("staged.removed", { count: byKind.removed.length })}</span>}
+          {byKind.changed.length > 0 && <span className="text-warn">{t("staged.changed", { count: byKind.changed.length })}</span>}
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="link" size="xs" onClick={() => toggleAll(true)} disabled={allChecked}>
-            Select all
+            {t("diff.select_all")}
           </Button>
           <span className="text-dim">·</span>
           <Button variant="link" size="xs" onClick={() => toggleAll(false)} disabled={noneChecked}>
-            Deselect all
+            {t("diff.deselect_all")}
           </Button>
-          <span className="text-dim ml-auto text-xs">{acceptedCount}/{entries.length} selected</span>
+          <span className="text-dim ml-auto text-xs">{t("diff.selected", { accepted: acceptedCount, total: entries.length })}</span>
         </div>
       </div>
 
@@ -86,9 +83,9 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
       </div>
 
       <div className="px-5 py-3 border-t border-rim shrink-0 flex gap-2 justify-end">
-        <Button variant="ghost" size="sm" onClick={onDismiss}>Dismiss</Button>
+        <Button variant="ghost" size="sm" onClick={onDismiss}>{t("diff.dismiss")}</Button>
         <Button variant="primary" size="sm" onClick={handleApply} disabled={busy}>
-          {busy ? "Applying…" : `Apply (${acceptedCount} accepted, ${entries.length - acceptedCount} reverted)`}
+          {busy ? t("diff.applying") : t("diff.apply", { accepted: acceptedCount, reverted: entries.length - acceptedCount })}
         </Button>
       </div>
     </div>

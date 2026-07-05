@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 import type { EnvVar, VarScope } from "../../types";
 import { Button } from "../ui/Button";
@@ -12,6 +13,7 @@ interface NewVarModalProps {
 }
 
 export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [scope, setScope] = useState<VarScope>("User");
   const [value, setValue] = useState("");
@@ -32,7 +34,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
     <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-semibold text-muted uppercase tracking-wide" htmlFor="newvar-name">
-          Name
+          {t("new_var.name")}
         </label>
         <input
           id="newvar-name"
@@ -41,7 +43,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
           value={name}
           onChange={(e) => setName(e.target.value)}
           spellCheck={false}
-          placeholder="VARIABLE_NAME"
+          placeholder={t("new_var.placeholder_name")}
           className={cn(
             "px-2.5 py-1.5 bg-surface border rounded font-mono text-sm text-fg",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent",
@@ -49,17 +51,17 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
           )}
         />
         {alreadyExists && (
-          <p className="text-xs text-danger">{trimmedName} already exists in {scope} scope</p>
+          <p className="text-xs text-danger">{t("new_var.exists", { name: trimmedName, scope })}</p>
         )}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-semibold text-muted uppercase tracking-wide">Scope</p>
+        <p className="text-xs font-semibold text-muted uppercase tracking-wide">{t("new_var.scope")}</p>
         <SegmentedControl
           aria-label="Variable scope"
           options={[
             { value: "User" as VarScope, label: "User" },
-            { value: "System" as VarScope, label: elevated ? "System" : "System (admin)", disabled: !elevated },
+            { value: "System" as VarScope, label: elevated ? "System" : t("new_var.system_admin"), disabled: !elevated },
           ]}
           value={scope}
           onChange={setScope}
@@ -68,7 +70,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-semibold text-muted uppercase tracking-wide" htmlFor="newvar-value">
-          Value
+          {t("new_var.value")}
         </label>
         <textarea
           id="newvar-value"
@@ -76,7 +78,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
           onChange={(e) => setValue(e.target.value)}
           spellCheck={false}
           rows={3}
-          placeholder="(empty)"
+          placeholder={t("new_var.placeholder_value")}
           className={cn(
             "px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-sm text-fg resize-none",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent",
@@ -85,9 +87,9 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
       </div>
 
       <div className="flex gap-2 justify-end pt-1">
-        <Button variant="ghost" size="md" type="button" onClick={onClose}>Cancel</Button>
+        <Button variant="ghost" size="md" type="button" onClick={onClose}>{t("new_var.cancel")}</Button>
         <Button variant="primary" size="md" type="submit" disabled={!canSubmit}>
-          Stage new variable
+          {t("new_var.stage")}
         </Button>
       </div>
     </form>

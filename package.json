@@ -29,9 +29,11 @@
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-opener": "^2",
     "clsx": "^2.1.1",
+    "i18next": "^26.3.4",
     "react": "^19.1.0",
     "react-diff-viewer-continued": "^4.2.2",
     "react-dom": "^19.1.0",
+    "react-i18next": "^17.0.8",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.1"
   },
@@ -49,12 +51,12 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "@vitest/coverage-v8": "^4.1.9",
+    "allure-commandline": "^2.32.0",
     "jsdom": "^29.1.1",
     "license-checker-rseidelsohn": "^4.4.2",
     "storybook": "^10.4.6",
     "typescript": "~5.8.3",
     "vite": "^6.4.3",
-    "vitest": "^4.1.9",
-    "allure-commandline": "^2.32.0"
+    "vitest": "^4.1.9"
   }
 }

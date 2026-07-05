@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { DiffEntry } from "../../lib/diff";
 import type { SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
@@ -11,6 +12,7 @@ interface SnapshotPreviewProps {
 }
 
 export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPreviewProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-2">
@@ -18,13 +20,11 @@ export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPre
           <p className="text-sm font-semibold text-fg truncate">{snap.label}</p>
           <p className="text-[11px] text-dim">{new Date(snap.createdAt).toLocaleString()}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onCancel}>← Back</Button>
+        <Button variant="ghost" size="sm" onClick={onCancel}>{t("snapshot_preview.back")}</Button>
       </div>
 
       {diff.length === 0 ? (
-        <p className="text-xs text-dim py-4 text-center">
-          Current state matches this snapshot — no changes would be made.
-        </p>
+        <p className="text-xs text-dim py-4 text-center">{t("snapshot_preview.no_diff")}</p>
       ) : (
         <DiffTable diff={diff} />
       )}
@@ -35,9 +35,9 @@ export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPre
           size="md"
           onClick={onRestore}
         >
-          {diff.length === 0 ? "No changes to stage" : "Stage restore"}
+          {diff.length === 0 ? t("snapshot_preview.no_changes") : t("snapshot_preview.restore")}
         </Button>
-        <Button variant="ghost" size="md" onClick={onCancel}>Cancel</Button>
+        <Button variant="ghost" size="md" onClick={onCancel}>{t("snapshot_preview.cancel")}</Button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function DetailPanel({ variable, allVars, elevated, userPathInEnv, systemPathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
+  const { t } = useTranslation();
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
 
@@ -68,7 +70,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3 text-dim">
         <span className="text-5xl opacity-20">⚙</span>
-        <p className="text-sm">Select a variable to view and edit it</p>
+        <p className="text-sm">{t("detail.empty")}</p>
       </div>
     );
   }
@@ -83,7 +85,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
   };
 
   const handleDelete = () => {
-    if (!confirm(`Stage "${variable.name}" for deletion from ${variable.scope} environment?`)) return;
+    if (!confirm(t("detail.confirm_delete", { name: variable.name, scope: variable.scope }))) return;
     onStageDelete(variable.name, variable.scope);
   };
 
@@ -111,9 +113,9 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
     && (variable.scope === "User" || elevated);
 
   const editorLabel =
-    effectiveSeparator === ";" ? "Path entries (drag to reorder)" :
-    effectiveSeparator === "," ? "List entries (drag to reorder)" :
-    "Value";
+    effectiveSeparator === ";" ? t("detail.label_path") :
+    effectiveSeparator === "," ? t("detail.label_list") :
+    t("detail.label_value");
 
   const entriesCount = effectiveSeparator
     ? value.split(effectiveSeparator).filter((p) => p.trim()).length
@@ -130,25 +132,25 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
           </Badge>
           {readOnly && (
             <>
-              <Badge variant="readonly">read-only</Badge>
+              <Badge variant="readonly">{t("detail.readonly_badge")}</Badge>
               <button
                 type="button"
                 onClick={() => api.restartAsAdmin()}
                 className="text-[10px] text-accent/70 hover:text-accent px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors shrink-0"
                 title="Restart as administrator to edit system variables"
               >
-                🛡 Restart as admin →
+                {t("detail.restart_admin")}
               </button>
             </>
           )}
           {isStagedSet && !dirty && (
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-accent/15 text-accent shrink-0">
-              staged
+              {t("detail.staged_badge")}
             </span>
           )}
           {isStagedDelete && (
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-danger/15 text-danger shrink-0">
-              staged: delete
+              {t("detail.staged_delete_badge")}
             </span>
           )}
         </div>
@@ -156,13 +158,13 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
         <div className="flex gap-2 shrink-0">
           {dirty ? (
             <>
-              <Button variant="primary" size="sm" onClick={handleApply}>Stage</Button>
-              <Button variant="ghost" size="sm" onClick={handleDiscard}>Discard</Button>
+              <Button variant="primary" size="sm" onClick={handleApply}>{t("detail.stage")}</Button>
+              <Button variant="ghost" size="sm" onClick={handleDiscard}>{t("detail.discard")}</Button>
             </>
           ) : isStagedSet ? (
-            <Button variant="ghost" size="sm" onClick={handleUnstage}>Unstage</Button>
+            <Button variant="ghost" size="sm" onClick={handleUnstage}>{t("detail.unstage")}</Button>
           ) : !isStagedDelete && !readOnly ? (
-            <Button variant="danger" size="sm" onClick={handleDelete}>Delete</Button>
+            <Button variant="danger" size="sm" onClick={handleDelete}>{t("detail.delete")}</Button>
           ) : null}
         </div>
       </div>
@@ -182,12 +184,12 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-dim px-6">
           <span className="text-4xl opacity-20">🗑</span>
           <p className="text-sm text-center">
-            <span className="font-mono font-semibold text-fg">{variable.name}</span> is staged for deletion.
+            {t("detail.staged_delete_title", { name: variable.name })}
           </p>
           <p className="text-xs text-center">
-            Original value: <span className="font-mono text-muted">{stagedChange.originalValue}</span>
+            {t("detail.original_value_label")} <span className="font-mono text-muted">{stagedChange.originalValue}</span>
           </p>
-          <Button variant="secondary" size="md" onClick={handleUnstage}>Unstage</Button>
+          <Button variant="secondary" size="md" onClick={handleUnstage}>{t("detail.unstage")}</Button>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
@@ -202,7 +204,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
                   className="text-[10px] text-accent/70 hover:text-accent px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors"
                   title="Stage adding Envarly install directory to this PATH variable"
                 >
-                  + Add Envarly to PATH
+                  {t("detail.add_to_path")}
                 </button>
               )}
             </div>
@@ -213,7 +215,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
                   onClick={() => setOverrideSeparator(null)}
                   className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
                 >
-                  Plain text
+                  {t("detail.plain_text")}
                 </button>
               ) : (
                 <>
@@ -222,14 +224,14 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
                     onClick={() => setOverrideSeparator(";")}
                     className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
                   >
-                    List (;)
+                    {t("detail.list_semicolon")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setOverrideSeparator(",")}
                     className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
                   >
-                    List (,)
+                    {t("detail.list_comma")}
                   </button>
                 </>
               )}
@@ -263,14 +265,14 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
           {/* Metadata */}
           <div className="flex flex-col gap-1.5 pt-2 border-t border-rim-subtle mt-1">
             {[
-              ["Scope", variable.scope],
-              ["Length", `${value.length} chars`],
-              ...(entriesCount !== null ? [["Entries", String(entriesCount)]] : []),
+              [t("detail.meta_scope"), variable.scope],
+              [t("detail.meta_length_label"), t("detail.meta_length", { count: value.length })],
+              ...(entriesCount !== null ? [[t("detail.meta_entries"), String(entriesCount)]] : []),
               ...(expandedValue !== null
-                ? [["Expanded", expandedValue.length > 60 ? `${expandedValue.slice(0, 60)}…` : expandedValue]]
+                ? [[t("detail.meta_expanded"), expandedValue.length > 60 ? `${expandedValue.slice(0, 60)}…` : expandedValue]]
                 : []),
               ...(isStagedSet && stagedChange.originalValue !== null
-                ? [["Original", stagedChange.originalValue.length > 40
+                ? [[t("detail.meta_original"), stagedChange.originalValue.length > 40
                     ? `${stagedChange.originalValue.slice(0, 40)}…`
                     : stagedChange.originalValue]]
                 : []),

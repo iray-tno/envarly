@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppHeader } from "./components/AppHeader/AppHeader";
 import { AppModals } from "./components/AppModals/AppModals";
 import { PathBanner } from "./components/PathBanner/PathBanner";
@@ -24,6 +25,7 @@ import type { EnvVar } from "./types";
 type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | null;
 
 export default function App() {
+  const { t } = useTranslation();
   const { theme, toggle: toggleTheme } = useTheme();
   const { vars, loading, error, refresh } = useEnvVars();
   const [selected, setSelected] = useState<EnvVar | null>(null);
@@ -99,7 +101,7 @@ export default function App() {
 
         {error && (
           <div className="px-4 py-2 bg-danger/15 border-b border-danger text-danger text-sm shrink-0">
-            Registry error: {error}
+            {t("app.registry_error", { error })}
           </div>
         )}
 
