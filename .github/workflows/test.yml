@@ -6,8 +6,8 @@ on:
   pull_request:
 
 jobs:
-  frontend:
-    name: Frontend (vitest)
+  test-js:
+    name: Test (frontend)
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -23,18 +23,40 @@ jobs:
         run: npx vitest run --reporter=junit --outputFile=test-results.xml
         continue-on-error: true
       - name: Report Vitest results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Vitest
           path: test-results.xml
           reporter: java-junit
 
-  biome:
-    name: Lint (Biome)
+  test-rs:
+    name: Test (rust)
     runs-on: ubuntu-latest
     permissions:
       checks: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - uses: taiki-e/install-action@nextest
+      - name: Test (cargo nextest)
+        run: cargo nextest run --profile ci
+        working-directory: src-tauri
+      - name: Report nextest results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: Cargo Nextest
+          path: src-tauri/target/nextest/ci/nextest.xml
+          reporter: java-junit
+
+  lint-js:
+    name: Lint (frontend)
+    runs-on: ubuntu-latest
+    permissions:
       pull-requests: write
     steps:
       - uses: actions/checkout@v7
@@ -55,36 +77,12 @@ jobs:
           ERRORS=$(echo "$RESULT" | jq '[.diagnostics[] | select(.severity == "error")] | length')
           WARNINGS=$(echo "$RESULT" | jq '[.diagnostics[] | select(.severity == "warning")] | length')
           printf "## Biome\n| | Count |\n|---|---:|\n| Errors | %s |\n| Warnings | %s |\n" "$ERRORS" "$WARNINGS" >> "$GITHUB_STEP_SUMMARY"
-          echo "$RESULT" | jq -rc '.diagnostics[] | select(.location.path.file != null) | {message:.description,severity:(if .severity=="error" then "ERROR" elif .severity=="warning" then "WARNING" else "INFO" end),location:{path:{name:.location.path.file},range:{start:{line:(.location.span.start.line//1),column:(.location.span.start.column//0)}}}}' | reviewdog -f=rdjsonl -name=biome -reporter=github-pr-check -fail-on-error=false || true
+          echo "$RESULT" | jq -rc '.diagnostics[] | select(.location.path.file != null) | {message:.description,severity:(if .severity=="error" then "ERROR" elif .severity=="warning" then "WARNING" else "INFO" end),location:{path:{name:.location.path.file},range:{start:{line:(.location.span.start.line//1),column:(.location.span.start.column//0)}}}}' | reviewdog -f=rdjsonl -name=biome -reporter=github-pr-review -fail-on-error=false || true
 
-  rust:
-    name: Rust (cargo nextest)
+  lint-rs:
+    name: Lint (rust)
     runs-on: ubuntu-latest
     permissions:
-      checks: write
-    steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-      - uses: taiki-e/install-action@nextest
-      - name: Test (cargo nextest)
-        run: cargo nextest run --profile ci
-        working-directory: src-tauri
-      - name: Report nextest results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Cargo Nextest
-          path: src-tauri/target/nextest/ci/nextest.xml
-          reporter: java-junit
-
-  clippy:
-    name: Lint (clippy)
-    runs-on: ubuntu-latest
-    permissions:
-      checks: write
       pull-requests: write
     steps:
       - uses: actions/checkout@v7
@@ -105,5 +103,5 @@ jobs:
           ERRORS=$(echo "$RESULT" | jq -s '[.[] | select(.reason=="compiler-message") | select(.message.code != null and (.message.code.code | startswith("clippy"))) | select(.message.level=="error")] | length')
           WARNINGS=$(echo "$RESULT" | jq -s '[.[] | select(.reason=="compiler-message") | select(.message.code != null and (.message.code.code | startswith("clippy"))) | select(.message.level=="warning")] | length')
           printf "## Clippy\n| | Count |\n|---|---:|\n| Errors | %s |\n| Warnings | %s |\n" "$ERRORS" "$WARNINGS" >> "$GITHUB_STEP_SUMMARY"
-          echo "$RESULT" | jq -rc 'select(.reason=="compiler-message") | select(.message.code != null and (.message.code.code | startswith("clippy"))) | select(.message.spans | length > 0) | {message:.message.message,severity:(if .message.level=="error" then "ERROR" elif .message.level=="warning" then "WARNING" else "INFO" end),location:{path:{name:.message.spans[0].file_name},range:{start:{line:.message.spans[0].line_start,column:.message.spans[0].column_start}}},code:{value:.message.code.code}}' | reviewdog -f=rdjsonl -name=clippy -reporter=github-pr-check -fail-on-error=false || true
+          echo "$RESULT" | jq -rc 'select(.reason=="compiler-message") | select(.message.code != null and (.message.code.code | startswith("clippy"))) | select(.message.spans | length > 0) | {message:.message.message,severity:(if .message.level=="error" then "ERROR" elif .message.level=="warning" then "WARNING" else "INFO" end),location:{path:{name:.message.spans[0].file_name},range:{start:{line:.message.spans[0].line_start,column:.message.spans[0].column_start}}},code:{value:.message.code.code}}' | reviewdog -f=rdjsonl -name=clippy -reporter=github-pr-review -fail-on-error=false || true
         working-directory: src-tauri
