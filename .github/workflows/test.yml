@@ -29,7 +29,18 @@ jobs:
           name: Vitest
           path: test-results.xml
           reporter: java-junit
-      - name: Lint (Biome)
+
+  biome:
+    name: Lint (Biome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Biome check
         run: npx biome check --reporter=github src
         continue-on-error: true
 
@@ -55,3 +66,18 @@ jobs:
           name: Cargo Nextest
           path: src-tauri/target/nextest/ci/nextest.xml
           reporter: java-junit
+
+  clippy:
+    name: Lint (clippy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+        working-directory: src-tauri
