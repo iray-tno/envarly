@@ -5,8 +5,8 @@ describe("lookupEnvDescription", () => {
   it("returns a description for a known variable", () => {
     const desc = lookupEnvDescription("JAVA_HOME");
     expect(desc).not.toBeNull();
-    expect(desc?.category).toBe("Java");
-    expect(desc?.summary.length).toBeGreaterThan(0);
+    expect(desc?.categoryKey).toBe("env_desc.categories.java");
+    expect(desc?.summaryKey).toBe("env_desc.JAVA_HOME");
   });
 
   it("is case-insensitive (lowercase)", () => {
@@ -25,24 +25,24 @@ describe("lookupEnvDescription", () => {
     expect(lookupEnvDescription("")).toBeNull();
   });
 
-  it("covers PATH with the Windows category", () => {
+  it("covers PATH with the windows category", () => {
     const desc = lookupEnvDescription("PATH");
-    expect(desc?.category).toBe("Windows");
+    expect(desc?.categoryKey).toBe("env_desc.categories.windows");
   });
 
-  it("covers GOPATH with the Go category", () => {
-    expect(lookupEnvDescription("GOPATH")?.category).toBe("Go");
+  it("covers GOPATH with the go category", () => {
+    expect(lookupEnvDescription("GOPATH")?.categoryKey).toBe("env_desc.categories.go");
   });
 
-  it("covers AWS_ACCESS_KEY_ID with the AWS category", () => {
-    expect(lookupEnvDescription("AWS_ACCESS_KEY_ID")?.category).toBe("AWS");
+  it("covers AWS_ACCESS_KEY_ID with the aws category", () => {
+    expect(lookupEnvDescription("AWS_ACCESS_KEY_ID")?.categoryKey).toBe("env_desc.categories.aws");
   });
 
-  it("covers DOCKER_HOST with the Docker category", () => {
-    expect(lookupEnvDescription("DOCKER_HOST")?.category).toBe("Docker");
+  it("covers DOCKER_HOST with the docker category", () => {
+    expect(lookupEnvDescription("DOCKER_HOST")?.categoryKey).toBe("env_desc.categories.docker");
   });
 
-  it("covers NODE_ENV with the Node.js category", () => {
-    expect(lookupEnvDescription("NODE_ENV")?.category).toBe("Node.js");
+  it("covers NODE_ENV with the nodejs category", () => {
+    expect(lookupEnvDescription("NODE_ENV")?.categoryKey).toBe("env_desc.categories.nodejs");
   });
 });
