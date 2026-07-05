@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { AppHeader } from "./components/AppHeader/AppHeader";
 import { AppModals } from "./components/AppModals/AppModals";
 import { PathBanner } from "./components/PathBanner/PathBanner";
@@ -15,8 +15,10 @@ import { useTheme } from "./hooks/useTheme";
 import { usePathStatus } from "./hooks/usePathStatus";
 import { useDiff } from "./hooks/useDiff";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useLocalUndo } from "./hooks/useLocalUndo";
+import { useAppInit } from "./hooks/useAppInit";
+import { useApplyStaged } from "./hooks/useApplyStaged";
 import { stagedToDiff } from "./lib/stagedToDiff";
-import { api } from "./api";
 import type { EnvVar } from "./types";
 
 type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | null;
@@ -28,12 +30,12 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
-  const [stagedBusy, setStagedBusy] = useState(false);
 
   const { staged, effectiveVars, stageSet, stageDelete, stageImport, stageSnapshot, unstage, clearStaged, restoreStaged } =
     useStaged(vars);
 
   const { push, undo, redo } = useUndo();
+  const { localUndoRef, handleRegisterLocalUndo } = useLocalUndo();
 
   const {
     userPathInEnv, systemPathInEnv, pathBannerDismissed,
@@ -43,24 +45,7 @@ export default function App() {
   const { diffEntries, baselineRef, checkForExternalChanges, handleDiffApply, handleDiffDismiss, applyBusy } =
     useDiff(refresh, setDialog);
 
-  const localUndoRef = useRef<(() => void) | null>(null);
-  const handleRegisterLocalUndo = useCallback((fn: (() => void) | null) => {
-    localUndoRef.current = fn;
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
-      try { setElevated(await api.isElevated()); } catch { }
-      await refreshPathStatus();
-      refresh();
-    })();
-  }, []);
-
-  const handleRefresh = useCallback(async () => {
-    await refresh();
-    await checkForExternalChanges();
-  }, [refresh, checkForExternalChanges]);
+  const { handleRefresh } = useAppInit({ baselineRef, setElevated, refreshPathStatus, refresh, checkForExternalChanges });
 
   useKeyboardShortcuts(undo, redo, localUndoRef);
 
@@ -73,30 +58,14 @@ export default function App() {
     setDialog, setSelected, setSnapshotsOpen,
   });
 
+  const { handleApplyStaged, busy: stagedBusy } = useApplyStaged({
+    staged, clearStaged, refresh, refreshPathStatus, baselineRef, setDialog,
+  });
+
   const effectiveSelected = useMemo<EnvVar | null>(() => {
     if (!selected) return null;
     return effectiveVars.find((v) => v.name === selected.name && v.scope === selected.scope) ?? null;
   }, [selected, effectiveVars]);
-
-  const handleApplyStaged = async (takeSnapshot: boolean) => {
-    setStagedBusy(true);
-    try {
-      if (takeSnapshot) await api.createSnapshot("auto: before apply");
-      for (const change of staged.values()) {
-        if (change.kind === "delete") await api.deleteEnvVar(change.name, change.scope);
-        else await api.setEnvVar(change.name, change.newValue!, change.scope);
-      }
-      clearStaged();
-      setDialog(null);
-      await refresh();
-      try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
-      await refreshPathStatus();
-    } catch (err) {
-      console.error("Failed to apply staged changes", err);
-    } finally {
-      setStagedBusy(false);
-    }
-  };
 
   const stagedDiff = useMemo(() => stagedToDiff(staged), [staged]);
 
