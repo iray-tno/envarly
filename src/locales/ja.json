@@ -51,8 +51,8 @@
   },
   "sidebar": {
     "search_placeholder": "変数を検索...",
-    "secret_one": "⚠ {{count}} 件の機密情報",
-    "secret_other": "⚠ {{count}} 件の機密情報",
+    "secret_one": "{{count}} 件の機密情報",
+    "secret_other": "{{count}} 件の機密情報",
     "sort_name_asc": "名前 A→Z",
     "sort_name_desc": "名前 Z→A",
     "sort_scope": "スコープ",

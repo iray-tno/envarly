@@ -51,8 +51,8 @@
   },
   "sidebar": {
     "search_placeholder": "Search variables...",
-    "secret_one": "⚠ {{count}} secret",
-    "secret_other": "⚠ {{count}} secrets",
+    "secret_one": "{{count}} secret",
+    "secret_other": "{{count}} secrets",
     "sort_name_asc": "Name A→Z",
     "sort_name_desc": "Name Z→A",
     "sort_scope": "Scope",
