@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { TextInput } from "./TextInput";
 
 const meta: Meta<typeof TextInput> = {
-  title: "ui/TextInput",
+  title: "Primitives/TextInput",
   component: TextInput,
   tags: ["autodocs"],
   args: { label: "Variable name", placeholder: "e.g. MY_VAR" },

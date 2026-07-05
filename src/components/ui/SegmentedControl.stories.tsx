@@ -3,7 +3,7 @@ import { useState } from "react";
 import { SegmentedControl } from "./SegmentedControl";
 
 const meta: Meta<typeof SegmentedControl> = {
-  title: "ui/SegmentedControl",
+  title: "Primitives/SegmentedControl",
   component: SegmentedControl,
   tags: ["autodocs"],
 };
