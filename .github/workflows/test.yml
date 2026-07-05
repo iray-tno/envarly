@@ -51,30 +51,11 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           RESULT=$(npx biome check --reporter=json src 2>/dev/null || true)
+          [ -z "$RESULT" ] && RESULT='{"diagnostics":[]}'
           ERRORS=$(echo "$RESULT" | jq '[.diagnostics[] | select(.severity == "error")] | length')
           WARNINGS=$(echo "$RESULT" | jq '[.diagnostics[] | select(.severity == "warning")] | length')
-          {
-            echo "## Biome"
-            echo "| | Count |"
-            echo "|---|---:|"
-            echo "| Errors | $ERRORS |"
-            echo "| Warnings | $WARNINGS |"
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "$RESULT" \
-            | jq -c '{
-                source: {name: "biome"},
-                diagnostics: [.diagnostics[]
-                  | select(.location.path.file != null)
-                  | {
-                      message: .description,
-                      severity: (if .severity == "error" then "ERROR" elif .severity == "warning" then "WARNING" else "INFO" end),
-                      location: {
-                        path: {name: .location.path.file},
-                        range: {start: {line: (.location.span.start.line // 1), column: (.location.span.start.column // 0)}}
-                      }
-                    }]
-              }' \
-            | reviewdog -f=rdjson -name=biome -reporter=github-pr-check -fail-on-error=false
+          printf "## Biome\n| | Count |\n|---|---:|\n| Errors | %s |\n| Warnings | %s |\n" "$ERRORS" "$WARNINGS" >> "$GITHUB_STEP_SUMMARY"
+          echo "$RESULT" | jq -rc '.diagnostics[] | select(.location.path.file != null) | {message:.description,severity:(if .severity=="error" then "ERROR" elif .severity=="warning" then "WARNING" else "INFO" end),location:{path:{name:.location.path.file},range:{start:{line:(.location.span.start.line//1),column:(.location.span.start.column//0)}}}}' | reviewdog -f=rdjsonl -name=biome -reporter=github-pr-check -fail-on-error=false || true
 
   rust:
     name: Rust (cargo nextest)
@@ -123,27 +104,6 @@ jobs:
           RESULT=$(cargo clippy --message-format=json 2>/dev/null || true)
           ERRORS=$(echo "$RESULT" | jq -s '[.[] | select(.reason=="compiler-message") | select(.message.code != null and (.message.code.code | startswith("clippy"))) | select(.message.level=="error")] | length')
           WARNINGS=$(echo "$RESULT" | jq -s '[.[] | select(.reason=="compiler-message") | select(.message.code != null and (.message.code.code | startswith("clippy"))) | select(.message.level=="warning")] | length')
-          {
-            echo "## Clippy"
-            echo "| | Count |"
-            echo "|---|---:|"
-            echo "| Errors | $ERRORS |"
-            echo "| Warnings | $WARNINGS |"
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "$RESULT" \
-            | jq -sc '[.[]
-                | select(.reason=="compiler-message")
-                | select(.message.code != null and (.message.code.code | startswith("clippy")))
-                | select(.message.spans | length > 0)
-                | {
-                    message: .message.message,
-                    severity: (if .message.level=="error" then "ERROR" elif .message.level=="warning" then "WARNING" else "INFO" end),
-                    location: {
-                      path: {name: .message.spans[0].file_name},
-                      range: {start: {line: .message.spans[0].line_start, column: .message.spans[0].column_start}}
-                    },
-                    code: {value: .message.code.code}
-                  }]
-              | {source: {name: "clippy"}, diagnostics: .}' \
-            | reviewdog -f=rdjson -name=clippy -reporter=github-pr-check -fail-on-error=false
+          printf "## Clippy\n| | Count |\n|---|---:|\n| Errors | %s |\n| Warnings | %s |\n" "$ERRORS" "$WARNINGS" >> "$GITHUB_STEP_SUMMARY"
+          echo "$RESULT" | jq -rc 'select(.reason=="compiler-message") | select(.message.code != null and (.message.code.code | startswith("clippy"))) | select(.message.spans | length > 0) | {message:.message.message,severity:(if .message.level=="error" then "ERROR" elif .message.level=="warning" then "WARNING" else "INFO" end),location:{path:{name:.message.spans[0].file_name},range:{start:{line:.message.spans[0].line_start,column:.message.spans[0].column_start}}},code:{value:.message.code.code}}' | reviewdog -f=rdjsonl -name=clippy -reporter=github-pr-check -fail-on-error=false || true
         working-directory: src-tauri
