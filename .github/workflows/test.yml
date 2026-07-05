@@ -48,7 +48,9 @@ jobs:
       - name: Test (cargo nextest)
         run: cargo nextest run --profile ci
         working-directory: src-tauri
-        continue-on-error: true
+      - name: Debug nextest output
+        if: always()
+        run: find src-tauri/target/nextest -type f 2>/dev/null || echo "no nextest output dir"
       - name: Report nextest results
         uses: dorny/test-reporter@v1
         if: always()
@@ -56,3 +58,5 @@ jobs:
           name: Cargo Nextest
           path: src-tauri/target/nextest/ci/nextest.xml
           reporter: java-junit
+          fail-on-empty: false
+          fail-on-error: false
