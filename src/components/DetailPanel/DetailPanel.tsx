@@ -3,6 +3,7 @@ import { api } from "../../api";
 import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
+import { lookupEnvDescription } from "../../lib/envDescriptions";
 import type { EnvVar, VarScope } from "../../types";
 import { ListEditor } from "../ListEditor/ListEditor";
 import { PathEditor } from "../PathEditor/PathEditor";
@@ -103,6 +104,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
 
   const effectiveSeparator = overrideSeparator ?? variable.listSeparator;
   const readOnly = variable.scope === "System" && !elevated;
+  const description = lookupEnvDescription(variable.name);
   const isPathVar = variable.name.toUpperCase() === "PATH";
   const pathInEnvForScope = variable.scope === "System" ? systemPathInEnv : userPathInEnv;
   const showAddToPathHint = isPathVar && !pathInEnvForScope && !isStagedDelete
@@ -164,6 +166,16 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
           ) : null}
         </div>
       </div>
+
+      {description && (
+        <div className="flex items-start gap-2.5 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
+          <span className="text-dim text-xs mt-px select-none">ℹ</span>
+          <p className="text-xs text-muted leading-relaxed">
+            <span className="font-semibold text-dim mr-1.5">{description.category}</span>
+            {description.summary}
+          </p>
+        </div>
+      )}
 
       {/* Staged-delete overlay */}
       {isStagedDelete ? (
