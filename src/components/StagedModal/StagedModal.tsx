@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
 import { Button } from "../ui/Button";
@@ -24,7 +24,7 @@ function isList(value: string): boolean {
 }
 
 function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: string }) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const oldEntries = splitList(oldValue);
   const newEntries = splitList(newValue);
   const removed = oldEntries.filter((e) => !newEntries.includes(e));
@@ -98,7 +98,7 @@ function ListEntries({ value, className }: { value: string; className?: string }
 }
 
 export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [takeSnapshot, setTakeSnapshot] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("delta");
 

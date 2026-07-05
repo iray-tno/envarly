@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import type { EnvVar, VarScope } from "../../types";
 import { Button } from "../ui/Button";
@@ -13,7 +13,7 @@ interface NewVarModalProps {
 }
 
 export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [scope, setScope] = useState<VarScope>("User");
   const [value, setValue] = useState("");

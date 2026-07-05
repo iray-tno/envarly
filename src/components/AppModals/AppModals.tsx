@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { DiffPanel } from "../DiffPanel/DiffPanel";
 import { ImportExportPanel } from "../ImportExportPanel/ImportExportPanel";
 import { LicensesPanel } from "../LicensesPanel/LicensesPanel";
@@ -34,7 +34,7 @@ export function AppModals({
   diffEntries, applyBusy, onDiffApply, onDiffDismiss,
   onStageImport, effectiveVars, elevated, onNewVarStage,
 }: Props) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   return (
     <>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function DetailPanel({ variable, allVars, elevated, userPathInEnv, systemPathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
 

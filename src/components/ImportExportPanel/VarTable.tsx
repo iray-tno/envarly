@@ -1,11 +1,11 @@
-import { useTranslation } from "react-i18next";
+import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import { resolveSecret } from "../../lib/secrets";
 import { Button } from "../ui/Button";
 import { type FlatVar, varKey } from "./types";
 
 export function SecretBanner({ count }: { count: number }) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   if (count === 0) return null;
   return (
     <div className="flex gap-2 px-3 py-2 rounded border border-warn/40 bg-warn/10 text-warn text-xs">
@@ -23,7 +23,7 @@ interface VarTableProps {
 }
 
 export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const checkedCount = vars.filter((v) => checked[varKey(v)]).length;
   const allChecked = checkedCount === vars.length;
   const noneChecked = checkedCount === 0;
