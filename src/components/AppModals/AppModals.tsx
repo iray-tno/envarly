@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { DiffPanel } from "../DiffPanel/DiffPanel";
 import { ImportExportPanel } from "../ImportExportPanel/ImportExportPanel";
 import { LicensesPanel } from "../LicensesPanel/LicensesPanel";
@@ -33,32 +34,34 @@ export function AppModals({
   diffEntries, applyBusy, onDiffApply, onDiffDismiss,
   onStageImport, effectiveVars, elevated, onNewVarStage,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <>
-      <Modal open={dialog === "importexport"} onClose={() => setDialog(null)} title="Import / Export" size="xl">
+      <Modal open={dialog === "importexport"} onClose={() => setDialog(null)} title={t("modal.import_export")} size="xl">
         <ImportExportPanel onStage={onStageImport} />
       </Modal>
 
       <Modal
         open={dialog === "staged"}
         onClose={() => setDialog(null)}
-        title={`Apply ${staged.size} staged ${staged.size === 1 ? "change" : "changes"}`}
+        title={t("modal.apply_staged", { count: staged.size })}
         size="xl"
       >
         <StagedModal diff={stagedDiff} busy={stagedBusy} onApply={onApplyStaged} onClose={() => setDialog(null)} />
       </Modal>
 
-      <Modal open={dialog === "changes"} onClose={onDiffDismiss} title={`External changes detected (${diffEntries.length})`} size="xl">
+      <Modal open={dialog === "changes"} onClose={onDiffDismiss} title={t("modal.external_changes", { count: diffEntries.length })} size="xl">
         <div className="px-6 py-5">
           <DiffPanel entries={diffEntries} onApply={onDiffApply} onDismiss={onDiffDismiss} busy={applyBusy} />
         </div>
       </Modal>
 
-      <Modal open={dialog === "newvar"} onClose={() => setDialog(null)} title="New variable" size="md">
+      <Modal open={dialog === "newvar"} onClose={() => setDialog(null)} title={t("modal.new_var")} size="md">
         <NewVarModal vars={effectiveVars} elevated={elevated} onStage={onNewVarStage} onClose={() => setDialog(null)} />
       </Modal>
 
-      <Modal open={dialog === "licenses"} onClose={() => setDialog(null)} title="Open Source Licenses" size="2xl" flex>
+      <Modal open={dialog === "licenses"} onClose={() => setDialog(null)} title={t("modal.licenses")} size="2xl" flex>
         <LicensesPanel />
       </Modal>
     </>

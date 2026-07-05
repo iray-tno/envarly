@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 import type { VarScope } from "../../types";
 import { SegmentedControl } from "../ui/SegmentedControl";
@@ -14,12 +15,13 @@ interface Props {
 }
 
 export function ImportExportPanel({ onStage }: Props) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>("export");
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
 
   const modeOptions: { value: Mode; label: string }[] = [
-    { value: "export", label: "Export" },
-    { value: "import", label: "Import" },
+    { value: "export", label: t("modal.tab_export") },
+    { value: "import", label: t("modal.tab_import") },
   ];
 
   const handleStatus = (msg: string | null) => {
@@ -32,7 +34,7 @@ export function ImportExportPanel({ onStage }: Props) {
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-5 py-4 border-b border-rim shrink-0">
         <div className="flex items-center gap-3 mb-4">
-          <h2 className="text-sm font-semibold text-fg">Import / Export</h2>
+          <h2 className="text-sm font-semibold text-fg">{t("modal.import_export")}</h2>
           <div className="ml-auto">
             <SegmentedControl
               aria-label="Mode"

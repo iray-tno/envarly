@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { type SecretInfo, resolveSecret } from "../../lib/secrets";
 import type { EnvVar } from "../../types";
@@ -32,18 +33,18 @@ interface ExportConfirmProps {
 }
 
 function ExportConfirm({ secretServices, onConfirm, onCancel }: ExportConfirmProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-3 p-3 rounded border border-warn/40 bg-warn/10">
       <p className="flex gap-2 text-warn text-xs">
         <span className="shrink-0">⚠</span>
         <span>
-          {secretServices.join(", ")} credentials will be included in the exported file.
-          Only export to destinations you trust.
+          {t("export.secret_warning", { services: secretServices.join(", ") })}
         </span>
       </p>
       <div className="flex gap-2">
-        <Button variant="primary" size="sm" onClick={onConfirm}>Export anyway</Button>
-        <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+        <Button variant="primary" size="sm" onClick={onConfirm}>{t("export.export_anyway")}</Button>
+        <Button variant="ghost" size="sm" onClick={onCancel}>{t("export.cancel")}</Button>
       </div>
     </div>
   );
@@ -54,6 +55,7 @@ interface ExportTabProps {
 }
 
 export function ExportTab({ onStatus }: ExportTabProps) {
+  const { t } = useTranslation();
   const [scope, setScope] = useState<ExportScope>("All");
   const [format, setFormat] = useState<AnyFormat>("json");
   const [busy, setBusy] = useState(false);
@@ -74,7 +76,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
         setAllVars(flat);
         setChecked(Object.fromEntries(flat.map((v) => [varKey(v), true])));
       })
-      .catch(() => onStatus("Failed to load variables."))
+      .catch(() => onStatus(t("export.failed_load")))
       .finally(() => setLoadingVars(false));
   }, [scope]);
 
@@ -105,7 +107,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
       }
       onStatus(savedPath ? `Saved to ${savedPath}` : null);
     } catch (e) {
-      onStatus(`Export failed: ${e}`);
+      onStatus(t("export.failed", { error: e }));
     } finally {
       setBusy(false);
     }
@@ -161,19 +163,19 @@ export function ExportTab({ onStatus }: ExportTabProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-medium text-muted uppercase tracking-wide">Scope</span>
+        <span className="text-xs font-medium text-muted uppercase tracking-wide">{t("export.scope_label")}</span>
         <SegmentedControl aria-label="Export scope" options={scopeOptions} value={scope} onChange={handleScopeChange} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-medium text-muted uppercase tracking-wide">Format</span>
+        <span className="text-xs font-medium text-muted uppercase tracking-wide">{t("export.format_label")}</span>
         <SegmentedControl aria-label="Export format" options={formatOptions} value={format} onChange={setFormat} className="flex-wrap" />
         <p className="text-xs text-dim">{FORMAT_DESC[format]}</p>
       </div>
 
       {scope === "Custom" && (
         <div className="flex flex-col gap-3">
-          {loadingVars && <p className="text-xs text-dim">Loading variables…</p>}
+          {loadingVars && <p className="text-xs text-dim">{t("export.loading")}</p>}
           {allVars && (
             <>
               <SecretBanner count={secretCount} />
@@ -202,7 +204,9 @@ export function ExportTab({ onStatus }: ExportTabProps) {
           disabled={busy || !canExport || checkingSecrets}
           className="self-start"
         >
-          {checkingSecrets ? "Checking…" : busy ? "Exporting…" : scope === "Custom" ? `Export ${selectedCustomVars.length} selected → ${ext}` : `Export ${scope} → ${ext}`}
+          {checkingSecrets ? t("export.checking") : busy ? t("export.exporting") : scope === "Custom"
+            ? t("export.custom_btn", { count: selectedCustomVars.length, ext })
+            : t("export.scope_btn", { scope, ext })}
         </Button>
       )}
     </div>

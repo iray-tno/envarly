@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
 import { cn } from "../../lib/cn";
@@ -20,6 +21,7 @@ const SCOPES = ["All", "User", "System"] as const;
 type ScopeFilter = (typeof SCOPES)[number];
 
 export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged }: Props) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
   const [secretsOnly, setSecretsOnly] = useState(false);
@@ -108,7 +110,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
           label="Search"
           labelHidden
           type="text"
-          placeholder="Search variables..."
+          placeholder={t("sidebar.search_placeholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full"
@@ -139,7 +141,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
             )}
           >
             <span>⚠</span>
-            <span>{secretCount} secret{secretCount !== 1 ? "s" : ""}</span>
+            <span>{t("sidebar.secret", { count: secretCount })}</span>
             {secretsOnly && <span className="opacity-60">✕</span>}
           </button>
         ) : (
@@ -151,10 +153,10 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           className="text-[10px] text-dim bg-transparent cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent rounded"
         >
-          <option value="name-asc">Name A→Z</option>
-          <option value="name-desc">Name Z→A</option>
-          <option value="scope">Scope</option>
-          <option value="staged">Staged first</option>
+          <option value="name-asc">{t("sidebar.sort_name_asc")}</option>
+          <option value="name-desc">{t("sidebar.sort_name_desc")}</option>
+          <option value="scope">{t("sidebar.sort_scope")}</option>
+          <option value="staged">{t("sidebar.sort_staged")}</option>
         </select>
       </div>
 
@@ -165,10 +167,10 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         onKeyDown={handleKeyDown}
       >
         {loading && (
-          <p className="text-center text-dim text-sm py-8">Loading…</p>
+          <p className="text-center text-dim text-sm py-8">{t("sidebar.loading")}</p>
         )}
         {!loading && sorted.length === 0 && (
-          <p className="text-center text-dim text-sm py-8">No variables found</p>
+          <p className="text-center text-dim text-sm py-8">{t("sidebar.empty")}</p>
         )}
         {sorted.map((v) => {
           const key = stagedKey(v.name, v.scope);
@@ -256,7 +258,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
           onClick={onCreateNew}
           className="w-full text-left text-xs text-dim hover:text-muted px-2 py-1.5 rounded hover:bg-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          + New variable
+          {t("sidebar.new_var")}
         </button>
       </div>
     </aside>

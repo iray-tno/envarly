@@ -1,17 +1,16 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 import { resolveSecret } from "../../lib/secrets";
 import { Button } from "../ui/Button";
 import { type FlatVar, varKey } from "./types";
 
 export function SecretBanner({ count }: { count: number }) {
+  const { t } = useTranslation();
   if (count === 0) return null;
   return (
     <div className="flex gap-2 px-3 py-2 rounded border border-warn/40 bg-warn/10 text-warn text-xs">
       <span className="shrink-0">⚠</span>
-      <span>
-        {count} selected variable{count !== 1 ? "s" : ""} may contain sensitive data
-        (tokens, keys, passwords). Verify you trust the destination before sharing this file.
-      </span>
+      <span>{t("var_table.secret", { count })}</span>
     </div>
   );
 }
@@ -24,6 +23,7 @@ interface VarTableProps {
 }
 
 export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps) {
+  const { t } = useTranslation();
   const checkedCount = vars.filter((v) => checked[varKey(v)]).length;
   const allChecked = checkedCount === vars.length;
   const noneChecked = checkedCount === 0;
@@ -31,11 +31,11 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3 text-xs text-muted">
-        <span>{vars.length} variable{vars.length !== 1 ? "s" : ""}</span>
-        <Button variant="ghost" size="sm" onClick={() => onToggleAll(true)} disabled={allChecked} className="px-1.5 py-0.5">Select all</Button>
+        <span>{t("var_table.count", { count: vars.length })}</span>
+        <Button variant="ghost" size="sm" onClick={() => onToggleAll(true)} disabled={allChecked} className="px-1.5 py-0.5">{t("var_table.select_all")}</Button>
         <span className="text-dim">·</span>
-        <Button variant="ghost" size="sm" onClick={() => onToggleAll(false)} disabled={noneChecked} className="px-1.5 py-0.5">Deselect all</Button>
-        <span className="ml-auto font-medium text-fg">{checkedCount} selected</span>
+        <Button variant="ghost" size="sm" onClick={() => onToggleAll(false)} disabled={noneChecked} className="px-1.5 py-0.5">{t("var_table.deselect_all")}</Button>
+        <span className="ml-auto font-medium text-fg">{t("var_table.selected", { count: checkedCount })}</span>
       </div>
 
       <div className="rounded border border-rim overflow-hidden max-h-72 overflow-y-auto">
@@ -45,9 +45,9 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
               <th className="w-8 px-2 py-1.5 text-center">
                 <input type="checkbox" checked={allChecked} onChange={(e) => onToggleAll(e.target.checked)} className="accent-accent" aria-label="Select all" />
               </th>
-              <th className="px-3 py-1.5 text-left">Name</th>
-              <th className="px-3 py-1.5 text-left">Scope</th>
-              <th className="px-3 py-1.5 text-left">Value</th>
+              <th className="px-3 py-1.5 text-left">{t("var_table.col_name")}</th>
+              <th className="px-3 py-1.5 text-left">{t("var_table.col_scope")}</th>
+              <th className="px-3 py-1.5 text-left">{t("var_table.col_value")}</th>
             </tr>
           </thead>
           <tbody>
