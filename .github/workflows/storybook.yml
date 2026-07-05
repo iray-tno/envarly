@@ -61,6 +61,9 @@ jobs:
       - name: Copy nextest JUnit
         run: cp src-tauri/target/nextest/ci/nextest.xml junit-reports/nextest.xml || true
 
+      - name: Fix nextest classnames for Allure
+        run: node scripts/nextest-fix-junit.mjs junit-reports/nextest.xml || true
+
       - name: Report (Clippy)
         run: cargo clippy --message-format=json 2>/dev/null | node ../../scripts/clippy-to-junit.mjs > ../../junit-reports/clippy.xml || true
         working-directory: src-tauri
