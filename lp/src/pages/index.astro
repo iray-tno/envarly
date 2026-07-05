@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 const GITHUB_URL = 'https://github.com/iray-tno/envarly';
 const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest';
 const STORYBOOK_URL = '/envarly/storybook/';
+const REPORTS_URL = '/envarly/reports/';
 const VERSION = '1.1.0';
 
 const features = [
@@ -58,6 +59,7 @@ const features = [
       <nav class="flex items-center gap-6">
         <a href="#features" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Features</a>
         <a href={STORYBOOK_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Storybook</a>
+        <a href={REPORTS_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Reports</a>
         <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
         <a
           href={RELEASE_URL}
@@ -213,6 +215,7 @@ const features = [
         <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
         <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Releases</a>
         <a href={STORYBOOK_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Storybook</a>
+        <a href={REPORTS_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Reports</a>
         <a href={`${GITHUB_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">License</a>
       </div>
     </div>
