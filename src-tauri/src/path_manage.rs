@@ -5,6 +5,7 @@ use winreg::enums::*;
 #[cfg(windows)]
 use winreg::RegKey;
 
+#[cfg(windows)]
 use crate::error::EnvarlyError;
 
 const USER_ENV_KEY: &str = "Environment";
