@@ -1,0 +1,188 @@
+---
+import Base from '../layouts/Base.astro';
+import {
+  GITHUB_URL,
+  RELEASE_URL,
+  REPORTS_URL,
+  STORYBOOK_URL,
+  type LandingCopy,
+} from '../lib/lpContent';
+
+interface Props {
+  copy: LandingCopy;
+}
+
+const { copy } = Astro.props;
+---
+
+<Base
+  title={copy.title}
+  description={copy.description}
+  ogDescription={copy.ogDescription}
+  lang={copy.lang}
+  canonicalPath={copy.canonicalPath}
+>
+  <!-- Nav -->
+  <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 backdrop-blur">
+    <div class="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
+      <a href={copy.lang === 'ja' ? '/envarly/ja/' : '/envarly/'} class="font-semibold text-[var(--color-text)] tracking-tight">Envarly</a>
+      <nav class="flex items-center gap-6">
+        <a href="#features" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.features}</a>
+        <a href={STORYBOOK_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.storybook}</a>
+        <a href={REPORTS_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.reports}</a>
+        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
+        <a href={copy.alternatePath} class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.alternateLabel}</a>
+        <a
+          href={RELEASE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-sm px-4 py-1.5 rounded-full bg-[var(--color-accent)] text-[var(--color-bg)] font-medium hover:bg-[var(--color-accent-dim)] transition-colors"
+        >
+          {copy.nav.download}
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="mx-auto max-w-5xl px-6 pt-24 pb-16 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--color-border)] text-xs text-[var(--color-muted)] mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] inline-block"></span>
+        {copy.hero.eyebrow}
+      </div>
+
+      <h1 class="text-5xl sm:text-6xl font-bold tracking-tight text-[var(--color-text)] mb-5">
+        Envarly
+      </h1>
+
+      <p class="text-lg sm:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-10 leading-relaxed">
+        {copy.hero.lead}
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <a
+          href={RELEASE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-6 py-3 rounded-lg bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold text-sm hover:bg-[var(--color-accent-dim)] transition-colors"
+        >
+          {copy.hero.download}
+        </a>
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-6 py-3 rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] font-medium text-sm hover:border-[var(--color-accent)] hover:text-[var(--color-text)] transition-colors"
+        >
+          {copy.hero.github}
+        </a>
+      </div>
+
+      <!-- Screenshot carousel -->
+      <div class="mx-auto">
+        <div class="relative overflow-hidden rounded-xl shadow-2xl shadow-[var(--color-accent)]/5">
+          <div id="carousel-track" class="flex" style="transition: transform 0.45s cubic-bezier(.4,0,.2,1)">
+            <img
+              src="/envarly/screenshot-path-editor.png"
+              alt={copy.screenshots.pathEditorAlt}
+              width="1196"
+              height="803"
+              class="w-full shrink-0"
+              loading="eager"
+            />
+            <img
+              src="/envarly/screenshot-apply-modal.png"
+              alt={copy.screenshots.applyModalAlt}
+              width="1196"
+              height="803"
+              class="w-full shrink-0"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <!-- Dots -->
+        <div class="flex justify-center gap-2 mt-4">
+          <button id="dot-0" aria-label={copy.screenshots.firstLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-accent)"></button>
+          <button id="dot-1" aria-label={copy.screenshots.secondLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-muted);opacity:0.4"></button>
+        </div>
+      </div>
+      <script>
+        {
+          const track = document.getElementById('carousel-track');
+          const dots = [document.getElementById('dot-0'), document.getElementById('dot-1')];
+          let current = 0;
+          let timer: ReturnType<typeof setInterval>;
+
+          function goTo(i: number) {
+            current = i;
+            (track as HTMLElement).style.transform = `translateX(-${i * 100}%)`;
+            dots.forEach((d, j) => {
+              (d as HTMLElement).style.background = j === i ? 'var(--color-accent)' : 'var(--color-muted)';
+              (d as HTMLElement).style.opacity = j === i ? '1' : '0.4';
+            });
+          }
+
+          function startAuto() {
+            timer = setInterval(() => goTo((current + 1) % dots.length), 5000);
+          }
+
+          dots.forEach((d, i) => d?.addEventListener('click', () => { clearInterval(timer); goTo(i); startAuto(); }));
+          startAuto();
+        }
+      </script>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="mx-auto max-w-5xl px-6 py-20">
+      <h2 class="text-2xl font-bold text-[var(--color-text)] text-center mb-3">{copy.featuresHeading}</h2>
+      <p class="text-[var(--color-muted)] text-center mb-12">{copy.featuresLead}</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {copy.features.map((f) => (
+          <div class="p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-colors">
+            <div class="text-2xl mb-3">{f.icon}</div>
+            <h3 class="text-sm font-semibold text-[var(--color-text)] mb-2">{f.title}</h3>
+            <p class="text-xs text-[var(--color-muted)] leading-relaxed">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Who is it for -->
+    <section class="mx-auto max-w-3xl px-6 py-16 text-center">
+      <h2 class="text-2xl font-bold text-[var(--color-text)] mb-4">{copy.audience.heading}</h2>
+      {copy.audience.paragraphs.map((paragraph) => (
+        <p class="text-[var(--color-muted)] leading-relaxed mb-4">
+          {paragraph}
+        </p>
+      ))}
+    </section>
+
+    <!-- Stack -->
+    <section class="mx-auto max-w-5xl px-6 py-12 border-t border-[var(--color-border)]">
+      <p class="text-xs text-[var(--color-muted)] text-center mb-5 uppercase tracking-widest">{copy.stack.label}</p>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        {copy.stack.items.map((tech) => (
+          <span class="px-3 py-1.5 rounded-full border border-[var(--color-border)] text-xs text-[var(--color-muted)]">
+            {tech}
+          </span>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-[var(--color-border)] mt-12">
+    <div class="mx-auto max-w-5xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span class="text-xs text-[var(--color-muted)]">{copy.footer.copyright}</span>
+      <div class="flex items-center gap-6">
+        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
+        <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.footer.releases}</a>
+        <a href={STORYBOOK_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Storybook</a>
+        <a href={REPORTS_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Reports</a>
+        <a href={`${GITHUB_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.footer.license}</a>
+      </div>
+    </div>
+  </footer>
+</Base>
