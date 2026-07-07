@@ -14,24 +14,24 @@ export default meta;
 type Story = StoryObj<typeof IconButton>;
 
 export const Remove: Story = {
-  args: { icon: "×", "aria-label": "Remove item", variant: "danger" },
+  args: { icon: "x", "aria-label": "Remove item", variant: "danger" },
 };
 export const Refresh: Story = {
-  args: { icon: "↻", "aria-label": "Refresh", variant: "ghost" },
+  args: { icon: "refresh", "aria-label": "Refresh", variant: "ghost" },
 };
 export const DragHandle: Story = {
-  args: { icon: "⠿", "aria-label": "Drag to reorder", variant: "ghost" },
+  args: { icon: "grip", "aria-label": "Drag to reorder", variant: "ghost" },
 };
 export const Disabled: Story = {
-  args: { icon: "×", "aria-label": "Remove item", variant: "danger", disabled: true },
+  args: { icon: "x", "aria-label": "Remove item", variant: "danger", disabled: true },
 };
 
 export const AllVariants: Story = {
   render: () => (
     <div className="flex gap-2">
-      <IconButton icon="×" aria-label="Remove" variant="danger" />
-      <IconButton icon="↻" aria-label="Refresh" variant="ghost" />
-      <IconButton icon="⠿" aria-label="Drag to reorder" variant="ghost" />
+      <IconButton icon="x" aria-label="Remove" variant="danger" />
+      <IconButton icon="refresh" aria-label="Refresh" variant="ghost" />
+      <IconButton icon="grip" aria-label="Drag to reorder" variant="ghost" />
     </div>
   ),
 };

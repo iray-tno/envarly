@@ -2,6 +2,7 @@ import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import { resolveSecret } from "../../lib/secrets";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 import { type FlatVar, varKey } from "./types";
 
 export function SecretBanner({ count }: { count: number }) {
@@ -9,7 +10,7 @@ export function SecretBanner({ count }: { count: number }) {
   if (count === 0) return null;
   return (
     <div className="flex gap-2 px-3 py-2 rounded border border-warn/40 bg-warn/10 text-warn text-xs">
-      <span className="shrink-0">⚠</span>
+      <Icon name="warning" size={14} className="mt-px" />
       <span>{t("var_table.secret", { count })}</span>
     </div>
   );
@@ -70,8 +71,9 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
                     <span className="flex items-center gap-1.5">
                       {v.name}
                       {secret && (
-                        <span title={secret.label} className="text-warn text-[10px] font-medium shrink-0">
-                          ⚠ {secret.service}
+                        <span title={secret.label} className="inline-flex items-center gap-1 text-warn text-[10px] font-medium shrink-0">
+                          <Icon name="warning" size={12} />
+                          {secret.service}
                         </span>
                       )}
                     </span>

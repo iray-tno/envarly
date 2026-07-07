@@ -4,6 +4,7 @@ import { api } from "../../api";
 import { type SecretInfo, resolveSecret } from "../../lib/secrets";
 import type { EnvVar } from "../../types";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { SecretBanner, VarTable } from "./VarTable";
 import { type AnyFormat, type ExportScope, type FlatVar, formatOptions, scopeOptions, varKey } from "./types";
@@ -37,7 +38,7 @@ function ExportConfirm({ secretServices, onConfirm, onCancel }: ExportConfirmPro
   return (
     <div className="flex flex-col gap-3 p-3 rounded border border-warn/40 bg-warn/10">
       <p className="flex gap-2 text-warn text-xs">
-        <span className="shrink-0">⚠</span>
+        <Icon name="warning" size={14} className="mt-px" />
         <span>
           {t("export.secret_warning", { services: secretServices.join(", ") })}
         </span>
