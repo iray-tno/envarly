@@ -1,54 +1,84 @@
-import { invoke } from '@tauri-apps/api/core';
-import type { EnvVar, VarScope, SnapshotMeta } from './types';
+import { invoke } from "@tauri-apps/api/core";
+import { createDemoApi, loadDemoFixture } from "./demo/createDemoApi";
+import type { EnvSnapshot, EnvVar, SnapshotMeta, VarScope } from "./types";
 
-export const api = {
-  getEnvVars: () =>
-    invoke<EnvVar[]>('get_env_vars'),
+export interface LaunchOptions {
+  demo: boolean;
+  demoFixture: string | null;
+}
 
-  setEnvVar: (name: string, value: string, scope: VarScope) =>
-    invoke<void>('set_env_var', { name, value, scope }),
+export interface EnvarlyApi {
+  getLaunchOptions: () => Promise<LaunchOptions>;
+  getEnvVars: () => Promise<EnvVar[]>;
+  setEnvVar: (name: string, value: string, scope: VarScope) => Promise<void>;
+  deleteEnvVar: (name: string, scope: VarScope) => Promise<void>;
+  createSnapshot: (label: string) => Promise<SnapshotMeta>;
+  listSnapshots: () => Promise<SnapshotMeta[]>;
+  deleteSnapshot: (id: string) => Promise<void>;
+  validatePaths: (paths: string[]) => Promise<boolean[]>;
+  getRegistrySnapshot: () => Promise<EnvSnapshot>;
+  isElevated: () => Promise<boolean>;
+  restartAsAdmin: () => Promise<void>;
+  exportVars: (scope: "All" | "User" | "System", format: string) => Promise<string | null>;
+  exportCustomVars: (
+    vars: { name: string; value: string; scope: string }[],
+    format: string,
+  ) => Promise<string | null>;
+  parseImport: (content: string, format: "json" | "reg") => Promise<EnvSnapshot>;
+  getPathStatus: () => Promise<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>;
+  getPathProposal: (scope: "User" | "System") => Promise<string | null>;
+}
 
-  deleteEnvVar: (name: string, scope: VarScope) =>
-    invoke<void>('delete_env_var', { name, scope }),
-
-  createSnapshot: (label: string) =>
-    invoke<SnapshotMeta>('create_snapshot', { label }),
-
-  listSnapshots: () =>
-    invoke<SnapshotMeta[]>('list_snapshots'),
-
-  deleteSnapshot: (id: string) =>
-    invoke<void>('delete_snapshot', { id }),
-
-  validatePaths: (paths: string[]) =>
-    invoke<boolean[]>('validate_paths', { paths }),
-
-  getRegistrySnapshot: () =>
-    invoke<import('./types').EnvSnapshot>('get_registry_snapshot'),
-
-  /** True when the process has write access to HKLM (elevated / admin). */
-  isElevated: () => invoke<boolean>('is_elevated'),
-
-  /** Spawn a new elevated instance via UAC and exit this process. */
-  restartAsAdmin: () => invoke<void>('restart_as_admin'),
-
-  /** Opens a native save dialog, writes the file, and returns the saved path (null = cancelled). */
-  exportVars: (scope: 'All' | 'User' | 'System', format: string) =>
-    invoke<string | null>('export_vars', { scope, format }),
-
-  /** Export a hand-picked list of variables. Values come from the frontend. */
-  exportCustomVars: (vars: { name: string; value: string; scope: string }[], format: string) =>
-    invoke<string | null>('export_custom', { vars, format }),
-
-  /** Parses file content and returns a snapshot. Does NOT write to the registry. */
-  parseImport: (content: string, format: 'json' | 'reg') =>
-    invoke<import('./types').EnvSnapshot>('parse_import', { content, format }),
-
-  /** Returns whether the Envarly install directory is currently in User/System PATH. */
+const normalApi: EnvarlyApi = {
+  getLaunchOptions: () => invoke<LaunchOptions>("get_launch_options"),
+  getEnvVars: () => invoke<EnvVar[]>("get_env_vars"),
+  setEnvVar: (name, value, scope) => invoke<void>("set_env_var", { name, value, scope }),
+  deleteEnvVar: (name, scope) => invoke<void>("delete_env_var", { name, scope }),
+  createSnapshot: (label) => invoke<SnapshotMeta>("create_snapshot", { label }),
+  listSnapshots: () => invoke<SnapshotMeta[]>("list_snapshots"),
+  deleteSnapshot: (id) => invoke<void>("delete_snapshot", { id }),
+  validatePaths: (paths) => invoke<boolean[]>("validate_paths", { paths }),
+  getRegistrySnapshot: () => invoke<EnvSnapshot>("get_registry_snapshot"),
+  isElevated: () => invoke<boolean>("is_elevated"),
+  restartAsAdmin: () => invoke<void>("restart_as_admin"),
+  exportVars: (scope, format) => invoke<string | null>("export_vars", { scope, format }),
+  exportCustomVars: (vars, format) => invoke<string | null>("export_custom", { vars, format }),
+  parseImport: (content, format) => invoke<EnvSnapshot>("parse_import", { content, format }),
   getPathStatus: () =>
-    invoke<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>('get_path_status'),
+    invoke<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>("get_path_status"),
+  getPathProposal: (scope) => invoke<string | null>("get_path_proposal", { scope }),
+};
 
-  /** Returns proposed new PATH value with Envarly added, or null if already present. */
-  getPathProposal: (scope: 'User' | 'System') =>
-    invoke<string | null>('get_path_proposal', { scope }),
+let apiPromise: Promise<EnvarlyApi> | null = null;
+
+async function getApi(): Promise<EnvarlyApi> {
+  if (!apiPromise) {
+    apiPromise = normalApi
+      .getLaunchOptions()
+      .catch(() => ({ demo: false, demoFixture: null }))
+      .then(async (options) => {
+        if (!options.demo) return normalApi;
+        return createDemoApi(options, await loadDemoFixture(options), normalApi);
+      });
+  }
+  return apiPromise;
+}
+
+export const api: EnvarlyApi = {
+  getLaunchOptions: async () => (await getApi()).getLaunchOptions(),
+  getEnvVars: async () => (await getApi()).getEnvVars(),
+  setEnvVar: async (name, value, scope) => (await getApi()).setEnvVar(name, value, scope),
+  deleteEnvVar: async (name, scope) => (await getApi()).deleteEnvVar(name, scope),
+  createSnapshot: async (label) => (await getApi()).createSnapshot(label),
+  listSnapshots: async () => (await getApi()).listSnapshots(),
+  deleteSnapshot: async (id) => (await getApi()).deleteSnapshot(id),
+  validatePaths: async (paths) => (await getApi()).validatePaths(paths),
+  getRegistrySnapshot: async () => (await getApi()).getRegistrySnapshot(),
+  isElevated: async () => (await getApi()).isElevated(),
+  restartAsAdmin: async () => (await getApi()).restartAsAdmin(),
+  exportVars: async (scope, format) => (await getApi()).exportVars(scope, format),
+  exportCustomVars: async (vars, format) => (await getApi()).exportCustomVars(vars, format),
+  parseImport: async (content, format) => (await getApi()).parseImport(content, format),
+  getPathStatus: async () => (await getApi()).getPathStatus(),
+  getPathProposal: async (scope) => (await getApi()).getPathProposal(scope),
 };
