@@ -70,17 +70,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="apple-touch-icon" sizes="128x128" href="/envarly/icon-128.png" />
     <link rel="icon" type="image/x-icon" href="/envarly/favicon.ico" />
 
-    <!-- Google Analytics (via Partytown) -->
-    <script type="text/partytown" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
-    <script type="text/partytown" define:vars={{ GA_ID }}>
+    <!-- Google Analytics -->
+    <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+    <script define:vars={{ GA_ID }}>
       window.dataLayer = window.dataLayer || [];
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', GA_ID);
     </script>
 
-    <!-- Microsoft Clarity (via Partytown) -->
-    <script type="text/partytown" define:vars={{ CLARITY_ID }}>
+    <!-- Microsoft Clarity -->
+    <script define:vars={{ CLARITY_ID }}>
       (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
       t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
