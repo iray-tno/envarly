@@ -12,7 +12,7 @@ export function PathBanner({ scope, onStageAddToPath, onDismiss }: PathBannerPro
 
   return (
     <div className="flex items-center gap-3 px-5 py-2 bg-accent/10 border-b border-accent/30 text-sm shrink-0">
-      <span className="text-fg/80 flex-1">
+      <span className="text-fg flex-1">
         {t("path_banner.prefix", { scope })}{" "}
         <span className="font-mono text-fg">envarly</span>{" "}
         {t("path_banner.suffix")}

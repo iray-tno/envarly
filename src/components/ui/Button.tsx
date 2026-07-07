@@ -13,8 +13,8 @@ const variantCls: Record<Variant, string> = {
   primary:   "bg-accent text-canvas hover:bg-accent-hi",
   secondary: "border border-rim text-muted hover:bg-hover hover:text-fg",
   ghost:     "text-muted hover:bg-hover hover:text-fg",
-  danger:    "bg-danger/15 text-danger border border-danger/30 hover:bg-danger/25",
-  warn:      "border border-warn/40 text-warn hover:bg-warn/10",
+  danger:    "bg-danger/15 text-danger border border-danger hover:bg-danger/25",
+  warn:      "border border-warn text-warn hover:bg-warn/10",
   link:      "text-muted hover:text-fg hover:underline",
 };
 

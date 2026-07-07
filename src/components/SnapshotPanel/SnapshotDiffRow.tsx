@@ -18,15 +18,15 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
       <td className="px-2 py-1.5 font-mono font-semibold text-fg whitespace-nowrap">
         <span className="flex items-center gap-1.5">
           {entry.name}
-          {secret && <span className="text-[9px] font-medium text-warn/80">{secret.service}</span>}
+          {secret && <span className="text-[9px] font-medium text-warn">{secret.service}</span>}
         </span>
       </td>
       <td className="px-2 py-1.5 text-muted w-12">{entry.scope[0]}</td>
       <td className="px-2 py-1.5 font-mono text-muted max-w-xs truncate">
         {entry.kind === "changed" ? (
           <span className="flex flex-col gap-0.5">
-            <span className="line-through text-danger/70">{mask(entry.oldValue!)}</span>
-            <span className="text-success/90">{mask(entry.newValue!)}</span>
+            <span className="line-through text-danger">{mask(entry.oldValue!)}</span>
+            <span className="text-success">{mask(entry.newValue!)}</span>
           </span>
         ) : (
           <span>{mask(entry.value!)}</span>

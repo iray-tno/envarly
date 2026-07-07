@@ -137,7 +137,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent",
               secretsOnly
                 ? "bg-warn/20 text-warn border border-warn/40"
-                : "bg-warn/10 text-warn/70 border border-warn/20 hover:bg-warn/15 hover:text-warn",
+                : "bg-warn/10 text-warn border border-warn/40 hover:bg-warn/15 hover:text-warn",
             )}
           >
             <span>⚠</span>
@@ -209,7 +209,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
               {secret && !isDelete && (
                 <span
                   title={secret.label}
-                  className="text-[9px] font-medium text-warn/80 shrink-0 max-w-[44px] truncate"
+                  className="text-[9px] font-medium text-warn shrink-0 max-w-[44px] truncate"
                 >
                   {secret.service}
                 </span>

@@ -41,7 +41,7 @@ function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: str
   return (
     <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
       {removed.map((e, i) => (
-        <p key={`r${i}`} className="font-mono text-[11px] text-danger/80 break-all">
+        <p key={`r${i}`} className="font-mono text-[11px] text-danger break-all">
           <span className="select-none mr-1 opacity-70">−</span>{e}
         </p>
       ))}
@@ -72,7 +72,7 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
           key={i}
           className={cn(
             "font-mono text-[11px] break-all",
-            r.status === "removed"   && "text-danger/80 line-through",
+            r.status === "removed"   && "text-danger line-through",
             r.status === "added"     && "text-success",
             r.status === "unchanged" && "text-muted",
           )}
@@ -120,7 +120,7 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
           <p className="text-xs font-semibold text-danger mb-1">
             {t("staged.critical", { count: criticalChanges.length })}
           </p>
-          <p className="text-xs text-danger/80">
+          <p className="text-xs text-danger">
             {t("staged.critical_detail", { count: criticalChanges.length, vars: criticalChanges.map((e) => e.name).join(", ") })}
           </p>
         </div>
@@ -202,7 +202,7 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
                   )
                 ) : (
                   <div className="flex flex-col gap-0.5">
-                    <p className="font-mono text-[11px] text-danger/70 line-through break-all">{entry.oldValue}</p>
+                    <p className="font-mono text-[11px] text-danger line-through break-all">{entry.oldValue}</p>
                     <p className="font-mono text-[11px] text-success break-all">{entry.newValue}</p>
                   </div>
                 )
