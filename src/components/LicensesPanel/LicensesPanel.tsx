@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { cn } from "../../lib/cn";
 import licensesData from "../../assets/oss-licenses.json";
+import { Icon } from "../ui/Icon";
 
 type TopTab = "envarly" | "third-party";
 type Ecosystem = "npm" | "rust";
@@ -66,9 +67,10 @@ function RepoLink({ url }: { url: string }) {
       type="button"
       onClick={() => openUrl(url)}
       title={display}
-      className="text-dim hover:text-accent transition-colors text-[11px] font-mono whitespace-nowrap focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+      className="inline-flex items-center gap-1 text-dim hover:text-accent transition-colors text-[11px] font-mono whitespace-nowrap focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
     >
       {display}
+      <Icon name="external-link" size={12} />
     </button>
   );
 }
@@ -124,9 +126,10 @@ export function LicensesPanel() {
             <button
               type="button"
               onClick={() => openUrl("https://github.com/iray-tno/envarly")}
-              className="text-[11px] font-mono text-dim hover:text-accent transition-colors shrink-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              className="inline-flex items-center gap-1 text-[11px] font-mono text-dim hover:text-accent transition-colors shrink-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
             >
-              github.com/iray-tno/envarly ↗
+              <span>github.com/iray-tno/envarly</span>
+              <Icon name="external-link" size={12} />
             </button>
           </div>
           <pre className="rounded border border-rim bg-surface px-4 py-3 text-[11px] font-mono text-muted leading-relaxed whitespace-pre-wrap select-text">

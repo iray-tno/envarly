@@ -2,6 +2,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 
 interface AppHeaderProps {
   loading: boolean;
@@ -32,16 +33,11 @@ export function AppHeader({
       className="flex items-center gap-2 h-13 px-5 bg-panel border-b border-rim shrink-0"
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
-      <div className="flex items-center gap-2 mr-3">
-        <span className="text-lg">⚡</span>
-        <span className="text-[15px] font-semibold tracking-tight">Envarly</span>
-      </div>
-
       <div
         className="flex items-center gap-1.5"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
-        <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
+        <Button variant="ghost" size="sm" icon="refresh" onClick={onRefresh} disabled={loading}>
           {t("header.refresh")}
         </Button>
 
@@ -57,7 +53,7 @@ export function AppHeader({
         )}
 
         {diffCount > 0 && (
-          <Button variant="warn" size="sm" onClick={onShowChanges}>
+          <Button variant="warn" size="sm" icon="warning" onClick={onShowChanges}>
             {t("header.external_changes", { count: diffCount })}
           </Button>
         )}
@@ -83,6 +79,7 @@ export function AppHeader({
           <Button
             variant="warn"
             size="sm"
+            icon="shield"
             onClick={() => api.restartAsAdmin()}
             title={t("header.run_as_admin_title")}
           >
@@ -90,13 +87,23 @@ export function AppHeader({
           </Button>
         )}
         {elevated && (
-          <span className="text-xs text-success opacity-60">{t("header.administrator")}</span>
+          <span className="inline-flex items-center gap-1 text-xs text-success opacity-60">
+            <Icon name="shield" size={14} />
+            {t("header.administrator")}
+          </span>
         )}
-        <Button variant="ghost" size="xs" onClick={() => openUrl("https://github.com/iray-tno/envarly")} title="View on GitHub">
-          ↗ GitHub
+        <Button
+          variant="ghost"
+          size="xs"
+          icon="external-link"
+          iconPosition="right"
+          onClick={() => openUrl("https://github.com/iray-tno/envarly")}
+          title="View on GitHub"
+        >
+          GitHub
         </Button>
         <label className="flex items-center gap-1 text-xs text-dim cursor-pointer">
-          <span title="Language">🌐</span>
+          <Icon name="globe" size={14} className="text-dim" />
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value as "en" | "ja")}
@@ -106,9 +113,14 @@ export function AppHeader({
             <option value="ja">日本語</option>
           </select>
         </label>
-        <Button variant="ghost" size="xs" onClick={onToggleTheme} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
-          {theme === "dark" ? "☀" : "🌙"}
-        </Button>
+        <Button
+          variant="ghost"
+          size="xs"
+          icon={theme === "dark" ? "sun" : "moon"}
+          onClick={onToggleTheme}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        />
         <Button variant="ghost" size="xs" onClick={onLicenses} className="text-dim">
           {t("header.licenses")}
         </Button>

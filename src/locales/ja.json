@@ -3,31 +3,31 @@
     "registry_error": "レジストリエラー: {{error}}"
   },
   "header": {
-    "refresh": "↻ 更新",
+    "refresh": "更新",
     "apply_staged_one": "{{count}} 件の変更を適用",
     "apply_staged_other": "{{count}} 件の変更を適用",
     "discard_all": "すべて破棄",
-    "external_changes_one": "⚠ {{count}} 件の外部変更",
-    "external_changes_other": "⚠ {{count}} 件の外部変更",
+    "external_changes_one": "{{count}} 件の外部変更",
+    "external_changes_other": "{{count}} 件の外部変更",
     "import_export": "インポート / エクスポート",
     "snapshots": "スナップショット",
-    "run_as_admin": "🛡 管理者として実行",
+    "run_as_admin": "管理者として実行",
     "run_as_admin_title": "システム変数は読み取り専用です。編集するには管理者として再起動してください。",
-    "administrator": "🛡 管理者モード",
+    "administrator": "管理者モード",
     "licenses": "ライセンス"
   },
   "path_banner": {
     "prefix": "Envarly が {{scope}} の PATH に含まれていません — ターミナルから",
     "suffix": "コマンドを使うには追加してください。",
-    "add": "+ {{scope}} PATH",
+    "add": "{{scope}} PATH",
     "dismiss": "閉じる"
   },
   "detail": {
     "empty": "変数を選択して表示・編集",
     "staged_badge": "ステージ済み",
     "staged_delete_badge": "ステージ済み: 削除",
-    "restart_admin": "🛡 管理者として再起動 →",
-    "add_to_path": "+ Envarly を PATH に追加",
+    "restart_admin": "管理者として再起動",
+    "add_to_path": "Envarly を PATH に追加",
     "stage": "ステージ",
     "discard": "破棄",
     "delete": "削除",
@@ -60,7 +60,7 @@
     "sort_staged": "ステージ済みを先頭に",
     "loading": "読み込み中…",
     "empty": "変数が見つかりません",
-    "new_var": "+ 新しい変数"
+    "new_var": "新しい変数"
   },
   "new_var": {
     "name": "名前",
@@ -74,8 +74,8 @@
     "system_admin": "System (管理者)"
   },
   "staged": {
-    "critical_one": "⚠ 重要なシステム変数が変更されます",
-    "critical_other": "⚠ 重要なシステム変数が変更されます",
+    "critical_one": "重要なシステム変数が変更されます",
+    "critical_other": "重要なシステム変数が変更されます",
     "critical_detail_one": "{{vars}} — 変更するとWindowsや実行中のアプリケーションが壊れる可能性があります。スナップショットを強くお勧めします。",
     "critical_detail_other": "{{vars}} — 変更するとWindowsや実行中のアプリケーションが壊れる可能性があります。スナップショットを強くお勧めします。",
     "broadcast": "これらの変更はWindowsレジストリに書き込まれ、実行中のアプリケーションにブロードキャストされます。",

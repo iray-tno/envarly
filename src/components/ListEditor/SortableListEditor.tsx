@@ -17,6 +17,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 import { IconButton } from "../ui/IconButton";
 import { cn } from "../../lib/cn";
 
@@ -61,7 +62,7 @@ function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
         )}
       >
-        ⠿
+        <Icon name="grip" size={16} />
       </button>
 
       <div className="flex-1 py-1.5 pr-2">
@@ -83,16 +84,20 @@ function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps
       {entry.exists !== undefined && (
         <div className="w-6 flex items-center justify-center shrink-0 text-xs">
           {entry.exists === false && (
-            <span aria-hidden="true" title="Not found on disk" className="text-danger leading-none">✗</span>
+            <span title="Not found on disk">
+              <Icon name="x" size={14} className="text-danger" />
+            </span>
           )}
           {entry.exists === true && (
-            <span aria-hidden="true" title="Exists" className="text-success leading-none">✓</span>
+            <span title="Exists">
+              <Icon name="check" size={14} className="text-success" />
+            </span>
           )}
         </div>
       )}
 
       <div className="w-7 flex items-center justify-center shrink-0">
-        <IconButton icon="×" aria-label={`Remove ${entry.value}`} variant="danger" onClick={onRemove} />
+        <IconButton icon="x" aria-label={`Remove ${entry.value}`} variant="danger" onClick={onRemove} />
       </div>
     </li>
   );
@@ -236,7 +241,7 @@ export function SortableListEditor({
             onKeyDown={(e) => e.key === "Enter" && addEntry(newValue)}
             onPaste={handlePaste}
           />
-          <Button variant="primary" onClick={() => addEntry(newValue)}>Add</Button>
+          <Button variant="primary" icon="plus" onClick={() => addEntry(newValue)}>Add</Button>
         </div>
       )}
     </div>

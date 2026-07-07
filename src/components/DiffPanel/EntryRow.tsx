@@ -2,6 +2,7 @@ import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { useState } from "react";
 import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
+import { Icon } from "../ui/Icon";
 
 const KIND_LABEL: Record<DiffEntry["kind"], string> = {
   added: "Added",
@@ -70,10 +71,11 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
         </span>
         {showExpand && (
           <button
+            type="button"
             onClick={() => setExpanded((v) => !v)}
             className="text-dim hover:text-fg text-xs shrink-0 transition-colors"
           >
-            {expanded ? "▲" : "▼"}
+            <Icon name={expanded ? "chevron-up" : "chevron-down"} size={14} />
           </button>
         )}
       </div>

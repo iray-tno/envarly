@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { DiffEntry } from "../../lib/diff";
 import { resolveSecret } from "../../lib/secrets";
+import { Icon } from "../ui/Icon";
 
 export function DiffRow({ entry }: { entry: DiffEntry }) {
   const secret = resolveSecret(entry.name, entry.value ?? entry.newValue ?? "");
@@ -18,7 +19,12 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
       <td className="px-2 py-1.5 font-mono font-semibold text-fg whitespace-nowrap">
         <span className="flex items-center gap-1.5">
           {entry.name}
-          {secret && <span className="text-[9px] font-medium text-warn">{secret.service}</span>}
+          {secret && (
+            <span className="inline-flex items-center gap-1 text-[9px] font-medium text-warn">
+              <Icon name="warning" size={12} />
+              {secret.service}
+            </span>
+          )}
         </span>
       </td>
       <td className="px-2 py-1.5 text-muted w-12">{entry.scope[0]}</td>

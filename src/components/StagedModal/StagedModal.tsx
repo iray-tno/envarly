@@ -3,6 +3,7 @@ import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 
 const CRITICAL_VARS = new Set(["SYSTEMROOT", "WINDIR", "COMSPEC"]);
 
@@ -116,13 +117,16 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {criticalChanges.length > 0 && (
-        <div className="px-6 py-3 bg-danger/10 border-b border-danger/30 shrink-0">
-          <p className="text-xs font-semibold text-danger mb-1">
-            {t("staged.critical", { count: criticalChanges.length })}
-          </p>
-          <p className="text-xs text-danger">
-            {t("staged.critical_detail", { count: criticalChanges.length, vars: criticalChanges.map((e) => e.name).join(", ") })}
-          </p>
+        <div className="flex gap-2 px-6 py-3 bg-danger/10 border-b border-danger/30 shrink-0 text-danger">
+          <Icon name="warning" size={16} className="mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold mb-1">
+              {t("staged.critical", { count: criticalChanges.length })}
+            </p>
+            <p className="text-xs">
+              {t("staged.critical_detail", { count: criticalChanges.length, vars: criticalChanges.map((e) => e.name).join(", ") })}
+            </p>
+          </div>
         </div>
       )}
 

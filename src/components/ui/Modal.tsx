@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { cn } from "../../lib/cn";
+import { IconButton } from "./IconButton";
 
 interface Props {
   open: boolean;
@@ -52,14 +53,7 @@ export function Modal({ open, onClose, title, size = "lg", flex = false, childre
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-rim shrink-0">
             <h2 className="text-base font-semibold text-fg">{title}</h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-dim hover:text-fg transition-colors text-lg leading-none px-1"
-              aria-label="Close"
-            >
-              ×
-            </button>
+            <IconButton aria-label="Close" icon="x" onClick={onClose} />
           </div>
         )}
         <div className={flex ? "flex-1 min-h-0 flex flex-col" : "flex-1 overflow-y-auto"}>

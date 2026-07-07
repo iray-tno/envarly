@@ -49,7 +49,7 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
       <div className="px-5 py-4 border-b border-rim shrink-0">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-sm font-semibold text-fg">{t("diff.title")}</h2>
-          <IconButton aria-label="Close" icon="×" onClick={onDismiss} />
+          <IconButton aria-label="Close" icon="x" onClick={onDismiss} />
         </div>
         <p className="text-xs text-muted mb-3">{t("diff.description")}</p>
 

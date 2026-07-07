@@ -4,6 +4,7 @@ import { api } from "../../api";
 import { resolveSecret } from "../../lib/secrets";
 import type { VarScope } from "../../types";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { Textarea } from "../ui/Textarea";
 import { SecretBanner, VarTable } from "./VarTable";
@@ -151,7 +152,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
 
           {strategy === "replace" && affectedScopes.length > 0 && (
             <div className="flex gap-2 px-3 py-2 rounded border border-danger/40 bg-danger/10 text-danger text-xs">
-              <span className="shrink-0">⚠</span>
+              <Icon name="warning" size={14} className="mt-px" />
               <span>
                 {t("import.replace_warning", { scopes: affectedScopes.join(" and ") })}
               </span>

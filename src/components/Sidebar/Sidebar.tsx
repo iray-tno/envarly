@@ -5,6 +5,7 @@ import { stagedKey } from "../../hooks/useStaged";
 import { cn } from "../../lib/cn";
 import { resolveSecret } from "../../lib/secrets";
 import type { EnvVar, VarScope } from "../../types";
+import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { TextInput } from "../ui/TextInput";
 
@@ -140,9 +141,9 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
                 : "bg-warn/10 text-warn border border-warn/40 hover:bg-warn/15 hover:text-warn",
             )}
           >
-            <span>⚠</span>
+            <Icon name="warning" size={12} />
             <span>{t("sidebar.secret", { count: secretCount })}</span>
-            {secretsOnly && <span className="opacity-60">✕</span>}
+            {secretsOnly && <Icon name="x" size={12} className="opacity-60" />}
           </button>
         ) : (
           <span />
@@ -234,7 +235,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
                   copiedKey === key ? "text-success" : "text-dim hover:text-muted",
                 )}
               >
-                {copiedKey === key ? "✓" : "⧉"}
+                <Icon name={copiedKey === key ? "check" : "copy"} size={12} />
               </button>
               <span
                 className={cn(
@@ -256,8 +257,9 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         <button
           type="button"
           onClick={onCreateNew}
-          className="w-full text-left text-xs text-dim hover:text-muted px-2 py-1.5 rounded hover:bg-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="w-full inline-flex items-center gap-1.5 text-left text-xs text-dim hover:text-muted px-2 py-1.5 rounded hover:bg-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
+          <Icon name="plus" size={12} />
           {t("sidebar.new_var")}
         </button>
       </div>

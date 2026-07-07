@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "../../lib/cn";
+import { Icon, type IconName } from "./Icon";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "warn" | "link";
 type Size = "xs" | "sm" | "md";
@@ -7,6 +8,8 @@ type Size = "xs" | "sm" | "md";
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
+  icon?: IconName;
+  iconPosition?: "left" | "right";
 }
 
 const variantCls: Record<Variant, string> = {
@@ -24,7 +27,15 @@ const sizeCls: Record<Size, string> = {
   md: "px-5 py-3 text-sm font-medium",
 };
 
-export function Button({ variant = "ghost", size = "sm", className, children, ...props }: Props) {
+export function Button({
+  variant = "ghost",
+  size = "sm",
+  icon,
+  iconPosition = "left",
+  className,
+  children,
+  ...props
+}: Props) {
   return (
     <button
       type="button"
@@ -38,7 +49,9 @@ export function Button({ variant = "ghost", size = "sm", className, children, ..
         className,
       )}
     >
+      {icon && iconPosition === "left" && <Icon name={icon} size={14} />}
       {children}
+      {icon && iconPosition === "right" && <Icon name={icon} size={14} />}
     </button>
   );
 }

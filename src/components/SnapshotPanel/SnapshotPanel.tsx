@@ -227,7 +227,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                     ) : (
                       <IconButton
                         aria-label="Delete snapshot"
-                        icon="×"
+                        icon="x"
                         variant="danger"
                         onClick={() => setConfirmDeleteId(s.id)}
                         title="Delete snapshot"

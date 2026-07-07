@@ -3,31 +3,31 @@
     "registry_error": "Registry error: {{error}}"
   },
   "header": {
-    "refresh": "↻ Refresh",
+    "refresh": "Refresh",
     "apply_staged_one": "Apply {{count}} staged change",
     "apply_staged_other": "Apply {{count}} staged changes",
     "discard_all": "Discard all",
-    "external_changes_one": "⚠ {{count}} external change",
-    "external_changes_other": "⚠ {{count}} external changes",
+    "external_changes_one": "{{count}} external change",
+    "external_changes_other": "{{count}} external changes",
     "import_export": "Import / Export",
     "snapshots": "Snapshots",
-    "run_as_admin": "🛡 Run as admin",
+    "run_as_admin": "Run as admin",
     "run_as_admin_title": "System variables are read-only. Restart as administrator to edit them.",
-    "administrator": "🛡 Administrator",
+    "administrator": "Administrator",
     "licenses": "Licenses"
   },
   "path_banner": {
     "prefix": "Envarly is not in your {{scope}} PATH — add it to run",
     "suffix": "from a terminal.",
-    "add": "+ {{scope}} PATH",
+    "add": "{{scope}} PATH",
     "dismiss": "Dismiss"
   },
   "detail": {
     "empty": "Select a variable to view and edit it",
     "staged_badge": "staged",
     "staged_delete_badge": "staged: delete",
-    "restart_admin": "🛡 Restart as admin →",
-    "add_to_path": "+ Add Envarly to PATH",
+    "restart_admin": "Restart as admin",
+    "add_to_path": "Add Envarly to PATH",
     "stage": "Stage",
     "discard": "Discard",
     "delete": "Delete",
@@ -60,7 +60,7 @@
     "sort_staged": "Staged first",
     "loading": "Loading…",
     "empty": "No variables found",
-    "new_var": "+ New variable"
+    "new_var": "New variable"
   },
   "new_var": {
     "name": "Name",
@@ -74,8 +74,8 @@
     "system_admin": "System (admin)"
   },
   "staged": {
-    "critical_one": "⚠ Critical system variable will be modified",
-    "critical_other": "⚠ Critical system variables will be modified",
+    "critical_one": "Critical system variable will be modified",
+    "critical_other": "Critical system variables will be modified",
     "critical_detail_one": "{{vars}} — changing this can break Windows or running applications. A snapshot is strongly recommended.",
     "critical_detail_other": "{{vars}} — changing these can break Windows or running applications. A snapshot is strongly recommended.",
     "broadcast": "These changes will be written to the Windows registry and broadcast to running applications.",

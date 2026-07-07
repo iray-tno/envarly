@@ -11,6 +11,7 @@ import { ListEditor } from "../ListEditor/ListEditor";
 import { PathEditor } from "../PathEditor/PathEditor";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 import { IconButton } from "../ui/IconButton";
 import { Textarea } from "../ui/Textarea";
 
@@ -60,15 +61,6 @@ function looksLikeSinglePath(name: string, value: string) {
   return /^[a-z]:[\\/]/i.test(trimmedValue) || trimmedValue.startsWith("/") || trimmedValue.startsWith("\\\\");
 }
 
-function FolderIcon() {
-  return (
-    <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24">
-      <path d="M3.5 6.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v1.25" />
-      <path d="M4.5 9.5h15.8a1.5 1.5 0 0 1 1.45 1.88l-1.65 6.25a2.5 2.5 0 0 1-2.42 1.87H5.35a2 2 0 0 1-1.94-2.49l1.1-4.4" />
-    </svg>
-  );
-}
-
 export function DetailPanel({ variable, allVars, elevated, userPathInEnv, systemPathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
   const { t } = useI18n();
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
@@ -111,7 +103,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
   if (!variable) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3 text-dim">
-        <span className="text-5xl opacity-20">⚙</span>
+        <Icon name="info" size={48} className="opacity-20" />
         <p className="text-sm">{t("detail.empty")}</p>
       </div>
     );
@@ -225,7 +217,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
 
       {description && (
         <div className="flex items-start gap-2.5 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
-          <span className="text-dim text-xs mt-px select-none">ℹ</span>
+          <Icon name="info" size={14} className="mt-px text-dim" />
           <div className="flex items-baseline gap-2 flex-wrap">
             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-surface border border-rim text-dim shrink-0 select-none">
               {t(description.categoryKey)}
@@ -238,7 +230,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
       {/* Staged-delete overlay */}
       {isStagedDelete ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-dim px-6">
-          <span className="text-4xl opacity-20">🗑</span>
+          <Icon name="trash" size={48} className="opacity-20" />
           <p className="text-sm text-center">
             {t("detail.staged_delete_title", { name: variable.name })}
           </p>
@@ -322,7 +314,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
                 <IconButton
                   aria-label={t("detail.browse_folder")}
                   title={t("detail.browse_folder")}
-                  icon={<FolderIcon />}
+                  icon="folder"
                   onClick={handleBrowseFolder}
                   className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
                 />
