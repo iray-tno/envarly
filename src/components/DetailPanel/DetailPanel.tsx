@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { open } from "@tauri-apps/plugin-dialog";
 import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { useLocalHistory } from "../../hooks/useLocalHistory";
@@ -10,6 +11,7 @@ import { ListEditor } from "../ListEditor/ListEditor";
 import { PathEditor } from "../PathEditor/PathEditor";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
+import { IconButton } from "../ui/IconButton";
 import { Textarea } from "../ui/Textarea";
 
 interface Props {
@@ -25,6 +27,46 @@ interface Props {
   onStageAddToPath: (scope: "User" | "System") => void;
   /** Called with a discard fn when dirty, null when clean. Lets App wire Ctrl+Z. */
   onRegisterLocalUndo?: (fn: (() => void) | null) => void;
+}
+
+const PATH_NAME_SUFFIXES = ["_HOME", "_ROOT", "_PATH", "_DIR", "_DIRECTORY"];
+const PATH_NAME_EXACT = new Set([
+  "APPDATA",
+  "CUDA_PATH",
+  "LOCALAPPDATA",
+  "PROGRAMDATA",
+  "PROGRAMFILES",
+  "PROGRAMFILES(X86)",
+  "PUBLIC",
+  "SYSTEMDRIVE",
+  "SYSTEMROOT",
+  "TEMP",
+  "TMP",
+  "USERPROFILE",
+  "WINDIR",
+]);
+
+function looksLikeSinglePath(name: string, value: string) {
+  const normalizedName = name.toUpperCase();
+  const trimmedValue = value.trim();
+
+  if (
+    PATH_NAME_EXACT.has(normalizedName) ||
+    PATH_NAME_SUFFIXES.some((suffix) => normalizedName.endsWith(suffix))
+  ) {
+    return true;
+  }
+
+  return /^[a-z]:[\\/]/i.test(trimmedValue) || trimmedValue.startsWith("/") || trimmedValue.startsWith("\\\\");
+}
+
+function FolderIcon() {
+  return (
+    <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24">
+      <path d="M3.5 6.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v1.25" />
+      <path d="M4.5 9.5h15.8a1.5 1.5 0 0 1 1.45 1.88l-1.65 6.25a2.5 2.5 0 0 1-2.42 1.87H5.35a2 2 0 0 1-1.94-2.49l1.1-4.4" />
+    </svg>
+  );
 }
 
 export function DetailPanel({ variable, allVars, elevated, userPathInEnv, systemPathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
@@ -94,6 +136,17 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
     reset(stagedChange?.originalValue ?? variable.value);
   };
 
+  const handleBrowseFolder = async () => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      defaultPath: value.trim() || undefined,
+    });
+    if (typeof selected === "string") {
+      handleValueChange(selected);
+    }
+  };
+
   /** Auto-detect list separator from pasted text. */
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const text = e.clipboardData.getData("text");
@@ -106,6 +159,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
 
   const effectiveSeparator = overrideSeparator ?? variable.listSeparator;
   const readOnly = variable.scope === "System" && !elevated;
+  const showFolderPicker = !readOnly && effectiveSeparator === null && looksLikeSinglePath(variable.name, value);
   const description = lookupEnvDescription(variable.name);
   const isPathVar = variable.name.toUpperCase() === "PATH";
   const pathInEnvForScope = variable.scope === "System" ? systemPathInEnv : userPathInEnv;
@@ -252,16 +306,28 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
           ) : effectiveSeparator === "," ? (
             <ListEditor separator="," rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
           ) : (
-            <Textarea
-              label="Value"
-              labelHidden
-              value={value}
-              onChange={(e) => handleValueChange(e.target.value)}
-              onPaste={handlePaste}
-              rows={Math.max(3, value.split("\n").length + 1)}
-              spellCheck={false}
-              disabled={readOnly}
-            />
+            <div className="group relative">
+              <Textarea
+                label="Value"
+                labelHidden
+                value={value}
+                onChange={(e) => handleValueChange(e.target.value)}
+                onPaste={handlePaste}
+                rows={Math.max(3, value.split("\n").length + 1)}
+                spellCheck={false}
+                disabled={readOnly}
+                className={showFolderPicker ? "pr-11" : undefined}
+              />
+              {showFolderPicker && (
+                <IconButton
+                  aria-label={t("detail.browse_folder")}
+                  title={t("detail.browse_folder")}
+                  icon={<FolderIcon />}
+                  onClick={handleBrowseFolder}
+                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                />
+              )}
+            </div>
           )}
 
           {/* Metadata */}

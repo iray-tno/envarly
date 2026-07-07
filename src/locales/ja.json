@@ -38,6 +38,7 @@
     "label_path": "パスエントリ (ドラッグで並べ替え)",
     "label_list": "リストエントリ (ドラッグで並べ替え)",
     "label_value": "値",
+    "browse_folder": "フォルダーを選択",
     "plain_text": "プレーンテキスト",
     "list_semicolon": "リスト (;)",
     "list_comma": "リスト (,)",

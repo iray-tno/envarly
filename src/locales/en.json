@@ -38,6 +38,7 @@
     "label_path": "Path entries (drag to reorder)",
     "label_list": "List entries (drag to reorder)",
     "label_value": "Value",
+    "browse_folder": "Browse for folder",
     "plain_text": "Plain text",
     "list_semicolon": "List (;)",
     "list_comma": "List (,)",
