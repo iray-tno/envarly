@@ -4,7 +4,18 @@ import en from "./locales/en.json";
 import ja from "./locales/ja.json";
 
 const STORAGE_KEY = "envarly-language";
-const stored = localStorage.getItem(STORAGE_KEY);
+
+function getStoredLanguage() {
+  try {
+    return typeof localStorage !== "undefined" && typeof localStorage.getItem === "function"
+      ? localStorage.getItem(STORAGE_KEY)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+const stored = getStoredLanguage();
 const detected = navigator.language;
 const lng = stored === "ja" || stored === "en" ? stored : detected.startsWith("ja") ? "ja" : "en";
 

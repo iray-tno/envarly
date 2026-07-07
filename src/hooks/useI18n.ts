@@ -10,7 +10,13 @@ export function useI18n() {
   const language = i18next.language as Language;
 
   const setLanguage = (lang: Language) => {
-    localStorage.setItem(STORAGE_KEY, lang);
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, lang);
+      }
+    } catch {
+      // Language switching should still work in test/private-storage contexts.
+    }
     i18n.changeLanguage(lang);
   };
 

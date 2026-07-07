@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { open } from "@tauri-apps/plugin-dialog";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../../api";
 import type { StagedChange } from "../../hooks/useStaged";
@@ -8,6 +9,10 @@ import { DetailPanel } from "./DetailPanel";
 
 vi.mock("../../api", () => ({
   api: { validatePaths: vi.fn() },
+}));
+
+vi.mock("@tauri-apps/plugin-dialog", () => ({
+  open: vi.fn(),
 }));
 
 const noStaged = new Map<string, StagedChange>();
@@ -34,6 +39,7 @@ describe("DetailPanel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(api.validatePaths).mockResolvedValue([true]);
+    vi.mocked(open).mockResolvedValue(null);
   });
 
   const render_ = (
@@ -88,9 +94,36 @@ describe("DetailPanel", () => {
     expect(onStage).toHaveBeenCalledWith("JAVA_HOME", "User", "NewValue");
   });
 
+  it("shows a folder picker button for path-like single values", () => {
+    render_(simpleVar);
+    expect(screen.getByRole("button", { name: /browse for folder/i })).toBeInTheDocument();
+  });
+
+  it("updates the value with the selected folder path", async () => {
+    const user = userEvent.setup();
+    vi.mocked(open).mockResolvedValue("C:\\Program Files\\Java\\jdk-22");
+    render_(simpleVar);
+
+    await user.click(screen.getByRole("button", { name: /browse for folder/i }));
+    await user.click(screen.getByRole("button", { name: /^stage$/i }));
+
+    expect(open).toHaveBeenCalledWith({
+      directory: true,
+      multiple: false,
+      defaultPath: simpleVar.value,
+    });
+    expect(onStage).toHaveBeenCalledWith("JAVA_HOME", "User", "C:\\Program Files\\Java\\jdk-22");
+  });
+
+  it("does not show a folder picker button for non-path single values", () => {
+    render_({ ...simpleVar, name: "NODE_ENV", value: "development" });
+    expect(screen.queryByRole("button", { name: /browse for folder/i })).not.toBeInTheDocument();
+  });
+
   it("shows PATH editor for path-like variable", () => {
     render_(pathVar);
     expect(screen.getByText(/drag to reorder/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /browse for folder/i })).not.toBeInTheDocument();
   });
 
   it("shows Delete button when not dirty and not staged", () => {
@@ -111,6 +144,7 @@ describe("DetailPanel", () => {
     render_(sysVar, false);
     expect(screen.getByText(/restart as admin/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /browse for folder/i })).not.toBeInTheDocument();
   });
 
   it("shows staged badge and Unstage button when var is staged for set", () => {
