@@ -47,7 +47,13 @@ export default function App() {
   const { diffEntries, baselineRef, checkForExternalChanges, handleDiffApply, handleDiffDismiss, applyBusy } =
     useDiff(refresh, setDialog);
 
-  const { handleRefresh } = useAppInit({ baselineRef, setElevated, refreshPathStatus, refresh, checkForExternalChanges });
+  const { handleRefresh } = useAppInit({
+    baselineRef,
+    setElevated,
+    refreshPathStatus,
+    refresh,
+    checkForExternalChanges,
+  });
 
   useKeyboardShortcuts(undo, redo, localUndoRef);
 

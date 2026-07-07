@@ -130,6 +130,18 @@ envarly export --format ansible  --output backup.yml      # Ansible environment 
 envarly export --format json | jq '.user.PATH'
 ```
 
+## Demo mode
+
+Demo mode opens the GUI with fixture data and keeps every change in memory, so it is safe for screenshots, walkthroughs, and release media.
+
+```sh
+envarly --demo
+envarly --demo --demo-fixture path\to\fixture.json
+envarly --demo-fixture=path\to\fixture.json
+```
+
+The bundled fixture lives at `src/demo/envarly-demo.json`. Custom fixtures use the same shape and can include User/System variables, snapshots, PATH validation results, and an initial baseline for external-change demos.
+
 ## Import / Export (GUI)
 
 Open the **Import / Export** tab.

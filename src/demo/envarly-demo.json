@@ -1,0 +1,111 @@
+{
+  "elevated": false,
+  "installDir": "C:\\Program Files\\Envarly",
+  "pathStatus": {
+    "userHasEntry": false,
+    "systemHasEntry": true
+  },
+  "pathExists": {
+    "C:\\Program Files\\Envarly": true,
+    "C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312\\Scripts": true,
+    "C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312": true,
+    "C:\\Program Files\\nodejs": true,
+    "C:\\Program Files\\Git\\cmd": true,
+    "C:\\Users\\demo\\.cargo\\bin": true,
+    "C:\\Users\\demo\\Tools\\missing-bin": false,
+    "C:\\Windows\\System32": true,
+    "C:\\Windows": true,
+    "C:\\Program Files\\PowerShell\\7": true,
+    "C:\\OldTools\\Java\\bin": false
+  },
+  "baseline": {
+    "user": {
+      "Path": "C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312\\Scripts;C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312;C:\\Program Files\\nodejs;C:\\Program Files\\Git\\cmd;C:\\Users\\demo\\Tools\\missing-bin",
+      "JAVA_HOME": "C:\\Program Files\\Java\\jdk-17",
+      "NO_PROXY": "localhost,127.0.0.1,.local",
+      "OPENAI_API_KEY": "sk-proj-demoDemoDemoDemoDemoDemoDemoDemoDemoDemoDemo",
+      "DATABASE_URL": "postgres://demo_user:demo_password@localhost:5432/envarly_demo"
+    },
+    "system": {
+      "Path": "C:\\Windows\\System32;C:\\Windows;C:\\Program Files\\PowerShell\\7;C:\\OldTools\\Java\\bin",
+      "COMSPEC": "C:\\Windows\\System32\\cmd.exe",
+      "TEMP": "C:\\Windows\\Temp",
+      "TMP": "C:\\Windows\\Temp"
+    }
+  },
+  "current": {
+    "user": {
+      "Path": "C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312\\Scripts;C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312;C:\\Program Files\\nodejs;C:\\Program Files\\Git\\cmd;C:\\Users\\demo\\.cargo\\bin;C:\\Users\\demo\\Tools\\missing-bin",
+      "JAVA_HOME": "C:\\Program Files\\Java\\jdk-21",
+      "NO_PROXY": "localhost,127.0.0.1,.local,*.internal",
+      "OPENAI_API_KEY": "sk-proj-demoDemoDemoDemoDemoDemoDemoDemoDemoDemoDemo",
+      "DATABASE_URL": "postgres://demo_user:demo_password@localhost:5432/envarly_demo",
+      "GITHUB_TOKEN": "ghp_demoDemoDemoDemoDemoDemoDemoDemo"
+    },
+    "system": {
+      "Path": "C:\\Windows\\System32;C:\\Windows;C:\\Program Files\\PowerShell\\7;C:\\OldTools\\Java\\bin",
+      "COMSPEC": "C:\\Windows\\System32\\cmd.exe",
+      "TEMP": "C:\\Windows\\Temp",
+      "TMP": "C:\\Windows\\Temp"
+    }
+  },
+  "snapshots": [
+    {
+      "id": "demo-clean-dev",
+      "createdAt": "2026-07-01T09:00:00.000Z",
+      "label": "Clean developer setup",
+      "snapshot": {
+        "user": {
+          "Path": "C:\\Program Files\\Envarly;C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312\\Scripts;C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312;C:\\Program Files\\nodejs;C:\\Program Files\\Git\\cmd;C:\\Users\\demo\\.cargo\\bin",
+          "JAVA_HOME": "C:\\Program Files\\Java\\jdk-21",
+          "NO_PROXY": "localhost,127.0.0.1,.local,*.internal",
+          "OPENAI_API_KEY": "sk-proj-demoDemoDemoDemoDemoDemoDemoDemoDemoDemoDemo"
+        },
+        "system": {
+          "Path": "C:\\Windows\\System32;C:\\Windows;C:\\Program Files\\PowerShell\\7",
+          "COMSPEC": "C:\\Windows\\System32\\cmd.exe",
+          "TEMP": "C:\\Windows\\Temp",
+          "TMP": "C:\\Windows\\Temp"
+        }
+      }
+    },
+    {
+      "id": "demo-before-node-upgrade",
+      "createdAt": "2026-06-21T15:30:00.000Z",
+      "label": "Before Node upgrade",
+      "snapshot": {
+        "user": {
+          "Path": "C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312\\Scripts;C:\\Users\\demo\\AppData\\Local\\Programs\\Python\\Python312;C:\\Program Files\\nodejs;C:\\Program Files\\Git\\cmd",
+          "JAVA_HOME": "C:\\Program Files\\Java\\jdk-17",
+          "NO_PROXY": "localhost,127.0.0.1,.local",
+          "DATABASE_URL": "postgres://demo_user:demo_password@localhost:5432/envarly_demo"
+        },
+        "system": {
+          "Path": "C:\\Windows\\System32;C:\\Windows;C:\\Program Files\\PowerShell\\7;C:\\OldTools\\Java\\bin",
+          "COMSPEC": "C:\\Windows\\System32\\cmd.exe",
+          "TEMP": "C:\\Windows\\Temp",
+          "TMP": "C:\\Windows\\Temp"
+        }
+      }
+    },
+    {
+      "id": "demo-broken-path",
+      "createdAt": "2026-06-15T08:15:00.000Z",
+      "label": "Broken PATH example",
+      "snapshot": {
+        "user": {
+          "Path": "C:\\Users\\demo\\Tools\\missing-bin;C:\\OldTools\\Java\\bin;C:\\Program Files\\Git\\cmd",
+          "JAVA_HOME": "C:\\OldTools\\Java",
+          "NO_PROXY": "localhost,127.0.0.1",
+          "GITHUB_TOKEN": "ghp_demoDemoDemoDemoDemoDemoDemoDemo"
+        },
+        "system": {
+          "Path": "C:\\Windows\\System32;C:\\Windows;C:\\OldTools\\Java\\bin",
+          "COMSPEC": "C:\\Windows\\System32\\cmd.exe",
+          "TEMP": "C:\\Windows\\Temp",
+          "TMP": "C:\\Windows\\Temp"
+        }
+      }
+    }
+  ]
+}

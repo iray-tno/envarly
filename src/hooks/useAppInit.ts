@@ -11,11 +11,21 @@ interface Params {
   checkForExternalChanges: () => Promise<void>;
 }
 
-export function useAppInit({ baselineRef, setElevated, refreshPathStatus, refresh, checkForExternalChanges }: Params) {
+export function useAppInit({
+  baselineRef,
+  setElevated,
+  refreshPathStatus,
+  refresh,
+  checkForExternalChanges,
+}: Params) {
   useEffect(() => {
     (async () => {
-      try { baselineRef.current = await api.getRegistrySnapshot(); } catch { }
-      try { setElevated(await api.isElevated()); } catch { }
+      try {
+        baselineRef.current = await api.getRegistrySnapshot();
+      } catch {}
+      try {
+        setElevated(await api.isElevated());
+      } catch {}
       await refreshPathStatus();
       refresh();
     })();

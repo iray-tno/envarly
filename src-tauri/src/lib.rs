@@ -15,7 +15,12 @@ mod snapshot;
 /// Returns normally (unit) when there are no subcommand args, so the caller can launch the GUI.
 #[cfg(windows)]
 pub fn try_run_cli() {
-    if std::env::args().len() <= 1 {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.is_empty()
+        || args
+            .iter()
+            .any(|arg| arg == "--demo" || arg.starts_with("--demo-fixture"))
+    {
         return;
     }
     cli::run() // -> !  (either exits 0 on success or exits 1 on error)
@@ -43,6 +48,8 @@ pub fn run() {
             commands::restart_as_admin,
             commands::get_path_status,
             commands::get_path_proposal,
+            commands::get_launch_options,
+            commands::read_demo_fixture,
         ])
         .run(tauri::generate_context!())
         .expect("error while running envarly");
