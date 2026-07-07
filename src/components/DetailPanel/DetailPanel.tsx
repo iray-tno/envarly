@@ -190,7 +190,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
               <button
                 type="button"
                 onClick={() => api.restartAsAdmin()}
-                className="text-[10px] text-accent/70 hover:text-accent px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors shrink-0"
+                className="text-[10px] text-accent hover:text-accent-hi px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors shrink-0"
                 title="Restart as administrator to edit system variables"
               >
                 {t("detail.restart_admin")}
@@ -257,7 +257,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
                 <button
                   type="button"
                   onClick={() => onStageAddToPath(variable.scope as "User" | "System")}
-                  className="text-[10px] text-accent/70 hover:text-accent px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors"
+                  className="text-[10px] text-accent hover:text-accent-hi px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors"
                   title="Stage adding Envarly install directory to this PATH variable"
                 >
                   {t("detail.add_to_path")}
