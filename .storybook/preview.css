@@ -1,0 +1,45 @@
+.sbdocs-wrapper,
+.sbdocs-content {
+  background: var(--color-canvas);
+  color: var(--color-fg);
+}
+
+.sbdocs-content h1,
+.sbdocs-content h2,
+.sbdocs-content h3,
+.sbdocs-content h4,
+.sbdocs-content h5,
+.sbdocs-content h6,
+.sbdocs-content p,
+.sbdocs-content li,
+.sbdocs-content td,
+.sbdocs-content th {
+  color: var(--color-fg);
+}
+
+.sbdocs-content a {
+  color: var(--color-accent);
+}
+
+.sbdocs-content table,
+.sbdocs-content tr {
+  border-color: var(--color-rim-subtle);
+}
+
+.sbdocs-content thead,
+.sbdocs-content th {
+  background: var(--color-panel);
+}
+
+.sbdocs-content code,
+.docblock-source {
+  background: var(--color-surface);
+  color: var(--color-fg);
+}
+
+.docblock-argstable,
+.docblock-argstable-body,
+.docblock-argstable-head {
+  background: var(--color-panel);
+  color: var(--color-fg);
+}

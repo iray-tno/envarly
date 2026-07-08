@@ -14,7 +14,7 @@ const config: StorybookConfig = {
   viteFinal: (config) => {
     if (isProd) config.base = "/envarly/storybook/";
     return config;
-  }
+  },
 };
 
 export default config;
