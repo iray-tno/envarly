@@ -48,3 +48,4 @@ pnpm-debug.log*
 
 # Windows proc-macro DLLs that git picks up via %USERPROFILE% path expansion
 %USERPROFILE%/
+%USERP~1/
