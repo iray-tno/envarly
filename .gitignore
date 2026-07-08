@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 dist/
 dist-ssr/
+storybook-static/
 target/
 src-tauri/target/
 src-tauri/gen/
