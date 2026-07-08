@@ -102,6 +102,7 @@ export function LicensesPanel() {
           ] as [TopTab, string][]).map(([t, label]) => (
             <button
               key={t}
+              type="button"
               onClick={() => setTab(t)}
               className={cn(
                 "px-3 py-1.5 rounded-t text-xs font-medium transition-colors -mb-px border-b",
@@ -145,6 +146,7 @@ export function LicensesPanel() {
                 {(["npm", "rust"] as Ecosystem[]).map((e) => (
                   <button
                     key={e}
+                    type="button"
                     onClick={() => setEco(e)}
                     className={cn(
                       "px-3 py-1 rounded text-xs font-mono transition-colors",

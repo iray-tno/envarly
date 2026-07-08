@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import type { EnvVar, VarScope } from "../../types";
@@ -17,12 +17,17 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
   const [name, setName] = useState("");
   const [scope, setScope] = useState<VarScope>("User");
   const [value, setValue] = useState("");
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const trimmedName = name.trim();
   const alreadyExists = trimmedName
     ? vars.some((v) => v.name.toLowerCase() === trimmedName.toLowerCase() && v.scope === scope)
     : false;
   const canSubmit = trimmedName.length > 0 && !alreadyExists;
+
+  useEffect(() => {
+    nameInputRef.current?.focus();
+  }, []);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -38,7 +43,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
         </label>
         <input
           id="newvar-name"
-          autoFocus
+          ref={nameInputRef}
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}

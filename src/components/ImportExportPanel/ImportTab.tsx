@@ -68,7 +68,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
     onStatus(null);
     try {
       const sets = selected.map((v) => ({ name: v.name, scope: v.scope, value: v.value }));
-      let deletes: Array<{ name: string; scope: VarScope }> = [];
+      const deletes: Array<{ name: string; scope: VarScope }> = [];
 
       if (strategy === "replace") {
         const affectedScopes = new Set(selected.map((v) => v.scope));

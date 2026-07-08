@@ -1,6 +1,5 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useRef } from "react";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 
 function fire(key: string, opts: Partial<KeyboardEventInit> = {}) {

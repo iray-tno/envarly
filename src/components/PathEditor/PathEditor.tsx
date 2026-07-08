@@ -82,8 +82,8 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
   }, [lintedValue, allVars]);
 
   return (
-    <div
-      className="flex flex-col gap-2"
+    <fieldset
+      className="flex flex-col gap-2 min-w-0 border-0 p-0 m-0"
       onFocus={() => { hasFocusRef.current = true; }}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) {
@@ -116,6 +116,6 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
         readOnly={readOnly}
         addPlaceholder="Add new path…"
       />
-    </div>
+    </fieldset>
   );
 }

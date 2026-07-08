@@ -21,7 +21,6 @@ jobs:
       - run: npm run check-version
       - name: Test (Vitest)
         run: npx vitest run --reporter=junit --outputFile=test-results.xml
-        continue-on-error: true
       - name: Report Vitest results
         uses: dorny/test-reporter@v3
         if: always()
@@ -72,11 +71,23 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RESULT=$(npx biome check --reporter=json src 2>/dev/null || true)
-          [ -z "$RESULT" ] && RESULT='{"diagnostics":[]}'
+          set +e
+          RESULT=$(npx biome lint --reporter=json src 2>biome-stderr.txt)
+          STATUS=$?
+          set -e
+          COMMAND_ERRORS=0
+          if [ -z "$RESULT" ] || ! echo "$RESULT" | jq empty >/dev/null 2>&1; then
+            RESULT='{"diagnostics":[]}'
+            [ "$STATUS" -ne 0 ] && COMMAND_ERRORS=1
+          fi
           ERRORS=$(echo "$RESULT" | jq '[.diagnostics[] | select(.severity == "error")] | length')
           WARNINGS=$(echo "$RESULT" | jq '[.diagnostics[] | select(.severity == "warning")] | length')
-          printf "## Biome\n| | Count |\n|---|---:|\n| Errors | %s |\n| Warnings | %s |\n" "$ERRORS" "$WARNINGS" >> "$GITHUB_STEP_SUMMARY"
+          printf "## Biome\n| | Count |\n|---|---:|\n| Errors | %s |\n| Warnings | %s |\n| Command errors | %s |\n" "$ERRORS" "$WARNINGS" "$COMMAND_ERRORS" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$COMMAND_ERRORS" -gt 0 ]; then
+            printf "\nBiome did not produce JSON output. Command stderr:\n\n\`\`\`\n" >> "$GITHUB_STEP_SUMMARY"
+            cat biome-stderr.txt >> "$GITHUB_STEP_SUMMARY"
+            printf "\n\`\`\`\n" >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo "$RESULT" | jq -rc '.diagnostics[] | select(.location.path.file != null) | {message:.description,severity:(if .severity=="error" then "ERROR" elif .severity=="warning" then "WARNING" else "INFO" end),location:{path:{name:.location.path.file},range:{start:{line:(.location.span.start.line//1),column:(.location.span.start.column//0)}}}}' | reviewdog -f=rdjsonl -name=biome -reporter=github-pr-review -fail-on-error=false || true
 
   lint-rs:

@@ -102,7 +102,7 @@ describe("applyAccepted", () => {
     const result = applyAccepted(base, [
       { kind: "added", name: "NEW_VAR", scope: "User", value: "hello" },
     ]);
-    expect(result.user["NEW_VAR"]).toBe("hello");
+    expect(result.user.NEW_VAR).toBe("hello");
   });
 
   it("removes accepted-removed variable from baseline", () => {
@@ -116,7 +116,7 @@ describe("applyAccepted", () => {
     const result = applyAccepted(base, [
       { kind: "changed", name: "JAVA_HOME", scope: "User", oldValue: "C:\\jdk17", newValue: "C:\\jdk21" },
     ]);
-    expect(result.user["JAVA_HOME"]).toBe("C:\\jdk21");
+    expect(result.user.JAVA_HOME).toBe("C:\\jdk21");
   });
 
   it("does not mutate the original baseline", () => {
@@ -129,7 +129,7 @@ describe("applyAccepted", () => {
     const result = applyAccepted(base, [
       { kind: "added", name: "SYS_NEW", scope: "System", value: "val" },
     ]);
-    expect(result.system["SYS_NEW"]).toBe("val");
+    expect(result.system.SYS_NEW).toBe("val");
     expect(result.user).toEqual(base.user);
   });
 });

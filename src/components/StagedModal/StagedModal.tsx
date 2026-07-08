@@ -24,6 +24,15 @@ function isList(value: string): boolean {
   return value.includes(";") && splitList(value).length > 1;
 }
 
+function keyedEntries(entries: string[], prefix: string) {
+  const seen = new Map<string, number>();
+  return entries.map((entry) => {
+    const count = seen.get(entry) ?? 0;
+    seen.set(entry, count + 1);
+    return { entry, key: `${prefix}:${entry}:${count}` };
+  });
+}
+
 function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: string }) {
   const { t } = useI18n();
   const oldEntries = splitList(oldValue);
@@ -41,14 +50,14 @@ function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: str
 
   return (
     <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
-      {removed.map((e, i) => (
-        <p key={`r${i}`} className="font-mono text-[11px] text-danger break-all">
-          <span className="select-none mr-1 opacity-70">−</span>{e}
+      {keyedEntries(removed, "removed").map(({ entry, key }) => (
+        <p key={key} className="font-mono text-[11px] text-danger break-all">
+          <span className="select-none mr-1 opacity-70">−</span>{entry}
         </p>
       ))}
-      {added.map((e, i) => (
-        <p key={`a${i}`} className="font-mono text-[11px] text-success break-all">
-          <span className="select-none mr-1 opacity-70">+</span>{e}
+      {keyedEntries(added, "added").map(({ entry, key }) => (
+        <p key={key} className="font-mono text-[11px] text-success break-all">
+          <span className="select-none mr-1 opacity-70">+</span>{entry}
         </p>
       ))}
     </div>
@@ -65,25 +74,31 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
     ...Array.from(removedSet).map((e) => ({ entry: e, status: "removed" as const })),
     ...newEntries.map((e) => ({ entry: e, status: addedSet.has(e) ? "added" as const : "unchanged" as const })),
   ];
+  const seen = new Map<string, number>();
 
   return (
     <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
-      {rows.map((r, i) => (
-        <p
-          key={i}
-          className={cn(
-            "font-mono text-[11px] break-all",
-            r.status === "removed"   && "text-danger line-through",
-            r.status === "added"     && "text-success",
-            r.status === "unchanged" && "text-muted",
-          )}
-        >
-          <span className="select-none mr-1 opacity-50">
-            {r.status === "added" ? "+" : r.status === "removed" ? "−" : " "}
-          </span>
-          {r.entry}
-        </p>
-      ))}
+      {rows.map((r) => {
+        const keyBase = `${r.status}:${r.entry}`;
+        const count = seen.get(keyBase) ?? 0;
+        seen.set(keyBase, count + 1);
+        return (
+          <p
+            key={`${keyBase}:${count}`}
+            className={cn(
+              "font-mono text-[11px] break-all",
+              r.status === "removed"   && "text-danger line-through",
+              r.status === "added"     && "text-success",
+              r.status === "unchanged" && "text-muted",
+            )}
+          >
+            <span className="select-none mr-1 opacity-50">
+              {r.status === "added" ? "+" : r.status === "removed" ? "−" : " "}
+            </span>
+            {r.entry}
+          </p>
+        );
+      })}
     </div>
   );
 }
@@ -91,8 +106,8 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
 function ListEntries({ value, className }: { value: string; className?: string }) {
   return (
     <div className={cn("flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto", className)}>
-      {splitList(value).map((e, i) => (
-        <p key={i} className="font-mono text-[11px] break-all">{e}</p>
+      {keyedEntries(splitList(value), "entry").map(({ entry, key }) => (
+        <p key={key} className="font-mono text-[11px] break-all">{entry}</p>
       ))}
     </div>
   );
