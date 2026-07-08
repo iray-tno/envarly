@@ -340,11 +340,11 @@ export function SortableListEditor({
 
       {!readOnly && (
         <div className="flex gap-2">
-          <div className="relative flex-1">
+          <div className="relative flex flex-1">
             <input
               aria-label="New entry"
               className={cn(
-                "w-full px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
+                "h-full min-h-10 w-full px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
                 onBrowseNewEntry && "pr-9",
                 "placeholder:text-muted transition-colors",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",
@@ -361,7 +361,7 @@ export function SortableListEditor({
                 aria-label="Browse folder to add"
                 title="Browse folder to add"
                 onClick={() => void browseNewEntry()}
-                className="absolute right-1 top-1/2 -translate-y-1/2 size-6"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2"
               />
             )}
           </div>
