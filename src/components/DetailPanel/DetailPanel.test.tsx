@@ -1,6 +1,6 @@
+import { open } from "@tauri-apps/plugin-dialog";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { open } from "@tauri-apps/plugin-dialog";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../../api";
 import type { StagedChange } from "../../hooks/useStaged";
@@ -42,11 +42,7 @@ describe("DetailPanel", () => {
     vi.mocked(open).mockResolvedValue(null);
   });
 
-  const render_ = (
-    variable: EnvVar | null,
-    elevated = true,
-    staged = noStaged,
-  ) =>
+  const render_ = (variable: EnvVar | null, elevated = true, staged = noStaged) =>
     render(
       <DetailPanel
         variable={variable}
@@ -149,13 +145,16 @@ describe("DetailPanel", () => {
 
   it("shows staged badge and Unstage button when var is staged for set", () => {
     const stagedMap = new Map<string, StagedChange>([
-      ["User:JAVA_HOME", {
-        kind: "set",
-        name: "JAVA_HOME",
-        scope: "User",
-        originalValue: "C:\\old",
-        newValue: simpleVar.value,
-      }],
+      [
+        "User:JAVA_HOME",
+        {
+          kind: "set",
+          name: "JAVA_HOME",
+          scope: "User",
+          originalValue: "C:\\old",
+          newValue: simpleVar.value,
+        },
+      ],
     ]);
     render_(simpleVar, true, stagedMap);
     expect(screen.getByText("staged")).toBeInTheDocument();
@@ -165,13 +164,16 @@ describe("DetailPanel", () => {
   it("calls onUnstage when Unstage clicked on staged-set var", async () => {
     const user = userEvent.setup();
     const stagedMap = new Map<string, StagedChange>([
-      ["User:JAVA_HOME", {
-        kind: "set",
-        name: "JAVA_HOME",
-        scope: "User",
-        originalValue: "C:\\old",
-        newValue: simpleVar.value,
-      }],
+      [
+        "User:JAVA_HOME",
+        {
+          kind: "set",
+          name: "JAVA_HOME",
+          scope: "User",
+          originalValue: "C:\\old",
+          newValue: simpleVar.value,
+        },
+      ],
     ]);
     render_(simpleVar, true, stagedMap);
     await user.click(screen.getByRole("button", { name: /unstage/i }));
@@ -181,13 +183,16 @@ describe("DetailPanel", () => {
   it("shows staged-delete overlay when var is staged for delete", () => {
     const deletedVar: EnvVar = { ...simpleVar, value: "C:\\Program Files\\Java\\jdk-21" };
     const stagedMap = new Map<string, StagedChange>([
-      ["User:JAVA_HOME", {
-        kind: "delete",
-        name: "JAVA_HOME",
-        scope: "User",
-        originalValue: deletedVar.value,
-        newValue: null,
-      }],
+      [
+        "User:JAVA_HOME",
+        {
+          kind: "delete",
+          name: "JAVA_HOME",
+          scope: "User",
+          originalValue: deletedVar.value,
+          newValue: null,
+        },
+      ],
     ]);
     render_(deletedVar, true, stagedMap);
     expect(screen.getByText(/staged for deletion/i)).toBeInTheDocument();

@@ -19,16 +19,14 @@ const stored = getStoredLanguage();
 const detected = navigator.language;
 const lng = stored === "ja" || stored === "en" ? stored : detected.startsWith("ja") ? "ja" : "en";
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: { translation: en },
-      ja: { translation: ja },
-    },
-    lng,
-    fallbackLng: "en",
-    interpolation: { escapeValue: false },
-  });
+i18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: en },
+    ja: { translation: ja },
+  },
+  lng,
+  fallbackLng: "en",
+  interpolation: { escapeValue: false },
+});
 
 export default i18n;

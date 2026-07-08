@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useAppInit } from "./useAppInit";
 import { api } from "../api";
+import { useAppInit } from "./useAppInit";
 
 vi.mock("../api", () => ({
   api: {
@@ -53,7 +53,9 @@ describe("useAppInit", () => {
   it("handleRefresh calls refresh and checkForExternalChanges", async () => {
     const params = makeParams();
     const { result } = renderHook(() => useAppInit(params));
-    await act(async () => { await result.current.handleRefresh(); });
+    await act(async () => {
+      await result.current.handleRefresh();
+    });
     expect(params.refresh).toHaveBeenCalled();
     expect(params.checkForExternalChanges).toHaveBeenCalledTimes(1);
   });

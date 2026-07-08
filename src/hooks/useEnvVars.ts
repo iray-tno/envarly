@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { api } from '../api';
-import type { EnvVar } from '../types';
+import { useCallback, useState } from "react";
+import { api } from "../api";
+import type { EnvVar } from "../types";
 
 export function useEnvVars() {
   const [vars, setVars] = useState<EnvVar[]>([]);

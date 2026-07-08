@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyAccepted, computeDiff, snapshotsEqual } from "./diff";
 import type { EnvSnapshot } from "../types";
+import { applyAccepted, computeDiff, snapshotsEqual } from "./diff";
 
 const empty: EnvSnapshot = { user: {}, system: {} };
 
@@ -59,7 +59,12 @@ describe("computeDiff", () => {
     const { OS: _, ...rest } = base.system;
     const cur = { ...base, system: rest };
     const diff = computeDiff(base, cur);
-    expect(diff).toContainEqual({ kind: "removed", name: "OS", scope: "System", value: "Windows_NT" });
+    expect(diff).toContainEqual({
+      kind: "removed",
+      name: "OS",
+      scope: "System",
+      value: "Windows_NT",
+    });
   });
 
   it("handles multiple changes at once", () => {
@@ -114,7 +119,13 @@ describe("applyAccepted", () => {
 
   it("updates accepted-changed variable in baseline", () => {
     const result = applyAccepted(base, [
-      { kind: "changed", name: "JAVA_HOME", scope: "User", oldValue: "C:\\jdk17", newValue: "C:\\jdk21" },
+      {
+        kind: "changed",
+        name: "JAVA_HOME",
+        scope: "User",
+        oldValue: "C:\\jdk17",
+        newValue: "C:\\jdk21",
+      },
     ]);
     expect(result.user.JAVA_HOME).toBe("C:\\jdk21");
   });

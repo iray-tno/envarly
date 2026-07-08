@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { detectSecret, detectSecretByValue, resolveSecret, isSecretVar } from "./secrets";
+import { detectSecret, detectSecretByValue, isSecretVar, resolveSecret } from "./secrets";
 
 describe("detectSecret — exact matches", () => {
   it("recognises well-known exact names", () => {
-    expect(detectSecret("AWS_ACCESS_KEY_ID")).toMatchObject({ service: "AWS", label: "AWS Access Key" });
+    expect(detectSecret("AWS_ACCESS_KEY_ID")).toMatchObject({
+      service: "AWS",
+      label: "AWS Access Key",
+    });
     expect(detectSecret("AWS_SECRET_ACCESS_KEY")).toMatchObject({ service: "AWS" });
-    expect(detectSecret("GITHUB_TOKEN")).toMatchObject({ service: "GitHub", label: "GitHub Token" });
+    expect(detectSecret("GITHUB_TOKEN")).toMatchObject({
+      service: "GitHub",
+      label: "GitHub Token",
+    });
     expect(detectSecret("OPENAI_API_KEY")).toMatchObject({ service: "OpenAI" });
     expect(detectSecret("DATABASE_URL")).toMatchObject({ service: "Database" });
     expect(detectSecret("ANTHROPIC_API_KEY")).toMatchObject({ service: "Anthropic" });
@@ -91,7 +97,9 @@ describe("detectSecretByValue — token patterns", () => {
   });
 
   it("detects npm granular access token", () => {
-    expect(detectSecretByValue("npm_abcdefghijklmnopqrstuvwxyz0123456789ab")).toMatchObject({ service: "npm" });
+    expect(detectSecretByValue("npm_abcdefghijklmnopqrstuvwxyz0123456789ab")).toMatchObject({
+      service: "npm",
+    });
   });
 
   it("returns null for values shorter than 10 characters", () => {

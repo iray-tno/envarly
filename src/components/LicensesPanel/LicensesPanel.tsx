@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { cn } from "../../lib/cn";
+import { useMemo, useState } from "react";
 import licensesData from "../../assets/oss-licenses.json";
+import { cn } from "../../lib/cn";
 import { Icon } from "../ui/Icon";
 
 type TopTab = "envarly" | "third-party";
@@ -44,12 +44,12 @@ SOFTWARE.`;
 const LICENSE_COLOR: Record<string, string> = {
   MIT: "text-success",
   "Apache-2.0": "text-accent",
-  "ISC": "text-accent",
+  ISC: "text-accent",
   "BSD-2-Clause": "text-violet",
   "BSD-3-Clause": "text-violet",
   "0BSD": "text-success",
   "CC0-1.0": "text-muted",
-  "Unlicense": "text-muted",
+  Unlicense: "text-muted",
 };
 
 function licenseColor(license: string): string {
@@ -84,9 +84,7 @@ export function LicensesPanel() {
     const q = query.toLowerCase().trim();
     if (!q) return ALL[eco];
     return ALL[eco].filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.license.toLowerCase().includes(q),
+      (p) => p.name.toLowerCase().includes(q) || p.license.toLowerCase().includes(q),
     );
   }, [eco, query]);
 
@@ -96,10 +94,12 @@ export function LicensesPanel() {
       <div className="px-5 pt-4 pb-0 border-b border-rim shrink-0">
         <h2 className="text-sm font-semibold text-fg mb-3">Licenses</h2>
         <div className="flex gap-0.5">
-          {([
-            ["envarly", "Envarly"],
-            ["third-party", `Third-party (${ALL.npm.length + ALL.rust.length})`],
-          ] as [TopTab, string][]).map(([t, label]) => (
+          {(
+            [
+              ["envarly", "Envarly"],
+              ["third-party", `Third-party (${ALL.npm.length + ALL.rust.length})`],
+            ] as [TopTab, string][]
+          ).map(([t, label]) => (
             <button
               key={t}
               type="button"
@@ -150,9 +150,7 @@ export function LicensesPanel() {
                     onClick={() => setEco(e)}
                     className={cn(
                       "px-3 py-1 rounded text-xs font-mono transition-colors",
-                      eco === e
-                        ? "bg-surface text-fg"
-                        : "text-muted hover:bg-hover hover:text-fg",
+                      eco === e ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
                     )}
                   >
                     {e === "npm" ? `npm (${ALL.npm.length})` : `Rust (${ALL.rust.length})`}
@@ -183,7 +181,9 @@ export function LicensesPanel() {
                     <th className="px-5 py-2 text-left font-medium whitespace-nowrap">Package</th>
                     <th className="px-3 py-2 text-left font-medium whitespace-nowrap">Version</th>
                     <th className="px-3 py-2 text-left font-medium whitespace-nowrap">License</th>
-                    <th className="px-5 py-2 text-left font-medium whitespace-nowrap">Repository</th>
+                    <th className="px-5 py-2 text-left font-medium whitespace-nowrap">
+                      Repository
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

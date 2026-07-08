@@ -14,7 +14,8 @@ const meta: Meta<typeof ListEditor> = {
 export default meta;
 type Story = StoryObj<typeof ListEditor>;
 
-const PATH_VALUE = "C:\\Windows\\System32;C:\\Program Files\\Git\\bin;C:\\Users\\dev\\.cargo\\bin;C:\\Users\\dev\\.local\\bin";
+const PATH_VALUE =
+  "C:\\Windows\\System32;C:\\Program Files\\Git\\bin;C:\\Users\\dev\\.cargo\\bin;C:\\Users\\dev\\.local\\bin";
 
 export const PathSemicolon: Story = {
   render: (args) => {
@@ -33,9 +34,7 @@ export const CommaSeparated: Story = {
 };
 
 export const ReadOnly: Story = {
-  render: (args) => (
-    <ListEditor {...args} rawValue={PATH_VALUE} onChange={() => {}} />
-  ),
+  render: (args) => <ListEditor {...args} rawValue={PATH_VALUE} onChange={() => {}} />,
   args: { separator: ";", readOnly: true },
 };
 

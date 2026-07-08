@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
-import { DiffPanel } from "./DiffPanel";
 import type { DiffEntry } from "../../lib/diff";
+import { DiffPanel } from "./DiffPanel";
 
 const meta = {
   title: "Components/DiffPanel",
@@ -102,7 +102,13 @@ export const ManyEntries: Story = {
       changedSimple,
       changedPath,
       systemAdded,
-      { kind: "changed", name: "NODE_ENV", scope: "User", oldValue: "development", newValue: "production" },
+      {
+        kind: "changed",
+        name: "NODE_ENV",
+        scope: "User",
+        oldValue: "development",
+        newValue: "production",
+      },
       { kind: "removed", name: "OLD_DB_URL", scope: "System", value: "postgres://localhost/dev" },
     ],
   },

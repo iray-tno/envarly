@@ -9,6 +9,7 @@ import {
   FolderIcon,
   GlobeIcon,
   GripIcon,
+  type IconSvgProps,
   InfoIcon,
   MinusIcon,
   MoonIcon,
@@ -19,7 +20,6 @@ import {
   TrashIcon,
   WarningIcon,
   XIcon,
-  type IconSvgProps,
 } from ".";
 
 export const iconNames = [

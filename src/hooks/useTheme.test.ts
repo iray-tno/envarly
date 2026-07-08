@@ -27,21 +27,27 @@ describe("useTheme", () => {
   it("toggle switches from dark to light", () => {
     localStorage.setItem("envarly-theme", "dark");
     const { result } = renderHook(() => useTheme());
-    act(() => { result.current.toggle(); });
+    act(() => {
+      result.current.toggle();
+    });
     expect(result.current.theme).toBe("light");
   });
 
   it("toggle switches from light to dark", () => {
     localStorage.setItem("envarly-theme", "light");
     const { result } = renderHook(() => useTheme());
-    act(() => { result.current.toggle(); });
+    act(() => {
+      result.current.toggle();
+    });
     expect(result.current.theme).toBe("dark");
   });
 
   it("persists theme to localStorage on toggle", () => {
     localStorage.setItem("envarly-theme", "dark");
     const { result } = renderHook(() => useTheme());
-    act(() => { result.current.toggle(); });
+    act(() => {
+      result.current.toggle();
+    });
     expect(localStorage.getItem("envarly-theme")).toBe("light");
   });
 
@@ -49,7 +55,9 @@ describe("useTheme", () => {
     localStorage.setItem("envarly-theme", "dark");
     const { result } = renderHook(() => useTheme());
     expect(document.documentElement.classList.contains("dark")).toBe(true);
-    act(() => { result.current.toggle(); });
+    act(() => {
+      result.current.toggle();
+    });
     expect(document.documentElement.classList.contains("light")).toBe(true);
     expect(document.documentElement.classList.contains("dark")).toBe(false);
   });

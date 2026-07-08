@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
-import bundledFixture from "./envarly-demo.json";
 import type { EnvarlyApi, LaunchOptions } from "../api";
 import type { EnvSnapshot, EnvVar, SnapshotMeta, VarScope } from "../types";
+import bundledFixture from "./envarly-demo.json";
 
 interface DemoFixture {
   elevated: boolean;
@@ -96,7 +96,10 @@ export function createDemoApi(
       paths.map((path) => {
         const normalized = path.trim();
         if (normalized in fixture.pathExists) return fixture.pathExists[normalized];
-        return !normalized.toLowerCase().includes("missing") && !normalized.toLowerCase().includes("oldtools");
+        return (
+          !normalized.toLowerCase().includes("missing") &&
+          !normalized.toLowerCase().includes("oldtools")
+        );
       }),
     getRegistrySnapshot: async () => {
       if (pendingBaseline) {
@@ -108,7 +111,8 @@ export function createDemoApi(
     },
     isElevated: async () => fixture.elevated,
     restartAsAdmin: async () => undefined,
-    exportVars: async (_scope, format) => `C:\\Users\\Demo\\Downloads\\envarly-demo.${format === "reg" ? "reg" : "json"}`,
+    exportVars: async (_scope, format) =>
+      `C:\\Users\\Demo\\Downloads\\envarly-demo.${format === "reg" ? "reg" : "json"}`,
     exportCustomVars: async (_vars, format) =>
       `C:\\Users\\Demo\\Downloads\\envarly-demo-custom.${format === "reg" ? "reg" : "json"}`,
     parseImport: async (content, format) => {

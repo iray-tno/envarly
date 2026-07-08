@@ -25,7 +25,11 @@ export interface EnvarlyApi {
     format: string,
   ) => Promise<string | null>;
   parseImport: (content: string, format: "json" | "reg") => Promise<EnvSnapshot>;
-  getPathStatus: () => Promise<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>;
+  getPathStatus: () => Promise<{
+    installDir: string;
+    userHasEntry: boolean;
+    systemHasEntry: boolean;
+  }>;
   getPathProposal: (scope: "User" | "System") => Promise<string | null>;
 }
 
@@ -45,7 +49,9 @@ const normalApi: EnvarlyApi = {
   exportCustomVars: (vars, format) => invoke<string | null>("export_custom", { vars, format }),
   parseImport: (content, format) => invoke<EnvSnapshot>("parse_import", { content, format }),
   getPathStatus: () =>
-    invoke<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>("get_path_status"),
+    invoke<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>(
+      "get_path_status",
+    ),
   getPathProposal: (scope) => invoke<string | null>("get_path_proposal", { scope }),
 };
 

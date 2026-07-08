@@ -16,7 +16,11 @@ export interface FlatVar {
 export function flattenSnapshot(snap: EnvSnapshot): FlatVar[] {
   return [
     ...Object.entries(snap.user).map(([name, value]) => ({ name, value, scope: "User" as const })),
-    ...Object.entries(snap.system).map(([name, value]) => ({ name, value, scope: "System" as const })),
+    ...Object.entries(snap.system).map(([name, value]) => ({
+      name,
+      value,
+      scope: "System" as const,
+    })),
   ].sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -32,17 +36,17 @@ export const scopeOptions: { value: ExportScope; label: string }[] = [
 ];
 
 export const formatOptions: { value: AnyFormat; label: string }[] = [
-  { value: "json",    label: ".json" },
-  { value: "reg",     label: ".reg" },
-  { value: "ps1",     label: ".ps1" },
-  { value: "dsc_v2",  label: "DSC v2" },
-  { value: "dsc_v3",  label: "DSC v3" },
+  { value: "json", label: ".json" },
+  { value: "reg", label: ".reg" },
+  { value: "ps1", label: ".ps1" },
+  { value: "dsc_v2", label: "DSC v2" },
+  { value: "dsc_v3", label: "DSC v3" },
   { value: "ansible", label: "Ansible" },
 ];
 
 export const importFormatOptions: { value: ExportFormat; label: string }[] = [
   { value: "json", label: ".json" },
-  { value: "reg",  label: ".reg" },
+  { value: "reg", label: ".reg" },
 ];
 
 export const strategyOptions: { value: MergeStrategy; label: string }[] = [

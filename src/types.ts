@@ -1,4 +1,4 @@
-export type VarScope = 'User' | 'System';
+export type VarScope = "User" | "System";
 
 export interface EnvVar {
   name: string;

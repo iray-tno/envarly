@@ -14,8 +14,8 @@ interface Props {
 
 export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
   const { t } = useI18n();
-  const [accepted, setAccepted] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(entries.map((e) => [`${e.scope}:${e.name}`, true])),
+  const [accepted, setAccepted] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(entries.map((e) => [`${e.scope}:${e.name}`, true])),
   );
 
   const key = (e: DiffEntry) => `${e.scope}:${e.name}`;
@@ -39,7 +39,7 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
   if (entries.length === 0) return null;
 
   const byKind = {
-    added:   entries.filter((e) => e.kind === "added"),
+    added: entries.filter((e) => e.kind === "added"),
     removed: entries.filter((e) => e.kind === "removed"),
     changed: entries.filter((e) => e.kind === "changed"),
   };
@@ -54,9 +54,21 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
         <p className="text-xs text-muted mb-3">{t("diff.description")}</p>
 
         <div className="flex gap-3 text-xs mb-3">
-          {byKind.added.length > 0   && <span className="text-success">{t("staged.added", { count: byKind.added.length })}</span>}
-          {byKind.removed.length > 0 && <span className="text-danger">{t("staged.removed", { count: byKind.removed.length })}</span>}
-          {byKind.changed.length > 0 && <span className="text-warn">{t("staged.changed", { count: byKind.changed.length })}</span>}
+          {byKind.added.length > 0 && (
+            <span className="text-success">
+              {t("staged.added", { count: byKind.added.length })}
+            </span>
+          )}
+          {byKind.removed.length > 0 && (
+            <span className="text-danger">
+              {t("staged.removed", { count: byKind.removed.length })}
+            </span>
+          )}
+          {byKind.changed.length > 0 && (
+            <span className="text-warn">
+              {t("staged.changed", { count: byKind.changed.length })}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -67,7 +79,9 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
           <Button variant="link" size="xs" onClick={() => toggleAll(false)} disabled={noneChecked}>
             {t("diff.deselect_all")}
           </Button>
-          <span className="text-dim ml-auto text-xs">{t("diff.selected", { accepted: acceptedCount, total: entries.length })}</span>
+          <span className="text-dim ml-auto text-xs">
+            {t("diff.selected", { accepted: acceptedCount, total: entries.length })}
+          </span>
         </div>
       </div>
 
@@ -83,9 +97,16 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
       </div>
 
       <div className="px-5 py-3 border-t border-rim shrink-0 flex gap-2 justify-end">
-        <Button variant="ghost" size="sm" onClick={onDismiss}>{t("diff.dismiss")}</Button>
+        <Button variant="ghost" size="sm" onClick={onDismiss}>
+          {t("diff.dismiss")}
+        </Button>
         <Button variant="primary" size="sm" onClick={handleApply} disabled={busy}>
-          {busy ? t("diff.applying") : t("diff.apply", { accepted: acceptedCount, reverted: entries.length - acceptedCount })}
+          {busy
+            ? t("diff.applying")
+            : t("diff.apply", {
+                accepted: acceptedCount,
+                reverted: entries.length - acceptedCount,
+              })}
         </Button>
       </div>
     </div>

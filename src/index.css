@@ -25,7 +25,7 @@
   --color-canvas: #ffffff;
   --color-panel: #f6f8fa;
   --color-surface: #eaeef2;
-  --color-hover:  #dde3ea;
+  --color-hover: #dde3ea;
   --color-rim: #737d88;
   --color-rim-subtle: #d0d7de;
   --color-fg: #1f2328;
@@ -40,13 +40,17 @@
 }
 
 @layer base {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
-  html, body, #root {
+  html,
+  body,
+  #root {
     height: 100%;
     overflow: hidden;
   }
@@ -68,16 +72,28 @@
     outline: none;
   }
 
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     font-family: inherit;
     font-size: 13px;
     outline: none;
   }
 
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--color-rim); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--color-dim); }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-rim);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-dim);
+  }
 }
 
 @layer components {
