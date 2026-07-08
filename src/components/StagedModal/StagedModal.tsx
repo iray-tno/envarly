@@ -17,11 +17,20 @@ interface StagedModalProps {
 }
 
 function splitList(value: string): string[] {
-  return value.split(";").map((e) => e.trim()).filter(Boolean);
+  return value
+    .split(";")
+    .map((e) => e.trim())
+    .filter(Boolean);
 }
 
 function isList(value: string): boolean {
   return value.includes(";") && splitList(value).length > 1;
+}
+
+function entryHasListValue(entry: DiffEntry): boolean {
+  return entry.kind === "changed"
+    ? isList(entry.oldValue) || isList(entry.newValue)
+    : isList(entry.value);
 }
 
 function keyedEntries(entries: string[], prefix: string) {
@@ -38,7 +47,7 @@ function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: str
   const oldEntries = splitList(oldValue);
   const newEntries = splitList(newValue);
   const removed = oldEntries.filter((e) => !newEntries.includes(e));
-  const added   = newEntries.filter((e) => !oldEntries.includes(e));
+  const added = newEntries.filter((e) => !oldEntries.includes(e));
 
   if (removed.length === 0 && added.length === 0) {
     return (
@@ -52,12 +61,14 @@ function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: str
     <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
       {keyedEntries(removed, "removed").map(({ entry, key }) => (
         <p key={key} className="font-mono text-[11px] text-danger break-all">
-          <span className="select-none mr-1 opacity-70">−</span>{entry}
+          <span className="select-none mr-1 opacity-70">−</span>
+          {entry}
         </p>
       ))}
       {keyedEntries(added, "added").map(({ entry, key }) => (
         <p key={key} className="font-mono text-[11px] text-success break-all">
-          <span className="select-none mr-1 opacity-70">+</span>{entry}
+          <span className="select-none mr-1 opacity-70">+</span>
+          {entry}
         </p>
       ))}
     </div>
@@ -68,11 +79,14 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
   const oldEntries = splitList(oldValue);
   const newEntries = splitList(newValue);
   const removedSet = new Set(oldEntries.filter((e) => !newEntries.includes(e)));
-  const addedSet   = new Set(newEntries.filter((e) => !oldEntries.includes(e)));
+  const addedSet = new Set(newEntries.filter((e) => !oldEntries.includes(e)));
 
   const rows: { entry: string; status: "added" | "removed" | "unchanged" }[] = [
     ...Array.from(removedSet).map((e) => ({ entry: e, status: "removed" as const })),
-    ...newEntries.map((e) => ({ entry: e, status: addedSet.has(e) ? "added" as const : "unchanged" as const })),
+    ...newEntries.map((e) => ({
+      entry: e,
+      status: addedSet.has(e) ? ("added" as const) : ("unchanged" as const),
+    })),
   ];
   const seen = new Map<string, number>();
 
@@ -87,8 +101,8 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
             key={`${keyBase}:${count}`}
             className={cn(
               "font-mono text-[11px] break-all",
-              r.status === "removed"   && "text-danger line-through",
-              r.status === "added"     && "text-success",
+              r.status === "removed" && "text-danger line-through",
+              r.status === "added" && "text-success",
               r.status === "unchanged" && "text-muted",
             )}
           >
@@ -107,7 +121,9 @@ function ListEntries({ value, className }: { value: string; className?: string }
   return (
     <div className={cn("flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto", className)}>
       {keyedEntries(splitList(value), "entry").map(({ entry, key }) => (
-        <p key={key} className="font-mono text-[11px] break-all">{entry}</p>
+        <p key={key} className="font-mono text-[11px] break-all">
+          {entry}
+        </p>
       ))}
     </div>
   );
@@ -119,12 +135,10 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
   const [viewMode, setViewMode] = useState<ViewMode>("delta");
 
   const criticalChanges = diff.filter((e) => CRITICAL_VARS.has(e.name.toUpperCase()));
-  const hasListValues = diff.some(
-    (e) => isList(e.value ?? "") || isList(e.oldValue ?? "") || isList(e.newValue ?? ""),
-  );
+  const hasListValues = diff.some(entryHasListValue);
 
   const byKind = {
-    added:   diff.filter((e) => e.kind === "added"),
+    added: diff.filter((e) => e.kind === "added"),
     removed: diff.filter((e) => e.kind === "removed"),
     changed: diff.filter((e) => e.kind === "changed"),
   };
@@ -139,21 +153,34 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
               {t("staged.critical", { count: criticalChanges.length })}
             </p>
             <p className="text-xs">
-              {t("staged.critical_detail", { count: criticalChanges.length, vars: criticalChanges.map((e) => e.name).join(", ") })}
+              {t("staged.critical_detail", {
+                count: criticalChanges.length,
+                vars: criticalChanges.map((e) => e.name).join(", "),
+              })}
             </p>
           </div>
         </div>
       )}
 
       <div className="px-6 py-4 border-b border-rim shrink-0">
-        <p className="text-xs text-muted mb-3">
-          {t("staged.broadcast")}
-        </p>
+        <p className="text-xs text-muted mb-3">{t("staged.broadcast")}</p>
         <div className="flex items-center justify-between">
           <div className="flex gap-3 text-xs">
-            {byKind.added.length > 0   && <span className="text-success">{t("staged.added", { count: byKind.added.length })}</span>}
-            {byKind.removed.length > 0 && <span className="text-danger">{t("staged.removed", { count: byKind.removed.length })}</span>}
-            {byKind.changed.length > 0 && <span className="text-warn">{t("staged.changed", { count: byKind.changed.length })}</span>}
+            {byKind.added.length > 0 && (
+              <span className="text-success">
+                {t("staged.added", { count: byKind.added.length })}
+              </span>
+            )}
+            {byKind.removed.length > 0 && (
+              <span className="text-danger">
+                {t("staged.removed", { count: byKind.removed.length })}
+              </span>
+            )}
+            {byKind.changed.length > 0 && (
+              <span className="text-warn">
+                {t("staged.changed", { count: byKind.changed.length })}
+              </span>
+            )}
           </div>
           {hasListValues && (
             <div className="flex rounded border border-rim overflow-hidden text-[10px]">
@@ -185,7 +212,7 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
               key={key}
               className={cn(
                 "rounded border px-3 py-2 text-xs",
-                entry.kind === "added"   && "border-success/30 bg-success/5 text-success",
+                entry.kind === "added" && "border-success/30 bg-success/5 text-success",
                 entry.kind === "removed" && "border-danger/30 bg-danger/5 text-danger",
                 entry.kind === "changed" && "border-warn/30 bg-warn/5 text-warn",
               )}
@@ -193,39 +220,45 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-mono font-semibold text-fg">{entry.name}</span>
                 <span className="opacity-60 text-[10px]">{entry.scope}</span>
-                <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">{t(`staged.kind_${entry.kind}`)}</span>
+                <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">
+                  {t(`staged.kind_${entry.kind}`)}
+                </span>
               </div>
 
-              {entry.kind === "removed" && (
-                isList(entry.value!) ? (
-                  <ListEntries value={entry.value!} className="opacity-70 line-through" />
+              {entry.kind === "removed" &&
+                (isList(entry.value) ? (
+                  <ListEntries value={entry.value} className="opacity-70 line-through" />
                 ) : (
-                  <p className="font-mono text-[11px] opacity-70 line-through break-all">{entry.value}</p>
-                )
-              )}
+                  <p className="font-mono text-[11px] opacity-70 line-through break-all">
+                    {entry.value}
+                  </p>
+                ))}
 
-              {entry.kind === "added" && (
-                isList(entry.value!) ? (
-                  <ListEntries value={entry.value!} />
+              {entry.kind === "added" &&
+                (isList(entry.value) ? (
+                  <ListEntries value={entry.value} />
                 ) : (
                   <p className="font-mono text-[11px] break-all">{entry.value}</p>
-                )
-              )}
+                ))}
 
-              {entry.kind === "changed" && (
-                isList(entry.oldValue ?? "") || isList(entry.newValue ?? "") ? (
+              {entry.kind === "changed" &&
+                (isList(entry.oldValue ?? "") || isList(entry.newValue ?? "") ? (
                   viewMode === "delta" ? (
-                    <ListDiffDelta oldValue={entry.oldValue ?? ""} newValue={entry.newValue ?? ""} />
+                    <ListDiffDelta
+                      oldValue={entry.oldValue ?? ""}
+                      newValue={entry.newValue ?? ""}
+                    />
                   ) : (
                     <ListDiffFull oldValue={entry.oldValue ?? ""} newValue={entry.newValue ?? ""} />
                   )
                 ) : (
                   <div className="flex flex-col gap-0.5">
-                    <p className="font-mono text-[11px] text-danger line-through break-all">{entry.oldValue}</p>
+                    <p className="font-mono text-[11px] text-danger line-through break-all">
+                      {entry.oldValue}
+                    </p>
                     <p className="font-mono text-[11px] text-success break-all">{entry.newValue}</p>
                   </div>
-                )
-              )}
+                ))}
             </div>
           );
         })}
@@ -243,7 +276,9 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
           {t("staged.take_snapshot")}
         </label>
         <div className="flex gap-2 justify-end">
-          <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>{t("staged.cancel")}</Button>
+          <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>
+            {t("staged.cancel")}
+          </Button>
           <Button variant="primary" size="md" onClick={() => onApply(takeSnapshot)} disabled={busy}>
             {busy ? t("staged.applying") : t("staged.apply", { count: diff.length })}
           </Button>

@@ -4,15 +4,15 @@ import { resolveSecret } from "../../lib/secrets";
 import { Icon } from "../ui/Icon";
 
 export function DiffRow({ entry }: { entry: DiffEntry }) {
-  const secret = resolveSecret(entry.name, entry.value ?? entry.newValue ?? "");
+  const secret = resolveSecret(entry.name, entry.kind === "changed" ? entry.newValue : entry.value);
   const [revealed, setRevealed] = useState(false);
 
-  const mask = (v: string) => secret && !revealed ? "••••••••" : v;
+  const mask = (v: string) => (secret && !revealed ? "••••••••" : v);
 
   return (
     <tr className="border-b border-rim-subtle last:border-0 text-xs">
       <td className="px-2 py-1.5 w-5 text-center font-mono font-bold shrink-0">
-        {entry.kind === "added"   && <span className="text-success">+</span>}
+        {entry.kind === "added" && <span className="text-success">+</span>}
         {entry.kind === "removed" && <span className="text-danger">−</span>}
         {entry.kind === "changed" && <span className="text-warn">~</span>}
       </td>
@@ -31,11 +31,11 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
       <td className="px-2 py-1.5 font-mono text-muted max-w-xs truncate">
         {entry.kind === "changed" ? (
           <span className="flex flex-col gap-0.5">
-            <span className="line-through text-danger">{mask(entry.oldValue!)}</span>
-            <span className="text-success">{mask(entry.newValue!)}</span>
+            <span className="line-through text-danger">{mask(entry.oldValue)}</span>
+            <span className="text-success">{mask(entry.newValue)}</span>
           </span>
         ) : (
-          <span>{mask(entry.value!)}</span>
+          <span>{mask(entry.value)}</span>
         )}
       </td>
       {secret && (
@@ -54,14 +54,14 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
 }
 
 export function DiffTable({ diff }: { diff: DiffEntry[] }) {
-  const added   = diff.filter((e) => e.kind === "added").length;
+  const added = diff.filter((e) => e.kind === "added").length;
   const removed = diff.filter((e) => e.kind === "removed").length;
   const changed = diff.filter((e) => e.kind === "changed").length;
 
   return (
     <>
       <div className="flex gap-3 text-xs">
-        {added   > 0 && <span className="text-success">+{added} added</span>}
+        {added > 0 && <span className="text-success">+{added} added</span>}
         {removed > 0 && <span className="text-danger">−{removed} removed</span>}
         {changed > 0 && <span className="text-warn">~{changed} changed</span>}
       </div>

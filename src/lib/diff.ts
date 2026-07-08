@@ -2,17 +2,15 @@ import type { EnvSnapshot, VarScope } from "../types";
 
 export type DiffKind = "added" | "removed" | "changed";
 
-export interface DiffEntry {
-  kind: DiffKind;
+interface DiffEntryBase {
   name: string;
   scope: VarScope;
-  /** present for added and removed */
-  value?: string;
-  /** present for changed */
-  oldValue?: string;
-  /** present for changed */
-  newValue?: string;
 }
+
+export type DiffEntry =
+  | (DiffEntryBase & { kind: "added"; value: string })
+  | (DiffEntryBase & { kind: "removed"; value: string })
+  | (DiffEntryBase & { kind: "changed"; oldValue: string; newValue: string });
 
 /** Compare two snapshots and return a sorted list of differences. */
 export function computeDiff(baseline: EnvSnapshot, current: EnvSnapshot): DiffEntry[] {
@@ -59,11 +57,11 @@ export function applyAccepted(baseline: EnvSnapshot, accepted: DiffEntry[]): Env
   for (const entry of accepted) {
     const target = entry.scope === "User" ? user : system;
     if (entry.kind === "added") {
-      target[entry.name] = entry.value!;
+      target[entry.name] = entry.value;
     } else if (entry.kind === "removed") {
       delete target[entry.name];
     } else {
-      target[entry.name] = entry.newValue!;
+      target[entry.name] = entry.newValue;
     }
   }
 

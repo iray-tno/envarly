@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { useI18n } from "../../hooks/useI18n";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api";
+import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
-import { computeDiff } from "../../lib/diff";
 import type { DiffEntry } from "../../lib/diff";
+import { computeDiff } from "../../lib/diff";
 import type { EnvSnapshot, SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
@@ -34,15 +34,17 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   const [comparingFrom, setComparingFrom] = useState<SnapshotMeta | null>(null);
   const [compareResult, setCompareResult] = useState<CompareResult | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setSnapshots(await api.listSnapshots());
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const handleCreate = async () => {
     const snapshotLabel = label.trim() || new Date().toLocaleString();
@@ -90,7 +92,10 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   const handleDelete = async (id: string) => {
     try {
       await api.deleteSnapshot(id);
-      if (previewing?.id === id) { setPreviewing(null); setPreviewDiff([]); }
+      if (previewing?.id === id) {
+        setPreviewing(null);
+        setPreviewDiff([]);
+      }
       if (comparingFrom?.id === id) setComparingFrom(null);
       if (compareResult?.from.id === id || compareResult?.to.id === id) setCompareResult(null);
       setConfirmDeleteId(null);
@@ -120,7 +125,11 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   };
 
   const formatDate = (iso: string) => {
-    try { return new Date(iso).toLocaleString(); } catch { return iso; }
+    try {
+      return new Date(iso).toLocaleString();
+    } catch {
+      return iso;
+    }
   };
 
   return (
@@ -163,14 +172,19 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
           snap={previewing}
           diff={previewDiff}
           onRestore={handleRestore}
-          onCancel={() => { setPreviewing(null); setPreviewDiff([]); }}
+          onCancel={() => {
+            setPreviewing(null);
+            setPreviewDiff([]);
+          }}
         />
       ) : (
         <div className="flex flex-col gap-2">
           {comparingFrom && (
             <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-accent/30 bg-accent/10 text-accent text-xs">
               <span>{t("snapshot.comparing_hint", { label: comparingFrom.label })}</span>
-              <Button variant="link" size="xs" onClick={handleCancelCompare}>{t("snapshot.cancel")}</Button>
+              <Button variant="link" size="xs" onClick={handleCancelCompare}>
+                {t("snapshot.cancel")}
+              </Button>
             </div>
           )}
           {snapshots.length === 0 && (
@@ -193,7 +207,11 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                 <div className="flex gap-1.5 shrink-0 items-center">
                   {comparingFrom ? (
                     !isComparingSource && (
-                      <Button variant="secondary" size="sm" onClick={() => handlePickCompareTarget(s)}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handlePickCompareTarget(s)}
+                      >
                         {t("snapshot.compare_with")}
                       </Button>
                     )
@@ -218,11 +236,15 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                       </Button>
                     </>
                   )}
-                  {!comparingFrom && (
-                    confirmDeleteId === s.id ? (
+                  {!comparingFrom &&
+                    (confirmDeleteId === s.id ? (
                       <>
-                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id)}>{t("snapshot.delete")}</Button>
-                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)}>{t("snapshot.cancel")}</Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id)}>
+                          {t("snapshot.delete")}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)}>
+                          {t("snapshot.cancel")}
+                        </Button>
                       </>
                     ) : (
                       <IconButton
@@ -232,8 +254,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                         onClick={() => setConfirmDeleteId(s.id)}
                         title="Delete snapshot"
                       />
-                    )
-                  )}
+                    ))}
                 </div>
               </div>
             );

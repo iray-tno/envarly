@@ -13,11 +13,12 @@ export function ListEditor({ separator, rawValue, onChange, readOnly = false }: 
   const [entries, setEntries] = useState<ListEntry[]>([]);
 
   useEffect(() => {
-    const current = entries.map((e) => e.value).join(separator);
-    if (current === rawValue) return;
-    const parts = rawValue.split(separator).filter((p) => p.trim().length > 0);
-    setEntries(parts.map((value, i) => ({ id: `${i}-${value}`, value })));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setEntries((prev) => {
+      const current = prev.map((e) => e.value).join(separator);
+      if (current === rawValue) return prev;
+      const parts = rawValue.split(separator).filter((p) => p.trim().length > 0);
+      return parts.map((value, i) => ({ id: `${i}-${value}`, value }));
+    });
   }, [rawValue, separator]);
 
   const handleEntriesChange = (next: ListEntry[]) => {
