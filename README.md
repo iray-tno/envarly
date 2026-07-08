@@ -99,6 +99,8 @@ npm run tauri build   # produces installer in src-tauri/target/release/bundle/
 
 ## Releasing a new version
 
+Release artifact policy and installer checks are documented in [docs/distribution.md](docs/distribution.md).
+
 ```sh
 npm version patch     # or minor / major
 # → bumps package.json, syncs tauri.conf.json and Cargo.toml, commits + tags
