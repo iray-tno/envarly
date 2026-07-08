@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { cn } from "../../lib/cn";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
@@ -29,14 +29,30 @@ export interface ListEntry {
 }
 
 interface RowProps {
+  index: number;
   entry: ListEntry;
+  inputRef: (el: HTMLInputElement | null) => void;
+  readOnly: boolean;
   onRemove: () => void;
   onEdit: (val: string) => void;
+  onBrowse?: () => void;
+  onFocusEntry: (index: number) => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
 }
 
-function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps) {
+function SortableRow({
+  index,
+  entry,
+  inputRef,
+  readOnly,
+  onRemove,
+  onEdit,
+  onBrowse,
+  onFocusEntry,
+  onMoveUp,
+  onMoveDown,
+}: RowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: entry.id,
   });
@@ -47,19 +63,22 @@ function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
         "flex items-center border-b border-rim-subtle last:border-0 transition-colors",
+        "focus-within:ring-2 focus-within:ring-accent focus-within:ring-inset",
         isDragging ? "opacity-50 bg-hover" : "bg-canvas",
         entry.exists === false && "bg-danger/5",
       )}
     >
       <button
         type="button"
-        {...attributes}
-        {...listeners}
+        {...(readOnly ? {} : attributes)}
+        {...(readOnly ? {} : listeners)}
         aria-label="Drag to reorder"
         title="Drag to reorder"
+        disabled={readOnly}
         className={cn(
           "w-8 flex items-center justify-center shrink-0 self-stretch text-dim",
-          "cursor-grab active:cursor-grabbing select-none",
+          readOnly ? "cursor-default opacity-40" : "cursor-grab active:cursor-grabbing",
+          "select-none",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
         )}
       >
@@ -68,23 +87,38 @@ function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps
 
       <div className="flex-1 py-1.5 pr-2">
         <input
+          ref={inputRef}
           aria-label={`Entry: ${entry.value}`}
           value={entry.value}
           onChange={(e) => onEdit(e.target.value)}
           onKeyDown={(e) => {
-            if (!e.altKey) return;
-            if (e.key === "ArrowUp") {
+            if (readOnly) return;
+            if (e.altKey && e.key === "ArrowUp") {
               e.preventDefault();
               onMoveUp();
+              return;
             }
-            if (e.key === "ArrowDown") {
+            if (e.altKey && e.key === "ArrowDown") {
               e.preventDefault();
               onMoveDown();
+              return;
+            }
+            if (!e.altKey && e.key === "ArrowUp") {
+              e.preventDefault();
+              onFocusEntry(index - 1);
+            }
+            if (!e.altKey && e.key === "ArrowDown") {
+              e.preventDefault();
+              onFocusEntry(index + 1);
             }
           }}
+          readOnly={readOnly}
           spellCheck={false}
           title="Alt+↑/↓ to reorder"
-          className="w-full bg-transparent font-mono text-[11px] text-fg focus:outline-none"
+          className={cn(
+            "w-full bg-transparent font-mono text-[11px] text-fg focus:outline-none",
+            readOnly && "cursor-default",
+          )}
         />
       </div>
 
@@ -103,14 +137,27 @@ function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps
         </div>
       )}
 
-      <div className="w-7 flex items-center justify-center shrink-0">
-        <IconButton
-          icon="x"
-          aria-label={`Remove ${entry.value}`}
-          variant="danger"
-          onClick={onRemove}
-        />
-      </div>
+      {onBrowse && (
+        <div className="w-7 flex items-center justify-center shrink-0">
+          <IconButton
+            icon="folder"
+            aria-label={`Browse folder for ${entry.value}`}
+            title="Browse for folder"
+            onClick={onBrowse}
+          />
+        </div>
+      )}
+
+      {!readOnly && (
+        <div className="w-7 flex items-center justify-center shrink-0">
+          <IconButton
+            icon="x"
+            aria-label={`Remove ${entry.value}`}
+            variant="danger"
+            onClick={onRemove}
+          />
+        </div>
+      )}
     </li>
   );
 }
@@ -121,6 +168,7 @@ interface Props {
   onEntriesChange: (entries: ListEntry[]) => void;
   /** Called before structural changes (drag, remove, add) so callers can snapshot state. */
   onBeforeChange?: () => void;
+  onBrowseEntry?: (entry: ListEntry) => Promise<string | null>;
   readOnly?: boolean;
   addPlaceholder?: string;
 }
@@ -130,10 +178,12 @@ export function SortableListEditor({
   entries,
   onEntriesChange,
   onBeforeChange,
+  onBrowseEntry,
   readOnly = false,
   addPlaceholder = "Add entry…",
 }: Props) {
   const [newValue, setNewValue] = useState("");
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const dupCount = useMemo(() => {
     const seen = new Set<string>();
@@ -148,6 +198,7 @@ export function SortableListEditor({
   }, [entries]);
 
   const handleDedup = () => {
+    if (readOnly) return;
     onBeforeChange?.();
     const seen = new Set<string>();
     onEntriesChange(
@@ -166,6 +217,7 @@ export function SortableListEditor({
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (readOnly) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     onBeforeChange?.();
@@ -178,14 +230,31 @@ export function SortableListEditor({
   };
 
   const removeEntry = (id: string) => {
+    if (readOnly) return;
     onBeforeChange?.();
     onEntriesChange(entries.filter((e) => e.id !== id));
   };
 
-  const editEntry = (id: string, val: string) =>
+  const editEntry = (id: string, val: string) => {
+    if (readOnly) return;
     onEntriesChange(entries.map((e) => (e.id === id ? { ...e, value: val, exists: null } : e)));
+  };
+
+  const browseEntry = async (entry: ListEntry) => {
+    if (readOnly) return;
+    if (!onBrowseEntry) return;
+    const selected = await onBrowseEntry(entry);
+    if (selected === null) return;
+    editEntry(entry.id, selected);
+  };
+
+  const focusEntry = (index: number) => {
+    inputRefs.current[index]?.focus();
+    inputRefs.current[index]?.select();
+  };
 
   const moveEntry = (id: string, dir: -1 | 1) => {
+    if (readOnly) return;
     const idx = entries.findIndex((e) => e.id === id);
     if (idx === -1) return;
     const next = idx + dir;
@@ -195,6 +264,7 @@ export function SortableListEditor({
   };
 
   const addEntry = (raw: string) => {
+    if (readOnly) return;
     const trimmed = raw.trim();
     if (!trimmed) return;
     onBeforeChange?.();
@@ -234,12 +304,19 @@ export function SortableListEditor({
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={entries.map((e) => e.id)} strategy={verticalListSortingStrategy}>
           <ol aria-label="List entries" className="border border-rim rounded overflow-hidden">
-            {entries.map((entry) => (
+            {entries.map((entry, index) => (
               <SortableRow
                 key={entry.id}
+                index={index}
                 entry={entry}
+                inputRef={(el) => {
+                  inputRefs.current[index] = el;
+                }}
+                readOnly={readOnly}
                 onRemove={() => removeEntry(entry.id)}
                 onEdit={(val) => editEntry(entry.id, val)}
+                onBrowse={onBrowseEntry ? () => void browseEntry(entry) : undefined}
+                onFocusEntry={focusEntry}
                 onMoveUp={() => moveEntry(entry.id, -1)}
                 onMoveDown={() => moveEntry(entry.id, 1)}
               />

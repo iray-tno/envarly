@@ -1,3 +1,4 @@
+import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../api";
 import { lintPathValue } from "../../lib/lint";
@@ -15,6 +16,8 @@ interface Props {
   allVars?: EnvVar[];
   /** Skip filesystem existence checks (e.g. for PATHEXT whose entries are extensions, not paths). */
   skipPathValidation?: boolean;
+  /** Show folder picker buttons for entries. Disable for path-like lists that are not folders. */
+  allowFolderBrowse?: boolean;
   /** Called before structural changes (drag, add, remove) so parent can snapshot state for undo. */
   onBeforeReorder?: () => void;
 }
@@ -25,6 +28,7 @@ export function PathEditor({
   readOnly = false,
   allVars,
   skipPathValidation = false,
+  allowFolderBrowse = true,
   onBeforeReorder,
 }: Props) {
   const [entries, setEntries] = useState<ListEntry[]>([]);
@@ -86,6 +90,15 @@ export function PathEditor({
     onChange(next.map((e) => e.value).join(";"));
   };
 
+  const handleBrowseEntry = async (entry: ListEntry) => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      defaultPath: entry.value.trim() || undefined,
+    });
+    return typeof selected === "string" ? selected : null;
+  };
+
   const invalidCount = entries.filter((e) => e.exists === false).length;
 
   const { unresolvedRefs, hasWhitespace } = useMemo(() => {
@@ -143,6 +156,7 @@ export function PathEditor({
         entries={entries}
         onEntriesChange={handleEntriesChange}
         onBeforeChange={onBeforeReorder}
+        onBrowseEntry={readOnly || !allowFolderBrowse ? undefined : handleBrowseEntry}
         readOnly={readOnly}
         addPlaceholder="Add new path…"
       />
