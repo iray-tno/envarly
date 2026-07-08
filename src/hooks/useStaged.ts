@@ -3,15 +3,15 @@ import type { EnvSnapshot, EnvVar, VarScope } from "../types";
 
 export type StagedKind = "set" | "delete";
 
-export interface StagedChange {
-  kind: StagedKind;
+interface StagedChangeBase {
   name: string;
   scope: VarScope;
-  /** Value currently in the registry; null if this is a brand-new variable. */
-  originalValue: string | null;
-  /** New value; null when kind is "delete". */
-  newValue: string | null;
 }
+
+export type StagedChange =
+  /** Value currently in the registry; null if this is a brand-new variable. */
+  | (StagedChangeBase & { kind: "set"; originalValue: string | null; newValue: string })
+  | (StagedChangeBase & { kind: "delete"; originalValue: string; newValue: null });
 
 type StagedKey = string; // `${VarScope}:${name}`
 
@@ -82,14 +82,26 @@ export function useStaged(registryVars: EnvVar[]) {
           if (original === v.value) {
             next.delete(k);
           } else {
-            next.set(k, { kind: "set", name: v.name, scope: v.scope, originalValue: original, newValue: v.value });
+            next.set(k, {
+              kind: "set",
+              name: v.name,
+              scope: v.scope,
+              originalValue: original,
+              newValue: v.value,
+            });
           }
         }
         for (const d of deletes) {
           const k = stagedKey(d.name, d.scope);
           const original = registryByKey.get(k)?.value ?? null;
           if (original !== null) {
-            next.set(k, { kind: "delete", name: d.name, scope: d.scope, originalValue: original, newValue: null });
+            next.set(k, {
+              kind: "delete",
+              name: d.name,
+              scope: d.scope,
+              originalValue: original,
+              newValue: null,
+            });
           }
         }
         return next;
@@ -107,14 +119,32 @@ export function useStaged(registryVars: EnvVar[]) {
         for (const [name, value] of Object.entries(snap.user)) {
           const k = stagedKey(name, "User");
           const original = registryByKey.get(k)?.value ?? null;
-          if (original === value) { next.delete(k); }
-          else { next.set(k, { kind: "set", name, scope: "User", originalValue: original, newValue: value }); }
+          if (original === value) {
+            next.delete(k);
+          } else {
+            next.set(k, {
+              kind: "set",
+              name,
+              scope: "User",
+              originalValue: original,
+              newValue: value,
+            });
+          }
         }
         for (const [name, value] of Object.entries(snap.system)) {
           const k = stagedKey(name, "System");
           const original = registryByKey.get(k)?.value ?? null;
-          if (original === value) { next.delete(k); }
-          else { next.set(k, { kind: "set", name, scope: "System", originalValue: original, newValue: value }); }
+          if (original === value) {
+            next.delete(k);
+          } else {
+            next.set(k, {
+              kind: "set",
+              name,
+              scope: "System",
+              originalValue: original,
+              newValue: value,
+            });
+          }
         }
 
         // Stage deletes for registry vars not present in the snapshot
@@ -122,7 +152,13 @@ export function useStaged(registryVars: EnvVar[]) {
           const inSnap = v.scope === "User" ? snap.user : snap.system;
           if (!(v.name in inSnap)) {
             const k = stagedKey(v.name, v.scope);
-            next.set(k, { kind: "delete", name: v.name, scope: v.scope, originalValue: v.value, newValue: null });
+            next.set(k, {
+              kind: "delete",
+              name: v.name,
+              scope: v.scope,
+              originalValue: v.value,
+              newValue: null,
+            });
           }
         }
         return next;
@@ -164,8 +200,9 @@ export function useStaged(registryVars: EnvVar[]) {
         result.set(k, {
           name: change.name,
           scope: change.scope,
-          value: change.newValue!,
-          listSeparator: existing?.listSeparator ?? inferListSeparator(change.name, change.newValue ?? ""),
+          value: change.newValue,
+          listSeparator:
+            existing?.listSeparator ?? inferListSeparator(change.name, change.newValue),
         });
       }
       // "delete": var stays in result with original value; sidebar renders D marker

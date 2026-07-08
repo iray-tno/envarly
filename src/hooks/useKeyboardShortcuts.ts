@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import type { RefObject } from "react";
+import { useEffect } from "react";
 
 export function useKeyboardShortcuts(
   undo: () => void,
@@ -16,10 +16,16 @@ export function useKeyboardShortcuts(
       }
       const active = document.activeElement;
       if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
-      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
-      if (e.key === "y" || (e.key === "z" && e.shiftKey)) { e.preventDefault(); redo(); }
+      if (e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+      if (e.key === "y" || (e.key === "z" && e.shiftKey)) {
+        e.preventDefault();
+        redo();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo]);
+  }, [undo, redo, localUndoRef]);
 }

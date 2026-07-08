@@ -21,11 +21,7 @@
       "preset": "recommended",
       "correctness": {
         "noUnusedVariables": "warn",
-        "noUnusedImports": "warn",
-        "useExhaustiveDependencies": "warn"
-      },
-      "style": {
-        "noNonNullAssertion": "warn"
+        "noUnusedImports": "warn"
       }
     }
   },

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useI18n } from "../../hooks/useI18n";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../api";
+import { useI18n } from "../../hooks/useI18n";
 import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
@@ -58,13 +58,31 @@ function looksLikeSinglePath(name: string, value: string) {
     return true;
   }
 
-  return /^[a-z]:[\\/]/i.test(trimmedValue) || trimmedValue.startsWith("/") || trimmedValue.startsWith("\\\\");
+  return (
+    /^[a-z]:[\\/]/i.test(trimmedValue) ||
+    trimmedValue.startsWith("/") ||
+    trimmedValue.startsWith("\\\\")
+  );
 }
 
-export function DetailPanel({ variable, allVars, elevated, userPathInEnv, systemPathInEnv, staged, onStage, onStageDelete, onUnstage, onStageAddToPath, onRegisterLocalUndo }: Props) {
+export function DetailPanel({
+  variable,
+  allVars,
+  elevated,
+  userPathInEnv,
+  systemPathInEnv,
+  staged,
+  onStage,
+  onStageDelete,
+  onUnstage,
+  onStageAddToPath,
+  onRegisterLocalUndo,
+}: Props) {
   const { t } = useI18n();
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
+  const variableName = variable?.name;
+  const variableScope = variable?.scope;
 
   const {
     value,
@@ -77,30 +95,38 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
 
   // Reset overrideSeparator only when the variable identity changes (not on value-only updates).
   useEffect(() => {
-    if (!variable) return;
+    if (!variableName || !variableScope) return;
     const isSameVar =
-      prevVarRef.current?.name === variable.name &&
-      prevVarRef.current?.scope === variable.scope;
+      prevVarRef.current?.name === variableName && prevVarRef.current?.scope === variableScope;
     if (!isSameVar) setOverrideSeparator(null);
-    prevVarRef.current = { name: variable.name, scope: variable.scope };
-  }, [variable?.name, variable?.scope]);
+    prevVarRef.current = { name: variableName, scope: variableScope };
+  }, [variableName, variableScope]);
 
   useEffect(() => {
     if (!onRegisterLocalUndo) return;
     onRegisterLocalUndo(dirty ? handleDiscard : null);
-    return () => { onRegisterLocalUndo(null); };
+    return () => {
+      onRegisterLocalUndo(null);
+    };
   }, [dirty, handleDiscard, onRegisterLocalUndo]);
 
   const expandedValue = useMemo(() => {
     if (!value.includes("%")) return null;
     const lookup = new Map<string, string>();
-    allVars.filter((v) => v.scope === "System").forEach((v) => {
-      lookup.set(v.name.toUpperCase(), v.value);
-    });
-    allVars.filter((v) => v.scope === "User").forEach((v) => {
-      lookup.set(v.name.toUpperCase(), v.value);
-    });
-    const expanded = value.replace(/%([^%]+)%/g, (match, name: string) => lookup.get(name.toUpperCase()) ?? match);
+    allVars
+      .filter((v) => v.scope === "System")
+      .forEach((v) => {
+        lookup.set(v.name.toUpperCase(), v.value);
+      });
+    allVars
+      .filter((v) => v.scope === "User")
+      .forEach((v) => {
+        lookup.set(v.name.toUpperCase(), v.value);
+      });
+    const expanded = value.replace(
+      /%([^%]+)%/g,
+      (match, name: string) => lookup.get(name.toUpperCase()) ?? match,
+    );
     return expanded !== value ? expanded : null;
   }, [value, allVars]);
 
@@ -123,7 +149,8 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
   };
 
   const handleDelete = () => {
-    if (!confirm(t("detail.confirm_delete", { name: variable.name, scope: variable.scope }))) return;
+    if (!confirm(t("detail.confirm_delete", { name: variable.name, scope: variable.scope })))
+      return;
     onStageDelete(variable.name, variable.scope);
   };
 
@@ -155,17 +182,20 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
 
   const effectiveSeparator = overrideSeparator ?? variable.listSeparator;
   const readOnly = variable.scope === "System" && !elevated;
-  const showFolderPicker = !readOnly && effectiveSeparator === null && looksLikeSinglePath(variable.name, value);
+  const showFolderPicker =
+    !readOnly && effectiveSeparator === null && looksLikeSinglePath(variable.name, value);
   const description = lookupEnvDescription(variable.name);
   const isPathVar = variable.name.toUpperCase() === "PATH";
   const pathInEnvForScope = variable.scope === "System" ? systemPathInEnv : userPathInEnv;
-  const showAddToPathHint = isPathVar && !pathInEnvForScope && !isStagedDelete
-    && (variable.scope === "User" || elevated);
+  const showAddToPathHint =
+    isPathVar && !pathInEnvForScope && !isStagedDelete && (variable.scope === "User" || elevated);
 
   const editorLabel =
-    effectiveSeparator === ";" ? t("detail.label_path") :
-    effectiveSeparator === "," ? t("detail.label_list") :
-    t("detail.label_value");
+    effectiveSeparator === ";"
+      ? t("detail.label_path")
+      : effectiveSeparator === ","
+        ? t("detail.label_list")
+        : t("detail.label_value");
 
   const entriesCount = effectiveSeparator
     ? value.split(effectiveSeparator).filter((p) => p.trim()).length
@@ -177,9 +207,7 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
       <div className="flex items-center gap-3 px-6 h-[60px] border-b border-rim-subtle shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <h2 className="font-mono font-semibold text-base text-fg truncate">{variable.name}</h2>
-          <Badge variant={variable.scope === "User" ? "user" : "system"}>
-            {variable.scope}
-          </Badge>
+          <Badge variant={variable.scope === "User" ? "user" : "system"}>{variable.scope}</Badge>
           {readOnly && (
             <>
               <Badge variant="readonly">{t("detail.readonly_badge")}</Badge>
@@ -208,13 +236,21 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
         <div className="flex gap-2 shrink-0">
           {dirty ? (
             <>
-              <Button variant="primary" size="sm" onClick={handleApply}>{t("detail.stage")}</Button>
-              <Button variant="ghost" size="sm" onClick={handleDiscard}>{t("detail.discard")}</Button>
+              <Button variant="primary" size="sm" onClick={handleApply}>
+                {t("detail.stage")}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleDiscard}>
+                {t("detail.discard")}
+              </Button>
             </>
           ) : isStagedSet ? (
-            <Button variant="ghost" size="sm" onClick={handleUnstage}>{t("detail.unstage")}</Button>
+            <Button variant="ghost" size="sm" onClick={handleUnstage}>
+              {t("detail.unstage")}
+            </Button>
           ) : !isStagedDelete && !readOnly ? (
-            <Button variant="danger" size="sm" onClick={handleDelete}>{t("detail.delete")}</Button>
+            <Button variant="danger" size="sm" onClick={handleDelete}>
+              {t("detail.delete")}
+            </Button>
           ) : null}
         </div>
       </div>
@@ -239,16 +275,21 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
             {t("detail.staged_delete_title", { name: variable.name })}
           </p>
           <p className="text-xs text-center">
-            {t("detail.original_value_label")} <span className="font-mono text-muted">{stagedChange.originalValue}</span>
+            {t("detail.original_value_label")}{" "}
+            <span className="font-mono text-muted">{stagedChange.originalValue}</span>
           </p>
-          <Button variant="secondary" size="md" onClick={handleUnstage}>{t("detail.unstage")}</Button>
+          <Button variant="secondary" size="md" onClick={handleUnstage}>
+            {t("detail.unstage")}
+          </Button>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
           {/* Editor label + mode toggle */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <p className="text-sm font-semibold text-muted uppercase tracking-wide">{editorLabel}</p>
+              <p className="text-sm font-semibold text-muted uppercase tracking-wide">
+                {editorLabel}
+              </p>
               {showAddToPathHint && (
                 <button
                   type="button"
@@ -300,7 +341,12 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
               onBeforeReorder={onBeforeStructuralChange}
             />
           ) : effectiveSeparator === "," ? (
-            <ListEditor separator="," rawValue={value} onChange={handleValueChange} readOnly={readOnly} />
+            <ListEditor
+              separator=","
+              rawValue={value}
+              onChange={handleValueChange}
+              readOnly={readOnly}
+            />
           ) : (
             <div className="group relative">
               <Textarea
@@ -333,12 +379,22 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
               [t("detail.meta_length_label"), t("detail.meta_length", { count: value.length })],
               ...(entriesCount !== null ? [[t("detail.meta_entries"), String(entriesCount)]] : []),
               ...(expandedValue !== null
-                ? [[t("detail.meta_expanded"), expandedValue.length > 60 ? `${expandedValue.slice(0, 60)}…` : expandedValue]]
+                ? [
+                    [
+                      t("detail.meta_expanded"),
+                      expandedValue.length > 60 ? `${expandedValue.slice(0, 60)}…` : expandedValue,
+                    ],
+                  ]
                 : []),
               ...(isStagedSet && stagedChange.originalValue !== null
-                ? [[t("detail.meta_original"), stagedChange.originalValue.length > 40
-                    ? `${stagedChange.originalValue.slice(0, 40)}…`
-                    : stagedChange.originalValue]]
+                ? [
+                    [
+                      t("detail.meta_original"),
+                      stagedChange.originalValue.length > 40
+                        ? `${stagedChange.originalValue.slice(0, 40)}…`
+                        : stagedChange.originalValue,
+                    ],
+                  ]
                 : []),
             ].map(([label, val]) => (
               <div key={label} className="flex gap-3 text-sm">

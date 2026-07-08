@@ -19,7 +19,14 @@ interface Props {
   onBeforeReorder?: () => void;
 }
 
-export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skipPathValidation = false, onBeforeReorder }: Props) {
+export function PathEditor({
+  rawValue,
+  onChange,
+  readOnly = false,
+  allVars,
+  skipPathValidation = false,
+  onBeforeReorder,
+}: Props) {
   const [entries, setEntries] = useState<ListEntry[]>([]);
   // Lint runs against lintedValue, which only updates on blur or when rawValue changes while not focused.
   const [lintedValue, setLintedValue] = useState(rawValue);
@@ -32,21 +39,28 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
 
   // Parse rawValue → entries. Guard prevents reset when the change originated here.
   useEffect(() => {
-    const current = entries.map((e) => e.value).join(";");
-    if (current === rawValue) return;
-    const parts = rawValue.split(";").filter((p) => p.trim().length > 0);
-    // Reuse existing entry IDs to preserve DOM nodes and focus across undo operations.
-    // 1. Value match  — handles drag undo (same values, reordered).
-    // 2. Index match  — handles text-edit undo (same position, different value).
-    const pool = entries.map((e, i) => ({ e, i, used: false }));
-    setEntries(parts.map((value, i) => {
-      const byVal = pool.find((p) => !p.used && p.e.value === value);
-      if (byVal) { byVal.used = true; return byVal.e; }
-      const byIdx = pool.find((p) => !p.used && p.i === i);
-      if (byIdx) { byIdx.used = true; return { ...byIdx.e, value, exists: null }; }
-      return { id: `${i}-${value}-${Date.now()}`, value, exists: null };
-    }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setEntries((prev) => {
+      const current = prev.map((e) => e.value).join(";");
+      if (current === rawValue) return prev;
+      const parts = rawValue.split(";").filter((p) => p.trim().length > 0);
+      // Reuse existing entry IDs to preserve DOM nodes and focus across undo operations.
+      // 1. Value match  — handles drag undo (same values, reordered).
+      // 2. Index match  — handles text-edit undo (same position, different value).
+      const pool = prev.map((e, i) => ({ e, i, used: false }));
+      return parts.map((value, i) => {
+        const byVal = pool.find((p) => !p.used && p.e.value === value);
+        if (byVal) {
+          byVal.used = true;
+          return byVal.e;
+        }
+        const byIdx = pool.find((p) => !p.used && p.i === i);
+        if (byIdx) {
+          byIdx.used = true;
+          return { ...byIdx.e, value, exists: null };
+        }
+        return { id: `${i}-${value}-${Date.now()}`, value, exists: null };
+      });
+    });
   }, [rawValue]);
 
   // Validate paths when new entries appear with exists === null.
@@ -62,7 +76,9 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
         }
       })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [skipPathValidation, entries]);
 
   const handleEntriesChange = (next: ListEntry[]) => {
@@ -76,7 +92,9 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
     if (!allVars) return { unresolvedRefs: [], hasWhitespace: false };
     const diags = lintPathValue(lintedValue, allVars);
     return {
-      unresolvedRefs: [...new Set(diags.filter((d) => d.kind === "unresolved-ref").map((d) => d.varName))],
+      unresolvedRefs: [
+        ...new Set(diags.filter((d) => d.kind === "unresolved-ref").map((d) => d.varName)),
+      ],
       hasWhitespace: diags.some((d) => d.kind === "whitespace"),
     };
   }, [lintedValue, allVars]);
@@ -84,7 +102,9 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
   return (
     <fieldset
       className="flex flex-col gap-2 min-w-0 border-0 p-0 m-0"
-      onFocus={() => { hasFocusRef.current = true; }}
+      onFocus={() => {
+        hasFocusRef.current = true;
+      }}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) {
           hasFocusRef.current = false;
@@ -93,18 +113,28 @@ export function PathEditor({ rawValue, onChange, readOnly = false, allVars, skip
       }}
     >
       {hasWhitespace && (
-        <div className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs" role="alert">
+        <div
+          className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
+          role="alert"
+        >
           Some entries have leading or trailing spaces — remove them to avoid lookup failures
         </div>
       )}
       {unresolvedRefs.length > 0 && (
-        <div className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs" role="alert">
-          {unresolvedRefs.length} unresolvable {unresolvedRefs.length === 1 ? "reference" : "references"}:{" "}
+        <div
+          className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
+          role="alert"
+        >
+          {unresolvedRefs.length} unresolvable{" "}
+          {unresolvedRefs.length === 1 ? "reference" : "references"}:{" "}
           {unresolvedRefs.map((v) => `%${v}%`).join(", ")}
         </div>
       )}
       {invalidCount > 0 && (
-        <div className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs" role="alert">
+        <div
+          className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
+          role="alert"
+        >
           {invalidCount} path{invalidCount > 1 ? "s" : ""} not found on disk
         </div>
       )}

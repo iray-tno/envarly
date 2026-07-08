@@ -1,5 +1,5 @@
-import { useCallback, useEffect } from "react";
 import type { RefObject } from "react";
+import { useCallback, useEffect } from "react";
 import { api } from "../api";
 import type { EnvSnapshot } from "../types";
 
@@ -29,7 +29,7 @@ export function useAppInit({
       await refreshPathStatus();
       refresh();
     })();
-  }, []);
+  }, [baselineRef, setElevated, refreshPathStatus, refresh]);
 
   const handleRefresh = useCallback(async () => {
     await refresh();
