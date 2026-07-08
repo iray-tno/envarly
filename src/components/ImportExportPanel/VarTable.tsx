@@ -42,7 +42,6 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
         >
           {t("var_table.select_all")}
         </Button>
-        <span className="text-dim">·</span>
         <Button
           variant="ghost"
           size="sm"
