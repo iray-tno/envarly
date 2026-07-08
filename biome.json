@@ -18,11 +18,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
-      "correctness": {
-        "noUnusedVariables": "warn",
-        "noUnusedImports": "warn"
-      }
+      "preset": "recommended"
     }
   },
   "javascript": {
