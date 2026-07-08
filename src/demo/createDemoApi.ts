@@ -63,7 +63,7 @@ export function createDemoApi(
   fixture: DemoFixture,
   fallbackApi: EnvarlyApi,
 ): EnvarlyApi {
-  let current = clone(fixture.current);
+  const current = clone(fixture.current);
   let snapshots = clone(fixture.snapshots);
   let pendingBaseline = fixture.baseline ? clone(fixture.baseline) : null;
 

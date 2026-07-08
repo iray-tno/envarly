@@ -25,29 +25,31 @@ export function SegmentedControl<T extends string>({
   return (
     <div role="radiogroup" aria-label={label} className={cn("flex gap-0.5", className)}>
       {options.map((opt) => (
-        <button
+        <label
           key={opt.value}
-          type="button"
-          role="radio"
-          aria-checked={value === opt.value}
-          disabled={opt.disabled}
-          onClick={() => onChange(opt.value)}
           className={cn(
             "flex items-center gap-1.5 px-4 py-2 rounded text-sm transition-colors",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
-            "disabled:opacity-40 disabled:cursor-not-allowed",
+            opt.disabled && "opacity-40 cursor-not-allowed",
             value === opt.value
               ? "bg-surface text-fg"
               : "text-muted hover:bg-hover hover:text-fg",
           )}
         >
+          <input
+            type="radio"
+            checked={value === opt.value}
+            disabled={opt.disabled}
+            onChange={() => onChange(opt.value)}
+            className="sr-only"
+          />
           {opt.label}
           {opt.count !== undefined && (
             <span className="text-xs px-1.5 py-0.5 rounded-full bg-hover text-dim leading-none">
               {opt.count}
             </span>
           )}
-        </button>
+        </label>
       ))}
     </div>
   );

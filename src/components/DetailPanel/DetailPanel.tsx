@@ -94,8 +94,12 @@ export function DetailPanel({ variable, allVars, elevated, userPathInEnv, system
   const expandedValue = useMemo(() => {
     if (!value.includes("%")) return null;
     const lookup = new Map<string, string>();
-    allVars.filter((v) => v.scope === "System").forEach((v) => lookup.set(v.name.toUpperCase(), v.value));
-    allVars.filter((v) => v.scope === "User").forEach((v) => lookup.set(v.name.toUpperCase(), v.value));
+    allVars.filter((v) => v.scope === "System").forEach((v) => {
+      lookup.set(v.name.toUpperCase(), v.value);
+    });
+    allVars.filter((v) => v.scope === "User").forEach((v) => {
+      lookup.set(v.name.toUpperCase(), v.value);
+    });
     const expanded = value.replace(/%([^%]+)%/g, (match, name: string) => lookup.get(name.toUpperCase()) ?? match);
     return expanded !== value ? expanded : null;
   }, [value, allVars]);

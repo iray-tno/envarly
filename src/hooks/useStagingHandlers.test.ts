@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { StagedChange } from "./useStaged";
 import { useStagingHandlers } from "./useStagingHandlers";
 
