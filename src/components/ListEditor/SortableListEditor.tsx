@@ -169,6 +169,7 @@ interface Props {
   /** Called before structural changes (drag, remove, add) so callers can snapshot state. */
   onBeforeChange?: () => void;
   onBrowseEntry?: (entry: ListEntry) => Promise<string | null>;
+  onBrowseNewEntry?: (currentValue: string) => Promise<string | null>;
   readOnly?: boolean;
   addPlaceholder?: string;
 }
@@ -179,6 +180,7 @@ export function SortableListEditor({
   onEntriesChange,
   onBeforeChange,
   onBrowseEntry,
+  onBrowseNewEntry,
   readOnly = false,
   addPlaceholder = "Add entry…",
 }: Props) {
@@ -246,6 +248,14 @@ export function SortableListEditor({
     const selected = await onBrowseEntry(entry);
     if (selected === null) return;
     editEntry(entry.id, selected);
+  };
+
+  const browseNewEntry = async () => {
+    if (readOnly) return;
+    if (!onBrowseNewEntry) return;
+    const selected = await onBrowseNewEntry(newValue);
+    if (selected === null) return;
+    addEntry(selected);
   };
 
   const focusEntry = (index: number) => {
@@ -330,19 +340,31 @@ export function SortableListEditor({
 
       {!readOnly && (
         <div className="flex gap-2">
-          <input
-            aria-label="New entry"
-            className={cn(
-              "flex-1 px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
-              "placeholder:text-muted transition-colors",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",
+          <div className="relative flex flex-1">
+            <input
+              aria-label="New entry"
+              className={cn(
+                "h-full min-h-10 w-full px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
+                onBrowseNewEntry && "pr-9",
+                "placeholder:text-muted transition-colors",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",
+              )}
+              placeholder={addPlaceholder}
+              value={newValue}
+              onChange={(e) => setNewValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addEntry(newValue)}
+              onPaste={handlePaste}
+            />
+            {onBrowseNewEntry && (
+              <IconButton
+                icon="folder"
+                aria-label="Browse folder to add"
+                title="Browse folder to add"
+                onClick={() => void browseNewEntry()}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2"
+              />
             )}
-            placeholder={addPlaceholder}
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addEntry(newValue)}
-            onPaste={handlePaste}
-          />
+          </div>
           <Button variant="primary" icon="plus" onClick={() => addEntry(newValue)}>
             Add
           </Button>

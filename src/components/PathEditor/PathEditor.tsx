@@ -99,6 +99,15 @@ export function PathEditor({
     return typeof selected === "string" ? selected : null;
   };
 
+  const handleBrowseNewEntry = async (currentValue: string) => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      defaultPath: currentValue.trim() || undefined,
+    });
+    return typeof selected === "string" ? selected : null;
+  };
+
   const invalidCount = entries.filter((e) => e.exists === false).length;
 
   const { unresolvedRefs, hasWhitespace } = useMemo(() => {
@@ -157,6 +166,7 @@ export function PathEditor({
         onEntriesChange={handleEntriesChange}
         onBeforeChange={onBeforeReorder}
         onBrowseEntry={readOnly || !allowFolderBrowse ? undefined : handleBrowseEntry}
+        onBrowseNewEntry={readOnly || !allowFolderBrowse ? undefined : handleBrowseNewEntry}
         readOnly={readOnly}
         addPlaceholder="Add new path…"
       />

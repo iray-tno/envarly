@@ -56,8 +56,40 @@ describe("PathEditor", () => {
     vi.mocked(api.validatePaths).mockResolvedValue([true, true]);
     render(<PathEditor rawValue={A} onChange={onChange} />);
     await user.type(screen.getByPlaceholderText(/add new path/i), "/new/path");
-    await user.click(screen.getByRole("button", { name: /add/i }));
+    await user.click(screen.getByRole("button", { name: /^add$/i }));
     expect(onChange).toHaveBeenCalledWith(`${A};/new/path`);
+  });
+
+  it("adds a selected folder from the new entry controls", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    vi.mocked(api.validatePaths).mockResolvedValue([true, true]);
+    vi.mocked(open).mockResolvedValue("/selected/new");
+    render(<PathEditor rawValue={A} onChange={onChange} />);
+
+    await user.click(screen.getByRole("button", { name: /browse folder to add/i }));
+
+    expect(open).toHaveBeenCalledWith({
+      directory: true,
+      multiple: false,
+      defaultPath: undefined,
+    });
+    expect(onChange).toHaveBeenCalledWith(`${A};/selected/new`);
+  });
+
+  it("uses the typed new entry value as the folder picker default path", async () => {
+    const user = userEvent.setup();
+    vi.mocked(open).mockResolvedValue(null);
+    render(<PathEditor rawValue={A} onChange={vi.fn()} />);
+
+    await user.type(screen.getByPlaceholderText(/add new path/i), "/partial");
+    await user.click(screen.getByRole("button", { name: /browse folder to add/i }));
+
+    expect(open).toHaveBeenCalledWith({
+      directory: true,
+      multiple: false,
+      defaultPath: "/partial",
+    });
   });
 
   it("adds entry on Enter key", async () => {
@@ -100,6 +132,7 @@ describe("PathEditor", () => {
     render(<PathEditor rawValue=".COM;.EXE;.BAT" onChange={vi.fn()} allowFolderBrowse={false} />);
 
     expect(screen.queryByRole("button", { name: /browse folder for/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /browse folder to add/i })).not.toBeInTheDocument();
   });
 
   it("prevents row edits and controls when read-only", async () => {
@@ -112,6 +145,7 @@ describe("PathEditor", () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: /^remove/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /browse folder for/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /browse folder to add/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /add/i })).not.toBeInTheDocument();
   });
 
