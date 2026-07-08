@@ -14,6 +14,6 @@ export { RefreshIcon } from "./RefreshIcon";
 export { ShieldIcon } from "./ShieldIcon";
 export { SunIcon } from "./SunIcon";
 export { TrashIcon } from "./TrashIcon";
+export type { IconSvgProps } from "./types";
 export { WarningIcon } from "./WarningIcon";
 export { XIcon } from "./XIcon";
-export type { IconSvgProps } from "./types";

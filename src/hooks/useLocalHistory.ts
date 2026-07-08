@@ -30,20 +30,23 @@ export function useLocalHistory(originalValue: string): UseLocalHistoryResult {
     localHistory.current = [];
   }, [originalValue]);
 
-  const onChange = useCallback((newVal: string) => {
-    if (structuralChangeRef.current) {
-      const preOp = preOpValueRef.current;
-      const top = localHistory.current[localHistory.current.length - 1];
-      const next = [...localHistory.current];
-      if (preOp !== originalValue && preOp !== top) next.push(preOp);
-      next.push(newVal);
-      localHistory.current = next;
-      structuralChangeRef.current = false;
-    }
-    setValue(newVal);
-    valueRef.current = newVal;
-    setDirty(newVal !== originalValue);
-  }, [originalValue]);
+  const onChange = useCallback(
+    (newVal: string) => {
+      if (structuralChangeRef.current) {
+        const preOp = preOpValueRef.current;
+        const top = localHistory.current[localHistory.current.length - 1];
+        const next = [...localHistory.current];
+        if (preOp !== originalValue && preOp !== top) next.push(preOp);
+        next.push(newVal);
+        localHistory.current = next;
+        structuralChangeRef.current = false;
+      }
+      setValue(newVal);
+      valueRef.current = newVal;
+      setDirty(newVal !== originalValue);
+    },
+    [originalValue],
+  );
 
   const discard = useCallback(() => {
     const current = valueRef.current;
@@ -60,9 +63,10 @@ export function useLocalHistory(originalValue: string): UseLocalHistoryResult {
       setDirty(lastCheckpoint !== originalValue);
     } else {
       localHistory.current = localHistory.current.slice(0, -1);
-      const prev = localHistory.current.length > 0
-        ? localHistory.current[localHistory.current.length - 1]
-        : originalValue;
+      const prev =
+        localHistory.current.length > 0
+          ? localHistory.current[localHistory.current.length - 1]
+          : originalValue;
       setValue(prev);
       valueRef.current = prev;
       setDirty(prev !== originalValue);
@@ -74,12 +78,15 @@ export function useLocalHistory(originalValue: string): UseLocalHistoryResult {
     preOpValueRef.current = valueRef.current;
   }, []);
 
-  const reset = useCallback((newValue: string) => {
-    setValue(newValue);
-    valueRef.current = newValue;
-    setDirty(newValue !== originalValue);
-    localHistory.current = [];
-  }, [originalValue]);
+  const reset = useCallback(
+    (newValue: string) => {
+      setValue(newValue);
+      valueRef.current = newValue;
+      setDirty(newValue !== originalValue);
+      localHistory.current = [];
+    },
+    [originalValue],
+  );
 
   return { value, dirty, onChange, discard, onBeforeStructuralChange, reset };
 }

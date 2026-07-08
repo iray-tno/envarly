@@ -5,23 +5,29 @@ import { DetailPanel } from "./DetailPanel";
 const noStaged = new Map<string, StagedChange>();
 
 const stagedSet = new Map<string, StagedChange>([
-  ["User:JAVA_HOME", {
-    kind: "set",
-    name: "JAVA_HOME",
-    scope: "User",
-    originalValue: "C:\\Program Files\\Java\\jdk-17",
-    newValue: "C:\\Program Files\\Java\\jdk-21",
-  }],
+  [
+    "User:JAVA_HOME",
+    {
+      kind: "set",
+      name: "JAVA_HOME",
+      scope: "User",
+      originalValue: "C:\\Program Files\\Java\\jdk-17",
+      newValue: "C:\\Program Files\\Java\\jdk-21",
+    },
+  ],
 ]);
 
 const stagedDelete = new Map<string, StagedChange>([
-  ["User:JAVA_HOME", {
-    kind: "delete",
-    name: "JAVA_HOME",
-    scope: "User",
-    originalValue: "C:\\Program Files\\Java\\jdk-21",
-    newValue: null,
-  }],
+  [
+    "User:JAVA_HOME",
+    {
+      kind: "delete",
+      name: "JAVA_HOME",
+      scope: "User",
+      originalValue: "C:\\Program Files\\Java\\jdk-21",
+      newValue: null,
+    },
+  ],
 ]);
 
 const meta: Meta<typeof DetailPanel> = {

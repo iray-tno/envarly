@@ -1,6 +1,6 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
+import { useI18n } from "../../hooks/useI18n";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { Select } from "../ui/Select";
@@ -23,9 +23,20 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  loading, stagedCount, diffCount, elevated, snapshotsOpen, theme,
-  onRefresh, onApplyStaged, onDiscard, onShowChanges, onImportExport,
-  onToggleSnapshots, onToggleTheme, onLicenses,
+  loading,
+  stagedCount,
+  diffCount,
+  elevated,
+  snapshotsOpen,
+  theme,
+  onRefresh,
+  onApplyStaged,
+  onDiscard,
+  onShowChanges,
+  onImportExport,
+  onToggleSnapshots,
+  onToggleTheme,
+  onLicenses,
 }: AppHeaderProps) {
   const { t, language, setLanguage } = useI18n();
   const languageOptions = [

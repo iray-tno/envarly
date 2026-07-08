@@ -20,7 +20,9 @@ const MOCK_VARS = [
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(api.exportVars).mockResolvedValue("C:\\Users\\zigza\\envarly-20260624.json");
-  vi.mocked(api.exportCustomVars).mockResolvedValue("C:\\Users\\zigza\\envarly-custom-20260624.json");
+  vi.mocked(api.exportCustomVars).mockResolvedValue(
+    "C:\\Users\\zigza\\envarly-custom-20260624.json",
+  );
   vi.mocked(api.getEnvVars).mockResolvedValue(MOCK_VARS as never);
   vi.mocked(api.parseImport).mockResolvedValue(MOCK_SNAPSHOT);
   vi.mocked(api.setEnvVar).mockResolvedValue(undefined);
@@ -148,7 +150,9 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
+      target: { value: "{}" },
+    });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => {
       expect(screen.getByText("JAVA_HOME")).toBeInTheDocument();
@@ -161,7 +165,9 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
+      target: { value: "{}" },
+    });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => screen.getByText("JAVA_HOME"));
     expect(screen.getByRole("radio", { name: "Merge" })).toBeInTheDocument();
@@ -172,7 +178,9 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
+      target: { value: "{}" },
+    });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => screen.getByText("JAVA_HOME"));
     await user.click(screen.getByRole("radio", { name: "Replace" }));
@@ -184,7 +192,9 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={onStage} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
+      target: { value: "{}" },
+    });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => screen.getByText("JAVA_HOME"));
     await user.click(screen.getByRole("button", { name: /stage/i }));
@@ -205,7 +215,9 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "not valid" } });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
+      target: { value: "not valid" },
+    });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => expect(screen.getByText(/parse failed/i)).toBeInTheDocument());
   });
@@ -218,7 +230,9 @@ describe("ImportExportPanel — Import tab", () => {
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: /^import$/i }));
-    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), { target: { value: "{}" } });
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
+      target: { value: "{}" },
+    });
     await user.click(screen.getByRole("button", { name: /^parse$/i }));
     await waitFor(() => expect(screen.getByText(/sensitive data/i)).toBeInTheDocument());
   });

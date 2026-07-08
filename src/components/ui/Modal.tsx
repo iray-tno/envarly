@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { cn } from "../../lib/cn";
 import { IconButton } from "./IconButton";
 
@@ -22,7 +22,9 @@ const sizeCls = {
 export function Modal({ open, onClose, title, size = "lg", flex = false, children }: Props) {
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);

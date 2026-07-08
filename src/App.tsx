@@ -1,24 +1,24 @@
 import { useMemo, useState } from "react";
-import { useI18n } from "./hooks/useI18n";
 import { AppHeader } from "./components/AppHeader/AppHeader";
 import { AppModals } from "./components/AppModals/AppModals";
-import { PathBanner } from "./components/PathBanner/PathBanner";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
+import { PathBanner } from "./components/PathBanner/PathBanner";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
 import { IconButton } from "./components/ui/IconButton";
 import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
+import { useAppInit } from "./hooks/useAppInit";
+import { useApplyStaged } from "./hooks/useApplyStaged";
+import { useDiff } from "./hooks/useDiff";
 import { useEnvVars } from "./hooks/useEnvVars";
+import { useI18n } from "./hooks/useI18n";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useLocalUndo } from "./hooks/useLocalUndo";
+import { usePathStatus } from "./hooks/usePathStatus";
 import { useStaged } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
-import { usePathStatus } from "./hooks/usePathStatus";
-import { useDiff } from "./hooks/useDiff";
-import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
-import { useLocalUndo } from "./hooks/useLocalUndo";
-import { useAppInit } from "./hooks/useAppInit";
-import { useApplyStaged } from "./hooks/useApplyStaged";
 import { stagedToDiff } from "./lib/stagedToDiff";
 import type { EnvVar } from "./types";
 
@@ -33,19 +33,38 @@ export default function App() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
 
-  const { staged, effectiveVars, stageSet, stageDelete, stageImport, stageSnapshot, unstage, clearStaged, restoreStaged } =
-    useStaged(vars);
+  const {
+    staged,
+    effectiveVars,
+    stageSet,
+    stageDelete,
+    stageImport,
+    stageSnapshot,
+    unstage,
+    clearStaged,
+    restoreStaged,
+  } = useStaged(vars);
 
   const { push, undo, redo } = useUndo();
   const { localUndoRef, handleRegisterLocalUndo } = useLocalUndo();
 
   const {
-    userPathInEnv, systemPathInEnv, pathBannerDismissed,
-    refreshPathStatus, handleStageAddToPath, handleDismissPathBanner,
+    userPathInEnv,
+    systemPathInEnv,
+    pathBannerDismissed,
+    refreshPathStatus,
+    handleStageAddToPath,
+    handleDismissPathBanner,
   } = usePathStatus(staged, stageSet);
 
-  const { diffEntries, baselineRef, checkForExternalChanges, handleDiffApply, handleDiffDismiss, applyBusy } =
-    useDiff(refresh, setDialog);
+  const {
+    diffEntries,
+    baselineRef,
+    checkForExternalChanges,
+    handleDiffApply,
+    handleDiffDismiss,
+    applyBusy,
+  } = useDiff(refresh, setDialog);
 
   const { handleRefresh } = useAppInit({
     baselineRef,
@@ -58,21 +77,42 @@ export default function App() {
   useKeyboardShortcuts(undo, redo, localUndoRef);
 
   const {
-    handleStage, handleStageDelete, handleUnstage, handleClearStaged,
-    handleStageImport, handleStageSnapshot, handleNewVarStage,
+    handleStage,
+    handleStageDelete,
+    handleUnstage,
+    handleClearStaged,
+    handleStageImport,
+    handleStageSnapshot,
+    handleNewVarStage,
   } = useStagingHandlers({
-    staged, stageSet, stageDelete, stageImport, stageSnapshot,
-    unstage, clearStaged, restoreStaged, push,
-    setDialog, setSelected, setSnapshotsOpen,
+    staged,
+    stageSet,
+    stageDelete,
+    stageImport,
+    stageSnapshot,
+    unstage,
+    clearStaged,
+    restoreStaged,
+    push,
+    setDialog,
+    setSelected,
+    setSnapshotsOpen,
   });
 
   const { handleApplyStaged, busy: stagedBusy } = useApplyStaged({
-    staged, clearStaged, refresh, refreshPathStatus, baselineRef, setDialog,
+    staged,
+    clearStaged,
+    refresh,
+    refreshPathStatus,
+    baselineRef,
+    setDialog,
   });
 
   const effectiveSelected = useMemo<EnvVar | null>(() => {
     if (!selected) return null;
-    return effectiveVars.find((v) => v.name === selected.name && v.scope === selected.scope) ?? null;
+    return (
+      effectiveVars.find((v) => v.name === selected.name && v.scope === selected.scope) ?? null
+    );
   }, [selected, effectiveVars]);
 
   const stagedDiff = useMemo(() => stagedToDiff(staged), [staged]);
@@ -141,7 +181,11 @@ export default function App() {
             <div className="w-[380px] shrink-0 flex flex-col border-l border-rim bg-panel overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-rim shrink-0">
                 <span className="text-sm font-semibold text-fg">Snapshots</span>
-                <IconButton aria-label="Close snapshots" icon="x" onClick={() => setSnapshotsOpen(false)} />
+                <IconButton
+                  aria-label="Close snapshots"
+                  icon="x"
+                  onClick={() => setSnapshotsOpen(false)}
+                />
               </div>
               <div className="flex-1 overflow-hidden">
                 <SnapshotPanel onStageSnapshot={handleStageSnapshot} />

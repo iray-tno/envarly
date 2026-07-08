@@ -1,12 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useStaged, stagedKey } from "./useStaged";
 import type { EnvVar } from "../types";
+import { stagedKey, useStaged } from "./useStaged";
 
 const vars: EnvVar[] = [
-  { name: "PATH",      scope: "User",   value: "C:\\bin",     listSeparator: ";" },
-  { name: "JAVA_HOME", scope: "User",   value: "C:\\jdk21",   listSeparator: null },
-  { name: "WINDIR",    scope: "System", value: "C:\\Windows", listSeparator: null },
+  { name: "PATH", scope: "User", value: "C:\\bin", listSeparator: ";" },
+  { name: "JAVA_HOME", scope: "User", value: "C:\\jdk21", listSeparator: null },
+  { name: "WINDIR", scope: "System", value: "C:\\Windows", listSeparator: null },
 ];
 
 describe("stagedKey", () => {
@@ -24,7 +24,9 @@ describe("useStaged — stageSet", () => {
 
   it("adds a set change with the correct originalValue and newValue", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageSet("JAVA_HOME", "User", "C:\\jdk22"); });
+    act(() => {
+      result.current.stageSet("JAVA_HOME", "User", "C:\\jdk22");
+    });
     const change = result.current.staged.get("User:JAVA_HOME");
     expect(change?.kind).toBe("set");
     expect(change?.originalValue).toBe("C:\\jdk21");
@@ -33,15 +35,21 @@ describe("useStaged — stageSet", () => {
 
   it("removes the entry when new value matches the original (auto-unstage)", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageSet("JAVA_HOME", "User", "C:\\jdk22"); });
+    act(() => {
+      result.current.stageSet("JAVA_HOME", "User", "C:\\jdk22");
+    });
     expect(result.current.staged.size).toBe(1);
-    act(() => { result.current.stageSet("JAVA_HOME", "User", "C:\\jdk21"); });
+    act(() => {
+      result.current.stageSet("JAVA_HOME", "User", "C:\\jdk21");
+    });
     expect(result.current.staged.size).toBe(0);
   });
 
   it("uses null originalValue for a brand-new variable", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageSet("NEW_VAR", "User", "hello"); });
+    act(() => {
+      result.current.stageSet("NEW_VAR", "User", "hello");
+    });
     const change = result.current.staged.get("User:NEW_VAR");
     expect(change?.originalValue).toBeNull();
     expect(change?.newValue).toBe("hello");
@@ -51,7 +59,9 @@ describe("useStaged — stageSet", () => {
 describe("useStaged — stageDelete", () => {
   it("stages a deletion with correct originalValue", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageDelete("JAVA_HOME", "User"); });
+    act(() => {
+      result.current.stageDelete("JAVA_HOME", "User");
+    });
     const change = result.current.staged.get("User:JAVA_HOME");
     expect(change?.kind).toBe("delete");
     expect(change?.originalValue).toBe("C:\\jdk21");
@@ -60,7 +70,9 @@ describe("useStaged — stageDelete", () => {
 
   it("is a no-op for variables not in the registry", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageDelete("DOES_NOT_EXIST", "User"); });
+    act(() => {
+      result.current.stageDelete("DOES_NOT_EXIST", "User");
+    });
     expect(result.current.staged.size).toBe(0);
   });
 });
@@ -73,7 +85,9 @@ describe("useStaged — unstage / clearStaged", () => {
       result.current.stageSet("WINDIR", "System", "C:\\Win11");
     });
     expect(result.current.staged.size).toBe(2);
-    act(() => { result.current.unstage("JAVA_HOME", "User"); });
+    act(() => {
+      result.current.unstage("JAVA_HOME", "User");
+    });
     expect(result.current.staged.size).toBe(1);
     expect(result.current.staged.has("User:JAVA_HOME")).toBe(false);
     expect(result.current.staged.has("System:WINDIR")).toBe(true);
@@ -85,7 +99,9 @@ describe("useStaged — unstage / clearStaged", () => {
       result.current.stageSet("JAVA_HOME", "User", "C:\\jdk22");
       result.current.stageSet("WINDIR", "System", "C:\\Win11");
     });
-    act(() => { result.current.clearStaged(); });
+    act(() => {
+      result.current.clearStaged();
+    });
     expect(result.current.staged.size).toBe(0);
   });
 });
@@ -93,21 +109,27 @@ describe("useStaged — unstage / clearStaged", () => {
 describe("useStaged — effectiveVars", () => {
   it("reflects staged set changes in the merged view", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageSet("JAVA_HOME", "User", "C:\\jdk22"); });
+    act(() => {
+      result.current.stageSet("JAVA_HOME", "User", "C:\\jdk22");
+    });
     const javaHome = result.current.effectiveVars.find((v) => v.name === "JAVA_HOME");
     expect(javaHome?.value).toBe("C:\\jdk22");
   });
 
   it("keeps staged-deleted vars visible (for sidebar D marker)", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageDelete("JAVA_HOME", "User"); });
+    act(() => {
+      result.current.stageDelete("JAVA_HOME", "User");
+    });
     const names = result.current.effectiveVars.map((v) => v.name);
     expect(names).toContain("JAVA_HOME");
   });
 
   it("includes brand-new staged vars not yet in the registry", () => {
     const { result } = renderHook(() => useStaged(vars));
-    act(() => { result.current.stageSet("NEW_VAR", "User", "hello"); });
+    act(() => {
+      result.current.stageSet("NEW_VAR", "User", "hello");
+    });
     const names = result.current.effectiveVars.map((v) => v.name);
     expect(names).toContain("NEW_VAR");
   });
@@ -120,7 +142,9 @@ describe("useStaged — effectiveVars", () => {
 
   it("infers semicolon separator for PATH and PATHEXT names", () => {
     const { result } = renderHook(() => useStaged([]));
-    act(() => { result.current.stageSet("PATHEXT", "User", ".COM;.EXE"); });
+    act(() => {
+      result.current.stageSet("PATHEXT", "User", ".COM;.EXE");
+    });
     const pathext = result.current.effectiveVars.find((v) => v.name === "PATHEXT");
     expect(pathext?.listSeparator).toBe(";");
   });
@@ -132,7 +156,7 @@ describe("useStaged — stageImport", () => {
     act(() => {
       result.current.stageImport([
         { name: "JAVA_HOME", scope: "User", value: "C:\\jdk22" },
-        { name: "NEW_VAR",   scope: "User", value: "new" },
+        { name: "NEW_VAR", scope: "User", value: "new" },
       ]);
     });
     expect(result.current.staged.size).toBe(2);

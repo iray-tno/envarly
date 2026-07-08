@@ -7,14 +7,45 @@ import { Sidebar } from "./Sidebar";
 const noStaged = new Map<string, StagedChange>();
 
 const withStaged = new Map<string, StagedChange>([
-  ["User:JAVA_HOME", { kind: "set", name: "JAVA_HOME", scope: "User", originalValue: "C:\\jdk-17", newValue: "C:\\Program Files\\Java\\jdk-21" }],
-  ["User:NODE_ENV",  { kind: "delete", name: "NODE_ENV", scope: "User", originalValue: "development", newValue: null }],
-  ["System:NEW_VAR", { kind: "set", name: "NEW_VAR", scope: "System", originalValue: null, newValue: "hello" }],
+  [
+    "User:JAVA_HOME",
+    {
+      kind: "set",
+      name: "JAVA_HOME",
+      scope: "User",
+      originalValue: "C:\\jdk-17",
+      newValue: "C:\\Program Files\\Java\\jdk-21",
+    },
+  ],
+  [
+    "User:NODE_ENV",
+    {
+      kind: "delete",
+      name: "NODE_ENV",
+      scope: "User",
+      originalValue: "development",
+      newValue: null,
+    },
+  ],
+  [
+    "System:NEW_VAR",
+    { kind: "set", name: "NEW_VAR", scope: "System", originalValue: null, newValue: "hello" },
+  ],
 ]);
 
 const SAMPLE_VARS: EnvVar[] = [
-  { name: "PATH", value: "C:\\Windows\\System32;C:\\Program Files\\nodejs", scope: "User", listSeparator: ";" },
-  { name: "JAVA_HOME", value: "C:\\Program Files\\Java\\jdk-21", scope: "User", listSeparator: null },
+  {
+    name: "PATH",
+    value: "C:\\Windows\\System32;C:\\Program Files\\nodejs",
+    scope: "User",
+    listSeparator: ";",
+  },
+  {
+    name: "JAVA_HOME",
+    value: "C:\\Program Files\\Java\\jdk-21",
+    scope: "User",
+    listSeparator: null,
+  },
   { name: "NODE_ENV", value: "development", scope: "User", listSeparator: null },
   { name: "WINDIR", value: "C:\\Windows", scope: "System", listSeparator: null },
   { name: "SystemRoot", value: "C:\\Windows", scope: "System", listSeparator: null },
@@ -41,7 +72,14 @@ export const Default: Story = {
   render: () => {
     const [selected, setSelected] = useState<EnvVar | null>(null);
     return (
-      <Sidebar vars={SAMPLE_VARS} selected={selected} onSelect={setSelected} onCreateNew={() => {}} loading={false} staged={noStaged} />
+      <Sidebar
+        vars={SAMPLE_VARS}
+        selected={selected}
+        onSelect={setSelected}
+        onCreateNew={() => {}}
+        loading={false}
+        staged={noStaged}
+      />
     );
   },
 };
@@ -50,15 +88,36 @@ export const WithStagedChanges: Story = {
   render: () => {
     const [selected, setSelected] = useState<EnvVar | null>(null);
     return (
-      <Sidebar vars={SAMPLE_VARS} selected={selected} onSelect={setSelected} onCreateNew={() => {}} loading={false} staged={withStaged} />
+      <Sidebar
+        vars={SAMPLE_VARS}
+        selected={selected}
+        onSelect={setSelected}
+        onCreateNew={() => {}}
+        loading={false}
+        staged={withStaged}
+      />
     );
   },
 };
 
 export const Loading: Story = {
-  args: { vars: [], selected: null, onSelect: () => {}, onCreateNew: () => {}, loading: true, staged: noStaged },
+  args: {
+    vars: [],
+    selected: null,
+    onSelect: () => {},
+    onCreateNew: () => {},
+    loading: true,
+    staged: noStaged,
+  },
 };
 
 export const Empty: Story = {
-  args: { vars: [], selected: null, onSelect: () => {}, onCreateNew: () => {}, loading: false, staged: noStaged },
+  args: {
+    vars: [],
+    selected: null,
+    onSelect: () => {},
+    onCreateNew: () => {},
+    loading: false,
+    staged: noStaged,
+  },
 };

@@ -38,7 +38,10 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
   return (
     <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-muted uppercase tracking-wide" htmlFor="newvar-name">
+        <label
+          className="text-xs font-semibold text-muted uppercase tracking-wide"
+          htmlFor="newvar-name"
+        >
           {t("new_var.name")}
         </label>
         <input
@@ -61,12 +64,18 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-semibold text-muted uppercase tracking-wide">{t("new_var.scope")}</p>
+        <p className="text-xs font-semibold text-muted uppercase tracking-wide">
+          {t("new_var.scope")}
+        </p>
         <SegmentedControl
           aria-label="Variable scope"
           options={[
             { value: "User" as VarScope, label: "User" },
-            { value: "System" as VarScope, label: elevated ? "System" : t("new_var.system_admin"), disabled: !elevated },
+            {
+              value: "System" as VarScope,
+              label: elevated ? "System" : t("new_var.system_admin"),
+              disabled: !elevated,
+            },
           ]}
           value={scope}
           onChange={setScope}
@@ -74,7 +83,10 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-muted uppercase tracking-wide" htmlFor="newvar-value">
+        <label
+          className="text-xs font-semibold text-muted uppercase tracking-wide"
+          htmlFor="newvar-value"
+        >
           {t("new_var.value")}
         </label>
         <textarea
@@ -92,7 +104,9 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
       </div>
 
       <div className="flex gap-2 justify-end pt-1">
-        <Button variant="ghost" size="md" type="button" onClick={onClose}>{t("new_var.cancel")}</Button>
+        <Button variant="ghost" size="md" type="button" onClick={onClose}>
+          {t("new_var.cancel")}
+        </Button>
         <Button variant="primary" size="md" type="submit" disabled={!canSubmit}>
           {t("new_var.stage")}
         </Button>

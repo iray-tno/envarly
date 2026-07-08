@@ -1,25 +1,25 @@
 import {
+  closestCenter,
   DndContext,
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
+import { cn } from "../../lib/cn";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { IconButton } from "../ui/IconButton";
-import { cn } from "../../lib/cn";
 
 export interface ListEntry {
   id: string;
@@ -37,8 +37,9 @@ interface RowProps {
 }
 
 function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: entry.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: entry.id,
+  });
 
   return (
     <li
@@ -72,8 +73,14 @@ function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps
           onChange={(e) => onEdit(e.target.value)}
           onKeyDown={(e) => {
             if (!e.altKey) return;
-            if (e.key === "ArrowUp")   { e.preventDefault(); onMoveUp(); }
-            if (e.key === "ArrowDown") { e.preventDefault(); onMoveDown(); }
+            if (e.key === "ArrowUp") {
+              e.preventDefault();
+              onMoveUp();
+            }
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              onMoveDown();
+            }
           }}
           spellCheck={false}
           title="Alt+↑/↓ to reorder"
@@ -97,7 +104,12 @@ function SortableRow({ entry, onRemove, onEdit, onMoveUp, onMoveDown }: RowProps
       )}
 
       <div className="w-7 flex items-center justify-center shrink-0">
-        <IconButton icon="x" aria-label={`Remove ${entry.value}`} variant="danger" onClick={onRemove} />
+        <IconButton
+          icon="x"
+          aria-label={`Remove ${entry.value}`}
+          variant="danger"
+          onClick={onRemove}
+        />
       </div>
     </li>
   );
@@ -138,12 +150,14 @@ export function SortableListEditor({
   const handleDedup = () => {
     onBeforeChange?.();
     const seen = new Set<string>();
-    onEntriesChange(entries.filter((e) => {
-      const key = e.value.toLowerCase().trim();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    }));
+    onEntriesChange(
+      entries.filter((e) => {
+        const key = e.value.toLowerCase().trim();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }),
+    );
   };
 
   const sensors = useSensors(
@@ -184,8 +198,15 @@ export function SortableListEditor({
     const trimmed = raw.trim();
     if (!trimmed) return;
     onBeforeChange?.();
-    const parts = trimmed.split(separator).map((s) => s.trim()).filter(Boolean);
-    const newEntries = parts.map((value) => ({ id: `new-${Date.now()}-${value}`, value, exists: null }));
+    const parts = trimmed
+      .split(separator)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const newEntries = parts.map((value) => ({
+      id: `new-${Date.now()}-${value}`,
+      value,
+      exists: null,
+    }));
     onEntriesChange([...entries, ...newEntries]);
     setNewValue("");
   };
@@ -202,8 +223,12 @@ export function SortableListEditor({
     <div className="flex flex-col gap-2">
       {!readOnly && dupCount > 0 && (
         <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs">
-          <span>{dupCount} duplicate {dupCount === 1 ? "entry" : "entries"}</span>
-          <Button variant="link" size="xs" onClick={handleDedup}>Remove</Button>
+          <span>
+            {dupCount} duplicate {dupCount === 1 ? "entry" : "entries"}
+          </span>
+          <Button variant="link" size="xs" onClick={handleDedup}>
+            Remove
+          </Button>
         </div>
       )}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -241,7 +266,9 @@ export function SortableListEditor({
             onKeyDown={(e) => e.key === "Enter" && addEntry(newValue)}
             onPaste={handlePaste}
           />
-          <Button variant="primary" icon="plus" onClick={() => addEntry(newValue)}>Add</Button>
+          <Button variant="primary" icon="plus" onClick={() => addEntry(newValue)}>
+            Add
+          </Button>
         </div>
       )}
     </div>

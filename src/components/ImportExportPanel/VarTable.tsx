@@ -33,10 +33,28 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3 text-xs text-muted">
         <span>{t("var_table.count", { count: vars.length })}</span>
-        <Button variant="ghost" size="sm" onClick={() => onToggleAll(true)} disabled={allChecked} className="px-1.5 py-0.5">{t("var_table.select_all")}</Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onToggleAll(true)}
+          disabled={allChecked}
+          className="px-1.5 py-0.5"
+        >
+          {t("var_table.select_all")}
+        </Button>
         <span className="text-dim">·</span>
-        <Button variant="ghost" size="sm" onClick={() => onToggleAll(false)} disabled={noneChecked} className="px-1.5 py-0.5">{t("var_table.deselect_all")}</Button>
-        <span className="ml-auto font-medium text-fg">{t("var_table.selected", { count: checkedCount })}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onToggleAll(false)}
+          disabled={noneChecked}
+          className="px-1.5 py-0.5"
+        >
+          {t("var_table.deselect_all")}
+        </Button>
+        <span className="ml-auto font-medium text-fg">
+          {t("var_table.selected", { count: checkedCount })}
+        </span>
       </div>
 
       <div className="rounded border border-rim overflow-hidden max-h-72 overflow-y-auto">
@@ -44,7 +62,13 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
           <thead>
             <tr className="border-b border-rim bg-surface text-muted uppercase text-[10px] tracking-wide">
               <th className="w-8 px-2 py-1.5 text-center">
-                <input type="checkbox" checked={allChecked} onChange={(e) => onToggleAll(e.target.checked)} className="accent-accent" aria-label="Select all" />
+                <input
+                  type="checkbox"
+                  checked={allChecked}
+                  onChange={(e) => onToggleAll(e.target.checked)}
+                  className="accent-accent"
+                  aria-label="Select all"
+                />
               </th>
               <th className="px-3 py-1.5 text-left">{t("var_table.col_name")}</th>
               <th className="px-3 py-1.5 text-left">{t("var_table.col_scope")}</th>
@@ -61,17 +85,29 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
                   onClick={() => onToggle(key)}
                   className={cn(
                     "border-b border-rim-subtle last:border-0 cursor-pointer transition-colors",
-                    checked[key] ? "bg-canvas hover:bg-hover" : "bg-canvas opacity-40 hover:opacity-60",
+                    checked[key]
+                      ? "bg-canvas hover:bg-hover"
+                      : "bg-canvas opacity-40 hover:opacity-60",
                   )}
                 >
                   <td className="px-2 py-1.5 text-center">
-                    <input type="checkbox" checked={!!checked[key]} onChange={() => onToggle(key)} onClick={(e) => e.stopPropagation()} className="accent-accent" aria-label={v.name} />
+                    <input
+                      type="checkbox"
+                      checked={!!checked[key]}
+                      onChange={() => onToggle(key)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="accent-accent"
+                      aria-label={v.name}
+                    />
                   </td>
                   <td className="px-3 py-1.5 font-mono font-semibold text-fg">
                     <span className="flex items-center gap-1.5">
                       {v.name}
                       {secret && (
-                        <span title={secret.label} className="inline-flex items-center gap-1 text-warn text-[10px] font-medium shrink-0">
+                        <span
+                          title={secret.label}
+                          className="inline-flex items-center gap-1 text-warn text-[10px] font-medium shrink-0"
+                        >
                           <Icon name="warning" size={12} />
                           {secret.service}
                         </span>

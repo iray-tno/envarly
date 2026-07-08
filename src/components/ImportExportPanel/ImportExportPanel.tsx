@@ -25,7 +25,10 @@ export function ImportExportPanel({ onStage }: Props) {
   ];
 
   const handleStatus = (msg: string | null) => {
-    if (msg === null) { setStatus(null); return; }
+    if (msg === null) {
+      setStatus(null);
+      return;
+    }
     const ok = !msg.toLowerCase().includes("fail") && !msg.toLowerCase().includes("error");
     setStatus({ ok, msg });
   };
@@ -40,7 +43,10 @@ export function ImportExportPanel({ onStage }: Props) {
               aria-label="Mode"
               options={modeOptions}
               value={mode}
-              onChange={(m) => { setMode(m); setStatus(null); }}
+              onChange={(m) => {
+                setMode(m);
+                setStatus(null);
+              }}
             />
           </div>
         </div>
@@ -50,10 +56,11 @@ export function ImportExportPanel({ onStage }: Props) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-4">
-        {mode === "export"
-          ? <ExportTab onStatus={handleStatus} />
-          : <ImportTab onStage={onStage} onStatus={handleStatus} />
-        }
+        {mode === "export" ? (
+          <ExportTab onStatus={handleStatus} />
+        ) : (
+          <ImportTab onStage={onStage} onStatus={handleStatus} />
+        )}
       </div>
     </div>
   );

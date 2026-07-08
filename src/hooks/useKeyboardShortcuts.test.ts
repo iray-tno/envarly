@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 
 function fire(key: string, opts: Partial<KeyboardEventInit> = {}) {
-  window.dispatchEvent(new KeyboardEvent("keydown", { key, ctrlKey: true, bubbles: true, ...opts }));
+  window.dispatchEvent(
+    new KeyboardEvent("keydown", { key, ctrlKey: true, bubbles: true, ...opts }),
+  );
 }
 
 describe("useKeyboardShortcuts", () => {

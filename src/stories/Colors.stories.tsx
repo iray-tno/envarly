@@ -7,27 +7,27 @@ const meta: Meta = {
 export default meta;
 
 const semanticColors = [
-  { name: "canvas",      cls: "bg-canvas",      label: "Canvas",      desc: "App background" },
-  { name: "panel",       cls: "bg-panel",        label: "Panel",       desc: "Sidebar, header, overlays" },
-  { name: "surface",     cls: "bg-surface",      label: "Surface",     desc: "Input fields, cards" },
-  { name: "hover",       cls: "bg-hover",        label: "Hover",       desc: "Hover / selected states" },
-  { name: "rim",         cls: "bg-rim",          label: "Rim",         desc: "Primary borders" },
-  { name: "rim-subtle",  cls: "bg-rim-subtle",   label: "Rim subtle",  desc: "Faint dividers" },
+  { name: "canvas", cls: "bg-canvas", label: "Canvas", desc: "App background" },
+  { name: "panel", cls: "bg-panel", label: "Panel", desc: "Sidebar, header, overlays" },
+  { name: "surface", cls: "bg-surface", label: "Surface", desc: "Input fields, cards" },
+  { name: "hover", cls: "bg-hover", label: "Hover", desc: "Hover / selected states" },
+  { name: "rim", cls: "bg-rim", label: "Rim", desc: "Primary borders" },
+  { name: "rim-subtle", cls: "bg-rim-subtle", label: "Rim subtle", desc: "Faint dividers" },
 ];
 
 const textColors = [
-  { name: "fg",     cls: "bg-fg",     label: "Foreground", desc: "Primary text" },
-  { name: "muted",  cls: "bg-muted",  label: "Muted",      desc: "Secondary text, labels" },
-  { name: "dim",    cls: "bg-dim",    label: "Dim",        desc: "Placeholder, disabled" },
+  { name: "fg", cls: "bg-fg", label: "Foreground", desc: "Primary text" },
+  { name: "muted", cls: "bg-muted", label: "Muted", desc: "Secondary text, labels" },
+  { name: "dim", cls: "bg-dim", label: "Dim", desc: "Placeholder, disabled" },
 ];
 
 const accentColors = [
-  { name: "accent",   cls: "bg-accent",   label: "Accent",   desc: "Primary action, links" },
-  { name: "accent-hi",cls: "bg-accent-hi",label: "Accent hi",desc: "Accent hover / focus ring" },
-  { name: "success",  cls: "bg-success",  label: "Success",  desc: "Added, ok states" },
-  { name: "danger",   cls: "bg-danger",   label: "Danger",   desc: "Errors, destructive actions" },
-  { name: "warn",     cls: "bg-warn",     label: "Warn",     desc: "Warnings, external changes" },
-  { name: "violet",   cls: "bg-violet",   label: "Violet",   desc: "System scope badge" },
+  { name: "accent", cls: "bg-accent", label: "Accent", desc: "Primary action, links" },
+  { name: "accent-hi", cls: "bg-accent-hi", label: "Accent hi", desc: "Accent hover / focus ring" },
+  { name: "success", cls: "bg-success", label: "Success", desc: "Added, ok states" },
+  { name: "danger", cls: "bg-danger", label: "Danger", desc: "Errors, destructive actions" },
+  { name: "warn", cls: "bg-warn", label: "Warn", desc: "Warnings, external changes" },
+  { name: "violet", cls: "bg-violet", label: "Violet", desc: "System scope badge" },
 ];
 
 function SwatchRow({ colors }: { colors: typeof semanticColors }) {
@@ -48,7 +48,9 @@ function SwatchRow({ colors }: { colors: typeof semanticColors }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-sm font-semibold text-muted uppercase tracking-wide border-b border-rim pb-2">{title}</h2>
+      <h2 className="text-sm font-semibold text-muted uppercase tracking-wide border-b border-rim pb-2">
+        {title}
+      </h2>
       {children}
     </section>
   );

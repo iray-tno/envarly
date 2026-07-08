@@ -20,7 +20,9 @@ export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPre
           <p className="text-sm font-semibold text-fg truncate">{snap.label}</p>
           <p className="text-[11px] text-dim">{new Date(snap.createdAt).toLocaleString()}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onCancel}>{t("snapshot_preview.back")}</Button>
+        <Button variant="ghost" size="sm" onClick={onCancel}>
+          {t("snapshot_preview.back")}
+        </Button>
       </div>
 
       {diff.length === 0 ? (
@@ -30,14 +32,12 @@ export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPre
       )}
 
       <div className="flex gap-2">
-        <Button
-          variant={diff.length === 0 ? "secondary" : "primary"}
-          size="md"
-          onClick={onRestore}
-        >
+        <Button variant={diff.length === 0 ? "secondary" : "primary"} size="md" onClick={onRestore}>
           {diff.length === 0 ? t("snapshot_preview.no_changes") : t("snapshot_preview.restore")}
         </Button>
-        <Button variant="ghost" size="md" onClick={onCancel}>{t("snapshot_preview.cancel")}</Button>
+        <Button variant="ghost" size="md" onClick={onCancel}>
+          {t("snapshot_preview.cancel")}
+        </Button>
       </div>
     </div>
   );

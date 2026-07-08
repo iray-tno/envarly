@@ -9,9 +9,7 @@ vi.mock("../api", () => ({
   },
 }));
 
-const SAMPLE = [
-  { name: "PATH", value: "C:\\Windows", scope: "User" as const, listSeparator: ";" },
-];
+const SAMPLE = [{ name: "PATH", value: "C:\\Windows", scope: "User" as const, listSeparator: ";" }];
 
 describe("useEnvVars", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -48,13 +46,15 @@ describe("useEnvVars", () => {
   });
 
   it("clears error on successful re-fetch", async () => {
-    vi.mocked(api.getEnvVars)
-      .mockRejectedValueOnce("fail")
-      .mockResolvedValueOnce(SAMPLE);
+    vi.mocked(api.getEnvVars).mockRejectedValueOnce("fail").mockResolvedValueOnce(SAMPLE);
     const { result } = renderHook(() => useEnvVars());
-    await act(async () => { result.current.refresh(); });
+    await act(async () => {
+      result.current.refresh();
+    });
     await waitFor(() => expect(result.current.error).toBeTruthy());
-    await act(async () => { result.current.refresh(); });
+    await act(async () => {
+      result.current.refresh();
+    });
     await waitFor(() => {
       expect(result.current.error).toBeNull();
       expect(result.current.vars).toEqual(SAMPLE);

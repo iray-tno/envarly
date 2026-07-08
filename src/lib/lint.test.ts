@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { lintPathValue } from "./lint";
 import type { EnvVar } from "../types";
+import { lintPathValue } from "./lint";
 
 const vars: EnvVar[] = [
   { name: "SystemRoot", scope: "System", value: "C:\\Windows", listSeparator: null },

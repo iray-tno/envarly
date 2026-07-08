@@ -38,7 +38,9 @@ export const NoTitle: Story = {
       <>
         <Button onClick={() => setOpen(true)}>Open modal</Button>
         <Modal {...args} open={open} onClose={() => setOpen(false)}>
-          <div className="px-6 py-5 text-sm text-muted">No title bar — close via backdrop or Escape.</div>
+          <div className="px-6 py-5 text-sm text-muted">
+            No title bar — close via backdrop or Escape.
+          </div>
         </Modal>
       </>
     );
@@ -52,11 +54,15 @@ export const Sizes: Story = {
     return (
       <div className="flex gap-2 flex-wrap">
         {(["md", "lg", "xl", "2xl"] as const).map((s) => (
-          <Button key={s} variant="secondary" onClick={() => setSize(s)}>{s}</Button>
+          <Button key={s} variant="secondary" onClick={() => setSize(s)}>
+            {s}
+          </Button>
         ))}
         {size && (
           <Modal open title={`Size: ${size}`} size={size} onClose={() => setSize(null)}>
-            <div className="px-6 py-5 text-sm text-muted">Content at size <code>{size}</code>.</div>
+            <div className="px-6 py-5 text-sm text-muted">
+              Content at size <code>{size}</code>.
+            </div>
           </Modal>
         )}
       </div>

@@ -17,7 +17,9 @@ export default meta;
 type Story = StoryObj<typeof Textarea>;
 
 export const Default: Story = { args: { placeholder: "Enter value…" } };
-export const LabelHidden: Story = { args: { labelHidden: true, placeholder: "Paste contents here…" } };
+export const LabelHidden: Story = {
+  args: { labelHidden: true, placeholder: "Paste contents here…" },
+};
 export const WithValue: Story = {
   args: { value: "C:\\Program Files\\Java\\jdk-21", readOnly: false },
 };

@@ -12,11 +12,26 @@ export interface LintDiagnostic {
 // registry keys this app reads (HKCU\Environment / HKLM\...\Environment).
 // Always available at runtime, so %REF% warnings for them are false positives.
 const WINDOWS_BUILTIN = new Set([
-  "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP",
-  "SYSTEMROOT", "WINDIR", "SYSTEMDRIVE", "COMSPEC",
-  "ALLUSERSPROFILE", "PROGRAMDATA", "PUBLIC",
-  "HOMEDRIVE", "HOMEPATH", "USERDOMAIN", "USERNAME", "COMPUTERNAME",
-  "PROCESSOR_ARCHITECTURE", "NUMBER_OF_PROCESSORS", "OS",
+  "USERPROFILE",
+  "APPDATA",
+  "LOCALAPPDATA",
+  "TEMP",
+  "TMP",
+  "SYSTEMROOT",
+  "WINDIR",
+  "SYSTEMDRIVE",
+  "COMSPEC",
+  "ALLUSERSPROFILE",
+  "PROGRAMDATA",
+  "PUBLIC",
+  "HOMEDRIVE",
+  "HOMEPATH",
+  "USERDOMAIN",
+  "USERNAME",
+  "COMPUTERNAME",
+  "PROCESSOR_ARCHITECTURE",
+  "NUMBER_OF_PROCESSORS",
+  "OS",
 ]);
 
 /**

@@ -34,7 +34,9 @@ export const AllVariants: Story = {
       <Button variant="ghost">Ghost</Button>
       <Button variant="danger">Danger</Button>
       <Button variant="warn">Warn</Button>
-      <Button variant="primary" disabled>Disabled</Button>
+      <Button variant="primary" disabled>
+        Disabled
+      </Button>
     </div>
   ),
 };

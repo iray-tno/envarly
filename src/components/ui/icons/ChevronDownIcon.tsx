@@ -1,5 +1,9 @@
 import type { IconSvgProps } from "./types";
 
 export function ChevronDownIcon(props: IconSvgProps) {
-  return <svg aria-hidden="true" {...props}><path d="m4.5 6.5 3.5 3.5 3.5-3.5" /></svg>;
+  return (
+    <svg aria-hidden="true" {...props}>
+      <path d="m4.5 6.5 3.5 3.5 3.5-3.5" />
+    </svg>
+  );
 }

@@ -31,9 +31,7 @@ export function SegmentedControl<T extends string>({
             "flex items-center gap-1.5 px-4 py-2 rounded text-sm transition-colors",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
             opt.disabled && "opacity-40 cursor-not-allowed",
-            value === opt.value
-              ? "bg-surface text-fg"
-              : "text-muted hover:bg-hover hover:text-fg",
+            value === opt.value ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
           )}
         >
           <input

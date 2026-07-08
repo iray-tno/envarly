@@ -1,14 +1,22 @@
 import { useRef, useState } from "react";
-import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
+import { useI18n } from "../../hooks/useI18n";
 import { resolveSecret } from "../../lib/secrets";
 import type { VarScope } from "../../types";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { Textarea } from "../ui/Textarea";
+import {
+  type ExportFormat,
+  type FlatVar,
+  flattenSnapshot,
+  importFormatOptions,
+  type MergeStrategy,
+  strategyOptions,
+  varKey,
+} from "./types";
 import { SecretBanner, VarTable } from "./VarTable";
-import { type ExportFormat, type FlatVar, type MergeStrategy, flattenSnapshot, importFormatOptions, strategyOptions, varKey } from "./types";
 
 interface ImportTabProps {
   onStage: (
@@ -43,13 +51,20 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
 
   const handleParse = async () => {
     const content = text.trim();
-    if (!content) { onStatus(t("import.no_content")); return; }
+    if (!content) {
+      onStatus(t("import.no_content"));
+      return;
+    }
     setParsing(true);
     onStatus(null);
     try {
       const snap = await api.parseImport(content, format);
       const vars = flattenSnapshot(snap);
-      if (vars.length === 0) { onStatus(t("import.no_vars")); setPreview(null); return; }
+      if (vars.length === 0) {
+        onStatus(t("import.no_vars"));
+        setPreview(null);
+        return;
+      }
       setPreview(vars);
       setChecked(Object.fromEntries(vars.map((v) => [varKey(v), true])));
     } catch (e) {
@@ -63,7 +78,10 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
   const handleApply = async () => {
     if (!preview) return;
     const selected = preview.filter((v) => checked[varKey(v)]);
-    if (selected.length === 0) { onStatus(t("import.no_selected")); return; }
+    if (selected.length === 0) {
+      onStatus(t("import.no_selected"));
+      return;
+    }
     setApplying(true);
     onStatus(null);
     try {
@@ -87,9 +105,10 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
       }
 
       onStage(sets, deletes);
-      const extra = strategy === "replace" && deletes.length > 0
-        ? t("import.result_extra", { count: deletes.length })
-        : "";
+      const extra =
+        strategy === "replace" && deletes.length > 0
+          ? t("import.result_extra", { count: deletes.length })
+          : "";
       onStatus(t("import.result", { count: selected.length, extra }));
       setPreview(null);
       setText("");
@@ -101,7 +120,9 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
   };
 
   const checkedCount = preview ? preview.filter((v) => checked[varKey(v)]).length : 0;
-  const secretCount = preview ? preview.filter((v) => checked[varKey(v)] && resolveSecret(v.name, v.value) !== null).length : 0;
+  const secretCount = preview
+    ? preview.filter((v) => checked[varKey(v)] && resolveSecret(v.name, v.value) !== null).length
+    : 0;
   const noneChecked = checkedCount === 0;
 
   const affectedScopes = preview
@@ -111,21 +132,43 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <Button variant="secondary" onClick={() => fileRef.current?.click()}>{t("import.choose_file")}</Button>
-        <SegmentedControl aria-label="Import format" options={importFormatOptions} value={format} onChange={setFormat} />
-        <input ref={fileRef} type="file" accept=".json,.reg" className="hidden" onChange={handleFileChange} aria-label="Import file" />
+        <Button variant="secondary" onClick={() => fileRef.current?.click()}>
+          {t("import.choose_file")}
+        </Button>
+        <SegmentedControl
+          aria-label="Import format"
+          options={importFormatOptions}
+          value={format}
+          onChange={setFormat}
+        />
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,.reg"
+          className="hidden"
+          onChange={handleFileChange}
+          aria-label="Import file"
+        />
       </div>
 
       <Textarea
         label="File contents"
         labelHidden
         value={text}
-        onChange={(e) => { setText(e.target.value); setPreview(null); }}
+        onChange={(e) => {
+          setText(e.target.value);
+          setPreview(null);
+        }}
         placeholder={t("import.paste_placeholder")}
         rows={5}
       />
 
-      <Button variant="secondary" onClick={handleParse} disabled={parsing || !text.trim()} className="self-start">
+      <Button
+        variant="secondary"
+        onClick={handleParse}
+        disabled={parsing || !text.trim()}
+        className="self-start"
+      >
         {parsing ? t("import.parsing") : t("import.parse")}
       </Button>
 
@@ -137,25 +180,30 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
             vars={preview}
             checked={checked}
             onToggle={(key) => setChecked((prev) => ({ ...prev, [key]: !prev[key] }))}
-            onToggleAll={(val) => setChecked(Object.fromEntries((preview ?? []).map((v) => [varKey(v), val])))}
+            onToggleAll={(val) =>
+              setChecked(Object.fromEntries((preview ?? []).map((v) => [varKey(v), val])))
+            }
           />
 
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium text-muted uppercase tracking-wide">{t("import.merge_strategy")}</span>
-            <SegmentedControl aria-label="Merge strategy" options={strategyOptions} value={strategy} onChange={setStrategy} />
+            <span className="text-xs font-medium text-muted uppercase tracking-wide">
+              {t("import.merge_strategy")}
+            </span>
+            <SegmentedControl
+              aria-label="Merge strategy"
+              options={strategyOptions}
+              value={strategy}
+              onChange={setStrategy}
+            />
             <p className="text-xs text-dim">
-              {strategy === "merge"
-                ? t("import.merge_desc")
-                : t("import.replace_desc")}
+              {strategy === "merge" ? t("import.merge_desc") : t("import.replace_desc")}
             </p>
           </div>
 
           {strategy === "replace" && affectedScopes.length > 0 && (
             <div className="flex gap-2 px-3 py-2 rounded border border-danger/40 bg-danger/10 text-danger text-xs">
               <Icon name="warning" size={14} className="mt-px" />
-              <span>
-                {t("import.replace_warning", { scopes: affectedScopes.join(" and ") })}
-              </span>
+              <span>{t("import.replace_warning", { scopes: affectedScopes.join(" and ") })}</span>
             </div>
           )}
 
@@ -166,9 +214,11 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
             disabled={applying || noneChecked}
             className="self-start"
           >
-            {applying ? t("import.staging") : strategy === "replace"
-              ? t("import.stage_replace", { count: checkedCount })
-              : t("import.stage", { count: checkedCount })}
+            {applying
+              ? t("import.staging")
+              : strategy === "replace"
+                ? t("import.stage_replace", { count: checkedCount })
+                : t("import.stage", { count: checkedCount })}
           </Button>
         </div>
       )}

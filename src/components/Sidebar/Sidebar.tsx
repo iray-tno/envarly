@@ -58,14 +58,18 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
     const byName = (a: EnvVar, b: EnvVar) =>
       a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
     switch (sortBy) {
-      case "name-asc": return arr.sort(byName);
-      case "name-desc": return arr.sort((a, b) => byName(b, a));
-      case "scope": return arr.sort((a, b) => a.scope.localeCompare(b.scope) || byName(a, b));
-      case "staged": return arr.sort((a, b) => {
-        const aS = staged.has(stagedKey(a.name, a.scope)) ? 0 : 1;
-        const bS = staged.has(stagedKey(b.name, b.scope)) ? 0 : 1;
-        return aS - bS || byName(a, b);
-      });
+      case "name-asc":
+        return arr.sort(byName);
+      case "name-desc":
+        return arr.sort((a, b) => byName(b, a));
+      case "scope":
+        return arr.sort((a, b) => a.scope.localeCompare(b.scope) || byName(a, b));
+      case "staged":
+        return arr.sort((a, b) => {
+          const aS = staged.has(stagedKey(a.name, a.scope)) ? 0 : 1;
+          const bS = staged.has(stagedKey(b.name, b.scope)) ? 0 : 1;
+          return aS - bS || byName(a, b);
+        });
     }
   }, [filtered, sortBy, staged]);
 
@@ -171,9 +175,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         className="flex-1 overflow-y-auto py-1"
         onKeyDown={handleKeyDown}
       >
-        {loading && (
-          <p className="text-center text-dim text-sm py-8">{t("sidebar.loading")}</p>
-        )}
+        {loading && <p className="text-center text-dim text-sm py-8">{t("sidebar.loading")}</p>}
         {!loading && sorted.length === 0 && (
           <p className="text-center text-dim text-sm py-8">{t("sidebar.empty")}</p>
         )}
@@ -197,14 +199,15 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
               tabIndex={-1}
               onClick={() => onSelect(v)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(v); }
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(v);
+                }
               }}
               className={cn(
                 "group flex items-center mx-2 w-[calc(100%-1rem)] gap-2 px-4 py-2.5 rounded text-left transition-colors cursor-pointer",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
-                isSelected
-                  ? "bg-surface text-fg"
-                  : "text-muted hover:bg-hover hover:text-fg",
+                isSelected ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
                 isDelete && "opacity-50",
               )}
             >
@@ -219,18 +222,17 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
                   {secret.service}
                 </span>
               )}
-              {isDelete && (
-                <span className="text-[9px] font-bold text-danger shrink-0">D</span>
-              )}
-              {isNew && (
-                <span className="text-[9px] font-bold text-success shrink-0">A</span>
-              )}
+              {isDelete && <span className="text-[9px] font-bold text-danger shrink-0">D</span>}
+              {isNew && <span className="text-[9px] font-bold text-success shrink-0">A</span>}
               {isSet && !isNew && (
                 <span className="text-[9px] font-bold text-warn shrink-0">M</span>
               )}
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); handleCopy(v.value, key); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(v.value, key);
+                }}
                 aria-label={`Copy value of ${v.name}`}
                 title="Copy value"
                 className={cn(
@@ -244,9 +246,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
               <span
                 className={cn(
                   "text-[10px] font-semibold w-4 h-4 rounded flex items-center justify-center shrink-0",
-                  v.scope === "User"
-                    ? "bg-accent/15 text-accent"
-                    : "bg-violet/15 text-violet",
+                  v.scope === "User" ? "bg-accent/15 text-accent" : "bg-violet/15 text-violet",
                 )}
               >
                 {v.scope[0]}
