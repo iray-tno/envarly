@@ -7,6 +7,7 @@ import { resolveSecret } from "../../lib/secrets";
 import type { EnvVar, VarScope } from "../../types";
 import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
+import { Select } from "../ui/Select";
 import { TextInput } from "../ui/TextInput";
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 
 const SCOPES = ["All", "User", "System"] as const;
 type ScopeFilter = (typeof SCOPES)[number];
+type SortOrder = "name-asc" | "name-desc" | "scope" | "staged";
 
 export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged }: Props) {
   const { t } = useI18n();
@@ -38,7 +40,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
     });
   };
 
-  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "scope" | "staged">("name-asc");
+  const [sortBy, setSortBy] = useState<SortOrder>("name-asc");
 
   const filtered = useMemo(
     () =>
@@ -78,6 +80,12 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
     label: s,
     count: s === "All" ? vars.length : counts[s as VarScope],
   }));
+  const sortOptions = [
+    { value: "name-asc", label: t("sidebar.sort_name_asc") },
+    { value: "name-desc", label: t("sidebar.sort_name_desc") },
+    { value: "scope", label: t("sidebar.sort_scope") },
+    { value: "staged", label: t("sidebar.sort_staged") },
+  ] satisfies Array<{ value: SortOrder; label: string }>;
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -148,17 +156,13 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         ) : (
           <span />
         )}
-        <select
+        <Select
           aria-label="Sort order"
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-          className="text-[10px] text-dim bg-transparent cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent rounded"
-        >
-          <option value="name-asc">{t("sidebar.sort_name_asc")}</option>
-          <option value="name-desc">{t("sidebar.sort_name_desc")}</option>
-          <option value="scope">{t("sidebar.sort_scope")}</option>
-          <option value="staged">{t("sidebar.sort_staged")}</option>
-        </select>
+          onValueChange={setSortBy}
+          options={sortOptions}
+          className="text-[10px]"
+        />
       </div>
 
       <div

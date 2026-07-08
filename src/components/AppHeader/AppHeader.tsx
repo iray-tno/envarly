@@ -3,6 +3,7 @@ import { useI18n } from "../../hooks/useI18n";
 import { api } from "../../api";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
+import { Select } from "../ui/Select";
 
 interface AppHeaderProps {
   loading: boolean;
@@ -27,6 +28,10 @@ export function AppHeader({
   onToggleSnapshots, onToggleTheme, onLicenses,
 }: AppHeaderProps) {
   const { t, language, setLanguage } = useI18n();
+  const languageOptions = [
+    { value: "en", label: "English" },
+    { value: "ja", label: "日本語" },
+  ] as const;
 
   return (
     <header
@@ -102,17 +107,16 @@ export function AppHeader({
         >
           GitHub
         </Button>
-        <label className="flex items-center gap-1 text-xs text-dim cursor-pointer">
+        <div className="flex items-center gap-1 text-xs text-dim">
           <Icon name="globe" size={14} className="text-dim" />
-          <select
+          <Select
+            aria-label="Language"
             value={language}
-            onChange={(e) => setLanguage(e.target.value as "en" | "ja")}
-            className="bg-transparent text-xs text-dim cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent rounded"
-          >
-            <option value="en">English</option>
-            <option value="ja">日本語</option>
-          </select>
-        </label>
+            onValueChange={setLanguage}
+            options={languageOptions}
+            className="text-xs"
+          />
+        </div>
         <Button
           variant="ghost"
           size="xs"

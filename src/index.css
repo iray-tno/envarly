@@ -68,7 +68,7 @@
     outline: none;
   }
 
-  input, textarea {
+  input, textarea, select {
     font-family: inherit;
     font-size: 13px;
     outline: none;
@@ -78,4 +78,16 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--color-rim); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--color-dim); }
+}
+
+@layer components {
+  .app-select option {
+    background: var(--color-surface);
+    color: var(--color-fg);
+  }
+
+  .app-select option:checked {
+    background: var(--color-hover);
+    color: var(--color-fg);
+  }
 }
