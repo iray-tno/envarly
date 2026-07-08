@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { open } from "@tauri-apps/plugin-dialog";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../../api";
@@ -11,6 +12,10 @@ vi.mock("../../api", () => ({
   },
 }));
 
+vi.mock("@tauri-apps/plugin-dialog", () => ({
+  open: vi.fn(),
+}));
+
 const A = "/usr/local/bin";
 const B = "/nonexistent/path";
 const C = "/usr/bin";
@@ -20,6 +25,7 @@ describe("PathEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(api.validatePaths).mockResolvedValue([true, false, true]);
+    vi.mocked(open).mockResolvedValue(null);
   });
 
   it("renders each path entry", () => {
@@ -71,6 +77,56 @@ describe("PathEditor", () => {
     const removeButtons = await screen.findAllByRole("button", { name: /^remove/i });
     await user.click(removeButtons[0]);
     expect(onChange).toHaveBeenCalledWith(C);
+  });
+
+  it("updates an entry with the selected folder path", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    vi.mocked(api.validatePaths).mockResolvedValue([true, true]);
+    vi.mocked(open).mockResolvedValue("/selected/bin");
+    render(<PathEditor rawValue={`${A};${C}`} onChange={onChange} />);
+
+    await user.click(screen.getByRole("button", { name: `Browse folder for ${A}` }));
+
+    expect(open).toHaveBeenCalledWith({
+      directory: true,
+      multiple: false,
+      defaultPath: A,
+    });
+    expect(onChange).toHaveBeenCalledWith(`/selected/bin;${C}`);
+  });
+
+  it("can hide folder picker buttons for non-folder path lists", () => {
+    render(<PathEditor rawValue=".COM;.EXE;.BAT" onChange={vi.fn()} allowFolderBrowse={false} />);
+
+    expect(screen.queryByRole("button", { name: /browse folder for/i })).not.toBeInTheDocument();
+  });
+
+  it("prevents row edits and controls when read-only", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<PathEditor rawValue={`${A};${C}`} onChange={onChange} readOnly />);
+
+    await user.type(screen.getByDisplayValue(A), "-edited");
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /^remove/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /browse folder for/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /add/i })).not.toBeInTheDocument();
+  });
+
+  it("moves focus between entries with arrow keys", () => {
+    vi.mocked(api.validatePaths).mockResolvedValue([true, true]);
+    render(<PathEditor rawValue={`${A};${C}`} onChange={vi.fn()} />);
+
+    const first = screen.getByDisplayValue(A);
+    const second = screen.getByDisplayValue(C);
+    first.focus();
+    fireEvent.keyDown(first, { key: "ArrowDown" });
+    expect(second).toHaveFocus();
+
+    fireEvent.keyDown(second, { key: "ArrowUp" });
+    expect(first).toHaveFocus();
   });
 
   it("shows unresolvable reference warning when allVars is provided and a %VAR% is unknown", () => {

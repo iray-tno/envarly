@@ -31,6 +31,13 @@ const pathVar: EnvVar = {
   listSeparator: ";",
 };
 
+const pathExtVar: EnvVar = {
+  name: "PATHEXT",
+  value: ".COM;.EXE;.BAT",
+  scope: "User",
+  listSeparator: ";",
+};
+
 describe("DetailPanel", () => {
   const onStage = vi.fn();
   const onStageDelete = vi.fn();
@@ -119,7 +126,24 @@ describe("DetailPanel", () => {
   it("shows PATH editor for path-like variable", () => {
     render_(pathVar);
     expect(screen.getByText(/drag to reorder/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /browse for folder/i })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /browse folder for/i })).toHaveLength(2);
+  });
+
+  it("does not show folder picker buttons for PATHEXT entries", () => {
+    render_(pathExtVar);
+    expect(screen.getByText(/drag to reorder/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /browse folder for/i })).not.toBeInTheDocument();
+  });
+
+  it("switches a list variable back to plain text editing", async () => {
+    const user = userEvent.setup();
+    render_(pathVar);
+
+    expect(screen.getByText(/drag to reorder/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /plain text/i }));
+
+    expect(screen.getByRole("textbox", { name: /value/i })).toHaveValue(pathVar.value);
+    expect(screen.queryByText(/drag to reorder/i)).not.toBeInTheDocument();
   });
 
   it("shows Delete button when not dirty and not staged", () => {

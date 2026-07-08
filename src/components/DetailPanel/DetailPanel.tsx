@@ -79,7 +79,7 @@ export function DetailPanel({
   onRegisterLocalUndo,
 }: Props) {
   const { t } = useI18n();
-  const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | null>(null);
+  const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | "plain" | null>(null);
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
   const variableName = variable?.name;
   const variableScope = variable?.scope;
@@ -180,7 +180,9 @@ export function DetailPanel({
     }
   };
 
-  const effectiveSeparator = overrideSeparator ?? variable.listSeparator;
+  const effectiveSeparator = overrideSeparator === "plain"
+    ? null
+    : (overrideSeparator ?? variable.listSeparator);
   const readOnly = variable.scope === "System" && !elevated;
   const showFolderPicker =
     !readOnly && effectiveSeparator === null && looksLikeSinglePath(variable.name, value);
@@ -256,9 +258,9 @@ export function DetailPanel({
       </div>
 
       {description && (
-        <div className="flex items-start gap-2.5 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
-          <Icon name="info" size={14} className="mt-px text-dim" />
-          <div className="flex items-baseline gap-2 flex-wrap">
+        <div className="flex items-center gap-2.5 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
+          <Icon name="info" size={14} className="text-dim" />
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-surface border border-rim text-dim shrink-0 select-none">
               {t(description.categoryKey)}
             </span>
@@ -305,7 +307,7 @@ export function DetailPanel({
               {effectiveSeparator !== null ? (
                 <button
                   type="button"
-                  onClick={() => setOverrideSeparator(null)}
+                  onClick={() => setOverrideSeparator("plain")}
                   className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
                 >
                   {t("detail.plain_text")}
@@ -338,6 +340,7 @@ export function DetailPanel({
               readOnly={readOnly}
               allVars={allVars}
               skipPathValidation={variable.name.toUpperCase() === "PATHEXT"}
+              allowFolderBrowse={variable.name.toUpperCase() !== "PATHEXT"}
               onBeforeReorder={onBeforeStructuralChange}
             />
           ) : effectiveSeparator === "," ? (
