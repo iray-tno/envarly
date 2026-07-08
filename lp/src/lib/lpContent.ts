@@ -2,7 +2,7 @@ export const GITHUB_URL = 'https://github.com/iray-tno/envarly';
 export const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest';
 export const STORYBOOK_URL = '/envarly/storybook/';
 export const REPORTS_URL = '/envarly/reports/';
-export const VERSION = '1.1.0';
+export const VERSION = '1.2.0';
 
 export type LandingCopy = {
   lang: 'en' | 'ja';
@@ -55,8 +55,8 @@ export type LandingCopy = {
 export const enCopy: LandingCopy = {
   lang: 'en',
   title: 'Envarly — Windows Environment Variable Manager',
-  description: 'Windows environment variable manager — edit PATH, detect secrets, and preview changes before applying. Free & open source on Windows 10 and 11.',
-  ogDescription: 'Windows environment variable manager — edit PATH, detect secrets, and preview changes before applying. Free & open source.',
+  description: 'Windows environment variable manager — edit PATH with folder pickers, detect secrets, and preview changes before applying. Free & open source on Windows 10 and 11.',
+  ogDescription: 'Windows environment variable manager — edit PATH with folder pickers, detect secrets, and preview changes before applying. Free & open source.',
   canonicalPath: '/envarly/',
   alternatePath: '/envarly/ja/',
   alternateLabel: '日本語',
@@ -68,7 +68,7 @@ export const enCopy: LandingCopy = {
   },
   hero: {
     eyebrow: `Windows Environment Variable Manager · v${VERSION}`,
-    lead: 'Edit, audit, and protect your Windows environment variables. Preview every change before applying — never break your PATH again.',
+    lead: 'Edit, audit, and protect your Windows environment variables. Preview every change before applying, clean up PATH entries with folder pickers, and keep registry writes intentional.',
     download: `Download v${VERSION} for Windows`,
     github: 'View on GitHub →',
   },
@@ -83,8 +83,8 @@ export const enCopy: LandingCopy = {
   features: [
     {
       icon: '⠿',
-      title: 'Drag-and-drop list editor',
-      desc: 'Reorder PATH, PATHEXT, NO_PROXY and any semicolon- or comma-separated variable. Auto-detects separator from the variable name.',
+      title: 'Practical PATH editor',
+      desc: 'Reorder PATH entries, switch between list and plain text, move through rows with the keyboard, and choose folders without leaving the editor.',
     },
     {
       icon: '✓',
@@ -93,8 +93,8 @@ export const enCopy: LandingCopy = {
     },
     {
       icon: '⚠',
-      title: '%VAR% reference lint',
-      desc: 'Warns on unresolvable %VAR% references in path entries. Evaluated on focus-out; skips Windows built-in volatile vars.',
+      title: 'Environment guidance',
+      desc: 'Shows short descriptions for well-known variables and warns on unresolvable %VAR% references in path entries.',
     },
     {
       icon: '↩',
@@ -108,8 +108,8 @@ export const enCopy: LandingCopy = {
     },
     {
       icon: '📸',
-      title: 'Snapshots & time-travel',
-      desc: 'Save named snapshots of your full environment, encrypted with DPAPI. Restore to any previous state in two clicks.',
+      title: 'Snapshots & demo mode',
+      desc: 'Save named snapshots of your full environment, encrypted with DPAPI. Demo mode opens realistic sample data for screenshots and walkthroughs without touching your registry.',
     },
     {
       icon: '⇄',
@@ -119,7 +119,7 @@ export const enCopy: LandingCopy = {
     {
       icon: '⇅',
       title: 'Import / Export',
-      desc: 'Read and write .json and .reg formats. Preview before any write. Merge or Replace strategy on import. Registry is never touched until you click Apply.',
+      desc: 'Read and write .json and .reg formats, plus export to PowerShell, DSC, and Ansible-friendly files. Preview before any write.',
     },
   ],
   audience: {
@@ -143,8 +143,8 @@ export const enCopy: LandingCopy = {
 export const jaCopy: LandingCopy = {
   lang: 'ja',
   title: 'Envarly — Windows 環境変数マネージャー',
-  description: 'Windows の環境変数を安全に編集できるマネージャー。PATH 編集、シークレット検出、変更前プレビューに対応。Windows 10 / 11 向けの無料オープンソースアプリです。',
-  ogDescription: 'Windows の環境変数を安全に編集。PATH 編集、シークレット検出、変更前プレビューに対応した無料オープンソースアプリ。',
+  description: 'Windows の環境変数を安全に編集できるマネージャー。フォルダ選択付きの PATH 編集、シークレット検出、変更前プレビューに対応。Windows 10 / 11 向けの無料オープンソースアプリです。',
+  ogDescription: 'Windows の環境変数を安全に編集。フォルダ選択付きの PATH 編集、シークレット検出、変更前プレビューに対応した無料オープンソースアプリ。',
   canonicalPath: '/envarly/ja/',
   alternatePath: '/envarly/',
   alternateLabel: 'English',
@@ -156,7 +156,7 @@ export const jaCopy: LandingCopy = {
   },
   hero: {
     eyebrow: `Windows 環境変数マネージャー · v${VERSION}`,
-    lead: 'Windows の環境変数を、編集・確認・保護。適用前にすべての変更をプレビューできるので、PATH を壊す前に気づけます。',
+    lead: 'Windows の環境変数を、編集・確認・保護。適用前にすべての変更をプレビューし、フォルダ選択付きの PATH 編集で、レジストリへの書き込みを意図したものにできます。',
     download: `Windows 版 v${VERSION} をダウンロード`,
     github: 'GitHub で見る →',
   },
@@ -171,8 +171,8 @@ export const jaCopy: LandingCopy = {
   features: [
     {
       icon: '⠿',
-      title: 'ドラッグ＆ドロップのリスト編集',
-      desc: 'PATH、PATHEXT、NO_PROXY など、セミコロン区切り・カンマ区切りの変数を並べ替え。変数名から区切り文字を自動判定します。',
+      title: '実用的な PATH エディター',
+      desc: 'PATH エントリの並べ替え、リスト表示とプレーンテキストの切り替え、キーボードでの行移動、フォルダ選択に対応しています。',
     },
     {
       icon: '✓',
@@ -181,8 +181,8 @@ export const jaCopy: LandingCopy = {
     },
     {
       icon: '⚠',
-      title: '%VAR% 参照の lint',
-      desc: 'パス内の解決できない %VAR% 参照を警告。フォーカスアウト時に評価し、Windows 組み込みの揮発変数は除外します。',
+      title: '環境変数の説明とガイド',
+      desc: 'よく使われる環境変数には短い説明を表示し、パス内の解決できない %VAR% 参照も警告します。',
     },
     {
       icon: '↩',
@@ -196,8 +196,8 @@ export const jaCopy: LandingCopy = {
     },
     {
       icon: '📸',
-      title: 'スナップショットと復元',
-      desc: '環境変数全体の名前付きスナップショットを DPAPI で暗号化して保存。過去の状態へ数クリックで戻せます。',
+      title: 'スナップショットとデモモード',
+      desc: '環境変数全体の名前付きスナップショットを DPAPI で暗号化して保存。デモモードでは、実際のレジストリに触れずにサンプルデータで動作を確認できます。',
     },
     {
       icon: '⇄',
@@ -207,7 +207,7 @@ export const jaCopy: LandingCopy = {
     {
       icon: '⇅',
       title: 'インポート / エクスポート',
-      desc: '.json と .reg 形式の読み書きに対応。書き込み前にプレビューし、Merge / Replace 戦略を選べます。Apply を押すまでレジストリは変更されません。',
+      desc: '.json と .reg 形式の読み書きに加えて、PowerShell、DSC、Ansible 向けの形式へエクスポートできます。書き込み前にプレビューできます。',
     },
   ],
   audience: {
