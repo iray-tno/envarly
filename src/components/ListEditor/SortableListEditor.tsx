@@ -340,27 +340,31 @@ export function SortableListEditor({
 
       {!readOnly && (
         <div className="flex gap-2">
-          <input
-            aria-label="New entry"
-            className={cn(
-              "flex-1 px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
-              "placeholder:text-muted transition-colors",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",
-            )}
-            placeholder={addPlaceholder}
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addEntry(newValue)}
-            onPaste={handlePaste}
-          />
-          {onBrowseNewEntry && (
-            <IconButton
-              icon="folder"
-              aria-label="Browse folder to add"
-              title="Browse folder to add"
-              onClick={() => void browseNewEntry()}
+          <div className="relative flex-1">
+            <input
+              aria-label="New entry"
+              className={cn(
+                "w-full px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
+                onBrowseNewEntry && "pr-9",
+                "placeholder:text-muted transition-colors",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",
+              )}
+              placeholder={addPlaceholder}
+              value={newValue}
+              onChange={(e) => setNewValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addEntry(newValue)}
+              onPaste={handlePaste}
             />
-          )}
+            {onBrowseNewEntry && (
+              <IconButton
+                icon="folder"
+                aria-label="Browse folder to add"
+                title="Browse folder to add"
+                onClick={() => void browseNewEntry()}
+                className="absolute right-1 top-1/2 -translate-y-1/2 size-6"
+              />
+            )}
+          </div>
           <Button variant="primary" icon="plus" onClick={() => addEntry(newValue)}>
             Add
           </Button>
