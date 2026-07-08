@@ -169,6 +169,7 @@ interface Props {
   /** Called before structural changes (drag, remove, add) so callers can snapshot state. */
   onBeforeChange?: () => void;
   onBrowseEntry?: (entry: ListEntry) => Promise<string | null>;
+  onBrowseNewEntry?: (currentValue: string) => Promise<string | null>;
   readOnly?: boolean;
   addPlaceholder?: string;
 }
@@ -179,6 +180,7 @@ export function SortableListEditor({
   onEntriesChange,
   onBeforeChange,
   onBrowseEntry,
+  onBrowseNewEntry,
   readOnly = false,
   addPlaceholder = "Add entry…",
 }: Props) {
@@ -246,6 +248,14 @@ export function SortableListEditor({
     const selected = await onBrowseEntry(entry);
     if (selected === null) return;
     editEntry(entry.id, selected);
+  };
+
+  const browseNewEntry = async () => {
+    if (readOnly) return;
+    if (!onBrowseNewEntry) return;
+    const selected = await onBrowseNewEntry(newValue);
+    if (selected === null) return;
+    addEntry(selected);
   };
 
   const focusEntry = (index: number) => {
@@ -343,6 +353,14 @@ export function SortableListEditor({
             onKeyDown={(e) => e.key === "Enter" && addEntry(newValue)}
             onPaste={handlePaste}
           />
+          {onBrowseNewEntry && (
+            <IconButton
+              icon="folder"
+              aria-label="Browse folder to add"
+              title="Browse folder to add"
+              onClick={() => void browseNewEntry()}
+            />
+          )}
           <Button variant="primary" icon="plus" onClick={() => addEntry(newValue)}>
             Add
           </Button>
