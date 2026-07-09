@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { AppHeader } from "./components/AppHeader/AppHeader";
 import { AppModals } from "./components/AppModals/AppModals";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
+import { DiagnosticsPanel } from "./components/DiagnosticsPanel/DiagnosticsPanel";
 import { PathBanner } from "./components/PathBanner/PathBanner";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
@@ -10,6 +11,7 @@ import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
 import { useAppInit } from "./hooks/useAppInit";
 import { useApplyStaged } from "./hooks/useApplyStaged";
+import { useDiagnostics } from "./hooks/useDiagnostics";
 import { useDiff } from "./hooks/useDiff";
 import { useEnvVars } from "./hooks/useEnvVars";
 import { useI18n } from "./hooks/useI18n";
@@ -19,6 +21,7 @@ import { usePathStatus } from "./hooks/usePathStatus";
 import { useStaged } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
+import type { DiagnosticAction, EnvironmentDiagnostic } from "./lib/environmentDiagnostics";
 import { stagedToDiff } from "./lib/stagedToDiff";
 import type { EnvVar } from "./types";
 
@@ -32,6 +35,7 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+  const diagnostics = useDiagnostics(vars);
 
   const {
     staged,
@@ -117,6 +121,19 @@ export default function App() {
 
   const stagedDiff = useMemo(() => stagedToDiff(staged), [staged]);
 
+  const handleDiagnosticAction = (diagnostic: EnvironmentDiagnostic, action: DiagnosticAction) => {
+    const variable = vars.find(
+      (item) => item.name === diagnostic.name && item.scope === diagnostic.scope,
+    );
+    if (action.kind === "delete") {
+      handleStageDelete(diagnostic.name, diagnostic.scope);
+    } else if (action.kind === "set-value") {
+      handleStage(diagnostic.name, diagnostic.scope, action.value);
+    } else if (variable) {
+      handleStage(variable.name, variable.scope, variable.value, action.valueKind);
+    }
+  };
+
   return (
     <ThemeContext.Provider value={theme}>
       <div className="flex flex-col h-screen overflow-hidden">
@@ -144,6 +161,12 @@ export default function App() {
             onDismiss={handleDismissPathBanner}
           />
         )}
+
+        <DiagnosticsPanel
+          diagnostics={diagnostics}
+          elevated={elevated}
+          onStageAction={handleDiagnosticAction}
+        />
 
         {error && (
           <div className="px-4 py-2 bg-danger/15 border-b border-danger text-danger text-sm shrink-0">
