@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
 import type { StagedChange } from "../../hooks/useStaged";
 import { DetailPanel } from "./DetailPanel";
 
@@ -12,7 +13,9 @@ const stagedSet = new Map<string, StagedChange>([
       name: "JAVA_HOME",
       scope: "User",
       originalValue: "C:\\Program Files\\Java\\jdk-17",
+      originalValueKind: "String",
       newValue: "C:\\Program Files\\Java\\jdk-21",
+      newValueKind: "String",
     },
   ],
 ]);
@@ -25,6 +28,7 @@ const stagedDelete = new Map<string, StagedChange>([
       name: "JAVA_HOME",
       scope: "User",
       originalValue: "C:\\Program Files\\Java\\jdk-21",
+      originalValueKind: "String",
       newValue: null,
     },
   ],
@@ -43,9 +47,15 @@ const meta: Meta<typeof DetailPanel> = {
   ],
   args: {
     staged: noStaged,
-    onStage: () => {},
-    onStageDelete: () => {},
-    onUnstage: () => {},
+    allVars: [],
+    elevated: false,
+    userPathInEnv: true,
+    systemPathInEnv: true,
+    onStage: fn(),
+    onStageDelete: fn(),
+    onUnstage: fn(),
+    onStageAddToPath: fn(),
+    onRegisterLocalUndo: fn(),
   },
 };
 
@@ -62,6 +72,7 @@ export const SimpleVariable: Story = {
       name: "JAVA_HOME",
       value: "C:\\Program Files\\Java\\jdk-21",
       scope: "User",
+      valueKind: "String",
       listSeparator: null,
     },
   },
@@ -78,6 +89,7 @@ export const PathVariable: Story = {
         "C:\\Users\\dev\\.cargo\\bin",
       ].join(";"),
       scope: "User",
+      valueKind: "ExpandString",
       listSeparator: ";",
     },
   },

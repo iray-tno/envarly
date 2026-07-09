@@ -201,6 +201,7 @@ describe("useStagingHandlers", () => {
         name: "NEW_VAR",
         scope: "User",
         value: "value",
+        valueKind: "String",
         listSeparator: null,
       });
       expect(params.setDialog).toHaveBeenCalledWith(null);

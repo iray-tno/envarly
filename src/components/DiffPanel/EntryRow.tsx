@@ -2,6 +2,7 @@ import { useState } from "react";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
+import { registryKindLabel } from "../../lib/envValueKind";
 import { Icon } from "../ui/Icon";
 
 const KIND_LABEL: Record<DiffEntry["kind"], string> = {
@@ -91,6 +92,11 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
 
       {!showExpand && (
         <div className="px-3 pb-2 flex flex-col gap-1">
+          {entry.kind === "changed" && entry.oldValueKind !== entry.newValueKind && (
+            <p className="font-mono text-[10px] text-muted">
+              {registryKindLabel(entry.oldValueKind)} → {registryKindLabel(entry.newValueKind)}
+            </p>
+          )}
           {(entry.kind === "removed" || entry.kind === "changed") && (
             <p className="font-mono text-[11px] text-danger line-through opacity-70 truncate">
               {displayOld}

@@ -4,9 +4,27 @@ import type { EnvVar } from "../types";
 import { stagedKey, useStaged } from "./useStaged";
 
 const vars: EnvVar[] = [
-  { name: "PATH", scope: "User", value: "C:\\bin", listSeparator: ";" },
-  { name: "JAVA_HOME", scope: "User", value: "C:\\jdk21", listSeparator: null },
-  { name: "WINDIR", scope: "System", value: "C:\\Windows", listSeparator: null },
+  {
+    name: "PATH",
+    scope: "User",
+    value: "C:\\bin",
+    valueKind: "ExpandString",
+    listSeparator: ";",
+  },
+  {
+    name: "JAVA_HOME",
+    scope: "User",
+    value: "C:\\jdk21",
+    valueKind: "String",
+    listSeparator: null,
+  },
+  {
+    name: "WINDIR",
+    scope: "System",
+    value: "C:\\Windows",
+    valueKind: "String",
+    listSeparator: null,
+  },
 ];
 
 describe("stagedKey", () => {
@@ -31,6 +49,23 @@ describe("useStaged — stageSet", () => {
     expect(change?.kind).toBe("set");
     expect(change?.originalValue).toBe("C:\\jdk21");
     expect(change?.newValue).toBe("C:\\jdk22");
+    expect(change?.newValueKind).toBe("String");
+  });
+
+  it("preserves the current type when Auto is selected", () => {
+    const { result } = renderHook(() => useStaged(vars));
+    act(() => {
+      result.current.stageSet("PATH", "User", "%USERPROFILE%\\tools");
+    });
+    expect(result.current.staged.get("User:PATH")?.newValueKind).toBe("ExpandString");
+  });
+
+  it("allows an explicit type-only change", () => {
+    const { result } = renderHook(() => useStaged(vars));
+    act(() => {
+      result.current.stageSet("JAVA_HOME", "User", "C:\\jdk21", "ExpandString");
+    });
+    expect(result.current.staged.get("User:JAVA_HOME")?.newValueKind).toBe("ExpandString");
   });
 
   it("removes the entry when new value matches the original (auto-unstage)", () => {
@@ -155,8 +190,8 @@ describe("useStaged — stageImport", () => {
     const { result } = renderHook(() => useStaged(vars));
     act(() => {
       result.current.stageImport([
-        { name: "JAVA_HOME", scope: "User", value: "C:\\jdk22" },
-        { name: "NEW_VAR", scope: "User", value: "new" },
+        { name: "JAVA_HOME", scope: "User", value: "C:\\jdk22", valueKind: "String" },
+        { name: "NEW_VAR", scope: "User", value: "new", valueKind: "String" },
       ]);
     });
     expect(result.current.staged.size).toBe(2);
@@ -168,7 +203,7 @@ describe("useStaged — stageImport", () => {
     const { result } = renderHook(() => useStaged(vars));
     act(() => {
       result.current.stageImport([
-        { name: "JAVA_HOME", scope: "User", value: "C:\\jdk21" }, // same as registry
+        { name: "JAVA_HOME", scope: "User", value: "C:\\jdk21", valueKind: "String" },
       ]);
     });
     expect(result.current.staged.size).toBe(0);
@@ -178,7 +213,7 @@ describe("useStaged — stageImport", () => {
     const { result } = renderHook(() => useStaged(vars));
     act(() => {
       result.current.stageImport(
-        [{ name: "JAVA_HOME", scope: "User", value: "C:\\jdk22" }],
+        [{ name: "JAVA_HOME", scope: "User", value: "C:\\jdk22", valueKind: "String" }],
         [{ name: "WINDIR", scope: "System" }],
       );
     });

@@ -7,14 +7,35 @@ import { ImportExportPanel } from "./ImportExportPanel";
 vi.mock("../../api");
 
 const MOCK_SNAPSHOT = {
-  user: { JAVA_HOME: "C:\\jdk21", MY_VAR: "hello" },
-  system: { WINDIR: "C:\\Windows" },
+  user: {
+    JAVA_HOME: { value: "C:\\jdk21", kind: "String" as const },
+    MY_VAR: { value: "hello", kind: "String" as const },
+  },
+  system: { WINDIR: { value: "C:\\Windows", kind: "String" as const } },
 };
 
 const MOCK_VARS = [
-  { name: "JAVA_HOME", value: "C:\\jdk21", scope: "User", listSeparator: null },
-  { name: "MY_VAR", value: "hello", scope: "User", listSeparator: null },
-  { name: "WINDIR", value: "C:\\Windows", scope: "System", listSeparator: null },
+  {
+    name: "JAVA_HOME",
+    value: "C:\\jdk21",
+    valueKind: "String",
+    scope: "User",
+    listSeparator: null,
+  },
+  {
+    name: "MY_VAR",
+    value: "hello",
+    valueKind: "String",
+    scope: "User",
+    listSeparator: null,
+  },
+  {
+    name: "WINDIR",
+    value: "C:\\Windows",
+    valueKind: "String",
+    scope: "System",
+    listSeparator: null,
+  },
 ];
 
 beforeEach(() => {

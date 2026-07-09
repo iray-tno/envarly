@@ -43,8 +43,10 @@ export function useDiff(refresh: () => Promise<void>, setDialog: SetDialog): Use
         for (const entry of reverted) {
           const scope = entry.scope as VarScope;
           if (entry.kind === "added") await api.deleteEnvVar(entry.name, scope);
-          else if (entry.kind === "removed") await api.setEnvVar(entry.name, entry.value, scope);
-          else await api.setEnvVar(entry.name, entry.oldValue, scope);
+          else if (entry.kind === "removed" && entry.valueKind)
+            await api.setEnvVar(entry.name, entry.value, entry.valueKind, scope);
+          else if (entry.kind === "changed" && entry.oldValueKind)
+            await api.setEnvVar(entry.name, entry.oldValue, entry.oldValueKind, scope);
         }
         if (baselineRef.current) baselineRef.current = applyAccepted(baselineRef.current, accepted);
         setDiffEntries([]);

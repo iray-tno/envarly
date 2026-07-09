@@ -1,14 +1,16 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
-import type { EnvVar, VarScope } from "../../types";
+import { inferEnvValueKind } from "../../lib/envValueKind";
+import type { EnvValueKindSelection, EnvVar, VarScope } from "../../types";
 import { Button } from "../ui/Button";
 import { SegmentedControl } from "../ui/SegmentedControl";
+import { Select } from "../ui/Select";
 
 interface NewVarModalProps {
   vars: EnvVar[];
   elevated: boolean;
-  onStage: (name: string, scope: VarScope, value: string) => void;
+  onStage: (name: string, scope: VarScope, value: string, valueKind: EnvValueKindSelection) => void;
   onClose: () => void;
 }
 
@@ -17,6 +19,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
   const [name, setName] = useState("");
   const [scope, setScope] = useState<VarScope>("User");
   const [value, setValue] = useState("");
+  const [valueKind, setValueKind] = useState<EnvValueKindSelection>("Auto");
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const trimmedName = name.trim();
@@ -32,7 +35,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    onStage(trimmedName, scope, value);
+    onStage(trimmedName, scope, value, valueKind);
   };
 
   return (
@@ -61,6 +64,33 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
         {alreadyExists && (
           <p className="text-xs text-danger">{t("new_var.exists", { name: trimmedName, scope })}</p>
         )}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          className="text-xs font-semibold text-muted uppercase tracking-wide"
+          htmlFor="newvar-value-kind"
+        >
+          {t("new_var.value_kind")}
+        </label>
+        <Select
+          id="newvar-value-kind"
+          options={[
+            {
+              value: "Auto",
+              label: t("value_kind.auto_current", {
+                kind: t(
+                  `value_kind.${inferEnvValueKind(value) === "String" ? "string" : "expand_string"}`,
+                ),
+              }),
+            },
+            { value: "String", label: t("value_kind.string") },
+            { value: "ExpandString", label: t("value_kind.expand_string") },
+          ]}
+          value={valueKind}
+          onValueChange={setValueKind}
+          className="w-full px-2.5 py-1.5 bg-surface border border-rim text-sm text-fg"
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">

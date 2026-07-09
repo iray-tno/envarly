@@ -14,13 +14,23 @@ vi.mock("../../api", () => ({
   },
 }));
 
-const CURRENT: EnvSnapshot = { user: { PATH: "C:\\current" }, system: {} };
+const CURRENT: EnvSnapshot = {
+  user: { PATH: { value: "C:\\current", kind: "ExpandString" } },
+  system: {},
+};
 
 const MOCK_SNAPSHOT: SnapshotMeta = {
+  version: 2,
   id: "20240101T120000Z",
   createdAt: "2024-01-01T12:00:00Z",
   label: "Before Node update",
-  snapshot: { user: { PATH: "C:\\old", JAVA_HOME: "C:\\jdk21" }, system: {} },
+  snapshot: {
+    user: {
+      PATH: { value: "C:\\old", kind: "ExpandString" },
+      JAVA_HOME: { value: "C:\\jdk21", kind: "String" },
+    },
+    system: {},
+  },
 };
 
 describe("SnapshotPanel", () => {

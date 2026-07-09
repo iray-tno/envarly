@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
 import { NewVarModal } from "./NewVarModal";
 
 const meta: Meta<typeof NewVarModal> = {
@@ -8,6 +9,8 @@ const meta: Meta<typeof NewVarModal> = {
   args: {
     vars: [],
     elevated: false,
+    onStage: fn(),
+    onClose: fn(),
   },
   argTypes: {
     elevated: { control: "boolean" },
@@ -24,6 +27,14 @@ export const Elevated: Story = {
 
 export const WithExistingVar: Story = {
   args: {
-    vars: [{ name: "MY_VAR", value: "hello", scope: "User" }],
+    vars: [
+      {
+        name: "MY_VAR",
+        value: "hello",
+        valueKind: "String",
+        scope: "User",
+        listSeparator: null,
+      },
+    ],
   },
 };

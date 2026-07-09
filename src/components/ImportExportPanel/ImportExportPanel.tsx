@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
-import type { VarScope } from "../../types";
+import type { EnvValueKind, VarScope } from "../../types";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { ExportTab } from "./ExportTab";
 import { ImportTab } from "./ImportTab";
@@ -9,7 +9,12 @@ import type { Mode } from "./types";
 
 interface Props {
   onStage: (
-    sets: Array<{ name: string; scope: VarScope; value: string }>,
+    sets: Array<{
+      name: string;
+      scope: VarScope;
+      value: string;
+      valueKind: EnvValueKind | null;
+    }>,
     deletes: Array<{ name: string; scope: VarScope }>,
   ) => void;
 }

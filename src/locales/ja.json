@@ -38,6 +38,9 @@
     "label_path": "パスエントリ (ドラッグで並べ替え)",
     "label_list": "リストエントリ (ドラッグで並べ替え)",
     "label_value": "値",
+    "value_kind": "レジストリ型",
+    "expandable_value_warning": "この値には、文字列として保存すると展開されない変数参照が含まれています。",
+    "change_to_expand_string": "展開可能文字列へ変更",
     "browse_folder": "フォルダーを選択",
     "plain_text": "プレーンテキスト",
     "list_semicolon": "リスト (;)",
@@ -66,12 +69,19 @@
     "name": "名前",
     "scope": "スコープ",
     "value": "値",
+    "value_kind": "レジストリ型",
     "placeholder_name": "VARIABLE_NAME",
     "placeholder_value": "(空)",
     "exists": "{{name}} はすでに {{scope}} スコープに存在します",
     "cancel": "キャンセル",
     "stage": "新しい変数をステージ",
     "system_admin": "System (管理者)"
+  },
+  "value_kind": {
+    "auto": "自動判定",
+    "auto_current": "自動判定 ({{kind}})",
+    "string": "文字列 (REG_SZ)",
+    "expand_string": "展開可能文字列 (REG_EXPAND_SZ)"
   },
   "staged": {
     "critical_one": "重要なシステム変数が変更されます",
@@ -115,6 +125,8 @@
     "applying": "適用中…"
   },
   "import": {
+    "legacy_types": "このインポートにはレジストリ型がありません。既存変数は現在の型を維持し、新規変数は自動判定します。",
+    "confirm_legacy_types": "一部の変数にレジストリ型がありません。型を自動解決して続行しますか？",
     "choose_file": "ファイルを選択…",
     "paste_placeholder": "…またはここにファイルの内容を貼り付け",
     "parse": "解析",
@@ -165,6 +177,7 @@
   "snapshot": {
     "title": "スナップショット",
     "description": "すべての環境変数の現在の状態を保存します。スナップショットのプレビューと復元ができます。",
+    "confirm_legacy_restore": "このスナップショットにはレジストリ型がありません。既存変数は現在の型を維持し、新規変数は自動判定します。続行しますか？",
     "label_placeholder": "スナップショット名 (省略可)…",
     "save": "スナップショットを保存",
     "saving": "…",

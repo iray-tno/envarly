@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import type { EnvSnapshot, EnvVar, VarScope } from "../types";
+import { resolveEnvValueKind } from "../lib/envValueKind";
+import type { EnvSnapshot, EnvValueKind, EnvValueKindSelection, EnvVar, VarScope } from "../types";
 import type { StagedChange } from "./useStaged";
 import type { Command } from "./useUndoStack";
 
@@ -7,10 +8,20 @@ type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | nu
 
 interface Params {
   staged: Map<string, StagedChange>;
-  stageSet: (name: string, scope: VarScope, value: string) => void;
+  stageSet: (
+    name: string,
+    scope: VarScope,
+    value: string,
+    valueKind?: EnvValueKindSelection,
+  ) => void;
   stageDelete: (name: string, scope: VarScope) => void;
   stageImport: (
-    sets: Array<{ name: string; scope: VarScope; value: string }>,
+    sets: Array<{
+      name: string;
+      scope: VarScope;
+      value: string;
+      valueKind: EnvValueKind | null;
+    }>,
     deletes: Array<{ name: string; scope: VarScope }>,
   ) => void;
   stageSnapshot: (snap: EnvSnapshot) => void;
@@ -38,17 +49,23 @@ export function useStagingHandlers({
   setSnapshotsOpen,
 }: Params) {
   const handleStage = useCallback(
-    (name: string, scope: VarScope, value: string) => {
+    (name: string, scope: VarScope, value: string, valueKind: EnvValueKindSelection = "Auto") => {
       const prev = staged.get(`${scope}:${name}`);
-      stageSet(name, scope, value);
+      if (valueKind === "Auto") stageSet(name, scope, value);
+      else stageSet(name, scope, value, valueKind);
       push({
         label: `Stage ${name}`,
         undo: () => {
-          if (prev?.kind === "set") stageSet(name, scope, prev.newValue);
-          else if (prev?.kind === "delete") stageDelete(name, scope);
+          if (prev?.kind === "set") {
+            if (prev.newValueKind) stageSet(name, scope, prev.newValue, prev.newValueKind);
+            else stageSet(name, scope, prev.newValue);
+          } else if (prev?.kind === "delete") stageDelete(name, scope);
           else unstage(name, scope);
         },
-        redo: () => stageSet(name, scope, value),
+        redo: () => {
+          if (valueKind === "Auto") stageSet(name, scope, value);
+          else stageSet(name, scope, value, valueKind);
+        },
       });
     },
     [staged, stageSet, stageDelete, unstage, push],
@@ -61,8 +78,10 @@ export function useStagingHandlers({
       push({
         label: `Delete ${name}`,
         undo: () => {
-          if (prev?.kind === "set") stageSet(name, scope, prev.newValue);
-          else unstage(name, scope);
+          if (prev?.kind === "set") {
+            if (prev.newValueKind) stageSet(name, scope, prev.newValue, prev.newValueKind);
+            else stageSet(name, scope, prev.newValue);
+          } else unstage(name, scope);
         },
         redo: () => stageDelete(name, scope),
       });
@@ -77,8 +96,10 @@ export function useStagingHandlers({
       push({
         label: `Unstage ${name}`,
         undo: () => {
-          if (prev?.kind === "set") stageSet(name, scope, prev.newValue);
-          else if (prev?.kind === "delete") stageDelete(name, scope);
+          if (prev?.kind === "set") {
+            if (prev.newValueKind) stageSet(name, scope, prev.newValue, prev.newValueKind);
+            else stageSet(name, scope, prev.newValue);
+          } else if (prev?.kind === "delete") stageDelete(name, scope);
         },
         redo: () => unstage(name, scope),
       });
@@ -98,7 +119,12 @@ export function useStagingHandlers({
 
   const handleStageImport = useCallback(
     (
-      sets: Array<{ name: string; scope: VarScope; value: string }>,
+      sets: Array<{
+        name: string;
+        scope: VarScope;
+        value: string;
+        valueKind: EnvValueKind | null;
+      }>,
       deletes: Array<{ name: string; scope: VarScope }> = [],
     ) => {
       const snapshot = new Map(staged);
@@ -128,14 +154,19 @@ export function useStagingHandlers({
   );
 
   const handleNewVarStage = useCallback(
-    (name: string, scope: VarScope, value: string) => {
-      stageSet(name, scope, value);
-      setSelected({ name, scope, value, listSeparator: null });
+    (name: string, scope: VarScope, value: string, valueKind: EnvValueKindSelection = "Auto") => {
+      const resolvedKind = resolveEnvValueKind(valueKind, value);
+      if (valueKind === "Auto") stageSet(name, scope, value);
+      else stageSet(name, scope, value, valueKind);
+      setSelected({ name, scope, value, valueKind: resolvedKind, listSeparator: null });
       setDialog(null);
       push({
         label: `New variable ${name}`,
         undo: () => unstage(name, scope),
-        redo: () => stageSet(name, scope, value),
+        redo: () => {
+          if (valueKind === "Auto") stageSet(name, scope, value);
+          else stageSet(name, scope, value, valueKind);
+        },
       });
     },
     [stageSet, unstage, push, setSelected, setDialog],

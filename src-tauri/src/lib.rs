@@ -37,6 +37,7 @@ pub fn run() {
             commands::get_registry_snapshot,
             commands::set_env_var,
             commands::delete_env_var,
+            commands::apply_env_changes,
             commands::create_snapshot,
             commands::list_snapshots,
             commands::delete_snapshot,

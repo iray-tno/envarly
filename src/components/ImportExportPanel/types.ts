@@ -1,4 +1,4 @@
-import type { EnvSnapshot, VarScope } from "../../types";
+import type { EnvSnapshot, EnvValueKind, VarScope } from "../../types";
 
 export type Mode = "export" | "import";
 export type ExportScope = "All" | "User" | "System" | "Custom";
@@ -10,15 +10,27 @@ export type MergeStrategy = "merge" | "replace";
 export interface FlatVar {
   name: string;
   value: string;
+  valueKind: EnvValueKind | null;
   scope: VarScope;
 }
 
 export function flattenSnapshot(snap: EnvSnapshot): FlatVar[] {
+  const flatValue = (entry: EnvSnapshot["user"][string] | string) =>
+    typeof entry === "string"
+      ? { value: entry, valueKind: null }
+      : {
+          value: entry.value,
+          valueKind: entry.kind,
+        };
   return [
-    ...Object.entries(snap.user).map(([name, value]) => ({ name, value, scope: "User" as const })),
-    ...Object.entries(snap.system).map(([name, value]) => ({
+    ...Object.entries(snap.user).map(([name, entry]) => ({
       name,
-      value,
+      ...flatValue(entry),
+      scope: "User" as const,
+    })),
+    ...Object.entries(snap.system).map(([name, entry]) => ({
+      name,
+      ...flatValue(entry),
       scope: "System" as const,
     })),
   ].sort((a, b) => a.name.localeCompare(b.name));

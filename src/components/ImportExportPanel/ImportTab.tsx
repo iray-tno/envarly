@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
 import { resolveSecret } from "../../lib/secrets";
-import type { VarScope } from "../../types";
+import type { EnvValueKind, VarScope } from "../../types";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
@@ -20,7 +20,12 @@ import { SecretBanner, VarTable } from "./VarTable";
 
 interface ImportTabProps {
   onStage: (
-    sets: Array<{ name: string; scope: VarScope; value: string }>,
+    sets: Array<{
+      name: string;
+      scope: VarScope;
+      value: string;
+      valueKind: EnvValueKind | null;
+    }>,
     deletes: Array<{ name: string; scope: VarScope }>,
   ) => void;
   onStatus: (msg: string | null) => void;
@@ -82,10 +87,21 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
       onStatus(t("import.no_selected"));
       return;
     }
+    if (
+      selected.some((variable) => variable.valueKind === null) &&
+      !confirm(t("import.confirm_legacy_types"))
+    ) {
+      return;
+    }
     setApplying(true);
     onStatus(null);
     try {
-      const sets = selected.map((v) => ({ name: v.name, scope: v.scope, value: v.value }));
+      const sets = selected.map((v) => ({
+        name: v.name,
+        scope: v.scope,
+        value: v.value,
+        valueKind: v.valueKind,
+      }));
       const deletes: Array<{ name: string; scope: VarScope }> = [];
 
       if (strategy === "replace") {
@@ -124,6 +140,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
     ? preview.filter((v) => checked[varKey(v)] && resolveSecret(v.name, v.value) !== null).length
     : 0;
   const noneChecked = checkedCount === 0;
+  const hasUnresolvedTypes = preview?.some((variable) => variable.valueKind === null) ?? false;
 
   const affectedScopes = preview
     ? [...new Set(preview.filter((v) => checked[varKey(v)]).map((v) => v.scope))]
@@ -175,6 +192,12 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
       {preview && (
         <div className="flex flex-col gap-3">
           <SecretBanner count={secretCount} />
+          {hasUnresolvedTypes && (
+            <p className="flex items-center gap-2 text-xs text-warn">
+              <Icon name="warning" size={14} />
+              {t("import.legacy_types")}
+            </p>
+          )}
 
           <VarTable
             vars={preview}

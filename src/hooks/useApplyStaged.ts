@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 import { useCallback, useState } from "react";
 import { api } from "../api";
-import type { EnvSnapshot } from "../types";
+import type { EnvChange, EnvSnapshot } from "../types";
 import type { StagedChange } from "./useStaged";
 
 type SetDialog = (d: "importexport" | "changes" | "staged" | "licenses" | "newvar" | null) => void;
@@ -26,14 +26,25 @@ export function useApplyStaged({
   const [busy, setBusy] = useState(false);
 
   const handleApplyStaged = useCallback(
-    async (takeSnapshot: boolean) => {
+    async (_takeSnapshot: boolean) => {
       setBusy(true);
       try {
-        if (takeSnapshot) await api.createSnapshot("auto: before apply");
-        for (const change of staged.values()) {
-          if (change.kind === "delete") await api.deleteEnvVar(change.name, change.scope);
-          else await api.setEnvVar(change.name, change.newValue, change.scope);
-        }
+        const changes: EnvChange[] = Array.from(staged.values(), (change) =>
+          change.kind === "delete"
+            ? {
+                changeType: "delete",
+                name: change.name,
+                scope: change.scope,
+              }
+            : {
+                changeType: "set",
+                name: change.name,
+                value: change.newValue,
+                valueKind: change.newValueKind,
+                scope: change.scope,
+              },
+        );
+        await api.applyEnvChanges(changes);
         clearStaged();
         setDialog(null);
         await refresh();
