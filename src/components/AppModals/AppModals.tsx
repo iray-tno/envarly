@@ -1,7 +1,7 @@
 import { useI18n } from "../../hooks/useI18n";
 import type { StagedChange } from "../../hooks/useStaged";
 import type { DiffEntry } from "../../lib/diff";
-import type { EnvVar, VarScope } from "../../types";
+import type { EnvValueKind, EnvValueKindSelection, EnvVar, VarScope } from "../../types";
 import { DiffPanel } from "../DiffPanel/DiffPanel";
 import { ImportExportPanel } from "../ImportExportPanel/ImportExportPanel";
 import { LicensesPanel } from "../LicensesPanel/LicensesPanel";
@@ -23,12 +23,22 @@ interface Props {
   onDiffApply: (accepted: DiffEntry[], reverted: DiffEntry[]) => Promise<void>;
   onDiffDismiss: () => void;
   onStageImport: (
-    sets: Array<{ name: string; scope: VarScope; value: string }>,
+    sets: Array<{
+      name: string;
+      scope: VarScope;
+      value: string;
+      valueKind: EnvValueKind | null;
+    }>,
     deletes?: Array<{ name: string; scope: VarScope }>,
   ) => void;
   effectiveVars: EnvVar[];
   elevated: boolean;
-  onNewVarStage: (name: string, scope: VarScope, value: string) => void;
+  onNewVarStage: (
+    name: string,
+    scope: VarScope,
+    value: string,
+    valueKind: EnvValueKindSelection,
+  ) => void;
 }
 
 export function AppModals({

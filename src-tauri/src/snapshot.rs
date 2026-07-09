@@ -11,7 +11,8 @@ use crate::error::EnvarlyError;
 /// Version history:
 ///   0 – legacy plaintext JSON (.json), no version field (pre-encryption era)
 ///   1 – DPAPI-encrypted JSON blob (.snap), version field present
-pub const SNAPSHOT_FORMAT_VERSION: u32 = 1;
+///   2 – environment values include their registry type
+pub const SNAPSHOT_FORMAT_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -48,8 +49,53 @@ fn read_snap(path: &PathBuf) -> Result<SnapshotMeta, EnvarlyError> {
     let encrypted = fs::read(path)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot read snapshot file: {e}")))?;
     let json = crypto::unprotect(&encrypted)?;
-    serde_json::from_slice(&json)
-        .map_err(|e| EnvarlyError::Snapshot(format!("Cannot parse snapshot: {e}")))
+    match serde_json::from_slice(&json) {
+        Ok(meta) => Ok(meta),
+        Err(typed_error) => {
+            let legacy: LegacySnapshotMeta = serde_json::from_slice(&json).map_err(|_| {
+                EnvarlyError::Snapshot(format!("Cannot parse snapshot: {typed_error}"))
+            })?;
+            Ok(legacy.into())
+        }
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacySnapshotMeta {
+    #[serde(default)]
+    version: u32,
+    id: String,
+    created_at: String,
+    label: String,
+    snapshot: LegacyEnvSnapshot,
+}
+
+#[derive(Deserialize)]
+struct LegacyEnvSnapshot {
+    user: std::collections::HashMap<String, String>,
+    system: std::collections::HashMap<String, String>,
+}
+
+impl From<LegacySnapshotMeta> for SnapshotMeta {
+    fn from(legacy: LegacySnapshotMeta) -> Self {
+        let unresolved = |values: std::collections::HashMap<String, String>| {
+            values
+                .into_iter()
+                .map(|(name, value)| (name, crate::env_store::EnvValue { value, kind: None }))
+                .collect()
+        };
+        Self {
+            version: legacy.version,
+            id: legacy.id,
+            created_at: legacy.created_at,
+            label: legacy.label,
+            snapshot: EnvSnapshot {
+                user: unresolved(legacy.snapshot.user),
+                system: unresolved(legacy.snapshot.system),
+            },
+        }
+    }
 }
 
 pub fn save_snapshot(snapshot: EnvSnapshot, label: &str) -> Result<SnapshotMeta, EnvarlyError> {
@@ -98,8 +144,7 @@ pub fn list_snapshots_from(dir: &PathBuf) -> Result<Vec<SnapshotMeta>, EnvarlyEr
     for entry in fs::read_dir(dir)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot read snapshots dir: {e}")))?
     {
-        let entry =
-            entry.map_err(|e| EnvarlyError::Snapshot(format!("Read entry error: {e}")))?;
+        let entry = entry.map_err(|e| EnvarlyError::Snapshot(format!("Read entry error: {e}")))?;
         let path = entry.path();
         if path.extension().and_then(|e| e.to_str()) != Some("snap") {
             continue;
@@ -134,7 +179,13 @@ mod tests {
 
     fn make_snapshot() -> EnvSnapshot {
         EnvSnapshot {
-            user: HashMap::from([("MY_VAR".to_string(), "hello".to_string())]),
+            user: HashMap::from([(
+                "MY_VAR".to_string(),
+                crate::env_store::EnvValue::typed(
+                    "hello".to_string(),
+                    crate::env_store::EnvValueKind::String,
+                ),
+            )]),
             system: HashMap::new(),
         }
     }
@@ -152,7 +203,14 @@ mod tests {
         assert_eq!(list.len(), 1);
         assert_eq!(list[0].id, saved.id);
         assert_eq!(list[0].label, "test label");
-        assert_eq!(list[0].snapshot.user.get("MY_VAR").map(|s| s.as_str()), Some("hello"));
+        assert_eq!(
+            list[0]
+                .snapshot
+                .user
+                .get("MY_VAR")
+                .map(|value| value.value.as_str()),
+            Some("hello")
+        );
     }
 
     #[test]

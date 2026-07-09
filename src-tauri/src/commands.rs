@@ -1,13 +1,15 @@
-use crate::env_store::{self, EnvSnapshot, EnvVar, VarScope};
+use crate::env_store::{self, EnvChange, EnvSnapshot, EnvValue, EnvValueKind, EnvVar, VarScope};
 use crate::error::EnvarlyError;
 use crate::path_manage;
 use crate::snapshot::{self, SnapshotMeta};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CustomExportVar {
     pub name: String,
     pub value: String,
+    pub value_kind: EnvValueKind,
     pub scope: String,
 }
 
@@ -58,13 +60,25 @@ pub fn get_registry_snapshot() -> Result<crate::env_store::EnvSnapshot, EnvarlyE
 }
 
 #[tauri::command]
-pub fn set_env_var(name: String, value: String, scope: VarScope) -> Result<(), EnvarlyError> {
-    env_store::write_var(&name, &value, &scope)
+pub fn set_env_var(
+    name: String,
+    value: String,
+    value_kind: EnvValueKind,
+    scope: VarScope,
+) -> Result<(), EnvarlyError> {
+    env_store::write_var(&name, &value, value_kind, &scope)
 }
 
 #[tauri::command]
 pub fn delete_env_var(name: String, scope: VarScope) -> Result<(), EnvarlyError> {
     env_store::delete_var(&name, &scope)
+}
+
+#[tauri::command]
+pub fn apply_env_changes(changes: Vec<EnvChange>) -> Result<(), EnvarlyError> {
+    let snapshot = env_store::read_snapshot()?;
+    snapshot::save_snapshot(snapshot, "auto: before apply")?;
+    env_store::apply_changes(&changes)
 }
 
 #[tauri::command]
@@ -95,7 +109,11 @@ pub fn restart_as_admin(app: tauri::AppHandle) -> Result<(), EnvarlyError> {
     #[cfg(target_os = "windows")]
     {
         let exe = std::env::current_exe().map_err(EnvarlyError::Registry)?;
-        let exe_wide: Vec<u16> = exe.to_string_lossy().encode_utf16().chain(Some(0)).collect();
+        let exe_wide: Vec<u16> = exe
+            .to_string_lossy()
+            .encode_utf16()
+            .chain(Some(0))
+            .collect();
         let verb: Vec<u16> = "runas\0".encode_utf16().collect();
         // ShellExecuteW with "runas" verb triggers UAC elevation directly
         // without needing an intermediate PowerShell process.
@@ -131,12 +149,42 @@ pub async fn export_vars(
 
     let snapshot = env_store::read_snapshot()?;
     let (content, ext, default_stem, filter_name) = match format.as_str() {
-        "reg"     => (crate::export::to_reg(&snapshot, &scope),     "reg",      "envarly",         "Registry files"),
-        "ps1"     => (crate::export::to_ps1(&snapshot, &scope),     "ps1",      "envarly",         "PowerShell Script"),
-        "dsc_v2"  => (crate::export::to_dsc_v2(&snapshot, &scope),  "ps1",      "envarly-dsc",     "PowerShell DSC Configuration"),
-        "dsc_v3"  => (crate::export::to_dsc_v3(&snapshot, &scope),  "dsc.yaml", "envarly-dsc3",    "DSC v3 Configuration"),
-        "ansible" => (crate::export::to_ansible(&snapshot, &scope), "yml",      "envarly-ansible", "Ansible Playbook"),
-        _         => (crate::export::to_json(&snapshot, &scope),    "json",     "envarly",         "JSON files"),
+        "reg" => (
+            crate::export::to_reg(&snapshot, &scope),
+            "reg",
+            "envarly",
+            "Registry files",
+        ),
+        "ps1" => (
+            crate::export::to_ps1(&snapshot, &scope),
+            "ps1",
+            "envarly",
+            "PowerShell Script",
+        ),
+        "dsc_v2" => (
+            crate::export::to_dsc_v2(&snapshot, &scope),
+            "ps1",
+            "envarly-dsc",
+            "PowerShell DSC Configuration",
+        ),
+        "dsc_v3" => (
+            crate::export::to_dsc_v3(&snapshot, &scope),
+            "dsc.yaml",
+            "envarly-dsc3",
+            "DSC v3 Configuration",
+        ),
+        "ansible" => (
+            crate::export::to_ansible(&snapshot, &scope),
+            "yml",
+            "envarly-ansible",
+            "Ansible Playbook",
+        ),
+        _ => (
+            crate::export::to_json(&snapshot, &scope),
+            "json",
+            "envarly",
+            "JSON files",
+        ),
     };
 
     let default_name = format!(
@@ -188,19 +236,63 @@ pub async fn export_custom(
     };
     for v in &vars {
         match v.scope.as_str() {
-            "User"   => { snapshot.user.insert(v.name.clone(), v.value.clone()); }
-            "System" => { snapshot.system.insert(v.name.clone(), v.value.clone()); }
-            other => return Err(EnvarlyError::InvalidInput(format!("invalid scope: {other:?}"))),
+            "User" => {
+                snapshot.user.insert(
+                    v.name.clone(),
+                    EnvValue::typed(v.value.clone(), v.value_kind),
+                );
+            }
+            "System" => {
+                snapshot.system.insert(
+                    v.name.clone(),
+                    EnvValue::typed(v.value.clone(), v.value_kind),
+                );
+            }
+            other => {
+                return Err(EnvarlyError::InvalidInput(format!(
+                    "invalid scope: {other:?}"
+                )))
+            }
         }
     }
 
     let (content, ext, default_stem, filter_name) = match format.as_str() {
-        "reg"     => (crate::export::to_reg(&snapshot, "All"),     "reg",      "envarly-custom",         "Registry files"),
-        "ps1"     => (crate::export::to_ps1(&snapshot, "All"),     "ps1",      "envarly-custom",         "PowerShell Script"),
-        "dsc_v2"  => (crate::export::to_dsc_v2(&snapshot, "All"),  "ps1",      "envarly-custom-dsc",     "PowerShell DSC Configuration"),
-        "dsc_v3"  => (crate::export::to_dsc_v3(&snapshot, "All"),  "dsc.yaml", "envarly-custom-dsc3",    "DSC v3 Configuration"),
-        "ansible" => (crate::export::to_ansible(&snapshot, "All"), "yml",      "envarly-custom-ansible", "Ansible Playbook"),
-        _         => (crate::export::to_json(&snapshot, "All"),    "json",     "envarly-custom",         "JSON files"),
+        "reg" => (
+            crate::export::to_reg(&snapshot, "All"),
+            "reg",
+            "envarly-custom",
+            "Registry files",
+        ),
+        "ps1" => (
+            crate::export::to_ps1(&snapshot, "All"),
+            "ps1",
+            "envarly-custom",
+            "PowerShell Script",
+        ),
+        "dsc_v2" => (
+            crate::export::to_dsc_v2(&snapshot, "All"),
+            "ps1",
+            "envarly-custom-dsc",
+            "PowerShell DSC Configuration",
+        ),
+        "dsc_v3" => (
+            crate::export::to_dsc_v3(&snapshot, "All"),
+            "dsc.yaml",
+            "envarly-custom-dsc3",
+            "DSC v3 Configuration",
+        ),
+        "ansible" => (
+            crate::export::to_ansible(&snapshot, "All"),
+            "yml",
+            "envarly-custom-ansible",
+            "Ansible Playbook",
+        ),
+        _ => (
+            crate::export::to_json(&snapshot, "All"),
+            "json",
+            "envarly-custom",
+            "JSON files",
+        ),
     };
 
     let default_name = format!(
@@ -245,7 +337,8 @@ pub fn validate_paths(paths: Vec<String>) -> Vec<bool> {
 #[cfg(windows)]
 fn dir_exists(path: &str) -> bool {
     let wide: Vec<u16> = path.encode_utf16().chain(std::iter::once(0)).collect();
-    let attrs = unsafe { windows_sys::Win32::Storage::FileSystem::GetFileAttributesW(wide.as_ptr()) };
+    let attrs =
+        unsafe { windows_sys::Win32::Storage::FileSystem::GetFileAttributesW(wide.as_ptr()) };
     // INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF means the call failed (path not found etc.)
     attrs != u32::MAX
 }
@@ -308,9 +401,13 @@ pub fn get_path_status() -> path_manage::PathStatus {
 #[tauri::command]
 pub fn get_path_proposal(scope: String) -> Result<Option<String>, EnvarlyError> {
     let user = match scope.as_str() {
-        "User"   => true,
+        "User" => true,
         "System" => false,
-        other    => return Err(EnvarlyError::InvalidInput(format!("invalid scope: {other:?}"))),
+        other => {
+            return Err(EnvarlyError::InvalidInput(format!(
+                "invalid scope: {other:?}"
+            )))
+        }
     };
     path_manage::propose_add(user)
 }
@@ -321,7 +418,10 @@ mod tests {
 
     #[test]
     fn expand_no_vars() {
-        assert_eq!(expand_env_vars("C:\\Windows\\System32"), "C:\\Windows\\System32");
+        assert_eq!(
+            expand_env_vars("C:\\Windows\\System32"),
+            "C:\\Windows\\System32"
+        );
     }
 
     #[test]

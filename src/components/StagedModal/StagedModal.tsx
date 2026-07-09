@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
+import { registryKindLabel } from "../../lib/envValueKind";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
@@ -131,7 +132,6 @@ function ListEntries({ value, className }: { value: string; className?: string }
 
 export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
   const { t } = useI18n();
-  const [takeSnapshot, setTakeSnapshot] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("delta");
 
   const criticalChanges = diff.filter((e) => CRITICAL_VARS.has(e.name.toUpperCase()));
@@ -225,6 +225,12 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
                 </span>
               </div>
 
+              {entry.kind === "changed" && entry.oldValueKind !== entry.newValueKind && (
+                <p className="font-mono text-[10px] text-muted mb-1">
+                  {registryKindLabel(entry.oldValueKind)} → {registryKindLabel(entry.newValueKind)}
+                </p>
+              )}
+
               {entry.kind === "removed" &&
                 (isList(entry.value) ? (
                   <ListEntries value={entry.value} className="opacity-70 line-through" />
@@ -265,21 +271,11 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
       </div>
 
       <div className="px-6 py-4 border-t border-rim shrink-0 flex flex-col gap-3">
-        <label className="flex items-center gap-2 text-xs text-muted cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={takeSnapshot}
-            onChange={(e) => setTakeSnapshot(e.target.checked)}
-            disabled={busy}
-            className="accent-accent"
-          />
-          {t("staged.take_snapshot")}
-        </label>
         <div className="flex gap-2 justify-end">
           <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>
             {t("staged.cancel")}
           </Button>
-          <Button variant="primary" size="md" onClick={() => onApply(takeSnapshot)} disabled={busy}>
+          <Button variant="primary" size="md" onClick={() => onApply(true)} disabled={busy}>
             {busy ? t("staged.applying") : t("staged.apply", { count: diff.length })}
           </Button>
         </div>

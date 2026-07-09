@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { createDemoApi, loadDemoFixture } from "./demo/createDemoApi";
-import type { EnvSnapshot, EnvVar, SnapshotMeta, VarScope } from "./types";
+import type { EnvChange, EnvSnapshot, EnvValueKind, EnvVar, SnapshotMeta, VarScope } from "./types";
 
 export interface LaunchOptions {
   demo: boolean;
@@ -10,8 +10,14 @@ export interface LaunchOptions {
 export interface EnvarlyApi {
   getLaunchOptions: () => Promise<LaunchOptions>;
   getEnvVars: () => Promise<EnvVar[]>;
-  setEnvVar: (name: string, value: string, scope: VarScope) => Promise<void>;
+  setEnvVar: (
+    name: string,
+    value: string,
+    valueKind: EnvValueKind,
+    scope: VarScope,
+  ) => Promise<void>;
   deleteEnvVar: (name: string, scope: VarScope) => Promise<void>;
+  applyEnvChanges: (changes: EnvChange[]) => Promise<void>;
   createSnapshot: (label: string) => Promise<SnapshotMeta>;
   listSnapshots: () => Promise<SnapshotMeta[]>;
   deleteSnapshot: (id: string) => Promise<void>;
@@ -21,7 +27,7 @@ export interface EnvarlyApi {
   restartAsAdmin: () => Promise<void>;
   exportVars: (scope: "All" | "User" | "System", format: string) => Promise<string | null>;
   exportCustomVars: (
-    vars: { name: string; value: string; scope: string }[],
+    vars: { name: string; value: string; valueKind: EnvValueKind; scope: string }[],
     format: string,
   ) => Promise<string | null>;
   parseImport: (content: string, format: "json" | "reg") => Promise<EnvSnapshot>;
@@ -36,8 +42,10 @@ export interface EnvarlyApi {
 const normalApi: EnvarlyApi = {
   getLaunchOptions: () => invoke<LaunchOptions>("get_launch_options"),
   getEnvVars: () => invoke<EnvVar[]>("get_env_vars"),
-  setEnvVar: (name, value, scope) => invoke<void>("set_env_var", { name, value, scope }),
+  setEnvVar: (name, value, valueKind, scope) =>
+    invoke<void>("set_env_var", { name, value, valueKind, scope }),
   deleteEnvVar: (name, scope) => invoke<void>("delete_env_var", { name, scope }),
+  applyEnvChanges: (changes) => invoke<void>("apply_env_changes", { changes }),
   createSnapshot: (label) => invoke<SnapshotMeta>("create_snapshot", { label }),
   listSnapshots: () => invoke<SnapshotMeta[]>("list_snapshots"),
   deleteSnapshot: (id) => invoke<void>("delete_snapshot", { id }),
@@ -73,8 +81,10 @@ async function getApi(): Promise<EnvarlyApi> {
 export const api: EnvarlyApi = {
   getLaunchOptions: async () => (await getApi()).getLaunchOptions(),
   getEnvVars: async () => (await getApi()).getEnvVars(),
-  setEnvVar: async (name, value, scope) => (await getApi()).setEnvVar(name, value, scope),
+  setEnvVar: async (name, value, valueKind, scope) =>
+    (await getApi()).setEnvVar(name, value, valueKind, scope),
   deleteEnvVar: async (name, scope) => (await getApi()).deleteEnvVar(name, scope),
+  applyEnvChanges: async (changes) => (await getApi()).applyEnvChanges(changes),
   createSnapshot: async (label) => (await getApi()).createSnapshot(label),
   listSnapshots: async () => (await getApi()).listSnapshots(),
   deleteSnapshot: async (id) => (await getApi()).deleteSnapshot(id),

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { DiffEntry } from "../../lib/diff";
+import { registryKindLabel } from "../../lib/envValueKind";
 import { resolveSecret } from "../../lib/secrets";
 import { Icon } from "../ui/Icon";
 
@@ -31,6 +32,11 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
       <td className="px-2 py-1.5 font-mono text-muted max-w-xs truncate">
         {entry.kind === "changed" ? (
           <span className="flex flex-col gap-0.5">
+            {entry.oldValueKind !== entry.newValueKind && (
+              <span className="text-[10px] text-dim">
+                {registryKindLabel(entry.oldValueKind)} → {registryKindLabel(entry.newValueKind)}
+              </span>
+            )}
             <span className="line-through text-danger">{mask(entry.oldValue)}</span>
             <span className="text-success">{mask(entry.newValue)}</span>
           </span>

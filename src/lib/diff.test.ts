@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 import type { EnvSnapshot } from "../types";
 import { applyAccepted, computeDiff, snapshotsEqual } from "./diff";
 
+const value = (text: string, kind: "String" | "ExpandString" = "String") => ({
+  value: text,
+  kind,
+});
+
 const empty: EnvSnapshot = { user: {}, system: {} };
 
 const base: EnvSnapshot = {
-  user: { PATH: "C:\\old", JAVA_HOME: "C:\\jdk17" },
-  system: { WINDIR: "C:\\Windows", OS: "Windows_NT" },
+  user: { PATH: value("C:\\old", "ExpandString"), JAVA_HOME: value("C:\\jdk17") },
+  system: { WINDIR: value("C:\\Windows"), OS: value("Windows_NT") },
 };
 
 describe("computeDiff", () => {
@@ -15,9 +20,15 @@ describe("computeDiff", () => {
   });
 
   it("detects user variable added", () => {
-    const cur = { ...base, user: { ...base.user, NEW_VAR: "hello" } };
+    const cur = { ...base, user: { ...base.user, NEW_VAR: value("hello") } };
     const diff = computeDiff(base, cur);
-    expect(diff).toContainEqual({ kind: "added", name: "NEW_VAR", scope: "User", value: "hello" });
+    expect(diff).toContainEqual({
+      kind: "added",
+      name: "NEW_VAR",
+      scope: "User",
+      value: "hello",
+      valueKind: "String",
+    });
   });
 
   it("detects user variable removed", () => {
@@ -29,29 +40,49 @@ describe("computeDiff", () => {
       name: "JAVA_HOME",
       scope: "User",
       value: "C:\\jdk17",
+      valueKind: "String",
     });
   });
 
   it("detects user variable changed", () => {
-    const cur = { ...base, user: { ...base.user, JAVA_HOME: "C:\\jdk21" } };
+    const cur = { ...base, user: { ...base.user, JAVA_HOME: value("C:\\jdk21") } };
     const diff = computeDiff(base, cur);
     expect(diff).toContainEqual({
       kind: "changed",
       name: "JAVA_HOME",
       scope: "User",
       oldValue: "C:\\jdk17",
+      oldValueKind: "String",
       newValue: "C:\\jdk21",
+      newValueKind: "String",
+    });
+  });
+
+  it("detects a registry type change when the value is unchanged", () => {
+    const cur = {
+      ...base,
+      user: { ...base.user, JAVA_HOME: value("C:\\jdk17", "ExpandString") },
+    };
+    expect(computeDiff(base, cur)).toContainEqual({
+      kind: "changed",
+      name: "JAVA_HOME",
+      scope: "User",
+      oldValue: "C:\\jdk17",
+      oldValueKind: "String",
+      newValue: "C:\\jdk17",
+      newValueKind: "ExpandString",
     });
   });
 
   it("detects system variable added", () => {
-    const cur = { ...base, system: { ...base.system, NEW_SYS: "val" } };
+    const cur = { ...base, system: { ...base.system, NEW_SYS: value("val") } };
     const diff = computeDiff(base, cur);
     expect(diff).toContainEqual({
       kind: "added",
       name: "NEW_SYS",
       scope: "System",
       value: "val",
+      valueKind: "String",
     });
   });
 
@@ -64,13 +95,18 @@ describe("computeDiff", () => {
       name: "OS",
       scope: "System",
       value: "Windows_NT",
+      valueKind: "String",
     });
   });
 
   it("handles multiple changes at once", () => {
     const cur: EnvSnapshot = {
-      user: { PATH: "C:\\new" }, // JAVA_HOME removed, PATH changed
-      system: { WINDIR: "C:\\Windows", OS: "Windows_NT", SYS_NEW: "x" },
+      user: { PATH: value("C:\\new", "ExpandString") },
+      system: {
+        WINDIR: value("C:\\Windows"),
+        OS: value("Windows_NT"),
+        SYS_NEW: value("x"),
+      },
     };
     const diff = computeDiff(base, cur);
     expect(diff.length).toBe(3); // PATH changed, JAVA_HOME removed, SYS_NEW added
@@ -78,8 +114,8 @@ describe("computeDiff", () => {
 
   it("sorts output by scope then name", () => {
     const cur: EnvSnapshot = {
-      user: { PATH: "C:\\old", JAVA_HOME: "C:\\jdk17", ZZZ: "z", AAA: "a" },
-      system: { WINDIR: "C:\\Windows", OS: "Windows_NT" },
+      user: { ...base.user, ZZZ: value("z"), AAA: value("a") },
+      system: base.system,
     };
     const diff = computeDiff(base, cur);
     const names = diff.map((d) => d.name);
@@ -93,7 +129,10 @@ describe("snapshotsEqual", () => {
   });
 
   it("returns false when value differs", () => {
-    const cur = { ...base, user: { ...base.user, PATH: "C:\\different" } };
+    const cur = {
+      ...base,
+      user: { ...base.user, PATH: value("C:\\different", "ExpandString") },
+    };
     expect(snapshotsEqual(base, cur)).toBe(false);
   });
 
@@ -105,14 +144,26 @@ describe("snapshotsEqual", () => {
 describe("applyAccepted", () => {
   it("adds accepted-added variable to baseline", () => {
     const result = applyAccepted(base, [
-      { kind: "added", name: "NEW_VAR", scope: "User", value: "hello" },
+      {
+        kind: "added",
+        name: "NEW_VAR",
+        scope: "User",
+        value: "hello",
+        valueKind: "String",
+      },
     ]);
-    expect(result.user.NEW_VAR).toBe("hello");
+    expect(result.user.NEW_VAR).toEqual(value("hello"));
   });
 
   it("removes accepted-removed variable from baseline", () => {
     const result = applyAccepted(base, [
-      { kind: "removed", name: "JAVA_HOME", scope: "User", value: "C:\\jdk17" },
+      {
+        kind: "removed",
+        name: "JAVA_HOME",
+        scope: "User",
+        value: "C:\\jdk17",
+        valueKind: "String",
+      },
     ]);
     expect("JAVA_HOME" in result.user).toBe(false);
   });
@@ -124,23 +175,33 @@ describe("applyAccepted", () => {
         name: "JAVA_HOME",
         scope: "User",
         oldValue: "C:\\jdk17",
+        oldValueKind: "String",
         newValue: "C:\\jdk21",
+        newValueKind: "String",
       },
     ]);
-    expect(result.user.JAVA_HOME).toBe("C:\\jdk21");
+    expect(result.user.JAVA_HOME).toEqual(value("C:\\jdk21"));
   });
 
   it("does not mutate the original baseline", () => {
     const original = JSON.parse(JSON.stringify(base));
-    applyAccepted(base, [{ kind: "added", name: "X", scope: "User", value: "y" }]);
+    applyAccepted(base, [
+      { kind: "added", name: "X", scope: "User", value: "y", valueKind: "String" },
+    ]);
     expect(base).toEqual(original);
   });
 
   it("handles system scope correctly", () => {
     const result = applyAccepted(base, [
-      { kind: "added", name: "SYS_NEW", scope: "System", value: "val" },
+      {
+        kind: "added",
+        name: "SYS_NEW",
+        scope: "System",
+        value: "val",
+        valueKind: "String",
+      },
     ]);
-    expect(result.system.SYS_NEW).toBe("val");
+    expect(result.system.SYS_NEW).toEqual(value("val"));
     expect(result.user).toEqual(base.user);
   });
 });

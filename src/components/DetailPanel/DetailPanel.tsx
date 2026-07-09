@@ -6,13 +6,15 @@ import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
 import { lookupEnvDescription } from "../../lib/envDescriptions";
-import type { EnvVar, VarScope } from "../../types";
+import { resolveEnvValueKind } from "../../lib/envValueKind";
+import type { EnvValueKindSelection, EnvVar, VarScope } from "../../types";
 import { ListEditor } from "../ListEditor/ListEditor";
 import { PathEditor } from "../PathEditor/PathEditor";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { IconButton } from "../ui/IconButton";
+import { Select } from "../ui/Select";
 import { Textarea } from "../ui/Textarea";
 
 interface Props {
@@ -22,7 +24,12 @@ interface Props {
   userPathInEnv: boolean;
   systemPathInEnv: boolean;
   staged: Map<string, StagedChange>;
-  onStage: (name: string, scope: VarScope, value: string) => void;
+  onStage: (
+    name: string,
+    scope: VarScope,
+    value: string,
+    valueKind?: EnvValueKindSelection,
+  ) => void;
   onStageDelete: (name: string, scope: VarScope) => void;
   onUnstage: (name: string, scope: VarScope) => void;
   onStageAddToPath: (scope: "User" | "System") => void;
@@ -80,6 +87,7 @@ export function DetailPanel({
 }: Props) {
   const { t } = useI18n();
   const [overrideSeparator, setOverrideSeparator] = useState<";" | "," | "plain" | null>(null);
+  const [valueKindSelection, setValueKindSelection] = useState<EnvValueKindSelection>("Auto");
   const prevVarRef = useRef<{ name: string; scope: string } | null>(null);
   const variableName = variable?.name;
   const variableScope = variable?.scope;
@@ -98,7 +106,10 @@ export function DetailPanel({
     if (!variableName || !variableScope) return;
     const isSameVar =
       prevVarRef.current?.name === variableName && prevVarRef.current?.scope === variableScope;
-    if (!isSameVar) setOverrideSeparator(null);
+    if (!isSameVar) {
+      setOverrideSeparator(null);
+      setValueKindSelection("Auto");
+    }
     prevVarRef.current = { name: variableName, scope: variableScope };
   }, [variableName, variableScope]);
 
@@ -144,8 +155,18 @@ export function DetailPanel({
   const isStagedDelete = stagedChange?.kind === "delete";
   const isStagedSet = stagedChange?.kind === "set";
 
+  const resolvedValueKind = resolveEnvValueKind(
+    valueKindSelection,
+    value,
+    variable.valueKind ?? resolveEnvValueKind("Auto", variable.value),
+  );
+  const typeDirty =
+    resolvedValueKind !== (variable.valueKind ?? resolveEnvValueKind("Auto", variable.value));
+  const editorDirty = dirty || typeDirty;
+
   const handleApply = () => {
-    onStage(variable.name, variable.scope, value);
+    if (valueKindSelection === "Auto") onStage(variable.name, variable.scope, value);
+    else onStage(variable.name, variable.scope, value, valueKindSelection);
   };
 
   const handleDelete = () => {
@@ -157,6 +178,7 @@ export function DetailPanel({
   const handleUnstage = () => {
     onUnstage(variable.name, variable.scope);
     reset(stagedChange?.originalValue ?? variable.value);
+    setValueKindSelection("Auto");
   };
 
   const handleBrowseFolder = async () => {
@@ -180,9 +202,8 @@ export function DetailPanel({
     }
   };
 
-  const effectiveSeparator = overrideSeparator === "plain"
-    ? null
-    : (overrideSeparator ?? variable.listSeparator);
+  const effectiveSeparator =
+    overrideSeparator === "plain" ? null : (overrideSeparator ?? variable.listSeparator);
   const readOnly = variable.scope === "System" && !elevated;
   const showFolderPicker =
     !readOnly && effectiveSeparator === null && looksLikeSinglePath(variable.name, value);
@@ -236,7 +257,7 @@ export function DetailPanel({
         </div>
 
         <div className="flex gap-2 shrink-0">
-          {dirty ? (
+          {editorDirty ? (
             <>
               <Button variant="primary" size="sm" onClick={handleApply}>
                 {t("detail.stage")}
@@ -286,6 +307,46 @@ export function DetailPanel({
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="detail-value-kind"
+              className="text-xs font-semibold text-muted uppercase tracking-wide"
+            >
+              {t("detail.value_kind")}
+            </label>
+            <Select
+              id="detail-value-kind"
+              options={[
+                {
+                  value: "Auto",
+                  label: t("value_kind.auto_current", {
+                    kind: t(
+                      `value_kind.${resolvedValueKind === "String" ? "string" : "expand_string"}`,
+                    ),
+                  }),
+                },
+                { value: "String", label: t("value_kind.string") },
+                { value: "ExpandString", label: t("value_kind.expand_string") },
+              ]}
+              value={valueKindSelection}
+              onValueChange={setValueKindSelection}
+              disabled={readOnly}
+              className="w-full max-w-sm px-2.5 py-1.5 bg-surface border border-rim text-sm text-fg"
+            />
+            {resolvedValueKind === "String" && expandedValue && (
+              <div className="flex items-center gap-2 text-xs text-warn">
+                <Icon name="warning" size={14} />
+                <span>{t("detail.expandable_value_warning")}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setValueKindSelection("ExpandString")}
+                >
+                  {t("detail.change_to_expand_string")}
+                </Button>
+              </div>
+            )}
+          </div>
           {/* Editor label + mode toggle */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

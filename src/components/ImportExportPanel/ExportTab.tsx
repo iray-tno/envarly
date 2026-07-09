@@ -83,7 +83,12 @@ export function ExportTab({ onStatus }: ExportTabProps) {
     api
       .getEnvVars()
       .then((vars: EnvVar[]) => {
-        const flat: FlatVar[] = vars.map((v) => ({ name: v.name, value: v.value, scope: v.scope }));
+        const flat: FlatVar[] = vars.map((v) => ({
+          name: v.name,
+          value: v.value,
+          valueKind: v.valueKind,
+          scope: v.scope,
+        }));
         setAllVars(flat);
         setChecked(Object.fromEntries(flat.map((v) => [varKey(v), true])));
       })
@@ -112,7 +117,12 @@ export function ExportTab({ onStatus }: ExportTabProps) {
     try {
       let savedPath: string | null;
       if (scope === "Custom") {
-        savedPath = await api.exportCustomVars(selectedCustomVars, format);
+        savedPath = await api.exportCustomVars(
+          selectedCustomVars.flatMap((variable) =>
+            variable.valueKind ? [{ ...variable, valueKind: variable.valueKind }] : [],
+          ),
+          format,
+        );
       } else {
         savedPath = await api.exportVars(scope, format);
       }

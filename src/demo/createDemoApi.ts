@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { EnvarlyApi, LaunchOptions } from "../api";
-import type { EnvSnapshot, EnvVar, SnapshotMeta, VarScope } from "../types";
+import { inferEnvValueKind } from "../lib/envValueKind";
+import type { EnvSnapshot, EnvVar, SnapshotMeta, SnapshotValue, VarScope } from "../types";
 import bundledFixture from "./envarly-demo.json";
 
 interface DemoFixture {
@@ -31,11 +32,12 @@ function inferListSeparator(name: string, value: string): ";" | "," | null {
 function snapshotToVars(snapshot: EnvSnapshot): EnvVar[] {
   return (["User", "System"] as const).flatMap((scope) => {
     const entries = scope === "User" ? snapshot.user : snapshot.system;
-    return Object.entries(entries).map(([name, value]) => ({
+    return Object.entries(entries).map(([name, entry]) => ({
       name,
-      value,
+      value: entry.value,
       scope,
-      listSeparator: inferListSeparator(name, value),
+      valueKind: entry.kind ?? inferEnvValueKind(entry.value),
+      listSeparator: inferListSeparator(name, entry.value),
     }));
   });
 }
@@ -44,18 +46,51 @@ function scopedRecord(snapshot: EnvSnapshot, scope: VarScope) {
   return scope === "User" ? snapshot.user : snapshot.system;
 }
 
-function parseJsonSnapshot(content: string): EnvSnapshot {
-  const parsed = JSON.parse(content) as Partial<EnvSnapshot>;
+function normalizeValues(values: Record<string, string | SnapshotValue> = {}) {
+  return Object.fromEntries(
+    Object.entries(values).map(([name, entry]) => [
+      name,
+      typeof entry === "string" ? { value: entry, kind: null } : entry,
+    ]),
+  );
+}
+
+function normalizeSnapshot(snapshot: {
+  user?: Record<string, string | SnapshotValue>;
+  system?: Record<string, string | SnapshotValue>;
+}): EnvSnapshot {
   return {
-    user: parsed.user ?? {},
-    system: parsed.system ?? {},
+    user: normalizeValues(snapshot.user),
+    system: normalizeValues(snapshot.system),
   };
 }
 
 export async function loadDemoFixture(options: LaunchOptions): Promise<DemoFixture> {
-  if (!options.demoFixture) return clone(bundledFixture as unknown as DemoFixture);
+  const load = (raw: unknown) => {
+    const fixture = clone(raw) as Omit<DemoFixture, "current" | "baseline" | "snapshots"> & {
+      current: Parameters<typeof normalizeSnapshot>[0];
+      baseline?: Parameters<typeof normalizeSnapshot>[0];
+      snapshots: Array<
+        Omit<SnapshotMeta, "snapshot" | "version"> & {
+          version?: number;
+          snapshot: Parameters<typeof normalizeSnapshot>[0];
+        }
+      >;
+    };
+    return {
+      ...fixture,
+      current: normalizeSnapshot(fixture.current),
+      baseline: fixture.baseline ? normalizeSnapshot(fixture.baseline) : undefined,
+      snapshots: fixture.snapshots.map((snapshot) => ({
+        ...snapshot,
+        version: snapshot.version ?? 1,
+        snapshot: normalizeSnapshot(snapshot.snapshot),
+      })),
+    };
+  };
+  if (!options.demoFixture) return load(bundledFixture);
   const content = await invoke<string>("read_demo_fixture", { path: options.demoFixture });
-  return JSON.parse(content) as DemoFixture;
+  return load(JSON.parse(content));
 }
 
 export function createDemoApi(
@@ -72,14 +107,27 @@ export function createDemoApi(
   return {
     getLaunchOptions: async () => options,
     getEnvVars: async () => snapshotToVars(current),
-    setEnvVar: async (name, value, scope) => {
-      scopedRecord(current, scope)[name] = value;
+    setEnvVar: async (name, value, valueKind, scope) => {
+      scopedRecord(current, scope)[name] = { value, kind: valueKind };
     },
     deleteEnvVar: async (name, scope) => {
       delete scopedRecord(current, scope)[name];
     },
+    applyEnvChanges: async (changes) => {
+      for (const change of changes) {
+        if (change.changeType === "delete") {
+          delete scopedRecord(current, change.scope)[change.name];
+        } else {
+          scopedRecord(current, change.scope)[change.name] = {
+            value: change.value,
+            kind: change.valueKind,
+          };
+        }
+      }
+    },
     createSnapshot: async (label) => {
       const created: SnapshotMeta = {
+        version: 2,
         id: `demo-${Date.now()}`,
         createdAt: new Date().toISOString(),
         label,
@@ -119,7 +167,7 @@ export function createDemoApi(
       if (format !== "json") {
         return fallbackApi.parseImport(content, format);
       }
-      return parseJsonSnapshot(content);
+      return normalizeSnapshot(JSON.parse(content));
     },
     getPathStatus: async () => ({
       installDir: fixture.installDir,
@@ -127,7 +175,7 @@ export function createDemoApi(
       systemHasEntry: fixture.pathStatus.systemHasEntry,
     }),
     getPathProposal: async (scope) => {
-      const path = scopedRecord(current, scope).Path ?? "";
+      const path = scopedRecord(current, scope).Path?.value ?? "";
       const entries = path.split(";").filter(Boolean);
       if (entries.some((entry) => entry.toLowerCase() === fixture.installDir.toLowerCase())) {
         return null;

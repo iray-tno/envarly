@@ -38,6 +38,9 @@
     "label_path": "Path entries (drag to reorder)",
     "label_list": "List entries (drag to reorder)",
     "label_value": "Value",
+    "value_kind": "Registry type",
+    "expandable_value_warning": "This value contains a variable reference that will not expand when saved as a string.",
+    "change_to_expand_string": "Use expandable string",
     "browse_folder": "Browse for folder",
     "plain_text": "Plain text",
     "list_semicolon": "List (;)",
@@ -66,12 +69,19 @@
     "name": "Name",
     "scope": "Scope",
     "value": "Value",
+    "value_kind": "Registry type",
     "placeholder_name": "VARIABLE_NAME",
     "placeholder_value": "(empty)",
     "exists": "{{name}} already exists in {{scope}} scope",
     "cancel": "Cancel",
     "stage": "Stage new variable",
     "system_admin": "System (admin)"
+  },
+  "value_kind": {
+    "auto": "Auto",
+    "auto_current": "Auto ({{kind}})",
+    "string": "String (REG_SZ)",
+    "expand_string": "Expandable string (REG_EXPAND_SZ)"
   },
   "staged": {
     "critical_one": "Critical system variable will be modified",
@@ -115,6 +125,8 @@
     "applying": "Applying…"
   },
   "import": {
+    "legacy_types": "This import does not include registry types. Existing variables keep their current type; new variables use automatic detection.",
+    "confirm_legacy_types": "Some imported variables do not include registry types. Continue with automatic type resolution?",
     "choose_file": "Choose file…",
     "paste_placeholder": "…or paste file contents here",
     "parse": "Parse",
@@ -165,6 +177,7 @@
   "snapshot": {
     "title": "Snapshots",
     "description": "Save the current state of all environment variables. Preview and restore any snapshot.",
+    "confirm_legacy_restore": "This snapshot does not include registry types. Existing variables will keep their current type and new variables will use automatic detection. Continue?",
     "label_placeholder": "Snapshot label (optional)…",
     "save": "Save snapshot",
     "saving": "…",

@@ -5,7 +5,7 @@ use std::collections::HashMap;
 #[cfg(windows)]
 use winreg::enums::*;
 #[cfg(windows)]
-use winreg::RegKey;
+use winreg::{RegKey, RegValue};
 
 use crate::error::EnvarlyError;
 
@@ -21,12 +21,37 @@ pub enum VarScope {
     System,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+pub enum EnvValueKind {
+    String,
+    ExpandString,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct EnvValue {
+    pub value: String,
+    /// Legacy snapshots have no registry type. They remain readable, but the
+    /// frontend must resolve the type before staging a restore.
+    pub kind: Option<EnvValueKind>,
+}
+
+impl EnvValue {
+    pub fn typed(value: String, kind: EnvValueKind) -> Self {
+        Self {
+            value,
+            kind: Some(kind),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EnvVar {
     pub name: String,
     pub value: String,
     pub scope: VarScope,
+    pub value_kind: EnvValueKind,
     /// ";", ",", or null — indicates how the value should be rendered as a list.
     pub list_separator: Option<String>,
 }
@@ -34,8 +59,23 @@ pub struct EnvVar {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EnvSnapshot {
-    pub user: HashMap<String, String>,
-    pub system: HashMap<String, String>,
+    pub user: HashMap<String, EnvValue>,
+    pub system: HashMap<String, EnvValue>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "changeType", rename_all = "camelCase")]
+pub enum EnvChange {
+    Set {
+        name: String,
+        value: String,
+        value_kind: EnvValueKind,
+        scope: VarScope,
+    },
+    Delete {
+        name: String,
+        scope: VarScope,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -43,10 +83,10 @@ pub struct EnvSnapshot {
 // ---------------------------------------------------------------------------
 
 pub trait EnvBackend: Send + Sync {
-    fn read_user(&self) -> Result<HashMap<String, String>, EnvarlyError>;
-    fn read_system(&self) -> Result<HashMap<String, String>, EnvarlyError>;
-    fn write_user(&self, name: &str, value: &str) -> Result<(), EnvarlyError>;
-    fn write_system(&self, name: &str, value: &str) -> Result<(), EnvarlyError>;
+    fn read_user(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError>;
+    fn read_system(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError>;
+    fn write_user(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError>;
+    fn write_system(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError>;
     fn delete_user(&self, name: &str) -> Result<(), EnvarlyError>;
     fn delete_system(&self, name: &str) -> Result<(), EnvarlyError>;
     fn is_elevated(&self) -> bool;
@@ -62,27 +102,27 @@ pub struct WinregBackend;
 
 #[cfg(windows)]
 impl EnvBackend for WinregBackend {
-    fn read_user(&self) -> Result<HashMap<String, String>, EnvarlyError> {
+    fn read_user(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError> {
         let key = RegKey::predef(HKEY_CURRENT_USER).open_subkey(USER_ENV_KEY)?;
         Ok(iter_string_values(&key).collect())
     }
 
-    fn read_system(&self) -> Result<HashMap<String, String>, EnvarlyError> {
+    fn read_system(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError> {
         let key = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey(SYSTEM_ENV_KEY)?;
         Ok(iter_string_values(&key).collect())
     }
 
-    fn write_user(&self, name: &str, value: &str) -> Result<(), EnvarlyError> {
+    fn write_user(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError> {
         let key = RegKey::predef(HKEY_CURRENT_USER)
             .open_subkey_with_flags(USER_ENV_KEY, KEY_SET_VALUE)?;
-        key.set_value(name, &value)?;
+        key.set_raw_value(name, &to_reg_value(value)?)?;
         Ok(())
     }
 
-    fn write_system(&self, name: &str, value: &str) -> Result<(), EnvarlyError> {
+    fn write_system(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError> {
         let key = RegKey::predef(HKEY_LOCAL_MACHINE)
             .open_subkey_with_flags(SYSTEM_ENV_KEY, KEY_SET_VALUE)?;
-        key.set_value(name, &value)?;
+        key.set_raw_value(name, &to_reg_value(value)?)?;
         Ok(())
     }
 
@@ -117,8 +157,8 @@ impl EnvBackend for WinregBackend {
 
 #[cfg(test)]
 pub struct MemBackend {
-    pub user: std::sync::Mutex<HashMap<String, String>>,
-    pub system: std::sync::Mutex<HashMap<String, String>>,
+    pub user: std::sync::Mutex<HashMap<String, EnvValue>>,
+    pub system: std::sync::Mutex<HashMap<String, EnvValue>>,
     pub elevated: bool,
 }
 
@@ -133,7 +173,15 @@ impl MemBackend {
     }
 
     pub fn with_user(self, vars: impl IntoIterator<Item = (&'static str, &'static str)>) -> Self {
-        *self.user.lock().unwrap() = vars.into_iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
+        *self.user.lock().unwrap() = vars
+            .into_iter()
+            .map(|(k, v)| {
+                (
+                    k.to_string(),
+                    EnvValue::typed(v.to_string(), EnvValueKind::String),
+                )
+            })
+            .collect();
         self
     }
 
@@ -145,32 +193,39 @@ impl MemBackend {
 
 #[cfg(test)]
 impl EnvBackend for MemBackend {
-    fn read_user(&self) -> Result<HashMap<String, String>, EnvarlyError> {
+    fn read_user(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError> {
         Ok(self.user.lock().unwrap().clone())
     }
 
-    fn read_system(&self) -> Result<HashMap<String, String>, EnvarlyError> {
+    fn read_system(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError> {
         Ok(self.system.lock().unwrap().clone())
     }
 
-    fn write_user(&self, name: &str, value: &str) -> Result<(), EnvarlyError> {
-        self.user.lock().unwrap().insert(name.to_string(), value.to_string());
+    fn write_user(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError> {
+        self.user
+            .lock()
+            .unwrap()
+            .insert(name.to_string(), value.clone());
         Ok(())
     }
 
-    fn write_system(&self, name: &str, value: &str) -> Result<(), EnvarlyError> {
+    fn write_system(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError> {
         if !self.elevated {
             return Err(EnvarlyError::Registry(std::io::Error::from(
                 std::io::ErrorKind::PermissionDenied,
             )));
         }
-        self.system.lock().unwrap().insert(name.to_string(), value.to_string());
+        self.system
+            .lock()
+            .unwrap()
+            .insert(name.to_string(), value.clone());
         Ok(())
     }
 
     fn delete_user(&self, name: &str) -> Result<(), EnvarlyError> {
-        self.user.lock().unwrap().remove(name)
-            .ok_or_else(|| EnvarlyError::Registry(std::io::Error::from(std::io::ErrorKind::NotFound)))?;
+        self.user.lock().unwrap().remove(name).ok_or_else(|| {
+            EnvarlyError::Registry(std::io::Error::from(std::io::ErrorKind::NotFound))
+        })?;
         Ok(())
     }
 
@@ -180,8 +235,9 @@ impl EnvBackend for MemBackend {
                 std::io::ErrorKind::PermissionDenied,
             )));
         }
-        self.system.lock().unwrap().remove(name)
-            .ok_or_else(|| EnvarlyError::Registry(std::io::Error::from(std::io::ErrorKind::NotFound)))?;
+        self.system.lock().unwrap().remove(name).ok_or_else(|| {
+            EnvarlyError::Registry(std::io::Error::from(std::io::ErrorKind::NotFound))
+        })?;
         Ok(())
     }
 
@@ -198,13 +254,31 @@ impl EnvBackend for MemBackend {
 pub fn read_all_with(backend: &dyn EnvBackend) -> Result<Vec<EnvVar>, EnvarlyError> {
     let mut vars: Vec<EnvVar> = Vec::new();
 
-    for (name, value) in backend.read_user()? {
-        let list_separator = detect_list_separator(&name, &value);
-        vars.push(EnvVar { name, value, scope: VarScope::User, list_separator });
+    for (name, env_value) in backend.read_user()? {
+        let value_kind = env_value.kind.ok_or_else(|| {
+            EnvarlyError::InvalidInput(format!("registry value {name:?} has no type"))
+        })?;
+        let list_separator = detect_list_separator(&name, &env_value.value);
+        vars.push(EnvVar {
+            name,
+            value: env_value.value,
+            scope: VarScope::User,
+            value_kind,
+            list_separator,
+        });
     }
-    for (name, value) in backend.read_system()? {
-        let list_separator = detect_list_separator(&name, &value);
-        vars.push(EnvVar { name, value, scope: VarScope::System, list_separator });
+    for (name, env_value) in backend.read_system()? {
+        let value_kind = env_value.kind.ok_or_else(|| {
+            EnvarlyError::InvalidInput(format!("registry value {name:?} has no type"))
+        })?;
+        let list_separator = detect_list_separator(&name, &env_value.value);
+        vars.push(EnvVar {
+            name,
+            value: env_value.value,
+            scope: VarScope::System,
+            value_kind,
+            list_separator,
+        });
     }
 
     vars.sort_by_key(|a| a.name.to_lowercase());
@@ -218,21 +292,137 @@ pub fn read_snapshot_with(backend: &dyn EnvBackend) -> Result<EnvSnapshot, Envar
     })
 }
 
-pub fn write_var_with(backend: &dyn EnvBackend, name: &str, value: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
+pub fn write_var_with(
+    backend: &dyn EnvBackend,
+    name: &str,
+    value: &str,
+    kind: EnvValueKind,
+    scope: &VarScope,
+) -> Result<(), EnvarlyError> {
+    let env_value = EnvValue::typed(value.to_string(), kind);
     match scope {
-        VarScope::User   => backend.write_user(name, value)?,
-        VarScope::System => backend.write_system(name, value)?,
+        VarScope::User => backend.write_user(name, &env_value)?,
+        VarScope::System => backend.write_system(name, &env_value)?,
+    }
+    let written = match scope {
+        VarScope::User => backend.read_user()?,
+        VarScope::System => backend.read_system()?,
+    };
+    if written.get(name) != Some(&env_value) {
+        return Err(EnvarlyError::InvalidInput(format!(
+            "registry verification failed for {name:?}"
+        )));
     }
     backend.broadcast_changes();
     Ok(())
 }
 
-pub fn delete_var_with(backend: &dyn EnvBackend, name: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
+pub fn delete_var_with(
+    backend: &dyn EnvBackend,
+    name: &str,
+    scope: &VarScope,
+) -> Result<(), EnvarlyError> {
     match scope {
-        VarScope::User   => backend.delete_user(name)?,
+        VarScope::User => backend.delete_user(name)?,
         VarScope::System => backend.delete_system(name)?,
     }
     backend.broadcast_changes();
+    Ok(())
+}
+
+pub fn apply_changes_with(
+    backend: &dyn EnvBackend,
+    changes: &[EnvChange],
+) -> Result<(), EnvarlyError> {
+    let baseline = read_snapshot_with(backend)?;
+
+    for change in changes {
+        let result = match change {
+            EnvChange::Set {
+                name,
+                value,
+                value_kind,
+                scope,
+            } => {
+                let env_value = EnvValue::typed(value.clone(), *value_kind);
+                match scope {
+                    VarScope::User => backend.write_user(name, &env_value),
+                    VarScope::System => backend.write_system(name, &env_value),
+                }
+                .and_then(|()| verify_value(backend, name, scope, Some(&env_value)))
+            }
+            EnvChange::Delete { name, scope } => match scope {
+                VarScope::User => backend.delete_user(name),
+                VarScope::System => backend.delete_system(name),
+            }
+            .and_then(|()| verify_value(backend, name, scope, None)),
+        };
+
+        if let Err(error) = result {
+            let rollback = restore_snapshot_with(backend, &baseline);
+            backend.broadcast_changes();
+            return match rollback {
+                Ok(()) => Err(error),
+                Err(rollback_error) => Err(EnvarlyError::InvalidInput(format!(
+                    "apply failed: {error}; rollback also failed: {rollback_error}"
+                ))),
+            };
+        }
+    }
+
+    backend.broadcast_changes();
+    Ok(())
+}
+
+fn verify_value(
+    backend: &dyn EnvBackend,
+    name: &str,
+    scope: &VarScope,
+    expected: Option<&EnvValue>,
+) -> Result<(), EnvarlyError> {
+    let values = match scope {
+        VarScope::User => backend.read_user()?,
+        VarScope::System => backend.read_system()?,
+    };
+    if values.get(name) == expected {
+        Ok(())
+    } else {
+        Err(EnvarlyError::InvalidInput(format!(
+            "registry verification failed for {name:?}"
+        )))
+    }
+}
+
+fn restore_snapshot_with(
+    backend: &dyn EnvBackend,
+    snapshot: &EnvSnapshot,
+) -> Result<(), EnvarlyError> {
+    restore_scope(
+        backend.read_user()?,
+        &snapshot.user,
+        |name, value| backend.write_user(name, value),
+        |name| backend.delete_user(name),
+    )?;
+    restore_scope(
+        backend.read_system()?,
+        &snapshot.system,
+        |name, value| backend.write_system(name, value),
+        |name| backend.delete_system(name),
+    )
+}
+
+fn restore_scope(
+    current: HashMap<String, EnvValue>,
+    baseline: &HashMap<String, EnvValue>,
+    write: impl Fn(&str, &EnvValue) -> Result<(), EnvarlyError>,
+    delete: impl Fn(&str) -> Result<(), EnvarlyError>,
+) -> Result<(), EnvarlyError> {
+    for name in current.keys().filter(|name| !baseline.contains_key(*name)) {
+        delete(name)?;
+    }
+    for (name, value) in baseline {
+        write(name, value)?;
+    }
     Ok(())
 }
 
@@ -251,13 +441,23 @@ pub fn read_snapshot() -> Result<EnvSnapshot, EnvarlyError> {
 }
 
 #[cfg(windows)]
-pub fn write_var(name: &str, value: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
-    write_var_with(&WinregBackend, name, value, scope)
+pub fn write_var(
+    name: &str,
+    value: &str,
+    kind: EnvValueKind,
+    scope: &VarScope,
+) -> Result<(), EnvarlyError> {
+    write_var_with(&WinregBackend, name, value, kind, scope)
 }
 
 #[cfg(windows)]
 pub fn delete_var(name: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
     delete_var_with(&WinregBackend, name, scope)
+}
+
+#[cfg(windows)]
+pub fn apply_changes(changes: &[EnvChange]) -> Result<(), EnvarlyError> {
+    apply_changes_with(&WinregBackend, changes)
 }
 
 #[cfg(windows)]
@@ -287,16 +487,35 @@ pub(crate) fn detect_list_separator(name: &str, value: &str) -> Option<String> {
 }
 
 #[cfg(windows)]
-fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, String)> + '_ {
+fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, EnvValue)> + '_ {
     key.enum_values().filter_map(|v| {
         let (name, val) = v.ok()?;
-        match val.vtype {
-            REG_SZ | REG_EXPAND_SZ => Some((name, val.to_string())),
+        let kind = match val.vtype {
+            REG_SZ => Some(EnvValueKind::String),
+            REG_EXPAND_SZ => Some(EnvValueKind::ExpandString),
             _ => None,
-        }
+        }?;
+        Some((name, EnvValue::typed(val.to_string(), kind)))
     })
 }
 
+#[cfg(windows)]
+fn to_reg_value(value: &EnvValue) -> Result<RegValue, EnvarlyError> {
+    let kind = value.kind.ok_or_else(|| {
+        EnvarlyError::InvalidInput("registry type must be resolved before writing".into())
+    })?;
+    let mut bytes = Vec::with_capacity((value.value.encode_utf16().count() + 1) * 2);
+    for unit in value.value.encode_utf16().chain(std::iter::once(0)) {
+        bytes.extend_from_slice(&unit.to_le_bytes());
+    }
+    Ok(RegValue {
+        bytes,
+        vtype: match kind {
+            EnvValueKind::String => REG_SZ,
+            EnvValueKind::ExpandString => REG_EXPAND_SZ,
+        },
+    })
+}
 #[cfg(windows)]
 pub(crate) fn broadcast_settings_change() {
     #[cfg(target_os = "windows")]
@@ -304,9 +523,7 @@ pub(crate) fn broadcast_settings_change() {
         use windows_sys::Win32::UI::WindowsAndMessaging::{
             SendMessageTimeoutW, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
         };
-        let env = "Environment\0"
-            .encode_utf16()
-            .collect::<Vec<u16>>();
+        let env = "Environment\0".encode_utf16().collect::<Vec<u16>>();
         SendMessageTimeoutW(
             HWND_BROADCAST,
             WM_SETTINGCHANGE,
@@ -335,9 +552,18 @@ mod tests {
 
     #[test]
     fn path_name_always_semicolon() {
-        assert_eq!(detect_list_separator("PATH", "anything"), Some(";".to_string()));
-        assert_eq!(detect_list_separator("path", "anything"), Some(";".to_string()));
-        assert_eq!(detect_list_separator("Path", "anything"), Some(";".to_string()));
+        assert_eq!(
+            detect_list_separator("PATH", "anything"),
+            Some(";".to_string())
+        );
+        assert_eq!(
+            detect_list_separator("path", "anything"),
+            Some(";".to_string())
+        );
+        assert_eq!(
+            detect_list_separator("Path", "anything"),
+            Some(";".to_string())
+        );
     }
 
     #[test]
@@ -350,20 +576,38 @@ mod tests {
 
     #[test]
     fn pathext_is_semicolon() {
-        assert_eq!(detect_list_separator("PATHEXT", ".COM;.EXE;.BAT;.CMD"), Some(";".to_string()));
-        assert_eq!(detect_list_separator("pathext", ".COM;.EXE"), Some(";".to_string()));
+        assert_eq!(
+            detect_list_separator("PATHEXT", ".COM;.EXE;.BAT;.CMD"),
+            Some(";".to_string())
+        );
+        assert_eq!(
+            detect_list_separator("pathext", ".COM;.EXE"),
+            Some(";".to_string())
+        );
     }
 
     #[test]
     fn single_value_not_detected() {
-        assert_eq!(detect_list_separator("JAVA_HOME", r"C:\Program Files\Java\jdk-21"), None);
+        assert_eq!(
+            detect_list_separator("JAVA_HOME", r"C:\Program Files\Java\jdk-21"),
+            None
+        );
     }
 
     #[test]
     fn no_proxy_is_comma() {
-        assert_eq!(detect_list_separator("NO_PROXY", "localhost,127.0.0.1"), Some(",".to_string()));
-        assert_eq!(detect_list_separator("no_proxy", "localhost"), Some(",".to_string()));
-        assert_eq!(detect_list_separator("NOPROXY", "localhost"), Some(",".to_string()));
+        assert_eq!(
+            detect_list_separator("NO_PROXY", "localhost,127.0.0.1"),
+            Some(",".to_string())
+        );
+        assert_eq!(
+            detect_list_separator("no_proxy", "localhost"),
+            Some(",".to_string())
+        );
+        assert_eq!(
+            detect_list_separator("NOPROXY", "localhost"),
+            Some(",".to_string())
+        );
     }
 
     // --- MemBackend read/write/delete ---
@@ -371,24 +615,42 @@ mod tests {
     #[test]
     fn write_and_read_user_var() {
         let b = backend();
-        write_var_with(&b, "MY_VAR", "hello", &VarScope::User).unwrap();
+        write_var_with(&b, "MY_VAR", "hello", EnvValueKind::String, &VarScope::User).unwrap();
         let snap = read_snapshot_with(&b).unwrap();
-        assert_eq!(snap.user.get("MY_VAR").map(String::as_str), Some("hello"));
+        assert_eq!(
+            snap.user.get("MY_VAR").map(|value| value.value.as_str()),
+            Some("hello")
+        );
         assert!(snap.system.is_empty());
     }
 
     #[test]
     fn write_and_read_system_var_elevated() {
         let b = backend(); // elevated = true by default
-        write_var_with(&b, "SYS_VAR", "world", &VarScope::System).unwrap();
+        write_var_with(
+            &b,
+            "SYS_VAR",
+            "world",
+            EnvValueKind::ExpandString,
+            &VarScope::System,
+        )
+        .unwrap();
         let snap = read_snapshot_with(&b).unwrap();
-        assert_eq!(snap.system.get("SYS_VAR").map(String::as_str), Some("world"));
+        assert_eq!(
+            snap.system.get("SYS_VAR").map(|value| value.value.as_str()),
+            Some("world")
+        );
+        assert_eq!(
+            snap.system["SYS_VAR"].kind,
+            Some(EnvValueKind::ExpandString)
+        );
     }
 
     #[test]
     fn write_system_var_non_elevated_returns_error() {
         let b = MemBackend::new().with_elevated(false);
-        let err = write_var_with(&b, "SYS_VAR", "x", &VarScope::System).unwrap_err();
+        let err = write_var_with(&b, "SYS_VAR", "x", EnvValueKind::String, &VarScope::System)
+            .unwrap_err();
         assert!(matches!(err, EnvarlyError::Registry(_)));
     }
 
@@ -408,9 +670,12 @@ mod tests {
 
     #[test]
     fn read_all_with_combines_and_sorts() {
-        let b = MemBackend::new()
-            .with_user([("ZEBRA", "z"), ("APPLE", "a")]);
-        *b.system.lock().unwrap() = [("MIDDLE".to_string(), "m".to_string())].into();
+        let b = MemBackend::new().with_user([("ZEBRA", "z"), ("APPLE", "a")]);
+        *b.system.lock().unwrap() = [(
+            "MIDDLE".to_string(),
+            EnvValue::typed("m".to_string(), EnvValueKind::String),
+        )]
+        .into();
 
         let vars = read_all_with(&b).unwrap();
         let names: Vec<&str> = vars.iter().map(|v| v.name.as_str()).collect();
@@ -426,8 +691,10 @@ mod tests {
             ("NO_PROXY", "localhost,127.0.0.1"),
         ]);
         let vars = read_all_with(&b).unwrap();
-        let map: HashMap<&str, Option<String>> =
-            vars.iter().map(|v| (v.name.as_str(), v.list_separator.clone())).collect();
+        let map: HashMap<&str, Option<String>> = vars
+            .iter()
+            .map(|v| (v.name.as_str(), v.list_separator.clone()))
+            .collect();
         assert_eq!(map["PATH"], Some(";".to_string()));
         assert_eq!(map["PATHEXT"], Some(";".to_string()));
         assert_eq!(map["JAVA_HOME"], None);
@@ -437,8 +704,57 @@ mod tests {
     #[test]
     fn overwrite_existing_var() {
         let b = backend().with_user([("MY_VAR", "old")]);
-        write_var_with(&b, "MY_VAR", "new", &VarScope::User).unwrap();
+        write_var_with(&b, "MY_VAR", "new", EnvValueKind::String, &VarScope::User).unwrap();
         let snap = read_snapshot_with(&b).unwrap();
-        assert_eq!(snap.user["MY_VAR"], "new");
+        assert_eq!(snap.user["MY_VAR"].value, "new");
+    }
+
+    #[test]
+    fn atomic_apply_preserves_types() {
+        let b = backend().with_user([("EXPANDED", "%USERPROFILE%\\bin")]);
+        apply_changes_with(
+            &b,
+            &[EnvChange::Set {
+                name: "EXPANDED".into(),
+                value: "%USERPROFILE%\\tools".into(),
+                value_kind: EnvValueKind::ExpandString,
+                scope: VarScope::User,
+            }],
+        )
+        .unwrap();
+
+        let value = &read_snapshot_with(&b).unwrap().user["EXPANDED"];
+        assert_eq!(value.value, "%USERPROFILE%\\tools");
+        assert_eq!(value.kind, Some(EnvValueKind::ExpandString));
+    }
+
+    #[test]
+    fn atomic_apply_rolls_back_prior_changes_after_failure() {
+        let b = MemBackend::new()
+            .with_user([("KEEP", "original")])
+            .with_elevated(false);
+        let result = apply_changes_with(
+            &b,
+            &[
+                EnvChange::Set {
+                    name: "KEEP".into(),
+                    value: "changed".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::User,
+                },
+                EnvChange::Set {
+                    name: "DENIED".into(),
+                    value: "value".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::System,
+                },
+            ],
+        );
+
+        assert!(result.is_err());
+        assert_eq!(
+            read_snapshot_with(&b).unwrap().user["KEEP"].value,
+            "original"
+        );
     }
 }

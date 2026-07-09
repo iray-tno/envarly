@@ -78,6 +78,9 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
 
   const handleRestore = () => {
     if (!previewing) return;
+    if (previewing.version < 2 && !confirm(t("snapshot.confirm_legacy_restore"))) {
+      return;
+    }
     onStageSnapshot(previewing.snapshot);
     const count = previewDiff.length;
     setStatus(

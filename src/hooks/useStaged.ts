@@ -1,5 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
-import type { EnvSnapshot, EnvVar, VarScope } from "../types";
+import { inferEnvValueKind, resolveEnvValueKind } from "../lib/envValueKind";
+import type {
+  EnvSnapshot,
+  EnvValueKind,
+  EnvValueKindSelection,
+  EnvVar,
+  SnapshotValue,
+  VarScope,
+} from "../types";
 
 export type StagedKind = "set" | "delete";
 
@@ -10,8 +18,19 @@ interface StagedChangeBase {
 
 export type StagedChange =
   /** Value currently in the registry; null if this is a brand-new variable. */
-  | (StagedChangeBase & { kind: "set"; originalValue: string | null; newValue: string })
-  | (StagedChangeBase & { kind: "delete"; originalValue: string; newValue: null });
+  | (StagedChangeBase & {
+      kind: "set";
+      originalValue: string | null;
+      originalValueKind: EnvValueKind | null;
+      newValue: string;
+      newValueKind: EnvValueKind;
+    })
+  | (StagedChangeBase & {
+      kind: "delete";
+      originalValue: string;
+      originalValueKind: EnvValueKind;
+      newValue: null;
+    });
 
 type StagedKey = string; // `${VarScope}:${name}`
 
@@ -37,15 +56,37 @@ export function useStaged(registryVars: EnvVar[]) {
 
   /** Stage a value change for a single variable. */
   const stageSet = useCallback(
-    (name: string, scope: VarScope, newValue: string) => {
+    (
+      name: string,
+      scope: VarScope,
+      newValue: string,
+      valueKindSelection: EnvValueKindSelection = "Auto",
+    ) => {
       const k = stagedKey(name, scope);
-      const original = registryByKey.get(k)?.value ?? null;
+      const registryValue = registryByKey.get(k);
+      const original = registryValue?.value ?? null;
+      const originalValueKind = registryValue
+        ? (registryValue.valueKind ?? inferEnvValueKind(registryValue.value))
+        : null;
+      const newValueKind = resolveEnvValueKind(
+        valueKindSelection,
+        newValue,
+        originalValueKind ?? undefined,
+      );
       setStaged((prev) => {
         const next = new Map(prev);
-        if (original === newValue) {
+        if (original === newValue && originalValueKind === newValueKind) {
           next.delete(k);
         } else {
-          next.set(k, { kind: "set", name, scope, originalValue: original, newValue });
+          next.set(k, {
+            kind: "set",
+            name,
+            scope,
+            originalValue: original,
+            originalValueKind,
+            newValue,
+            newValueKind,
+          });
         }
         return next;
       });
@@ -58,10 +99,20 @@ export function useStaged(registryVars: EnvVar[]) {
     (name: string, scope: VarScope) => {
       const k = stagedKey(name, scope);
       const original = registryByKey.get(k)?.value ?? null;
-      if (original === null) return;
+      const originalValueKind = registryByKey.get(k)
+        ? (registryByKey.get(k)?.valueKind ?? inferEnvValueKind(registryByKey.get(k)?.value ?? ""))
+        : undefined;
+      if (original === null || !originalValueKind) return;
       setStaged((prev) => {
         const next = new Map(prev);
-        next.set(k, { kind: "delete", name, scope, originalValue: original, newValue: null });
+        next.set(k, {
+          kind: "delete",
+          name,
+          scope,
+          originalValue: original,
+          originalValueKind,
+          newValue: null,
+        });
         return next;
       });
     },
@@ -71,15 +122,25 @@ export function useStaged(registryVars: EnvVar[]) {
   /** Stage a batch of changes from Import (with optional deletions for Replace strategy). */
   const stageImport = useCallback(
     (
-      sets: Array<{ name: string; scope: VarScope; value: string }>,
+      sets: Array<{
+        name: string;
+        scope: VarScope;
+        value: string;
+        valueKind: EnvValueKind | null;
+      }>,
       deletes: Array<{ name: string; scope: VarScope }> = [],
     ) => {
       setStaged((prev) => {
         const next = new Map(prev);
         for (const v of sets) {
           const k = stagedKey(v.name, v.scope);
-          const original = registryByKey.get(k)?.value ?? null;
-          if (original === v.value) {
+          const registryValue = registryByKey.get(k);
+          const original = registryValue?.value ?? null;
+          const originalValueKind = registryValue
+            ? (registryValue.valueKind ?? inferEnvValueKind(registryValue.value))
+            : null;
+          const newValueKind = v.valueKind ?? originalValueKind ?? inferEnvValueKind(v.value);
+          if (original === v.value && originalValueKind === newValueKind) {
             next.delete(k);
           } else {
             next.set(k, {
@@ -87,19 +148,23 @@ export function useStaged(registryVars: EnvVar[]) {
               name: v.name,
               scope: v.scope,
               originalValue: original,
+              originalValueKind,
               newValue: v.value,
+              newValueKind,
             });
           }
         }
         for (const d of deletes) {
           const k = stagedKey(d.name, d.scope);
-          const original = registryByKey.get(k)?.value ?? null;
-          if (original !== null) {
+          const registryValue = registryByKey.get(k);
+          const original = registryValue?.value ?? null;
+          if (original !== null && registryValue) {
             next.set(k, {
               kind: "delete",
               name: d.name,
               scope: d.scope,
               originalValue: original,
+              originalValueKind: registryValue.valueKind ?? inferEnvValueKind(registryValue.value),
               newValue: null,
             });
           }
@@ -116,35 +181,35 @@ export function useStaged(registryVars: EnvVar[]) {
       setStaged((prev) => {
         const next = new Map(prev);
 
-        for (const [name, value] of Object.entries(snap.user)) {
-          const k = stagedKey(name, "User");
-          const original = registryByKey.get(k)?.value ?? null;
-          if (original === value) {
+        const stageValue = (name: string, scope: VarScope, value: SnapshotValue) => {
+          const k = stagedKey(name, scope);
+          const registryValue = registryByKey.get(stagedKey(name, scope));
+          const original = registryValue?.value ?? null;
+          const originalValueKind = registryValue
+            ? (registryValue.valueKind ?? inferEnvValueKind(registryValue.value))
+            : null;
+          const snapshotValue = typeof value === "string" ? { value, kind: null } : value;
+          const newValueKind =
+            snapshotValue.kind ?? originalValueKind ?? inferEnvValueKind(snapshotValue.value);
+          if (original === snapshotValue.value && originalValueKind === newValueKind) {
             next.delete(k);
           } else {
-            next.set(k, {
+            next.set(stagedKey(name, scope), {
               kind: "set",
               name,
-              scope: "User",
+              scope,
               originalValue: original,
-              newValue: value,
+              originalValueKind,
+              newValue: snapshotValue.value,
+              newValueKind,
             });
           }
+        };
+        for (const [name, value] of Object.entries(snap.user)) {
+          stageValue(name, "User", value);
         }
         for (const [name, value] of Object.entries(snap.system)) {
-          const k = stagedKey(name, "System");
-          const original = registryByKey.get(k)?.value ?? null;
-          if (original === value) {
-            next.delete(k);
-          } else {
-            next.set(k, {
-              kind: "set",
-              name,
-              scope: "System",
-              originalValue: original,
-              newValue: value,
-            });
-          }
+          stageValue(name, "System", value);
         }
 
         // Stage deletes for registry vars not present in the snapshot
@@ -157,6 +222,7 @@ export function useStaged(registryVars: EnvVar[]) {
               name: v.name,
               scope: v.scope,
               originalValue: v.value,
+              originalValueKind: v.valueKind ?? inferEnvValueKind(v.value),
               newValue: null,
             });
           }
@@ -201,6 +267,7 @@ export function useStaged(registryVars: EnvVar[]) {
           name: change.name,
           scope: change.scope,
           value: change.newValue,
+          valueKind: change.newValueKind,
           listSeparator:
             existing?.listSeparator ?? inferListSeparator(change.name, change.newValue),
         });
