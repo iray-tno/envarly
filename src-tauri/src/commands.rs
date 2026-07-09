@@ -55,6 +55,11 @@ pub fn get_env_vars() -> Result<Vec<EnvVar>, EnvarlyError> {
 }
 
 #[tauri::command]
+pub fn get_unsupported_env_values() -> Result<Vec<env_store::UnsupportedEnvValue>, EnvarlyError> {
+    env_store::read_unsupported_values()
+}
+
+#[tauri::command]
 pub fn get_registry_snapshot() -> Result<crate::env_store::EnvSnapshot, EnvarlyError> {
     env_store::read_snapshot()
 }

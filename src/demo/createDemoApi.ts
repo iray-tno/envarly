@@ -107,6 +107,7 @@ export function createDemoApi(
   return {
     getLaunchOptions: async () => options,
     getEnvVars: async () => snapshotToVars(current),
+    getUnsupportedEnvValues: async () => [],
     setEnvVar: async (name, value, valueKind, scope) => {
       scopedRecord(current, scope)[name] = { value, kind: valueKind };
     },

@@ -34,6 +34,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::get_env_vars,
+            commands::get_unsupported_env_values,
             commands::get_registry_snapshot,
             commands::set_env_var,
             commands::delete_env_var,
