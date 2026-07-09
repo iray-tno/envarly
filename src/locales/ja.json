@@ -2,6 +2,30 @@
   "app": {
     "registry_error": "レジストリエラー: {{error}}"
   },
+  "diagnostics": {
+    "summary_one": "環境変数の要確認項目が {{count}} 件あります",
+    "summary_other": "環境変数の要確認項目が {{count}} 件あります",
+    "show": "表示",
+    "hide": "閉じる",
+    "information": "参考情報",
+    "kind": {
+      "expandable-stored-as-string": "環境変数参照を含みますが、REG_SZ として保存されています。",
+      "undefined-reference": "未定義の変数 %{{detail}}% を参照しています。",
+      "missing-temp-directory": "存在しないディレクトリを参照しています: {{detail}}",
+      "unsupported-registry-type": "未対応のレジストリ型 {{detail}} のため編集できません。",
+      "invalid-nul": "不正な NUL 文字が含まれています。",
+      "windows-generated-override": "通常は Windows が生成しますが、Environment レジストリキーで上書きされています。",
+      "missing-path-entry": "存在しない PATH エントリが含まれています: {{detail}}",
+      "duplicate-path-entry": "重複した PATH エントリが含まれています: {{detail}}",
+      "expandable-without-reference": "REG_EXPAND_SZ ですが、変数参照が含まれていません。",
+      "system-references-user-variable": "システム変数からユーザー変数 %{{detail}}% を参照しています。"
+    },
+    "action": {
+      "set-type": "型変更をステージ",
+      "set-value": "整理をステージ",
+      "delete": "削除をステージ"
+    }
+  },
   "header": {
     "refresh": "更新",
     "apply_staged_one": "{{count}} 件の変更を適用",

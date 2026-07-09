@@ -1,6 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { createDemoApi, loadDemoFixture } from "./demo/createDemoApi";
-import type { EnvChange, EnvSnapshot, EnvValueKind, EnvVar, SnapshotMeta, VarScope } from "./types";
+import type {
+  EnvChange,
+  EnvSnapshot,
+  EnvValueKind,
+  EnvVar,
+  SnapshotMeta,
+  UnsupportedEnvValue,
+  VarScope,
+} from "./types";
 
 export interface LaunchOptions {
   demo: boolean;
@@ -10,6 +18,7 @@ export interface LaunchOptions {
 export interface EnvarlyApi {
   getLaunchOptions: () => Promise<LaunchOptions>;
   getEnvVars: () => Promise<EnvVar[]>;
+  getUnsupportedEnvValues: () => Promise<UnsupportedEnvValue[]>;
   setEnvVar: (
     name: string,
     value: string,
@@ -42,6 +51,7 @@ export interface EnvarlyApi {
 const normalApi: EnvarlyApi = {
   getLaunchOptions: () => invoke<LaunchOptions>("get_launch_options"),
   getEnvVars: () => invoke<EnvVar[]>("get_env_vars"),
+  getUnsupportedEnvValues: () => invoke<UnsupportedEnvValue[]>("get_unsupported_env_values"),
   setEnvVar: (name, value, valueKind, scope) =>
     invoke<void>("set_env_var", { name, value, valueKind, scope }),
   deleteEnvVar: (name, scope) => invoke<void>("delete_env_var", { name, scope }),
@@ -81,6 +91,7 @@ async function getApi(): Promise<EnvarlyApi> {
 export const api: EnvarlyApi = {
   getLaunchOptions: async () => (await getApi()).getLaunchOptions(),
   getEnvVars: async () => (await getApi()).getEnvVars(),
+  getUnsupportedEnvValues: async () => (await getApi()).getUnsupportedEnvValues(),
   setEnvVar: async (name, value, valueKind, scope) =>
     (await getApi()).setEnvVar(name, value, valueKind, scope),
   deleteEnvVar: async (name, scope) => (await getApi()).deleteEnvVar(name, scope),

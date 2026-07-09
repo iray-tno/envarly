@@ -17,6 +17,12 @@ export interface EnvVar {
   listSeparator: ";" | "," | null;
 }
 
+export interface UnsupportedEnvValue {
+  name: string;
+  scope: VarScope;
+  registryType: string;
+}
+
 export interface EnvSnapshot {
   user: Record<string, SnapshotValue>;
   system: Record<string, SnapshotValue>;

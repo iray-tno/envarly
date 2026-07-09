@@ -63,6 +63,14 @@ pub struct EnvSnapshot {
     pub system: HashMap<String, EnvValue>,
 }
 
+#[derive(Debug, Clone, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct UnsupportedEnvValue {
+    pub name: String,
+    pub scope: VarScope,
+    pub registry_type: String,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "changeType", rename_all = "camelCase")]
 pub enum EnvChange {
@@ -465,6 +473,25 @@ pub fn is_elevated() -> bool {
     WinregBackend.is_elevated()
 }
 
+#[cfg(windows)]
+pub fn read_unsupported_values() -> Result<Vec<UnsupportedEnvValue>, EnvarlyError> {
+    let user = RegKey::predef(HKEY_CURRENT_USER).open_subkey(USER_ENV_KEY)?;
+    let system = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey(SYSTEM_ENV_KEY)?;
+    let mut values = unsupported_values(&user, VarScope::User)
+        .chain(unsupported_values(&system, VarScope::System))
+        .collect::<Vec<_>>();
+    values.sort_by(|a, b| {
+        let scope_order = |scope: &VarScope| match scope {
+            VarScope::User => 0,
+            VarScope::System => 1,
+        };
+        scope_order(&a.scope)
+            .cmp(&scope_order(&b.scope))
+            .then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
+    });
+    Ok(values)
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -496,6 +523,24 @@ fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, EnvValue)> 
             _ => None,
         }?;
         Some((name, EnvValue::typed(val.to_string(), kind)))
+    })
+}
+
+#[cfg(windows)]
+fn unsupported_values(
+    key: &RegKey,
+    scope: VarScope,
+) -> impl Iterator<Item = UnsupportedEnvValue> + '_ {
+    key.enum_values().filter_map(move |value| {
+        let (name, value) = value.ok()?;
+        if matches!(value.vtype, REG_SZ | REG_EXPAND_SZ) {
+            return None;
+        }
+        Some(UnsupportedEnvValue {
+            name,
+            scope: scope.clone(),
+            registry_type: format!("{:?}", value.vtype),
+        })
     })
 }
 
