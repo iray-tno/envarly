@@ -71,8 +71,8 @@ pub struct UnsupportedEnvValue {
     pub registry_type: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-#[serde(tag = "changeType", rename_all = "camelCase")]
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[serde(tag = "changeType", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum EnvChange {
     Set {
         name: String,
@@ -771,6 +771,28 @@ mod tests {
         let value = &read_snapshot_with(&b).unwrap().user["EXPANDED"];
         assert_eq!(value.value, "%USERPROFILE%\\tools");
         assert_eq!(value.kind, Some(EnvValueKind::ExpandString));
+    }
+
+    #[test]
+    fn env_change_deserializes_camel_case_fields() {
+        let change: EnvChange = serde_json::from_value(serde_json::json!({
+            "changeType": "set",
+            "name": "EXPANDED",
+            "value": "%USERPROFILE%\\tools",
+            "valueKind": "ExpandString",
+            "scope": "User"
+        }))
+        .unwrap();
+
+        assert_eq!(
+            change,
+            EnvChange::Set {
+                name: "EXPANDED".into(),
+                value: "%USERPROFILE%\\tools".into(),
+                value_kind: EnvValueKind::ExpandString,
+                scope: VarScope::User,
+            }
+        );
     }
 
     #[test]

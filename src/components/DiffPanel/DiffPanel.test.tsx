@@ -94,4 +94,16 @@ describe("DiffPanel", () => {
     expect(screen.getByText(/−1 removed/i)).toBeInTheDocument();
     expect(screen.getByText(/~1 changed/i)).toBeInTheDocument();
   });
+
+  it("shows apply errors", () => {
+    render(
+      <DiffPanel
+        entries={entries}
+        onApply={vi.fn()}
+        onDismiss={vi.fn()}
+        error="Registry error: access denied"
+      />,
+    );
+    expect(screen.getByText("Registry error: access denied")).toBeInTheDocument();
+  });
 });

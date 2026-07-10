@@ -68,6 +68,7 @@ export default function App() {
     handleDiffApply,
     handleDiffDismiss,
     applyBusy,
+    applyError,
   } = useDiff(refresh, setDialog);
 
   const { handleRefresh } = useAppInit({
@@ -103,7 +104,7 @@ export default function App() {
     setSnapshotsOpen,
   });
 
-  const { handleApplyStaged, busy: stagedBusy } = useApplyStaged({
+  const { handleApplyStaged, busy: stagedBusy, error: stagedError } = useApplyStaged({
     staged,
     clearStaged,
     refresh,
@@ -223,9 +224,11 @@ export default function App() {
           staged={staged}
           stagedDiff={stagedDiff}
           stagedBusy={stagedBusy}
+          stagedError={stagedError}
           onApplyStaged={handleApplyStaged}
           diffEntries={diffEntries}
           applyBusy={applyBusy}
+          applyError={applyError}
           onDiffApply={handleDiffApply}
           onDiffDismiss={handleDiffDismiss}
           onStageImport={handleStageImport}
