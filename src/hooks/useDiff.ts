@@ -13,12 +13,14 @@ interface UseDiffResult {
   handleDiffApply: (accepted: DiffEntry[], reverted: DiffEntry[]) => Promise<void>;
   handleDiffDismiss: () => void;
   applyBusy: boolean;
+  applyError: string | null;
 }
 
 export function useDiff(refresh: () => Promise<void>, setDialog: SetDialog): UseDiffResult {
   const baselineRef = useRef<EnvSnapshot | null>(null);
   const [diffEntries, setDiffEntries] = useState<DiffEntry[]>([]);
   const [applyBusy, setApplyBusy] = useState(false);
+  const [applyError, setApplyError] = useState<string | null>(null);
 
   const checkForExternalChanges = useCallback(async () => {
     if (!baselineRef.current) return;
@@ -39,6 +41,7 @@ export function useDiff(refresh: () => Promise<void>, setDialog: SetDialog): Use
   const handleDiffApply = useCallback(
     async (accepted: DiffEntry[], reverted: DiffEntry[]) => {
       setApplyBusy(true);
+      setApplyError(null);
       try {
         for (const entry of reverted) {
           const scope = entry.scope as VarScope;
@@ -54,6 +57,7 @@ export function useDiff(refresh: () => Promise<void>, setDialog: SetDialog): Use
         await refresh();
       } catch (err) {
         console.error("Failed to apply diff", err);
+        setApplyError(String(err));
       } finally {
         setApplyBusy(false);
       }
@@ -64,6 +68,7 @@ export function useDiff(refresh: () => Promise<void>, setDialog: SetDialog): Use
   const handleDiffDismiss = useCallback(() => {
     if (baselineRef.current) baselineRef.current = applyAccepted(baselineRef.current, diffEntries);
     setDiffEntries([]);
+    setApplyError(null);
     setDialog(null);
   }, [diffEntries, setDialog]);
 
@@ -74,5 +79,6 @@ export function useDiff(refresh: () => Promise<void>, setDialog: SetDialog): Use
     handleDiffApply,
     handleDiffDismiss,
     applyBusy,
+    applyError,
   };
 }

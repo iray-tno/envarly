@@ -10,9 +10,10 @@ interface Props {
   onApply: (accepted: DiffEntry[], reverted: DiffEntry[]) => void;
   onDismiss: () => void;
   busy?: boolean;
+  error?: string | null;
 }
 
-export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
+export function DiffPanel({ entries, onApply, onDismiss, busy, error }: Props) {
   const { t } = useI18n();
   const [accepted, setAccepted] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(entries.map((e) => [`${e.scope}:${e.name}`, true])),
@@ -97,17 +98,26 @@ export function DiffPanel({ entries, onApply, onDismiss, busy }: Props) {
       </div>
 
       <div className="px-5 py-3 border-t border-rim shrink-0 flex gap-2 justify-end">
-        <Button variant="ghost" size="sm" onClick={onDismiss}>
-          {t("diff.dismiss")}
-        </Button>
-        <Button variant="primary" size="sm" onClick={handleApply} disabled={busy}>
-          {busy
-            ? t("diff.applying")
-            : t("diff.apply", {
-                accepted: acceptedCount,
-                reverted: entries.length - acceptedCount,
-              })}
-        </Button>
+        <div className="flex flex-1 flex-col gap-2">
+          {error && (
+            <p className="rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+              {error}
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={onDismiss} disabled={busy}>
+            {t("diff.dismiss")}
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleApply} disabled={busy}>
+            {busy
+              ? t("diff.applying")
+              : t("diff.apply", {
+                  accepted: acceptedCount,
+                  reverted: entries.length - acceptedCount,
+                })}
+          </Button>
+        </div>
       </div>
     </div>
   );

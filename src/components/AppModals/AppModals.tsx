@@ -17,9 +17,11 @@ interface Props {
   staged: Map<string, StagedChange>;
   stagedDiff: DiffEntry[];
   stagedBusy: boolean;
+  stagedError: string | null;
   onApplyStaged: (takeSnapshot: boolean) => Promise<void>;
   diffEntries: DiffEntry[];
   applyBusy: boolean;
+  applyError: string | null;
   onDiffApply: (accepted: DiffEntry[], reverted: DiffEntry[]) => Promise<void>;
   onDiffDismiss: () => void;
   onStageImport: (
@@ -47,9 +49,11 @@ export function AppModals({
   staged,
   stagedDiff,
   stagedBusy,
+  stagedError,
   onApplyStaged,
   diffEntries,
   applyBusy,
+  applyError,
   onDiffApply,
   onDiffDismiss,
   onStageImport,
@@ -79,6 +83,7 @@ export function AppModals({
         <StagedModal
           diff={stagedDiff}
           busy={stagedBusy}
+          error={stagedError}
           onApply={onApplyStaged}
           onClose={() => setDialog(null)}
         />
@@ -96,6 +101,7 @@ export function AppModals({
             onApply={onDiffApply}
             onDismiss={onDiffDismiss}
             busy={applyBusy}
+            error={applyError}
           />
         </div>
       </Modal>

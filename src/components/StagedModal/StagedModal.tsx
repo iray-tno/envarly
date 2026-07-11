@@ -13,6 +13,7 @@ type ViewMode = "delta" | "full";
 interface StagedModalProps {
   diff: DiffEntry[];
   busy: boolean;
+  error?: string | null;
   onApply: (takeSnapshot: boolean) => void;
   onClose: () => void;
 }
@@ -130,7 +131,7 @@ function ListEntries({ value, className }: { value: string; className?: string }
   );
 }
 
-export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) {
+export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModalProps) {
   const { t } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>("delta");
 
@@ -271,6 +272,11 @@ export function StagedModal({ diff, busy, onApply, onClose }: StagedModalProps) 
       </div>
 
       <div className="px-6 py-4 border-t border-rim shrink-0 flex flex-col gap-3">
+        {error && (
+          <p className="rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+            {error}
+          </p>
+        )}
         <div className="flex gap-2 justify-end">
           <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>
             {t("staged.cancel")}

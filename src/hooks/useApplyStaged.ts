@@ -24,10 +24,12 @@ export function useApplyStaged({
   setDialog,
 }: Params) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleApplyStaged = useCallback(
     async (_takeSnapshot: boolean) => {
       setBusy(true);
+      setError(null);
       try {
         const changes: EnvChange[] = Array.from(staged.values(), (change) =>
           change.kind === "delete"
@@ -54,6 +56,7 @@ export function useApplyStaged({
         await refreshPathStatus();
       } catch (err) {
         console.error("Failed to apply staged changes", err);
+        setError(String(err));
       } finally {
         setBusy(false);
       }
@@ -61,5 +64,5 @@ export function useApplyStaged({
     [staged, clearStaged, refresh, refreshPathStatus, baselineRef, setDialog],
   );
 
-  return { handleApplyStaged, busy };
+  return { handleApplyStaged, busy, error };
 }

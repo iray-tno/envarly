@@ -104,6 +104,20 @@ describe("useApplyStaged", () => {
     expect(params.setDialog).toHaveBeenCalledWith(null);
   });
 
+  it("keeps the modal open and exposes the error when apply fails", async () => {
+    vi.mocked(api.applyEnvChanges).mockRejectedValue("Registry error: access denied");
+    const params = makeParams();
+    const { result } = renderHook(() => useApplyStaged(params));
+
+    await act(async () => {
+      await result.current.handleApplyStaged(false);
+    });
+
+    expect(params.clearStaged).not.toHaveBeenCalled();
+    expect(params.setDialog).not.toHaveBeenCalled();
+    expect(result.current.error).toBe("Registry error: access denied");
+  });
+
   it("busy is true during apply and false after", async () => {
     let resolveFn!: () => void;
     vi.mocked(api.applyEnvChanges).mockReturnValue(
