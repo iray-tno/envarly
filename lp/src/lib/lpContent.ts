@@ -2,7 +2,7 @@ export const GITHUB_URL = 'https://github.com/iray-tno/envarly';
 export const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest';
 export const STORYBOOK_URL = '/envarly/storybook/';
 export const REPORTS_URL = '/envarly/reports/';
-export const VERSION = '1.2.0';
+export const VERSION = '1.2.1';
 
 export type LandingCopy = {
   lang: 'en' | 'ja';
