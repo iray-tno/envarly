@@ -20,6 +20,9 @@ src-tauri/gen/
 # Promo drafts (local only)
 promo/
 
+# WinGet submission drafts (submitted to microsoft/winget-pkgs)
+winget-manifests/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json
