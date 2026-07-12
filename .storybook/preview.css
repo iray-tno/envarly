@@ -4,6 +4,25 @@
   color: var(--color-fg);
 }
 
+.sb-show-main.sb-main-padded,
+.sb-show-main.sb-main-fullscreen {
+  overflow: auto;
+}
+
+#storybook-docs {
+  min-height: 100vh;
+  overflow: visible;
+}
+
+.sbdocs-wrapper {
+  min-height: 100vh;
+  overflow: visible;
+}
+
+.sbdocs-content {
+  overflow: visible;
+}
+
 .sbdocs-content h1,
 .sbdocs-content h2,
 .sbdocs-content h3,
