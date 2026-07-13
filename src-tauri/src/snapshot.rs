@@ -1,7 +1,7 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::crypto;
 use crate::env_store::EnvSnapshot;
@@ -37,7 +37,7 @@ fn snapshots_dir() -> Result<PathBuf, EnvarlyError> {
     Ok(dir)
 }
 
-fn write_snap(path: &PathBuf, meta: &SnapshotMeta) -> Result<(), EnvarlyError> {
+fn write_snap(path: &Path, meta: &SnapshotMeta) -> Result<(), EnvarlyError> {
     let json = serde_json::to_vec(meta)?;
     let encrypted = crypto::protect(&json)?;
     fs::write(path, encrypted)
@@ -45,7 +45,7 @@ fn write_snap(path: &PathBuf, meta: &SnapshotMeta) -> Result<(), EnvarlyError> {
     Ok(())
 }
 
-fn read_snap(path: &PathBuf) -> Result<SnapshotMeta, EnvarlyError> {
+fn read_snap(path: &Path) -> Result<SnapshotMeta, EnvarlyError> {
     let encrypted = fs::read(path)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot read snapshot file: {e}")))?;
     let json = crypto::unprotect(&encrypted)?;
@@ -117,7 +117,7 @@ pub fn save_snapshot(snapshot: EnvSnapshot, label: &str) -> Result<SnapshotMeta,
 pub fn save_snapshot_to(
     snapshot: EnvSnapshot,
     label: &str,
-    dir: &PathBuf,
+    dir: &Path,
 ) -> Result<SnapshotMeta, EnvarlyError> {
     let now = Utc::now();
     let id = now.format("%Y%m%dT%H%M%SZ").to_string();
@@ -139,7 +139,7 @@ pub fn list_snapshots() -> Result<Vec<SnapshotMeta>, EnvarlyError> {
     list_snapshots_from(&snapshots_dir()?)
 }
 
-pub fn list_snapshots_from(dir: &PathBuf) -> Result<Vec<SnapshotMeta>, EnvarlyError> {
+pub fn list_snapshots_from(dir: &Path) -> Result<Vec<SnapshotMeta>, EnvarlyError> {
     let mut metas: Vec<SnapshotMeta> = Vec::new();
     for entry in fs::read_dir(dir)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot read snapshots dir: {e}")))?
@@ -161,7 +161,7 @@ pub fn rename_snapshot(id: &str, label: &str) -> Result<SnapshotMeta, EnvarlyErr
     rename_snapshot_in(id, label, &snapshots_dir()?)
 }
 
-fn rename_snapshot_in(id: &str, label: &str, dir: &PathBuf) -> Result<SnapshotMeta, EnvarlyError> {
+fn rename_snapshot_in(id: &str, label: &str, dir: &Path) -> Result<SnapshotMeta, EnvarlyError> {
     let label = label.trim();
     if label.is_empty() {
         return Err(EnvarlyError::Snapshot(
@@ -184,7 +184,7 @@ pub fn delete_snapshot(id: &str) -> Result<(), EnvarlyError> {
 }
 
 #[cfg(test)]
-pub fn delete_snapshot_from(id: &str, dir: &PathBuf) -> Result<(), EnvarlyError> {
+pub fn delete_snapshot_from(id: &str, dir: &Path) -> Result<(), EnvarlyError> {
     let path = dir.join(format!("{id}.snap"));
     fs::remove_file(&path)
         .map_err(|e| EnvarlyError::Snapshot(format!("Cannot delete snapshot: {e}")))?;
@@ -235,7 +235,7 @@ mod tests {
     #[test]
     fn list_empty_dir() {
         let dir = tempfile::tempdir().unwrap();
-        let list = list_snapshots_from(&dir.path().to_path_buf()).unwrap();
+        let list = list_snapshots_from(dir.path()).unwrap();
         assert!(list.is_empty());
     }
 
@@ -299,7 +299,7 @@ mod tests {
     #[test]
     fn delete_nonexistent_returns_error() {
         let dir = tempfile::tempdir().unwrap();
-        let result = delete_snapshot_from("no-such-id", &dir.path().to_path_buf());
+        let result = delete_snapshot_from("no-such-id", dir.path());
         assert!(result.is_err());
     }
 }
