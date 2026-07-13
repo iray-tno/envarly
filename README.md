@@ -64,8 +64,12 @@ cd src-tauri && cargo fetch && cd ..  # prefetch Rust crates
 ## Development
 
 ```sh
-npm run tauri dev     # start Tauri + Vite dev server (hot-reload)
+npm run dev           # start Envarly with Tauri + Vite hot reload
+npm run dev:web       # frontend only; Windows environment data is unavailable
 ```
+
+Run these commands from the repository root. If mise is not activated in the current PowerShell
+session, use `mise exec -- npm run dev`.
 
 ## Testing
 
