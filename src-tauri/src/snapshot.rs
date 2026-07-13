@@ -157,6 +157,25 @@ pub fn list_snapshots_from(dir: &PathBuf) -> Result<Vec<SnapshotMeta>, EnvarlyEr
     Ok(metas)
 }
 
+pub fn rename_snapshot(id: &str, label: &str) -> Result<SnapshotMeta, EnvarlyError> {
+    rename_snapshot_in(id, label, &snapshots_dir()?)
+}
+
+fn rename_snapshot_in(id: &str, label: &str, dir: &PathBuf) -> Result<SnapshotMeta, EnvarlyError> {
+    let label = label.trim();
+    if label.is_empty() {
+        return Err(EnvarlyError::Snapshot(
+            "Snapshot name cannot be empty".to_string(),
+        ));
+    }
+
+    let path = dir.join(format!("{id}.snap"));
+    let mut meta = read_snap(&path)?;
+    meta.label = label.to_string();
+    write_snap(&path, &meta)?;
+    Ok(meta)
+}
+
 pub fn delete_snapshot(id: &str) -> Result<(), EnvarlyError> {
     let path = snapshots_dir()?.join(format!("{id}.snap"));
     fs::remove_file(&path)
@@ -232,6 +251,35 @@ mod tests {
         delete_snapshot_from(&saved.id, &path).unwrap();
         let after = list_snapshots_from(&path).unwrap();
         assert!(after.is_empty());
+    }
+
+    #[test]
+    fn rename_snapshot_updates_only_the_label() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().to_path_buf();
+
+        let saved = save_snapshot_to(make_snapshot(), "before", &path).unwrap();
+        let renamed = rename_snapshot_in(&saved.id, "  after  ", &path).unwrap();
+
+        assert_eq!(renamed.id, saved.id);
+        assert_eq!(renamed.created_at, saved.created_at);
+        assert_eq!(renamed.label, "after");
+        assert_eq!(renamed.snapshot.user, saved.snapshot.user);
+
+        let listed = list_snapshots_from(&path).unwrap();
+        assert_eq!(listed[0].label, "after");
+    }
+
+    #[test]
+    fn rename_snapshot_rejects_an_empty_label() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().to_path_buf();
+        let saved = save_snapshot_to(make_snapshot(), "before", &path).unwrap();
+
+        let result = rename_snapshot_in(&saved.id, "   ", &path);
+
+        assert!(result.is_err());
+        assert_eq!(list_snapshots_from(&path).unwrap()[0].label, "before");
     }
 
     #[test]
