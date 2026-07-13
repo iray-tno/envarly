@@ -11,6 +11,7 @@ vi.mock("../../api", () => ({
     createSnapshot: vi.fn(),
     deleteSnapshot: vi.fn(),
     getRegistrySnapshot: vi.fn(),
+    renameSnapshot: vi.fn(),
   },
 }));
 
@@ -42,6 +43,11 @@ describe("SnapshotPanel", () => {
     vi.mocked(api.createSnapshot).mockResolvedValue(MOCK_SNAPSHOT);
     vi.mocked(api.deleteSnapshot).mockResolvedValue(undefined);
     vi.mocked(api.getRegistrySnapshot).mockResolvedValue(CURRENT);
+    vi.mocked(api.renameSnapshot).mockImplementation(async (id, label) => ({
+      ...MOCK_SNAPSHOT,
+      id,
+      label,
+    }));
   });
 
   it("loads and renders snapshots on mount", async () => {
@@ -102,6 +108,39 @@ describe("SnapshotPanel", () => {
     await waitFor(() => {
       expect(api.deleteSnapshot).toHaveBeenCalledWith("20240101T120000Z");
     });
+  });
+
+  it("renames a snapshot inline and updates the displayed label", async () => {
+    const user = userEvent.setup();
+    render(<SnapshotPanel onStageSnapshot={onStageSnapshot} />);
+    await screen.findByText("Before Node update");
+
+    await user.click(screen.getByRole("button", { name: "Rename snapshot" }));
+    const input = screen.getByRole("textbox", { name: "Snapshot name" });
+    await user.clear(input);
+    await user.type(input, "After Node update");
+    await user.click(screen.getByRole("button", { name: "Save snapshot name" }));
+
+    await waitFor(() => {
+      expect(api.renameSnapshot).toHaveBeenCalledWith("20240101T120000Z", "After Node update");
+    });
+    expect(screen.getByText("After Node update")).toBeInTheDocument();
+    expect(screen.getByText("Snapshot renamed.")).toBeInTheDocument();
+  });
+
+  it("cancels renaming with Escape", async () => {
+    const user = userEvent.setup();
+    render(<SnapshotPanel onStageSnapshot={onStageSnapshot} />);
+    await screen.findByText("Before Node update");
+
+    await user.click(screen.getByRole("button", { name: "Rename snapshot" }));
+    const input = screen.getByRole("textbox", { name: "Snapshot name" });
+    await user.type(input, " changed");
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("textbox", { name: "Snapshot name" })).not.toBeInTheDocument();
+    expect(screen.getByText("Before Node update")).toBeInTheDocument();
+    expect(api.renameSnapshot).not.toHaveBeenCalled();
   });
 
   it("shows empty state when no snapshots", async () => {

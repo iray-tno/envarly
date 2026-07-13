@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
@@ -21,18 +21,27 @@ interface CompareResult {
   diff: DiffEntry[];
 }
 
+interface Status {
+  kind: "success" | "error";
+  message: string;
+}
+
 export function SnapshotPanel({ onStageSnapshot }: Props) {
   const { t } = useI18n();
   const [snapshots, setSnapshots] = useState<SnapshotMeta[]>([]);
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status | null>(null);
   const [previewing, setPreviewing] = useState<SnapshotMeta | null>(null);
   const [previewDiff, setPreviewDiff] = useState<DiffEntry[]>([]);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingLabel, setEditingLabel] = useState("");
+  const [renamingId, setRenamingId] = useState<string | null>(null);
   const [comparingFrom, setComparingFrom] = useState<SnapshotMeta | null>(null);
   const [compareResult, setCompareResult] = useState<CompareResult | null>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     try {
@@ -46,6 +55,12 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (!editingId) return;
+    renameInputRef.current?.focus();
+    renameInputRef.current?.select();
+  }, [editingId]);
+
   const handleCreate = async () => {
     const snapshotLabel = label.trim() || new Date().toLocaleString();
     setBusy(true);
@@ -53,10 +68,10 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
     try {
       await api.createSnapshot(snapshotLabel);
       setLabel("");
-      setStatus(t("snapshot.saved"));
+      setStatus({ kind: "success", message: t("snapshot.saved") });
       await load();
     } catch (e) {
-      setStatus(t("snapshot.error_save", { error: e }));
+      setStatus({ kind: "error", message: t("snapshot.error_save", { error: e }) });
     } finally {
       setBusy(false);
     }
@@ -70,7 +85,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
       setPreviewDiff(computeDiff(current, snap.snapshot));
       setPreviewing(snap);
     } catch (e) {
-      setStatus(t("snapshot.error_preview", { error: e }));
+      setStatus({ kind: "error", message: t("snapshot.error_preview", { error: e }) });
     } finally {
       setLoadingPreview(false);
     }
@@ -83,11 +98,13 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
     }
     onStageSnapshot(previewing.snapshot);
     const count = previewDiff.length;
-    setStatus(
-      count === 0
-        ? t("snapshot.matches_current", { label: previewing.label })
-        : t("snapshot.staged", { count, label: previewing.label }),
-    );
+    setStatus({
+      kind: "success",
+      message:
+        count === 0
+          ? t("snapshot.matches_current", { label: previewing.label })
+          : t("snapshot.staged", { count, label: previewing.label }),
+    });
     setPreviewing(null);
     setPreviewDiff([]);
   };
@@ -105,6 +122,37 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
       await load();
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleStartRename = (snap: SnapshotMeta) => {
+    setConfirmDeleteId(null);
+    setEditingId(snap.id);
+    setEditingLabel(snap.label);
+    setStatus(null);
+  };
+
+  const handleCancelRename = () => {
+    setEditingId(null);
+    setEditingLabel("");
+  };
+
+  const handleRename = async (event: FormEvent, id: string) => {
+    event.preventDefault();
+    const nextLabel = editingLabel.trim();
+    if (!nextLabel) return;
+
+    setRenamingId(id);
+    setStatus(null);
+    try {
+      const renamed = await api.renameSnapshot(id, nextLabel);
+      setSnapshots((current) => current.map((snap) => (snap.id === id ? renamed : snap)));
+      handleCancelRename();
+      setStatus({ kind: "success", message: t("snapshot.renamed") });
+    } catch (e) {
+      setStatus({ kind: "error", message: t("snapshot.error_rename", { error: e }) });
+    } finally {
+      setRenamingId(null);
     }
   };
 
@@ -158,8 +206,8 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
       </div>
 
       {status && (
-        <p className={cn("text-xs", status.startsWith("Error") ? "text-danger" : "text-success")}>
-          {status}
+        <p className={cn("text-xs", status.kind === "error" ? "text-danger" : "text-success")}>
+          {status.message}
         </p>
       )}
 
@@ -198,67 +246,121 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
             return (
               <div
                 key={s.id}
+                data-snapshot-id={s.id}
                 className={cn(
-                  "flex items-center gap-3 px-3.5 py-2.5 bg-panel border rounded",
+                  "flex flex-col gap-2 px-3.5 py-2.5 bg-panel border rounded",
                   isComparingSource ? "border-accent/40 bg-accent/5" : "border-rim",
                 )}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-fg truncate">{s.label}</p>
+                {editingId === s.id ? (
+                  <form
+                    className="flex items-center gap-1.5"
+                    onSubmit={(e) => handleRename(e, s.id)}
+                  >
+                    <input
+                      ref={renameInputRef}
+                      aria-label={t("snapshot.rename_label")}
+                      value={editingLabel}
+                      onChange={(e) => setEditingLabel(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          handleCancelRename();
+                        }
+                      }}
+                      className="h-8 min-w-0 flex-1 rounded border border-rim bg-surface px-2.5 text-sm text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    />
+                    <IconButton
+                      aria-label={t("snapshot.save_rename")}
+                      icon="check"
+                      type="submit"
+                      disabled={!editingLabel.trim() || renamingId === s.id}
+                      title={t("snapshot.save_rename")}
+                    />
+                    <IconButton
+                      aria-label={t("snapshot.cancel_rename")}
+                      icon="x"
+                      onClick={handleCancelRename}
+                      disabled={renamingId === s.id}
+                      title={t("snapshot.cancel_rename")}
+                    />
+                  </form>
+                ) : (
+                  <p
+                    className="text-sm font-medium leading-snug text-fg break-words"
+                    title={s.label}
+                  >
+                    {s.label}
+                  </p>
+                )}
+                <div>
                   <p className="text-[11px] text-dim">{formatDate(s.createdAt)}</p>
                 </div>
-                <div className="flex gap-1.5 shrink-0 items-center">
-                  {comparingFrom ? (
-                    !isComparingSource && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handlePickCompareTarget(s)}
-                      >
-                        {t("snapshot.compare_with")}
-                      </Button>
-                    )
-                  ) : (
-                    <>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handlePreview(s)}
-                        disabled={loadingPreview}
-                      >
-                        {loadingPreview ? "…" : t("snapshot.preview")}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleStartCompare(s)}
-                        disabled={snapshots.length < 2}
-                        title={snapshots.length < 2 ? t("snapshot.need_two") : undefined}
-                      >
-                        {t("snapshot.compare")}
-                      </Button>
-                    </>
-                  )}
-                  {!comparingFrom &&
-                    (confirmDeleteId === s.id ? (
+                {editingId !== s.id && (
+                  <div className="flex min-h-8 items-center gap-1.5">
+                    {comparingFrom ? (
+                      !isComparingSource && (
+                        <Button
+                          variant="secondary"
+                          size="xs"
+                          onClick={() => handlePickCompareTarget(s)}
+                        >
+                          {t("snapshot.compare_with")}
+                        </Button>
+                      )
+                    ) : confirmDeleteId === s.id ? (
                       <>
-                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id)}>
+                        <span className="min-w-0 flex-1 text-xs text-danger">
+                          {t("snapshot.confirm_delete")}
+                        </span>
+                        <Button variant="danger" size="xs" onClick={() => handleDelete(s.id)}>
                           {t("snapshot.delete")}
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)}>
+                        <Button variant="ghost" size="xs" onClick={() => setConfirmDeleteId(null)}>
                           {t("snapshot.cancel")}
                         </Button>
                       </>
                     ) : (
-                      <IconButton
-                        aria-label="Delete snapshot"
-                        icon="x"
-                        variant="danger"
-                        onClick={() => setConfirmDeleteId(s.id)}
-                        title="Delete snapshot"
-                      />
-                    ))}
-                </div>
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="xs"
+                          onClick={() => handlePreview(s)}
+                          disabled={loadingPreview}
+                        >
+                          {loadingPreview ? "…" : t("snapshot.preview")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => handleStartCompare(s)}
+                          disabled={snapshots.length < 2}
+                          title={snapshots.length < 2 ? t("snapshot.need_two") : undefined}
+                        >
+                          {t("snapshot.compare")}
+                        </Button>
+                        <span className="ml-auto flex items-center gap-0.5">
+                          <IconButton
+                            aria-label={t("snapshot.rename")}
+                            icon="pencil"
+                            onClick={() => handleStartRename(s)}
+                            title={t("snapshot.rename")}
+                          />
+                          <IconButton
+                            aria-label={t("snapshot.delete_action")}
+                            icon="trash"
+                            variant="danger"
+                            onClick={() => {
+                              setEditingId(null);
+                              setConfirmDeleteId(s.id);
+                            }}
+                            title={t("snapshot.delete_action")}
+                          />
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

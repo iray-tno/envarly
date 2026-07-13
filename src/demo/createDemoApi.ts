@@ -138,6 +138,14 @@ export function createDemoApi(
       return clone(created);
     },
     listSnapshots: async () => clone(snapshots),
+    renameSnapshot: async (id, label) => {
+      const snapshotToRename = snapshots.find((snap) => snap.id === id);
+      if (!snapshotToRename) throw new Error(`Snapshot not found: ${id}`);
+      const nextLabel = label.trim();
+      if (!nextLabel) throw new Error("Snapshot name cannot be empty");
+      snapshotToRename.label = nextLabel;
+      return clone(snapshotToRename);
+    },
     deleteSnapshot: async (id) => {
       snapshots = snapshots.filter((snap) => snap.id !== id);
     },

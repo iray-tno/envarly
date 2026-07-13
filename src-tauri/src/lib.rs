@@ -41,6 +41,7 @@ pub fn run() {
             commands::apply_env_changes,
             commands::create_snapshot,
             commands::list_snapshots,
+            commands::rename_snapshot,
             commands::delete_snapshot,
             commands::validate_paths,
             commands::export_vars,

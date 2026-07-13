@@ -202,9 +202,9 @@ export default function App() {
           </div>
 
           {snapshotsOpen && (
-            <div className="w-[380px] shrink-0 flex flex-col border-l border-rim bg-panel overflow-hidden">
+            <div className="w-[420px] shrink-0 flex flex-col border-l border-rim bg-panel overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-rim shrink-0">
-                <span className="text-sm font-semibold text-fg">Snapshots</span>
+                <span className="text-sm font-semibold text-fg">{t("header.snapshots")}</span>
                 <IconButton
                   aria-label="Close snapshots"
                   icon="x"

@@ -98,6 +98,11 @@ pub fn list_snapshots() -> Result<Vec<SnapshotMeta>, EnvarlyError> {
 }
 
 #[tauri::command]
+pub fn rename_snapshot(id: String, label: String) -> Result<SnapshotMeta, EnvarlyError> {
+    snapshot::rename_snapshot(&id, &label)
+}
+
+#[tauri::command]
 pub fn delete_snapshot(id: String) -> Result<(), EnvarlyError> {
     snapshot::delete_snapshot(&id)
 }
