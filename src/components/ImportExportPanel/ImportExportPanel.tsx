@@ -40,8 +40,8 @@ export function ImportExportPanel({ onStage }: Props) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-5 py-4 border-b border-rim shrink-0">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="px-5 py-3 border-b border-rim shrink-0">
+        <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold text-fg">{t("modal.import_export")}</h2>
           <div className="ml-auto">
             <SegmentedControl
@@ -56,11 +56,11 @@ export function ImportExportPanel({ onStage }: Props) {
           </div>
         </div>
         {status && (
-          <p className={cn("text-xs", status.ok ? "text-success" : "text-danger")}>{status.msg}</p>
+          <p className={cn("mt-2 text-xs", status.ok ? "text-success" : "text-danger")}>{status.msg}</p>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4">
+      <div className="flex-1 overflow-y-auto px-5 py-3">
         {mode === "export" ? (
           <ExportTab onStatus={handleStatus} />
         ) : (
