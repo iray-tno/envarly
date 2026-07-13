@@ -9,6 +9,7 @@ export { GripIcon } from "./GripIcon";
 export { InfoIcon } from "./InfoIcon";
 export { MinusIcon } from "./MinusIcon";
 export { MoonIcon } from "./MoonIcon";
+export { PencilIcon } from "./PencilIcon";
 export { PlusIcon } from "./PlusIcon";
 export { RefreshIcon } from "./RefreshIcon";
 export { ShieldIcon } from "./ShieldIcon";
