@@ -1,5 +1,6 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useMemo, useState } from "react";
+import packageMetadata from "../../../package.json";
 import licensesData from "../../assets/oss-licenses.json";
 import { cn } from "../../lib/cn";
 import { Icon } from "../ui/Icon";
@@ -21,7 +22,7 @@ const ALL: Record<Ecosystem, LicenseEntry[]> = {
 
 const MIT_TEXT = `MIT License
 
-Copyright (c) 2025 iray-tno
+Copyright (c) 2025-2026 iray-tno
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -122,7 +123,10 @@ export function LicensesPanel() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-fg">Envarly</p>
-              <p className="text-xs text-dim mt-0.5">MIT License · Copyright © 2025 iray-tno</p>
+              <p className="text-xs text-muted mt-0.5">Version {packageMetadata.version}</p>
+              <p className="text-xs text-dim mt-0.5">
+                MIT License · Copyright © 2025-2026 iray-tno
+              </p>
             </div>
             <button
               type="button"
