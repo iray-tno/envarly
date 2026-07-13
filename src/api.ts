@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, isTauri } from "@tauri-apps/api/core";
 import { createDemoApi, loadDemoFixture } from "./demo/createDemoApi";
 import type {
   EnvChange,
@@ -78,6 +78,9 @@ const normalApi: EnvarlyApi = {
 let apiPromise: Promise<EnvarlyApi> | null = null;
 
 async function getApi(): Promise<EnvarlyApi> {
+  if (!isTauri()) {
+    throw new Error("Tauri runtime unavailable. Start Envarly with `npm run dev`.");
+  }
   if (!apiPromise) {
     apiPromise = normalApi
       .getLaunchOptions()
