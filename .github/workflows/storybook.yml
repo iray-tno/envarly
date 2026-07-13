@@ -39,6 +39,7 @@ jobs:
         run: |
           mkdir -p junit-reports
           npx vitest run --project=unit --reporter=junit --outputFile=junit-reports/vitest.xml || true
+          node scripts/normalize-junit.mjs typescript junit-reports/vitest.xml || true
 
       - name: Report (Biome)
         run: npx biome check --reporter=json src 2>/dev/null | node scripts/biome-to-junit.mjs > junit-reports/biome.xml || true
@@ -61,8 +62,8 @@ jobs:
       - name: Copy nextest JUnit
         run: cp src-tauri/target/nextest/ci/nextest.xml junit-reports/nextest.xml || true
 
-      - name: Fix nextest classnames for Allure
-        run: node scripts/nextest-fix-junit.mjs junit-reports/nextest.xml || true
+      - name: Normalize nextest report
+        run: node scripts/normalize-junit.mjs rust junit-reports/nextest.xml || true
 
       - name: Report (Clippy)
         run: cargo clippy --message-format=json 2>/dev/null | node ../../scripts/clippy-to-junit.mjs > ../../junit-reports/clippy.xml || true
