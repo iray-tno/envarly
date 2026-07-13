@@ -28,7 +28,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
   const [secretsOnly, setSecretsOnly] = useState(false);
-  const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -169,91 +169,99 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         />
       </div>
 
-      <div
-        role="listbox"
-        aria-label="Environment variables"
-        className="flex-1 overflow-y-auto py-1"
-        onKeyDown={handleKeyDown}
-      >
+      <div className="flex-1 overflow-y-auto py-1">
         {loading && <p className="text-center text-dim text-sm py-8">{t("sidebar.loading")}</p>}
         {!loading && sorted.length === 0 && (
           <p className="text-center text-dim text-sm py-8">{t("sidebar.empty")}</p>
         )}
-        {sorted.map((v) => {
-          const key = stagedKey(v.name, v.scope);
-          const isSelected = selected?.name === v.name && selected?.scope === v.scope;
-          const secret = resolveSecret(v.name, v.value);
-          const stagedChange = staged.get(key);
-          const isDelete = stagedChange?.kind === "delete";
-          const isSet = stagedChange?.kind === "set";
-          const isNew = isSet && stagedChange.originalValue === null;
-          return (
-            <div
-              key={key}
-              ref={(el) => {
-                if (el) itemRefs.current.set(key, el);
-                else itemRefs.current.delete(key);
-              }}
-              role="option"
-              aria-selected={isSelected}
-              tabIndex={-1}
-              onClick={() => onSelect(v)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSelect(v);
-                }
-              }}
-              className={cn(
-                "group flex items-center mx-2 w-[calc(100%-1rem)] gap-2 px-4 py-2.5 rounded text-left transition-colors cursor-pointer",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
-                isSelected ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
-                isDelete && "opacity-50",
-              )}
-            >
-              <span className={cn("flex-1 font-mono text-sm truncate", isDelete && "line-through")}>
-                {v.name}
-              </span>
-              {secret && !isDelete && (
-                <span
-                  title={secret.label}
-                  className="text-[9px] font-medium text-warn shrink-0 max-w-[44px] truncate"
+        {sorted.length > 0 && (
+          <ul aria-label="Environment variables">
+            {sorted.map((v) => {
+              const key = stagedKey(v.name, v.scope);
+              const isSelected = selected?.name === v.name && selected?.scope === v.scope;
+              const secret = resolveSecret(v.name, v.value);
+              const stagedChange = staged.get(key);
+              const isDelete = stagedChange?.kind === "delete";
+              const isSet = stagedChange?.kind === "set";
+              const isNew = isSet && stagedChange.originalValue === null;
+              return (
+                <li
+                  key={key}
+                  className={cn(
+                    "group flex items-center mx-2 w-[calc(100%-1rem)] rounded transition-colors",
+                    isSelected ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
+                  )}
                 >
-                  {secret.service}
-                </span>
-              )}
-              {isDelete && <span className="text-[9px] font-bold text-danger shrink-0">D</span>}
-              {isNew && <span className="text-[9px] font-bold text-success shrink-0">A</span>}
-              {isSet && !isNew && (
-                <span className="text-[9px] font-bold text-warn shrink-0">M</span>
-              )}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopy(v.value, key);
-                }}
-                aria-label={`Copy value of ${v.name}`}
-                title="Copy value"
-                className={cn(
-                  "shrink-0 text-[10px] px-1 py-0.5 rounded transition-all",
-                  "opacity-0 group-hover:opacity-100 focus:opacity-100",
-                  copiedKey === key ? "text-success" : "text-dim hover:text-muted",
-                )}
-              >
-                <Icon name={copiedKey === key ? "check" : "copy"} size={12} />
-              </button>
-              <span
-                className={cn(
-                  "text-[10px] font-semibold w-4 h-4 rounded flex items-center justify-center shrink-0",
-                  v.scope === "User" ? "bg-accent/15 text-accent" : "bg-violet/15 text-violet",
-                )}
-              >
-                {v.scope[0]}
-              </span>
-            </div>
-          );
-        })}
+                  <button
+                    ref={(el) => {
+                      if (el) itemRefs.current.set(key, el);
+                      else itemRefs.current.delete(key);
+                    }}
+                    type="button"
+                    aria-current={isSelected ? "true" : undefined}
+                    tabIndex={isSelected || (!selected && sorted[0] === v) ? 0 : -1}
+                    onClick={() => onSelect(v)}
+                    onKeyDown={handleKeyDown}
+                    className={cn(
+                      "flex min-w-0 flex-1 items-center gap-2 px-4 py-2.5 text-left rounded",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex-1 font-mono text-sm truncate",
+                        isDelete && "line-through",
+                      )}
+                    >
+                      {v.name}
+                    </span>
+                    {secret && !isDelete && (
+                      <span
+                        title={secret.label}
+                        className="text-[9px] font-medium text-warn shrink-0 max-w-[44px] truncate"
+                      >
+                        {secret.service}
+                      </span>
+                    )}
+                    {isDelete && (
+                      <span className="text-[9px] font-bold text-danger shrink-0">D</span>
+                    )}
+                    {isNew && <span className="text-[9px] font-bold text-success shrink-0">A</span>}
+                    {isSet && !isNew && (
+                      <span className="text-[9px] font-bold text-warn shrink-0">M</span>
+                    )}
+                    <span
+                      className={cn(
+                        "text-[10px] font-semibold w-4 h-4 rounded flex items-center justify-center shrink-0",
+                        v.scope === "User"
+                          ? "bg-accent/15 text-accent"
+                          : "bg-violet/15 text-violet",
+                      )}
+                    >
+                      {v.scope[0]}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopy(v.value, key);
+                    }}
+                    aria-label={`Copy value of ${v.name}`}
+                    title="Copy value"
+                    className={cn(
+                      "shrink-0 text-[10px] px-1 py-0.5 rounded transition-all",
+                      "mr-2 opacity-0 group-hover:opacity-100 focus:opacity-100",
+                      copiedKey === key ? "text-success" : "text-dim hover:text-muted",
+                    )}
+                  >
+                    <Icon name={copiedKey === key ? "check" : "copy"} size={12} />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       {/* Footer: new variable */}

@@ -1,16 +1,18 @@
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useId } from "react";
 import { cn } from "../../lib/cn";
 import { IconButton } from "./IconButton";
 
-interface Props {
+interface BaseProps {
   open: boolean;
   onClose: () => void;
-  title?: string;
   size?: "md" | "lg" | "xl" | "2xl";
   /** Make the body a flex column instead of overflow-y-auto. Use for panels that manage their own scrolling. */
   flex?: boolean;
   children: ReactNode;
 }
+
+type Props = BaseProps &
+  ({ title: string; ariaLabel?: never } | { title?: undefined; ariaLabel: string });
 
 const sizeCls = {
   md: "max-w-lg",
@@ -19,7 +21,17 @@ const sizeCls = {
   "2xl": "max-w-[900px]",
 };
 
-export function Modal({ open, onClose, title, size = "lg", flex = false, children }: Props) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  ariaLabel,
+  size = "lg",
+  flex = false,
+  children,
+}: Props) {
+  const titleId = useId();
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -36,6 +48,8 @@ export function Modal({ open, onClose, title, size = "lg", flex = false, childre
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
       role="dialog"
       aria-modal="true"
+      aria-label={title ? undefined : ariaLabel}
+      aria-labelledby={title ? titleId : undefined}
     >
       {/* Backdrop */}
       <div
@@ -54,7 +68,9 @@ export function Modal({ open, onClose, title, size = "lg", flex = false, childre
       >
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-rim shrink-0">
-            <h2 className="text-base font-semibold text-fg">{title}</h2>
+            <h2 id={titleId} className="text-base font-semibold text-fg">
+              {title}
+            </h2>
             <IconButton aria-label="Close" icon="x" onClick={onClose} />
           </div>
         )}

@@ -53,7 +53,7 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
       className={cn(
         "rounded border transition-opacity",
         KIND_COLORS[entry.kind],
-        !accepted && "opacity-40",
+        !accepted && "border-dashed",
       )}
     >
       <div className="flex items-center gap-2.5 px-3 py-2">
@@ -68,7 +68,7 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
         <span className="font-mono text-xs font-semibold text-fg truncate flex-1">
           {entry.name}
         </span>
-        <span className="text-[10px] uppercase tracking-wide font-semibold shrink-0 opacity-70">
+        <span className="text-[10px] uppercase tracking-wide font-semibold shrink-0">
           {entry.scope}
         </span>
         <span
@@ -83,6 +83,8 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
+            aria-label={`${expanded ? "Collapse" : "Expand"} ${entry.name}`}
+            aria-expanded={expanded}
             className="text-dim hover:text-fg text-xs shrink-0 transition-colors"
           >
             <Icon name={expanded ? "chevron-up" : "chevron-down"} size={14} />
@@ -98,9 +100,7 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
             </p>
           )}
           {(entry.kind === "removed" || entry.kind === "changed") && (
-            <p className="font-mono text-[11px] text-danger line-through opacity-70 truncate">
-              {displayOld}
-            </p>
+            <p className="font-mono text-[11px] text-danger line-through truncate">{displayOld}</p>
           )}
           {(entry.kind === "added" || entry.kind === "changed") && (
             <p className="font-mono text-[11px] text-success truncate">{displayNew}</p>
