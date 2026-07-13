@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useRef, useState } from "react";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { cn } from "../../lib/cn";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
@@ -39,6 +40,7 @@ interface RowProps {
   onFocusEntry: (index: number) => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  reducedMotion: boolean;
 }
 
 function SortableRow({
@@ -52,9 +54,16 @@ function SortableRow({
   onFocusEntry,
   onMoveUp,
   onMoveDown,
+  reducedMotion,
 }: RowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: entry.id,
+    transition: reducedMotion
+      ? null
+      : {
+          duration: 160,
+          easing: "cubic-bezier(0.2, 0, 0, 1)",
+        },
   });
 
   return (
@@ -62,7 +71,7 @@ function SortableRow({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex items-center border-b border-rim-subtle last:border-0 transition-colors",
+        "motion-sortable-row flex items-center border-b border-rim-subtle last:border-0 transition-colors",
         "focus-within:ring-2 focus-within:ring-accent focus-within:ring-inset",
         isDragging ? "opacity-50 bg-hover" : "bg-canvas",
         entry.exists === false && "bg-danger/5",
@@ -186,6 +195,7 @@ export function SortableListEditor({
 }: Props) {
   const [newValue, setNewValue] = useState("");
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const reducedMotion = useReducedMotion();
 
   const dupCount = useMemo(() => {
     const seen = new Set<string>();
@@ -329,6 +339,7 @@ export function SortableListEditor({
                 onFocusEntry={focusEntry}
                 onMoveUp={() => moveEntry(entry.id, -1)}
                 onMoveDown={() => moveEntry(entry.id, 1)}
+                reducedMotion={reducedMotion}
               />
             ))}
             {entries.length === 0 && (
