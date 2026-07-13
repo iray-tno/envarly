@@ -103,7 +103,7 @@ export function AppHeader({
           </Button>
         )}
         {elevated && (
-          <span className="inline-flex items-center gap-1 text-xs text-success opacity-60">
+          <span className="inline-flex items-center gap-1 text-xs text-success">
             <Icon name="shield" size={14} />
             {t("header.administrator")}
           </span>

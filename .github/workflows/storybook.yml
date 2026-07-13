@@ -38,7 +38,7 @@ jobs:
       - name: Report (Vitest)
         run: |
           mkdir -p junit-reports
-          npx vitest run --reporter=junit --outputFile=junit-reports/vitest.xml || true
+          npx vitest run --project=unit --reporter=junit --outputFile=junit-reports/vitest.xml || true
 
       - name: Report (Biome)
         run: npx biome check --reporter=json src 2>/dev/null | node scripts/biome-to-junit.mjs > junit-reports/biome.xml || true

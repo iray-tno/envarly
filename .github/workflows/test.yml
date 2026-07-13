@@ -20,7 +20,7 @@ jobs:
       - run: npm ci
       - run: npm run check-version
       - name: Test (Vitest)
-        run: npx vitest run --reporter=junit --outputFile=test-results.xml
+        run: npx vitest run --project=unit --reporter=junit --outputFile=test-results.xml
       - name: Report Vitest results
         uses: dorny/test-reporter@v3
         if: always()
@@ -28,6 +28,21 @@ jobs:
           name: Vitest
           path: test-results.xml
           reporter: java-junit
+
+  test-a11y:
+    name: Test (accessibility)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test Storybook accessibility
+        run: npm run test:storybook -- --run
 
   test-rs:
     name: Test (rust)

@@ -54,6 +54,7 @@ const preview: Preview = {
   },
   parameters: {
     actions: { argTypesRegex: "^on[A-Z].*" },
+    a11y: { test: "error" },
     controls: { matchers: { color: /(bg|color)$/i } },
     docs: {
       theme: docsTheme,

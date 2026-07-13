@@ -63,13 +63,13 @@ function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: str
     <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
       {keyedEntries(removed, "removed").map(({ entry, key }) => (
         <p key={key} className="font-mono text-[11px] text-danger break-all">
-          <span className="select-none mr-1 opacity-70">−</span>
+          <span className="select-none mr-1">−</span>
           {entry}
         </p>
       ))}
       {keyedEntries(added, "added").map(({ entry, key }) => (
         <p key={key} className="font-mono text-[11px] text-success break-all">
-          <span className="select-none mr-1 opacity-70">+</span>
+          <span className="select-none mr-1">+</span>
           {entry}
         </p>
       ))}
@@ -108,7 +108,7 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
               r.status === "unchanged" && "text-muted",
             )}
           >
-            <span className="select-none mr-1 opacity-50">
+            <span className="select-none mr-1">
               {r.status === "added" ? "+" : r.status === "removed" ? "−" : " "}
             </span>
             {r.entry}
@@ -193,7 +193,7 @@ export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModal
                   className={cn(
                     "px-2.5 py-0.5 capitalize transition-colors",
                     viewMode === mode
-                      ? "bg-accent text-bg font-semibold"
+                      ? "bg-accent text-canvas font-semibold"
                       : "text-muted hover:text-fg hover:bg-hover",
                   )}
                 >
@@ -220,7 +220,7 @@ export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModal
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-mono font-semibold text-fg">{entry.name}</span>
-                <span className="opacity-60 text-[10px]">{entry.scope}</span>
+                <span className="text-[10px]">{entry.scope}</span>
                 <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide">
                   {t(`staged.kind_${entry.kind}`)}
                 </span>
@@ -234,11 +234,9 @@ export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModal
 
               {entry.kind === "removed" &&
                 (isList(entry.value) ? (
-                  <ListEntries value={entry.value} className="opacity-70 line-through" />
+                  <ListEntries value={entry.value} className="line-through" />
                 ) : (
-                  <p className="font-mono text-[11px] opacity-70 line-through break-all">
-                    {entry.value}
-                  </p>
+                  <p className="font-mono text-[11px] line-through break-all">{entry.value}</p>
                 ))}
 
               {entry.kind === "added" &&

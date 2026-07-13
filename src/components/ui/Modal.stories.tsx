@@ -45,7 +45,7 @@ export const NoTitle: Story = {
       </>
     );
   },
-  args: { size: "md" },
+  args: { ariaLabel: "Untitled dialog", size: "md" },
 };
 
 export const Sizes: Story = {
