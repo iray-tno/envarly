@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useId } from "react";
+import { usePresence } from "../../hooks/usePresence";
 import { cn } from "../../lib/cn";
 import { IconButton } from "./IconButton";
 
@@ -31,6 +32,7 @@ export function Modal({
   children,
 }: Props) {
   const titleId = useId();
+  const presence = usePresence(open);
 
   useEffect(() => {
     if (!open) return;
@@ -41,11 +43,15 @@ export function Modal({
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!presence.mounted) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-6"
+      className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center p-6",
+        presence.state === "closed" && "pointer-events-none",
+      )}
+      data-state={presence.state}
       role="dialog"
       aria-modal="true"
       aria-label={title ? undefined : ariaLabel}
@@ -53,7 +59,8 @@ export function Modal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-canvas/70 backdrop-blur-sm"
+        className="motion-modal-backdrop absolute inset-0 bg-canvas/70 backdrop-blur-sm"
+        data-state={presence.state}
         onClick={onClose}
         aria-hidden="true"
       />
@@ -63,8 +70,10 @@ export function Modal({
         className={cn(
           "relative z-10 w-full flex flex-col bg-panel border border-rim rounded-lg shadow-xl",
           "max-h-[85vh] overflow-hidden",
+          "motion-modal-panel",
           sizeCls[size],
         )}
+        data-state={presence.state}
       >
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-rim shrink-0">

@@ -18,6 +18,7 @@ import { useI18n } from "./hooks/useI18n";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useLocalUndo } from "./hooks/useLocalUndo";
 import { usePathStatus } from "./hooks/usePathStatus";
+import { usePresence } from "./hooks/usePresence";
 import { useStaged } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
@@ -35,6 +36,7 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+  const snapshotsPresence = usePresence(snapshotsOpen);
   const diagnostics = useDiagnostics(vars);
 
   const {
@@ -104,7 +106,11 @@ export default function App() {
     setSnapshotsOpen,
   });
 
-  const { handleApplyStaged, busy: stagedBusy, error: stagedError } = useApplyStaged({
+  const {
+    handleApplyStaged,
+    busy: stagedBusy,
+    error: stagedError,
+  } = useApplyStaged({
     staged,
     clearStaged,
     refresh,
@@ -201,20 +207,25 @@ export default function App() {
             />
           </div>
 
-          {snapshotsOpen && (
-            <div className="w-[420px] shrink-0 flex flex-col border-l border-rim bg-panel overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-3 border-b border-rim shrink-0">
-                <span className="text-sm font-semibold text-fg">{t("header.snapshots")}</span>
-                <IconButton
-                  aria-label="Close snapshots"
-                  icon="x"
-                  onClick={() => setSnapshotsOpen(false)}
-                />
+          {snapshotsPresence.mounted && (
+            <aside
+              className="motion-snapshot-panel shrink-0 border-l border-rim overflow-hidden"
+              data-state={snapshotsPresence.state}
+            >
+              <div className="motion-snapshot-content w-[420px] h-full flex flex-col bg-panel">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-rim shrink-0">
+                  <span className="text-sm font-semibold text-fg">{t("header.snapshots")}</span>
+                  <IconButton
+                    aria-label="Close snapshots"
+                    icon="x"
+                    onClick={() => setSnapshotsOpen(false)}
+                  />
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <SnapshotPanel onStageSnapshot={handleStageSnapshot} />
+                </div>
               </div>
-              <div className="flex-1 overflow-hidden">
-                <SnapshotPanel onStageSnapshot={handleStageSnapshot} />
-              </div>
-            </div>
+            </aside>
           )}
         </main>
 

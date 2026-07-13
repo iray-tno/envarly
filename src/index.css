@@ -97,6 +97,92 @@
 }
 
 @layer components {
+  @keyframes modal-backdrop-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes modal-backdrop-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes modal-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.985);
+    }
+  }
+
+  @keyframes modal-panel-out {
+    to {
+      opacity: 0;
+      transform: translateY(5px) scale(0.99);
+    }
+  }
+
+  @keyframes snapshot-panel-in {
+    from {
+      width: 0;
+      opacity: 0;
+    }
+  }
+
+  @keyframes snapshot-content-in {
+    from {
+      transform: translateX(12px);
+    }
+  }
+
+  .motion-modal-backdrop[data-state="open"] {
+    animation: modal-backdrop-in 140ms ease-out both;
+  }
+
+  .motion-modal-backdrop[data-state="closed"] {
+    animation: modal-backdrop-out 120ms ease-in both;
+  }
+
+  .motion-modal-panel[data-state="open"] {
+    animation: modal-panel-in 160ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  .motion-modal-panel[data-state="closed"] {
+    animation: modal-panel-out 120ms ease-in both;
+  }
+
+  .motion-snapshot-panel {
+    width: 420px;
+    opacity: 1;
+    transition:
+      width 180ms cubic-bezier(0.2, 0, 0, 1),
+      opacity 120ms ease-out;
+  }
+
+  .motion-snapshot-panel[data-state="open"] {
+    animation: snapshot-panel-in 180ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  .motion-snapshot-panel[data-state="closed"] {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .motion-snapshot-content {
+    transform: translateX(0);
+    transition: transform 180ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .motion-snapshot-panel[data-state="open"] .motion-snapshot-content {
+    animation: snapshot-content-in 180ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  .motion-snapshot-panel[data-state="closed"] .motion-snapshot-content {
+    transform: translateX(12px);
+  }
+
   .app-select option {
     background: var(--color-surface);
     color: var(--color-fg);
@@ -105,5 +191,17 @@
   .app-select option:checked {
     background: var(--color-hover);
     color: var(--color-fg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-modal-backdrop,
+  .motion-modal-panel,
+  .motion-snapshot-panel,
+  .motion-snapshot-content,
+  .motion-sortable-row,
+  .app-select {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
   }
 }
