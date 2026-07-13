@@ -24,20 +24,22 @@ mod dpapi {
     use std::ptr;
     use windows_sys::Win32::Foundation::LocalFree;
     use windows_sys::Win32::Security::Cryptography::{
-        CryptProtectData, CryptUnprotectData, CRYPT_INTEGER_BLOB,
-        CRYPTPROTECT_UI_FORBIDDEN,
+        CryptProtectData, CryptUnprotectData, CRYPTPROTECT_UI_FORBIDDEN, CRYPT_INTEGER_BLOB,
     };
 
     pub fn protect(data: &[u8]) -> Result<Vec<u8>, EnvarlyError> {
         unsafe {
-            let mut input = CRYPT_INTEGER_BLOB {
+            let input = CRYPT_INTEGER_BLOB {
                 cbData: data.len() as u32,
                 pbData: data.as_ptr() as *mut u8,
             };
-            let mut output = CRYPT_INTEGER_BLOB { cbData: 0, pbData: ptr::null_mut() };
+            let mut output = CRYPT_INTEGER_BLOB {
+                cbData: 0,
+                pbData: ptr::null_mut(),
+            };
 
             let ok = CryptProtectData(
-                &mut input,
+                &input,
                 ptr::null(),
                 ptr::null_mut(),
                 ptr::null_mut(),
@@ -61,14 +63,17 @@ mod dpapi {
 
     pub fn unprotect(data: &[u8]) -> Result<Vec<u8>, EnvarlyError> {
         unsafe {
-            let mut input = CRYPT_INTEGER_BLOB {
+            let input = CRYPT_INTEGER_BLOB {
                 cbData: data.len() as u32,
                 pbData: data.as_ptr() as *mut u8,
             };
-            let mut output = CRYPT_INTEGER_BLOB { cbData: 0, pbData: ptr::null_mut() };
+            let mut output = CRYPT_INTEGER_BLOB {
+                cbData: 0,
+                pbData: ptr::null_mut(),
+            };
 
             let ok = CryptUnprotectData(
-                &mut input,
+                &input,
                 ptr::null_mut(),
                 ptr::null_mut(),
                 ptr::null_mut(),

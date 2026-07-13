@@ -361,7 +361,7 @@ pub fn parse_reg(content: &str) -> Result<EnvSnapshot, EnvarlyError> {
             continue;
         }
         if let Some(is_user) = current {
-            if let Some((name, value)) = parse_reg_entry(&line) {
+            if let Some((name, value)) = parse_reg_entry(line) {
                 if is_user {
                     user.insert(name, value);
                 } else {
