@@ -89,6 +89,7 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
           ]}
           value={valueKind}
           onValueChange={setValueKind}
+          containerClassName="w-full"
           className="w-full px-2.5 py-1.5 bg-surface border border-rim text-sm text-fg"
         />
       </div>
