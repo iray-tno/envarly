@@ -40,7 +40,7 @@ export function Select<T extends string>({
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-accent",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           className,
-          compact ? "pl-1 pr-5" : "pl-2.5 pr-7",
+          compact ? "pl-1 pr-5" : "pl-2 pr-6",
         )}
       >
         {options.map((option) => (
@@ -54,7 +54,7 @@ export function Select<T extends string>({
         size={12}
         className={cn(
           "pointer-events-none absolute top-1/2 -translate-y-1/2 text-dim",
-          compact ? "right-1" : "right-2.5",
+          compact ? "right-1" : "right-2",
           props.disabled && "opacity-50",
         )}
       />
