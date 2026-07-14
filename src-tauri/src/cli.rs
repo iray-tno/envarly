@@ -2,7 +2,11 @@
 use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
-#[command(name = "envarly", about = "Windows environment variable manager", version)]
+#[command(
+    name = "envarly",
+    about = "Windows environment variable manager",
+    version
+)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -140,7 +144,11 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
             crate::path_manage::cleanup_path(dry_run);
         }
 
-        Command::Export { scope, format, output } => {
+        Command::Export {
+            scope,
+            format,
+            output,
+        } => {
             let snapshot = env_store::read_snapshot()?;
             let scope_str = match scope {
                 ScopeArg::User => "User",
@@ -148,11 +156,11 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
                 ScopeArg::All => "All",
             };
             let content = match format {
-                ExportFormat::Json    => export::to_json(&snapshot, scope_str),
-                ExportFormat::Reg     => export::to_reg(&snapshot, scope_str),
-                ExportFormat::Ps1     => export::to_ps1(&snapshot, scope_str),
-                ExportFormat::DscV2   => export::to_dsc_v2(&snapshot, scope_str),
-                ExportFormat::DscV3   => export::to_dsc_v3(&snapshot, scope_str),
+                ExportFormat::Json => export::to_json(&snapshot, scope_str),
+                ExportFormat::Reg => export::to_reg(&snapshot, scope_str),
+                ExportFormat::Ps1 => export::to_ps1(&snapshot, scope_str),
+                ExportFormat::DscV2 => export::to_dsc_v2(&snapshot, scope_str),
+                ExportFormat::DscV3 => export::to_dsc_v3(&snapshot, scope_str),
                 ExportFormat::Ansible => export::to_ansible(&snapshot, scope_str),
             };
             match output {

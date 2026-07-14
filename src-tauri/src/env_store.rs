@@ -72,7 +72,11 @@ pub struct UnsupportedEnvValue {
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
-#[serde(tag = "changeType", rename_all = "camelCase", rename_all_fields = "camelCase")]
+#[serde(
+    tag = "changeType",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum EnvChange {
     Set {
         name: String,
