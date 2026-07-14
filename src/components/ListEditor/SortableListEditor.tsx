@@ -9,6 +9,7 @@ import {
 } from "@dnd-kit/core";
 import {
   arrayMove,
+  defaultAnimateLayoutChanges,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -21,6 +22,19 @@ import { cn } from "../../lib/cn";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { IconButton } from "../ui/IconButton";
+
+type LayoutChangeArgs = Parameters<typeof defaultAnimateLayoutChanges>[0];
+
+function animateLayoutChanges(args: LayoutChangeArgs) {
+  return (
+    defaultAnimateLayoutChanges(args) ||
+    (args.previousItems !== args.items && args.index !== args.newIndex)
+  );
+}
+
+function disableLayoutChanges() {
+  return false;
+}
 
 export interface ListEntry {
   id: string;
@@ -58,6 +72,7 @@ function SortableRow({
 }: RowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: entry.id,
+    animateLayoutChanges: reducedMotion ? disableLayoutChanges : animateLayoutChanges,
     transition: reducedMotion
       ? null
       : {
