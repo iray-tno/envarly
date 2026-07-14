@@ -23,7 +23,7 @@ const variantCls: Record<Variant, string> = {
 
 const sizeCls: Record<Size, string> = {
   xs: "px-2 py-1 text-xs",
-  sm: "px-4 py-2.5 text-sm",
+  sm: "px-4 py-2 text-sm",
   md: "px-5 py-3 text-sm font-medium",
 };
 
@@ -41,7 +41,7 @@ export function Button({
       type="button"
       {...props}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded font-medium transition-colors",
+        "inline-flex items-center gap-1 rounded font-medium transition-colors",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         variantCls[variant],

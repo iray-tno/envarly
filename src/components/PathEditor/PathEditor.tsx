@@ -136,7 +136,7 @@ export function PathEditor({
     >
       {hasWhitespace && (
         <div
-          className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
+          className="px-2 py-2 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
           role="alert"
         >
           Some entries have leading or trailing spaces — remove them to avoid lookup failures
@@ -144,7 +144,7 @@ export function PathEditor({
       )}
       {unresolvedRefs.length > 0 && (
         <div
-          className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
+          className="px-2 py-2 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
           role="alert"
         >
           {unresolvedRefs.length} unresolvable{" "}
@@ -154,7 +154,7 @@ export function PathEditor({
       )}
       {invalidCount > 0 && (
         <div
-          className="px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
+          className="px-2 py-2 rounded border border-warn/30 bg-warn/10 text-warn text-xs"
           role="alert"
         >
           {invalidCount} path{invalidCount > 1 ? "s" : ""} not found on disk

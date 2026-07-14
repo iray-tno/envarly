@@ -94,7 +94,7 @@ export function LicensesPanel() {
       {/* Top-level tabs */}
       <div className="px-5 pt-4 pb-0 border-b border-rim shrink-0">
         <h2 className="text-sm font-semibold text-fg mb-3">Licenses</h2>
-        <div className="flex gap-0.5">
+        <div className="flex gap-1">
           {(
             [
               ["envarly", "Envarly"],
@@ -106,7 +106,7 @@ export function LicensesPanel() {
               type="button"
               onClick={() => setTab(t)}
               className={cn(
-                "px-3 py-1.5 rounded-t text-xs font-medium transition-colors -mb-px border-b",
+                "px-3 py-2 rounded-t text-xs font-medium transition-colors -mb-px border-b",
                 tab === t
                   ? "bg-canvas text-fg border-canvas"
                   : "text-muted hover:bg-hover hover:text-fg border-transparent",
@@ -146,7 +146,7 @@ export function LicensesPanel() {
           {/* Third-party sub-header */}
           <div className="px-5 py-3 border-b border-rim-subtle shrink-0">
             <div className="flex items-center gap-2">
-              <div className="flex gap-0.5 shrink-0">
+              <div className="flex gap-1 shrink-0">
                 {(["npm", "rust"] as Ecosystem[]).map((e) => (
                   <button
                     key={e}

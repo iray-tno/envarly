@@ -228,7 +228,7 @@ export function DetailPanel({
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header — fixed height so button appearance doesn't shift layout */}
       <div className="flex items-center gap-3 px-6 h-[60px] border-b border-rim-subtle shrink-0">
-        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <h2 className="font-mono font-semibold text-base text-fg truncate">{variable.name}</h2>
           <Badge variant={variable.scope === "User" ? "user" : "system"}>{variable.scope}</Badge>
           {readOnly && (
@@ -237,7 +237,7 @@ export function DetailPanel({
               <button
                 type="button"
                 onClick={() => api.restartAsAdmin()}
-                className="text-[10px] text-accent hover:text-accent-hi px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors shrink-0"
+                className="text-[10px] text-accent hover:text-accent-hi px-2 py-1 rounded hover:bg-accent/10 transition-colors shrink-0"
                 title="Restart as administrator to edit system variables"
               >
                 {t("detail.restart_admin")}
@@ -245,12 +245,12 @@ export function DetailPanel({
             </>
           )}
           {isStagedSet && !dirty && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-accent/15 text-accent shrink-0">
+            <span className="text-[10px] font-semibold px-2 py-1 rounded bg-accent/15 text-accent shrink-0">
               {t("detail.staged_badge")}
             </span>
           )}
           {isStagedDelete && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-danger/15 text-danger shrink-0">
+            <span className="text-[10px] font-semibold px-2 py-1 rounded bg-danger/15 text-danger shrink-0">
               {t("detail.staged_delete_badge")}
             </span>
           )}
@@ -279,10 +279,10 @@ export function DetailPanel({
       </div>
 
       {description && (
-        <div className="flex items-center gap-2.5 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
+        <div className="flex items-center gap-2 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
           <Icon name="info" size={14} className="text-dim" />
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-surface border border-rim text-dim shrink-0 select-none">
+            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold bg-surface border border-rim text-dim shrink-0 select-none">
               {t(description.categoryKey)}
             </span>
             <p className="text-xs text-muted leading-relaxed">{t(description.summaryKey)}</p>
@@ -307,7 +307,7 @@ export function DetailPanel({
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             <label
               htmlFor="detail-value-kind"
               className="text-xs font-semibold text-muted uppercase tracking-wide"
@@ -332,7 +332,7 @@ export function DetailPanel({
               onValueChange={setValueKindSelection}
               disabled={readOnly}
               containerClassName="w-full max-w-sm"
-              className="w-full px-2.5 py-1.5 bg-surface border border-rim text-sm text-fg"
+              className="w-full px-2 py-2 bg-surface border border-rim text-sm text-fg"
             />
             {resolvedValueKind === "String" && expandedValue && (
               <div className="flex items-center gap-2 text-xs text-warn">
@@ -358,7 +358,7 @@ export function DetailPanel({
                 <button
                   type="button"
                   onClick={() => onStageAddToPath(variable.scope as "User" | "System")}
-                  className="text-[10px] text-accent hover:text-accent-hi px-1.5 py-0.5 rounded hover:bg-accent/10 transition-colors"
+                  className="text-[10px] text-accent hover:text-accent-hi px-2 py-1 rounded hover:bg-accent/10 transition-colors"
                   title="Stage adding Envarly install directory to this PATH variable"
                 >
                   {t("detail.add_to_path")}
@@ -370,7 +370,7 @@ export function DetailPanel({
                 <button
                   type="button"
                   onClick={() => setOverrideSeparator("plain")}
-                  className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
+                  className="text-[10px] text-dim hover:text-muted px-2 py-1 rounded hover:bg-hover transition-colors"
                 >
                   {t("detail.plain_text")}
                 </button>
@@ -379,14 +379,14 @@ export function DetailPanel({
                   <button
                     type="button"
                     onClick={() => setOverrideSeparator(";")}
-                    className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
+                    className="text-[10px] text-dim hover:text-muted px-2 py-1 rounded hover:bg-hover transition-colors"
                   >
                     {t("detail.list_semicolon")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setOverrideSeparator(",")}
-                    className="text-[10px] text-dim hover:text-muted px-1.5 py-0.5 rounded hover:bg-hover transition-colors"
+                    className="text-[10px] text-dim hover:text-muted px-2 py-1 rounded hover:bg-hover transition-colors"
                   >
                     {t("detail.list_comma")}
                   </button>
@@ -438,7 +438,7 @@ export function DetailPanel({
           )}
 
           {/* Metadata */}
-          <div className="flex flex-col gap-1.5 pt-2 border-t border-rim-subtle mt-1">
+          <div className="flex flex-col gap-1 pt-2 border-t border-rim-subtle mt-1">
             {[
               [t("detail.meta_scope"), variable.scope],
               [t("detail.meta_length_label"), t("detail.meta_length", { count: value.length })],

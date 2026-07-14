@@ -50,7 +50,7 @@ export function AppHeader({
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
       <div
-        className="flex items-center gap-1.5"
+        className="flex items-center gap-1"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
         <Button variant="ghost" size="sm" icon="refresh" onClick={onRefresh} disabled={loading}>

@@ -23,12 +23,12 @@ export function SegmentedControl<T extends string>({
   className,
 }: Props<T>) {
   return (
-    <div role="radiogroup" aria-label={label} className={cn("flex gap-0.5", className)}>
+    <div role="radiogroup" aria-label={label} className={cn("flex gap-1", className)}>
       {options.map((opt) => (
         <label
           key={opt.value}
           className={cn(
-            "flex items-center gap-1.5 px-4 py-2 rounded text-sm transition-colors",
+            "flex items-center gap-1 px-4 py-2 rounded text-sm transition-colors",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
             opt.disabled && "opacity-40 cursor-not-allowed",
             value === opt.value ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
@@ -43,7 +43,7 @@ export function SegmentedControl<T extends string>({
           />
           {opt.label}
           {opt.count !== undefined && (
-            <span className="text-xs px-1.5 py-0.5 rounded-full bg-hover text-dim leading-none">
+            <span className="text-xs px-2 py-1 rounded-full bg-hover text-dim leading-none">
               {opt.count}
             </span>
           )}
