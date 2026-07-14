@@ -7,11 +7,8 @@ const meta: Meta = {
 export default meta;
 
 const steps = [
-  { token: "0.5", px: "2px" },
   { token: "1", px: "4px" },
-  { token: "1.5", px: "6px" },
   { token: "2", px: "8px" },
-  { token: "2.5", px: "10px" },
   { token: "3", px: "12px" },
   { token: "4", px: "16px" },
   { token: "5", px: "20px" },
@@ -23,10 +20,10 @@ const steps = [
 ];
 
 const patterns = [
-  { label: "Button padding", cls: "px-3 py-1.5", desc: "px-3 py-1.5" },
+  { label: "Button padding", cls: "px-3 py-2", desc: "px-3 py-2" },
   { label: "Panel padding", cls: "px-5 py-4", desc: "px-5 py-4" },
   { label: "Section gap", cls: "gap-4", desc: "gap-4 (between fields)" },
-  { label: "Inline chip gap", cls: "gap-1.5", desc: "gap-1.5 (badge + text)" },
+  { label: "Inline chip gap", cls: "gap-1", desc: "gap-1 (badge + text)" },
 ];
 
 export const Scale: StoryObj = {
@@ -36,6 +33,9 @@ export const Scale: StoryObj = {
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wide border-b border-rim pb-2">
           Spacing scale
         </h2>
+        <p className="text-xs text-dim">
+          Use an 8px base rhythm with a 4px half-step for compact layouts.
+        </p>
         <div className="flex flex-col gap-2">
           {steps.map((s) => (
             <div key={s.token} className="flex items-center gap-4">
