@@ -14,6 +14,7 @@ interface Props<T extends string>
   value: T;
   onValueChange: (value: T) => void;
   containerClassName?: string;
+  density?: "regular" | "compact";
 }
 
 export function Select<T extends string>({
@@ -22,8 +23,11 @@ export function Select<T extends string>({
   onValueChange,
   className,
   containerClassName,
+  density = "regular",
   ...props
 }: Props<T>) {
+  const compact = density === "compact";
+
   return (
     <span className={cn("relative inline-flex", containerClassName)}>
       <select
@@ -31,12 +35,12 @@ export function Select<T extends string>({
         value={value}
         onChange={(e) => onValueChange(e.target.value as T)}
         className={cn(
-          "app-select appearance-none bg-transparent text-dim cursor-pointer rounded pl-1.5",
+          "app-select appearance-none bg-transparent text-dim cursor-pointer rounded",
           "transition-[color,background-color,border-color,box-shadow] duration-150 ease-out",
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-accent",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           className,
-          "pr-6",
+          compact ? "pl-1 pr-5" : "pl-2.5 pr-7",
         )}
       >
         {options.map((option) => (
@@ -49,7 +53,8 @@ export function Select<T extends string>({
         name="chevron-down"
         size={12}
         className={cn(
-          "pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-dim",
+          "pointer-events-none absolute top-1/2 -translate-y-1/2 text-dim",
+          compact ? "right-1" : "right-2.5",
           props.disabled && "opacity-50",
         )}
       />

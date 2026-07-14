@@ -165,6 +165,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
           value={sortBy}
           onValueChange={setSortBy}
           options={sortOptions}
+          density="compact"
           className="text-[10px]"
         />
       </div>
