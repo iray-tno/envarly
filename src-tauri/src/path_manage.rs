@@ -9,8 +9,7 @@ use winreg::RegKey;
 use crate::error::EnvarlyError;
 
 const USER_ENV_KEY: &str = "Environment";
-const SYSTEM_ENV_KEY: &str =
-    r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment";
+const SYSTEM_ENV_KEY: &str = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment";
 const PATH_NAME: &str = "Path";
 
 // ── Pure helpers (testable without registry) ──────────────────────────────
@@ -18,7 +17,10 @@ const PATH_NAME: &str = "Path";
 /// Returns a new PATH string with `dir` appended, or `None` if already present.
 pub fn compute_add(current: &str, dir: &str) -> Option<String> {
     let dir_lc = dir.to_lowercase();
-    if current.split(';').any(|p| p.trim().to_lowercase() == dir_lc) {
+    if current
+        .split(';')
+        .any(|p| p.trim().to_lowercase() == dir_lc)
+    {
         return None;
     }
     Some(if current.trim_end_matches(';').is_empty() {
@@ -48,12 +50,20 @@ pub fn compute_remove(current: &str, dir: &str) -> Option<String> {
 #[cfg(windows)]
 fn open_path_key(user: bool, write: bool) -> Result<RegKey, EnvarlyError> {
     if user {
-        let flags = if write { KEY_SET_VALUE | KEY_QUERY_VALUE } else { KEY_QUERY_VALUE };
+        let flags = if write {
+            KEY_SET_VALUE | KEY_QUERY_VALUE
+        } else {
+            KEY_QUERY_VALUE
+        };
         RegKey::predef(HKEY_CURRENT_USER)
             .open_subkey_with_flags(USER_ENV_KEY, flags)
             .map_err(EnvarlyError::Registry)
     } else {
-        let flags = if write { KEY_SET_VALUE | KEY_QUERY_VALUE } else { KEY_QUERY_VALUE };
+        let flags = if write {
+            KEY_SET_VALUE | KEY_QUERY_VALUE
+        } else {
+            KEY_QUERY_VALUE
+        };
         RegKey::predef(HKEY_LOCAL_MACHINE)
             .open_subkey_with_flags(SYSTEM_ENV_KEY, flags)
             .map_err(EnvarlyError::Registry)
@@ -83,10 +93,7 @@ fn write_path_str(key: &RegKey, value: &str) -> Result<(), EnvarlyError> {
         .get_raw_value(PATH_NAME)
         .map(|rv| rv.vtype)
         .unwrap_or(winreg::enums::RegType::REG_EXPAND_SZ);
-    let mut bytes: Vec<u8> = value
-        .encode_utf16()
-        .flat_map(|w| w.to_le_bytes())
-        .collect();
+    let mut bytes: Vec<u8> = value.encode_utf16().flat_map(|w| w.to_le_bytes()).collect();
     bytes.extend([0u8, 0u8]); // null terminator
     key.set_raw_value(PATH_NAME, &winreg::RegValue { bytes, vtype })
         .map_err(EnvarlyError::Registry)
@@ -223,10 +230,7 @@ mod tests {
 
     #[test]
     fn add_trims_trailing_semicolons() {
-        assert_eq!(
-            compute_add(r"C:\a;", r"C:\b"),
-            Some(r"C:\a;C:\b".into())
-        );
+        assert_eq!(compute_add(r"C:\a;", r"C:\b"), Some(r"C:\a;C:\b".into()));
     }
 
     #[test]
@@ -249,9 +253,6 @@ mod tests {
 
     #[test]
     fn remove_is_case_insensitive() {
-        assert_eq!(
-            compute_remove(r"C:\FOO", r"C:\foo"),
-            Some(String::new())
-        );
+        assert_eq!(compute_remove(r"C:\FOO", r"C:\foo"), Some(String::new()));
     }
 }
