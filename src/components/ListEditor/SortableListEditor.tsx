@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { cn } from "../../lib/cn";
 import { Button } from "../ui/Button";
@@ -33,6 +33,8 @@ interface RowProps {
   index: number;
   entry: ListEntry;
   inputRef: (el: HTMLInputElement | null) => void;
+  rowRef: (el: HTMLLIElement | null) => void;
+  keyboardOffset?: number;
   readOnly: boolean;
   onRemove: () => void;
   onEdit: (val: string) => void;
@@ -47,6 +49,8 @@ function SortableRow({
   index,
   entry,
   inputRef,
+  rowRef,
+  keyboardOffset,
   readOnly,
   onRemove,
   onEdit,
@@ -68,8 +72,22 @@ function SortableRow({
 
   return (
     <li
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      ref={(el) => {
+        setNodeRef(el);
+        rowRef(el);
+      }}
+      style={{
+        transform:
+          keyboardOffset === undefined
+            ? CSS.Transform.toString(transform)
+            : `translateY(${keyboardOffset}px)`,
+        transition:
+          keyboardOffset === undefined
+            ? transition
+            : keyboardOffset === 0
+              ? "transform 160ms cubic-bezier(0.2, 0, 0, 1)"
+              : "none",
+      }}
       className={cn(
         "motion-sortable-row flex items-center border-b border-rim-subtle last:border-0 transition-colors",
         "focus-within:ring-2 focus-within:ring-accent focus-within:ring-inset",
@@ -195,7 +213,50 @@ export function SortableListEditor({
 }: Props) {
   const [newValue, setNewValue] = useState("");
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const rowRefs = useRef(new Map<string, HTMLLIElement>());
+  const keyboardLayoutRef = useRef<Map<string, number> | null>(null);
+  const [keyboardOffsets, setKeyboardOffsets] = useState(new Map<string, number>());
+  const keyboardFrameRef = useRef<number | null>(null);
+  const keyboardTimerRef = useRef<number | null>(null);
   const reducedMotion = useReducedMotion();
+
+  useLayoutEffect(() => {
+    const previousLayout = keyboardLayoutRef.current;
+    keyboardLayoutRef.current = null;
+    if (!previousLayout || reducedMotion) return;
+
+    const offsets = new Map<string, number>();
+    for (const entry of entries) {
+      const row = rowRefs.current.get(entry.id);
+      const previousTop = previousLayout.get(entry.id);
+      if (!row || previousTop === undefined) continue;
+
+      const offset = previousTop - row.getBoundingClientRect().top;
+      if (offset !== 0) offsets.set(entry.id, offset);
+    }
+
+    if (offsets.size === 0) return;
+    if (keyboardFrameRef.current !== null) cancelAnimationFrame(keyboardFrameRef.current);
+    if (keyboardTimerRef.current !== null) window.clearTimeout(keyboardTimerRef.current);
+
+    setKeyboardOffsets(offsets);
+    keyboardFrameRef.current = requestAnimationFrame(() => {
+      setKeyboardOffsets(new Map([...offsets.keys()].map((id) => [id, 0])));
+      keyboardTimerRef.current = window.setTimeout(() => {
+        setKeyboardOffsets(new Map());
+        keyboardTimerRef.current = null;
+      }, 160);
+      keyboardFrameRef.current = null;
+    });
+  }, [entries, reducedMotion]);
+
+  useLayoutEffect(
+    () => () => {
+      if (keyboardFrameRef.current !== null) cancelAnimationFrame(keyboardFrameRef.current);
+      if (keyboardTimerRef.current !== null) window.clearTimeout(keyboardTimerRef.current);
+    },
+    [],
+  );
 
   const dupCount = useMemo(() => {
     const seen = new Set<string>();
@@ -279,6 +340,14 @@ export function SortableListEditor({
     if (idx === -1) return;
     const next = idx + dir;
     if (next < 0 || next >= entries.length) return;
+    keyboardLayoutRef.current = reducedMotion
+      ? null
+      : new Map(
+          entries.flatMap((entry) => {
+            const row = rowRefs.current.get(entry.id);
+            return row ? [[entry.id, row.getBoundingClientRect().top] as const] : [];
+          }),
+        );
     onBeforeChange?.();
     onEntriesChange(arrayMove(entries, idx, next));
   };
@@ -332,6 +401,11 @@ export function SortableListEditor({
                 inputRef={(el) => {
                   inputRefs.current[index] = el;
                 }}
+                rowRef={(el) => {
+                  if (el) rowRefs.current.set(entry.id, el);
+                  else rowRefs.current.delete(entry.id);
+                }}
+                keyboardOffset={keyboardOffsets.get(entry.id)}
                 readOnly={readOnly}
                 onRemove={() => removeEntry(entry.id)}
                 onEdit={(val) => editEntry(entry.id, val)}

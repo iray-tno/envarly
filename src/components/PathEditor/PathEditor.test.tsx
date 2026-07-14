@@ -163,6 +163,16 @@ describe("PathEditor", () => {
     expect(first).toHaveFocus();
   });
 
+  it("reorders entries with Alt and arrow keys", () => {
+    const onChange = vi.fn();
+    vi.mocked(api.validatePaths).mockResolvedValue([true, true]);
+    render(<PathEditor rawValue={`${A};${C}`} onChange={onChange} />);
+
+    fireEvent.keyDown(screen.getByDisplayValue(A), { key: "ArrowDown", altKey: true });
+
+    expect(onChange).toHaveBeenCalledWith(`${C};${A}`);
+  });
+
   it("shows unresolvable reference warning when allVars is provided and a %VAR% is unknown", () => {
     const knownVars: EnvVar[] = [
       { name: "SystemRoot", scope: "System", value: "C:\\Windows", listSeparator: null },

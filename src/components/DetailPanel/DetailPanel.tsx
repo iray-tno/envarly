@@ -331,7 +331,8 @@ export function DetailPanel({
               value={valueKindSelection}
               onValueChange={setValueKindSelection}
               disabled={readOnly}
-              className="w-full max-w-sm px-2.5 py-1.5 bg-surface border border-rim text-sm text-fg"
+              containerClassName="w-full max-w-sm"
+              className="w-full px-2.5 py-1.5 bg-surface border border-rim text-sm text-fg"
             />
             {resolvedValueKind === "String" && expandedValue && (
               <div className="flex items-center gap-2 text-xs text-warn">

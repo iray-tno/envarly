@@ -18,6 +18,7 @@ export const Language: Story = {
         aria-label="Language"
         value={language}
         onValueChange={setLanguage}
+        density="compact"
         options={[
           { value: "en", label: "English" },
           { value: "ja", label: "日本語" },
@@ -35,6 +36,7 @@ export const SortOrder: Story = {
         aria-label="Sort order"
         value={sortBy}
         onValueChange={setSortBy}
+        density="compact"
         options={[
           { value: "name-asc", label: "Name A-Z" },
           { value: "name-desc", label: "Name Z-A" },

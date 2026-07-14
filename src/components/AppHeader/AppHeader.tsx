@@ -125,6 +125,7 @@ export function AppHeader({
             value={language}
             onValueChange={setLanguage}
             options={languageOptions}
+            density="compact"
             className="text-xs"
           />
         </div>
