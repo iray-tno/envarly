@@ -34,7 +34,7 @@ function SwatchRow({ colors }: { colors: typeof semanticColors }) {
   return (
     <div className="flex flex-wrap gap-3">
       {colors.map((c) => (
-        <div key={c.name} className="flex flex-col gap-1.5 w-32">
+        <div key={c.name} className="flex flex-col gap-1 w-32">
           <div className={`${c.cls} h-14 rounded border border-rim`} />
           <p className="text-xs font-semibold text-fg">{c.label}</p>
           <p className="text-[10px] text-dim">{c.desc}</p>

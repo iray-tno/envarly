@@ -112,7 +112,7 @@ function SortableRow({
         <Icon name="grip" size={16} />
       </button>
 
-      <div className="flex-1 py-1.5 pr-2">
+      <div className="flex-1 py-2 pr-2">
         <input
           ref={inputRef}
           aria-label={`Entry: ${entry.value}`}
@@ -381,7 +381,7 @@ export function SortableListEditor({
   return (
     <div className="flex flex-col gap-2">
       {!readOnly && dupCount > 0 && (
-        <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-warn/30 bg-warn/10 text-warn text-xs">
+        <div className="flex items-center justify-between px-2 py-2 rounded border border-warn/30 bg-warn/10 text-warn text-xs">
           <span>
             {dupCount} duplicate {dupCount === 1 ? "entry" : "entries"}
           </span>
@@ -429,7 +429,7 @@ export function SortableListEditor({
             <input
               aria-label="New entry"
               className={cn(
-                "h-full min-h-10 w-full px-2.5 py-1.5 bg-surface border border-rim rounded font-mono text-xs text-fg",
+                "h-full min-h-10 w-full px-2 py-2 bg-surface border border-rim rounded font-mono text-xs text-fg",
                 onBrowseNewEntry && "pr-9",
                 "placeholder:text-muted transition-colors",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus:border-accent",

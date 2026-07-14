@@ -140,13 +140,13 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         />
       </div>
 
-      <div className="px-3 pb-1.5 flex items-center justify-between">
+      <div className="px-3 pb-2 flex items-center justify-between">
         {secretCount > 0 ? (
           <button
             type="button"
             onClick={() => setSecretsOnly((v) => !v)}
             className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors",
+              "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium transition-colors",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent",
               secretsOnly
                 ? "bg-warn/20 text-warn border border-warn/40"
@@ -204,7 +204,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
                     onClick={() => onSelect(v)}
                     onKeyDown={handleKeyDown}
                     className={cn(
-                      "flex min-w-0 flex-1 items-center gap-2 px-4 py-2.5 text-left rounded",
+                      "flex min-w-0 flex-1 items-center gap-2 px-4 py-2 text-left rounded",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
                     )}
                   >
@@ -251,7 +251,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
                     aria-label={`Copy value of ${v.name}`}
                     title="Copy value"
                     className={cn(
-                      "shrink-0 text-[10px] px-1 py-0.5 rounded transition-all",
+                      "shrink-0 text-[10px] px-1 py-1 rounded transition-all",
                       "mr-2 opacity-0 group-hover:opacity-100 focus:opacity-100",
                       copiedKey === key ? "text-success" : "text-dim hover:text-muted",
                     )}
@@ -270,7 +270,7 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         <button
           type="button"
           onClick={onCreateNew}
-          className="w-full inline-flex items-center gap-1.5 text-left text-xs text-dim hover:text-muted px-2 py-1.5 rounded hover:bg-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="w-full inline-flex items-center gap-1 text-left text-xs text-dim hover:text-muted px-2 py-2 rounded hover:bg-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <Icon name="plus" size={12} />
           {t("sidebar.new_var")}

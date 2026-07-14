@@ -38,7 +38,7 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
           size="sm"
           onClick={() => onToggleAll(true)}
           disabled={allChecked}
-          className="px-1.5 py-0.5"
+          className="px-2 py-1"
         >
           {t("var_table.select_all")}
         </Button>
@@ -47,7 +47,7 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
           size="sm"
           onClick={() => onToggleAll(false)}
           disabled={noneChecked}
-          className="px-1.5 py-0.5"
+          className="px-2 py-1"
         >
           {t("var_table.deselect_all")}
         </Button>
@@ -60,7 +60,7 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-rim bg-surface text-muted uppercase text-[10px] tracking-wide">
-              <th className="w-8 px-2 py-1.5 text-center">
+              <th className="w-8 px-2 py-2 text-center">
                 <input
                   type="checkbox"
                   checked={allChecked}
@@ -69,9 +69,9 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
                   aria-label="Select all"
                 />
               </th>
-              <th className="px-3 py-1.5 text-left">{t("var_table.col_name")}</th>
-              <th className="px-3 py-1.5 text-left">{t("var_table.col_scope")}</th>
-              <th className="px-3 py-1.5 text-left">{t("var_table.col_value")}</th>
+              <th className="px-3 py-2 text-left">{t("var_table.col_name")}</th>
+              <th className="px-3 py-2 text-left">{t("var_table.col_scope")}</th>
+              <th className="px-3 py-2 text-left">{t("var_table.col_value")}</th>
             </tr>
           </thead>
           <tbody>
@@ -89,7 +89,7 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
                       : "bg-canvas opacity-40 hover:opacity-60",
                   )}
                 >
-                  <td className="px-2 py-1.5 text-center">
+                  <td className="px-2 py-2 text-center">
                     <input
                       type="checkbox"
                       checked={!!checked[key]}
@@ -99,8 +99,8 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
                       aria-label={v.name}
                     />
                   </td>
-                  <td className="px-3 py-1.5 font-mono font-semibold text-fg">
-                    <span className="flex items-center gap-1.5">
+                  <td className="px-3 py-2 font-mono font-semibold text-fg">
+                    <span className="flex items-center gap-1">
                       {v.name}
                       {secret && (
                         <span
@@ -113,8 +113,8 @@ export function VarTable({ vars, checked, onToggle, onToggleAll }: VarTableProps
                       )}
                     </span>
                   </td>
-                  <td className="px-3 py-1.5 text-muted">{v.scope}</td>
-                  <td className="px-3 py-1.5 font-mono text-muted truncate max-w-xs">
+                  <td className="px-3 py-2 text-muted">{v.scope}</td>
+                  <td className="px-3 py-2 font-mono text-muted truncate max-w-xs">
                     {secret ? "••••••••" : v.value}
                   </td>
                 </tr>

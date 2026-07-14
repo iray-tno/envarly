@@ -12,13 +12,13 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
 
   return (
     <tr className="border-b border-rim-subtle last:border-0 text-xs">
-      <td className="px-2 py-1.5 w-5 text-center font-mono font-bold shrink-0">
+      <td className="px-2 py-2 w-5 text-center font-mono font-bold shrink-0">
         {entry.kind === "added" && <span className="text-success">+</span>}
         {entry.kind === "removed" && <span className="text-danger">−</span>}
         {entry.kind === "changed" && <span className="text-warn">~</span>}
       </td>
-      <td className="px-2 py-1.5 font-mono font-semibold text-fg whitespace-nowrap">
-        <span className="flex items-center gap-1.5">
+      <td className="px-2 py-2 font-mono font-semibold text-fg whitespace-nowrap">
+        <span className="flex items-center gap-1">
           {entry.name}
           {secret && (
             <span className="inline-flex items-center gap-1 text-[9px] font-medium text-warn">
@@ -28,10 +28,10 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
           )}
         </span>
       </td>
-      <td className="px-2 py-1.5 text-muted w-12">{entry.scope[0]}</td>
-      <td className="px-2 py-1.5 font-mono text-muted max-w-xs truncate">
+      <td className="px-2 py-2 text-muted w-12">{entry.scope[0]}</td>
+      <td className="px-2 py-2 font-mono text-muted max-w-xs truncate">
         {entry.kind === "changed" ? (
-          <span className="flex flex-col gap-0.5">
+          <span className="flex flex-col gap-1">
             {entry.oldValueKind !== entry.newValueKind && (
               <span className="text-[10px] text-dim">
                 {registryKindLabel(entry.oldValueKind)} → {registryKindLabel(entry.newValueKind)}
@@ -45,7 +45,7 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
         )}
       </td>
       {secret && (
-        <td className="px-2 py-1.5">
+        <td className="px-2 py-2">
           <button
             type="button"
             onClick={() => setRevealed((r) => !r)}
@@ -76,11 +76,11 @@ export function DiffTable({ diff }: { diff: DiffEntry[] }) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-rim bg-surface text-muted text-[10px] uppercase tracking-wide">
-              <th className="px-2 py-1.5 w-5" />
-              <th className="px-2 py-1.5 text-left">Name</th>
-              <th className="px-2 py-1.5 text-left">Scope</th>
-              <th className="px-2 py-1.5 text-left">Value</th>
-              <th className="px-2 py-1.5 w-10" />
+              <th className="px-2 py-2 w-5" />
+              <th className="px-2 py-2 text-left">Name</th>
+              <th className="px-2 py-2 text-left">Scope</th>
+              <th className="px-2 py-2 text-left">Value</th>
+              <th className="px-2 py-2 w-10" />
             </tr>
           </thead>
           <tbody>

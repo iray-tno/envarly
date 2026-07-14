@@ -38,7 +38,7 @@ export function DiagnosticsPanel({ diagnostics, elevated, onStageAction }: Props
           return (
             <div
               key={diagnostic.id}
-              className="flex items-start gap-3 px-4 py-2.5 border-b border-rim-subtle last:border-0"
+              className="flex items-start gap-3 px-4 py-2 border-b border-rim-subtle last:border-0"
             >
               <Badge variant={diagnostic.scope === "User" ? "user" : "system"}>
                 {diagnostic.scope}

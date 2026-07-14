@@ -60,7 +60,7 @@ function ListDiffDelta({ oldValue, newValue }: { oldValue: string; newValue: str
   }
 
   return (
-    <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
+    <div className="flex flex-col gap-1 mt-1 max-h-48 overflow-y-auto">
       {keyedEntries(removed, "removed").map(({ entry, key }) => (
         <p key={key} className="font-mono text-[11px] text-danger break-all">
           <span className="select-none mr-1">−</span>
@@ -93,7 +93,7 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
   const seen = new Map<string, number>();
 
   return (
-    <div className="flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto">
+    <div className="flex flex-col gap-1 mt-1 max-h-48 overflow-y-auto">
       {rows.map((r) => {
         const keyBase = `${r.status}:${r.entry}`;
         const count = seen.get(keyBase) ?? 0;
@@ -121,7 +121,7 @@ function ListDiffFull({ oldValue, newValue }: { oldValue: string; newValue: stri
 
 function ListEntries({ value, className }: { value: string; className?: string }) {
   return (
-    <div className={cn("flex flex-col gap-0.5 mt-1 max-h-48 overflow-y-auto", className)}>
+    <div className={cn("flex flex-col gap-1 mt-1 max-h-48 overflow-y-auto", className)}>
       {keyedEntries(splitList(value), "entry").map(({ entry, key }) => (
         <p key={key} className="font-mono text-[11px] break-all">
           {entry}
@@ -191,7 +191,7 @@ export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModal
                   type="button"
                   onClick={() => setViewMode(mode)}
                   className={cn(
-                    "px-2.5 py-0.5 capitalize transition-colors",
+                    "px-2 py-1 capitalize transition-colors",
                     viewMode === mode
                       ? "bg-accent text-canvas font-semibold"
                       : "text-muted hover:text-fg hover:bg-hover",
@@ -257,7 +257,7 @@ export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModal
                     <ListDiffFull oldValue={entry.oldValue ?? ""} newValue={entry.newValue ?? ""} />
                   )
                 ) : (
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-1">
                     <p className="font-mono text-[11px] text-danger line-through break-all">
                       {entry.oldValue}
                     </p>

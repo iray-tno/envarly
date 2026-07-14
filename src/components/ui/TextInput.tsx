@@ -21,7 +21,7 @@ export function TextInput({ label, labelHidden = false, error, className, id, ..
         id={inputId}
         {...props}
         className={cn(
-          "px-4 py-2.5 bg-surface border rounded text-fg text-sm transition-colors",
+          "px-4 py-2 bg-surface border rounded text-fg text-sm transition-colors",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
           error ? "border-danger" : "border-rim focus:border-accent",
           "placeholder:text-muted disabled:opacity-60 disabled:cursor-not-allowed",

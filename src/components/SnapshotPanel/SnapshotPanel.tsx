@@ -231,7 +231,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
       ) : (
         <div className="flex flex-col gap-2">
           {comparingFrom && (
-            <div className="flex items-center justify-between px-2.5 py-1.5 rounded border border-accent/30 bg-accent/10 text-accent text-xs">
+            <div className="flex items-center justify-between px-2 py-2 rounded border border-accent/30 bg-accent/10 text-accent text-xs">
               <span>{t("snapshot.comparing_hint", { label: comparingFrom.label })}</span>
               <Button variant="link" size="xs" onClick={handleCancelCompare}>
                 {t("snapshot.cancel")}
@@ -248,15 +248,12 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                 key={s.id}
                 data-snapshot-id={s.id}
                 className={cn(
-                  "flex flex-col gap-2 px-3.5 py-2.5 bg-panel border rounded",
+                  "flex flex-col gap-2 px-4 py-2 bg-panel border rounded",
                   isComparingSource ? "border-accent/40 bg-accent/5" : "border-rim",
                 )}
               >
                 {editingId === s.id ? (
-                  <form
-                    className="flex items-center gap-1.5"
-                    onSubmit={(e) => handleRename(e, s.id)}
-                  >
+                  <form className="flex items-center gap-1" onSubmit={(e) => handleRename(e, s.id)}>
                     <input
                       ref={renameInputRef}
                       aria-label={t("snapshot.rename_label")}
@@ -268,7 +265,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                           handleCancelRename();
                         }
                       }}
-                      className="h-8 min-w-0 flex-1 rounded border border-rim bg-surface px-2.5 text-sm text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      className="h-8 min-w-0 flex-1 rounded border border-rim bg-surface px-2 text-sm text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     />
                     <IconButton
                       aria-label={t("snapshot.save_rename")}
@@ -297,7 +294,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                   <p className="text-[11px] text-dim">{formatDate(s.createdAt)}</p>
                 </div>
                 {editingId !== s.id && (
-                  <div className="flex min-h-8 items-center gap-1.5">
+                  <div className="flex min-h-8 items-center gap-1">
                     {comparingFrom ? (
                       !isComparingSource && (
                         <Button
@@ -339,7 +336,7 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
                         >
                           {t("snapshot.compare")}
                         </Button>
-                        <span className="ml-auto flex items-center gap-0.5">
+                        <span className="ml-auto flex items-center gap-1">
                           <IconButton
                             aria-label={t("snapshot.rename")}
                             icon="pencil"

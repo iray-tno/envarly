@@ -56,7 +56,7 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
         !accepted && "border-dashed",
       )}
     >
-      <div className="flex items-center gap-2.5 px-3 py-2">
+      <div className="flex items-center gap-2 px-3 py-2">
         <input
           type="checkbox"
           checked={accepted}
@@ -73,7 +73,7 @@ export function EntryRow({ entry, accepted, onToggle }: EntryRowProps) {
         </span>
         <span
           className={cn(
-            "text-[10px] uppercase tracking-wide font-semibold shrink-0 px-1.5 py-0.5 rounded",
+            "text-[10px] uppercase tracking-wide font-semibold shrink-0 px-2 py-1 rounded",
             KIND_COLORS[entry.kind],
           )}
         >
