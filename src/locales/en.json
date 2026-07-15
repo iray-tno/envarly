@@ -229,15 +229,15 @@
     "staged_other": "\"{{label}}\" staged ({{count}} changes). Use \"Apply staged\" to commit."
   },
   "snapshot_preview": {
-    "back": "← Back",
+    "title": "Snapshot preview",
     "no_diff": "Current state matches this snapshot — no changes would be made.",
     "restore": "Stage restore",
     "no_changes": "No changes to stage",
     "cancel": "Cancel"
   },
   "snapshot_compare": {
+    "title": "Compare snapshots",
     "heading": "Comparing snapshots",
-    "back": "← Back",
     "no_diff": "These two snapshots are identical — no differences found.",
     "to_label": "→ {{label}}"
   },

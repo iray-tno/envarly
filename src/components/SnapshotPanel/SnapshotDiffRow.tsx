@@ -65,8 +65,8 @@ export function DiffTable({ diff }: { diff: DiffEntry[] }) {
   const changed = diff.filter((e) => e.kind === "changed").length;
 
   return (
-    <>
-      <div className="flex gap-3 text-xs">
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <div className="flex shrink-0 gap-3 text-xs">
         {added > 0 && <span className="text-success">+{added} added</span>}
         {removed > 0 && <span className="text-danger">−{removed} removed</span>}
         {changed > 0 && <span className="text-warn">~{changed} changed</span>}
@@ -77,7 +77,7 @@ export function DiffTable({ diff }: { diff: DiffEntry[] }) {
         aria-label="Snapshot differences"
         // biome-ignore lint/a11y/noNoninteractiveTabindex: Scrollable content must be keyboard reachable.
         tabIndex={0}
-        className="rounded border border-rim max-h-80 overflow-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="min-h-0 flex-1 rounded border border-rim overflow-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <table className="w-max min-w-full">
           <thead>
@@ -100,6 +100,6 @@ export function DiffTable({ diff }: { diff: DiffEntry[] }) {
           </tbody>
         </table>
       </section>
-    </>
+    </div>
   );
 }

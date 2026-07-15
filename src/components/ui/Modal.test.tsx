@@ -25,7 +25,7 @@ describe("Modal", () => {
 
   it("keeps the dialog mounted while its exit motion completes", () => {
     vi.useFakeTimers();
-    const { container, rerender } = render(
+    const { rerender } = render(
       <Modal open title="Example" onClose={vi.fn()}>
         Content
       </Modal>,
@@ -39,9 +39,9 @@ describe("Modal", () => {
       </Modal>,
     );
 
-    expect(container.querySelector('[role="dialog"]')).toHaveAttribute("data-state", "closed");
+    expect(screen.getByRole("dialog")).toHaveAttribute("data-state", "closed");
     act(() => vi.advanceTimersByTime(180));
-    expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("closes when Escape is pressed", () => {
@@ -59,7 +59,7 @@ describe("Modal", () => {
   it("does not wait for exit motion when reduced motion is requested", () => {
     vi.useFakeTimers();
     vi.mocked(window.matchMedia).mockImplementation((query) => mediaQuery(query, true));
-    const { container, rerender } = render(
+    const { rerender } = render(
       <Modal open title="Example" onClose={vi.fn()}>
         Content
       </Modal>,
@@ -72,6 +72,18 @@ describe("Modal", () => {
     );
     act(() => vi.runOnlyPendingTimers());
 
-    expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("renders outside transformed or clipped ancestors", () => {
+    render(
+      <div className="overflow-hidden transform-gpu">
+        <Modal open title="Example" onClose={vi.fn()}>
+          Content
+        </Modal>
+      </div>,
+    );
+
+    expect(screen.getByRole("dialog").parentElement).toBe(document.body);
   });
 });
