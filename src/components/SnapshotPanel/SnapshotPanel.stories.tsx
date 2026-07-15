@@ -42,6 +42,22 @@ const manySnapshots = Array.from(
   }),
 );
 
+const wideDiffSnapshot: SnapshotMeta = {
+  ...storySnapshots[1],
+  id: "snapshot-wide-diff",
+  label: "Before consolidating development tool directories",
+  snapshot: {
+    user: {
+      PATH: {
+        value:
+          "C:\\Program Files\\Java\\jdk-21\\bin;C:\\Program Files\\Git\\cmd;C:\\Users\\dev\\AppData\\Local\\Programs\\Python\\Python313\\Scripts;C:\\Users\\dev\\.cargo\\bin",
+        kind: "ExpandString",
+      },
+    },
+    system: {},
+  },
+};
+
 const meta: Meta<typeof SnapshotPanel> = {
   title: "Components/SnapshotPanel",
   component: SnapshotPanel,
@@ -96,5 +112,29 @@ export const ManySnapshots: Story = {
     if (!scrollRegion) return;
     scrollRegion.scrollTop = scrollRegion.scrollHeight;
     expect(scrollRegion.scrollTop).toBeGreaterThan(0);
+  },
+};
+
+export const WidePreviewDiff: Story = {
+  parameters: { snapshotFixtures: [wideDiffSnapshot] },
+  play: async ({ canvasElement }) => {
+    const previewButton = await waitFor(() => {
+      const button = canvasElement.querySelector<HTMLButtonElement>("[data-snapshot-id] button");
+      expect(button).toBeTruthy();
+      return button;
+    });
+    previewButton?.click();
+
+    const scrollRegion = await waitFor(() => {
+      const region = canvasElement.querySelector<HTMLElement>(
+        '[data-testid="snapshot-diff-scroll"]',
+      );
+      expect(region?.scrollWidth).toBeGreaterThan(region?.clientWidth ?? 0);
+      return region;
+    });
+
+    if (!scrollRegion) return;
+    scrollRegion.scrollLeft = scrollRegion.scrollWidth;
+    expect(scrollRegion.scrollLeft).toBeGreaterThan(0);
   },
 };

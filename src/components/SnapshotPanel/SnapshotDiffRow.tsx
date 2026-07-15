@@ -29,7 +29,7 @@ export function DiffRow({ entry }: { entry: DiffEntry }) {
         </span>
       </td>
       <td className="px-2 py-2 text-muted w-12">{entry.scope[0]}</td>
-      <td className="px-2 py-2 font-mono text-muted max-w-xs truncate">
+      <td className="px-2 py-2 font-mono text-muted whitespace-nowrap">
         {entry.kind === "changed" ? (
           <span className="flex flex-col gap-1">
             {entry.oldValueKind !== entry.newValueKind && (
@@ -72,15 +72,25 @@ export function DiffTable({ diff }: { diff: DiffEntry[] }) {
         {changed > 0 && <span className="text-warn">~{changed} changed</span>}
       </div>
 
-      <div className="rounded border border-rim overflow-hidden max-h-80 overflow-y-auto">
-        <table className="w-full">
+      <section
+        data-testid="snapshot-diff-scroll"
+        aria-label="Snapshot differences"
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: Scrollable content must be keyboard reachable.
+        tabIndex={0}
+        className="rounded border border-rim max-h-80 overflow-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <table className="w-max min-w-full">
           <thead>
             <tr className="border-b border-rim bg-surface text-muted text-[10px] uppercase tracking-wide">
-              <th className="px-2 py-2 w-5" />
+              <th className="px-2 py-2 w-5">
+                <span className="sr-only">Change</span>
+              </th>
               <th className="px-2 py-2 text-left">Name</th>
               <th className="px-2 py-2 text-left">Scope</th>
               <th className="px-2 py-2 text-left">Value</th>
-              <th className="px-2 py-2 w-10" />
+              <th className="px-2 py-2 w-10">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -89,7 +99,7 @@ export function DiffTable({ diff }: { diff: DiffEntry[] }) {
             ))}
           </tbody>
         </table>
-      </div>
+      </section>
     </>
   );
 }
