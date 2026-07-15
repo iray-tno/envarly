@@ -181,7 +181,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="flex flex-1 overflow-hidden">
+        <main className="flex flex-1 min-h-0 overflow-hidden">
           <Sidebar
             vars={effectiveVars}
             selected={selected}
@@ -209,10 +209,10 @@ export default function App() {
 
           {snapshotsPresence.mounted && (
             <aside
-              className="motion-snapshot-panel shrink-0 border-l border-rim overflow-hidden"
+              className="motion-snapshot-panel min-h-0 shrink-0 border-l border-rim overflow-hidden"
               data-state={snapshotsPresence.state}
             >
-              <div className="motion-snapshot-content w-[420px] h-full flex flex-col bg-panel">
+              <div className="motion-snapshot-content w-[420px] h-full min-h-0 flex flex-col bg-panel">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-rim shrink-0">
                   <span className="text-sm font-semibold text-fg">{t("header.snapshots")}</span>
                   <IconButton
@@ -221,7 +221,7 @@ export default function App() {
                     onClick={() => setSnapshotsOpen(false)}
                   />
                 </div>
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 min-h-0 overflow-hidden">
                   <SnapshotPanel onStageSnapshot={handleStageSnapshot} />
                 </div>
               </div>
