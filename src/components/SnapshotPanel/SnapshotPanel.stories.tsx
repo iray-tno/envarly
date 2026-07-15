@@ -86,7 +86,7 @@ const meta: Meta<typeof SnapshotPanel> = {
       };
       api.getRegistrySnapshot = async () => currentSnapshot;
       return (
-        <div className="h-[700px] w-[420px] bg-panel">
+        <div className="h-[700px] w-[420px] overflow-hidden bg-panel transform-gpu">
           <Story />
         </div>
       );
@@ -125,8 +125,13 @@ export const WidePreviewDiff: Story = {
     });
     previewButton?.click();
 
+    await waitFor(() => {
+      const dialog = canvasElement.ownerDocument.querySelector<HTMLElement>('[role="dialog"]');
+      expect(dialog?.parentElement).toBe(canvasElement.ownerDocument.body);
+    });
+
     const scrollRegion = await waitFor(() => {
-      const region = canvasElement.querySelector<HTMLElement>(
+      const region = canvasElement.ownerDocument.querySelector<HTMLElement>(
         '[data-testid="snapshot-diff-scroll"]',
       );
       expect(region?.scrollWidth).toBeGreaterThan(region?.clientWidth ?? 0);

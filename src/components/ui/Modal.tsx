@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useId } from "react";
+import { createPortal } from "react-dom";
 import { usePresence } from "../../hooks/usePresence";
 import { cn } from "../../lib/cn";
 import { IconButton } from "./IconButton";
@@ -45,7 +46,7 @@ export function Modal({
 
   if (!presence.mounted) return null;
 
-  return (
+  return createPortal(
     <div
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center p-6",
@@ -87,6 +88,7 @@ export function Modal({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
