@@ -184,7 +184,10 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   };
 
   return (
-    <div className="w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto">
+    <div
+      data-testid="snapshot-panel-scroll"
+      className="h-full min-h-0 w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto"
+    >
       <div>
         <h2 className="text-sm font-semibold text-fg mb-1">{t("snapshot.title")}</h2>
         <p className="text-xs text-muted">{t("snapshot.description")}</p>
