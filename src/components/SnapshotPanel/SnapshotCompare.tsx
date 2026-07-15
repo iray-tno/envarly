@@ -1,33 +1,26 @@
 import { useI18n } from "../../hooks/useI18n";
 import type { DiffEntry } from "../../lib/diff";
 import type { SnapshotMeta } from "../../types";
-import { Button } from "../ui/Button";
 import { DiffTable } from "./SnapshotDiffRow";
 
 interface SnapshotCompareProps {
   from: SnapshotMeta;
   to: SnapshotMeta;
   diff: DiffEntry[];
-  onBack: () => void;
 }
 
-export function SnapshotCompare({ from, to, diff, onBack }: SnapshotCompareProps) {
+export function SnapshotCompare({ from, to, diff }: SnapshotCompareProps) {
   const { t } = useI18n();
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] text-dim uppercase tracking-wide mb-0.5">
-            {t("snapshot_compare.heading")}
-          </p>
-          <p className="text-sm font-semibold text-fg truncate">{from.label}</p>
-          <p className="text-[11px] text-dim">
-            {t("snapshot_compare.to_label", { label: to.label })}
-          </p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("snapshot_compare.back")}
-        </Button>
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="shrink-0 min-w-0">
+        <p className="text-[10px] text-dim uppercase tracking-wide mb-0.5">
+          {t("snapshot_compare.heading")}
+        </p>
+        <p className="text-sm font-semibold text-fg break-words">{from.label}</p>
+        <p className="text-[11px] text-dim break-words">
+          {t("snapshot_compare.to_label", { label: to.label })}
+        </p>
       </div>
 
       {diff.length === 0 ? (

@@ -34,6 +34,19 @@ const MOCK_SNAPSHOT: SnapshotMeta = {
   },
 };
 
+const SECOND_SNAPSHOT: SnapshotMeta = {
+  ...MOCK_SNAPSHOT,
+  id: "20240102T120000Z",
+  createdAt: "2024-01-02T12:00:00Z",
+  label: "After Node update",
+  snapshot: {
+    user: {
+      PATH: { value: "C:\\new", kind: "ExpandString" },
+    },
+    system: {},
+  },
+};
+
 describe("SnapshotPanel", () => {
   const onStageSnapshot = vi.fn();
 
@@ -151,13 +164,30 @@ describe("SnapshotPanel", () => {
     });
   });
 
-  it("Back button from preview returns to list", async () => {
+  it("opens preview in a modal and returns to the list when closed", async () => {
     const user = userEvent.setup();
     render(<SnapshotPanel onStageSnapshot={onStageSnapshot} />);
     await screen.findByText("Before Node update");
     await user.click(screen.getByRole("button", { name: /preview/i }));
-    await waitFor(() => screen.getByRole("button", { name: /← back/i }));
-    await user.click(screen.getByRole("button", { name: /← back/i }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Snapshot preview" });
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    await waitFor(() => expect(dialog).not.toBeInTheDocument());
     expect(screen.getByText("Before Node update")).toBeInTheDocument();
+  });
+
+  it("opens snapshot comparison in a modal", async () => {
+    vi.mocked(api.listSnapshots).mockResolvedValueOnce([MOCK_SNAPSHOT, SECOND_SNAPSHOT]);
+    const user = userEvent.setup();
+    render(<SnapshotPanel onStageSnapshot={onStageSnapshot} />);
+    await screen.findByText("Before Node update");
+
+    const compareButtons = screen.getAllByRole("button", { name: "Compare" });
+    await user.click(compareButtons[0]);
+    await user.click(screen.getByRole("button", { name: "Compare with" }));
+
+    expect(await screen.findByRole("dialog", { name: "Compare snapshots" })).toBeInTheDocument();
+    expect(screen.getByText("After Node update")).toBeInTheDocument();
   });
 });

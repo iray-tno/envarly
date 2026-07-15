@@ -14,15 +14,10 @@ interface SnapshotPreviewProps {
 export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPreviewProps) {
   const { t } = useI18n();
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-fg truncate">{snap.label}</p>
-          <p className="text-[11px] text-dim">{new Date(snap.createdAt).toLocaleString()}</p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          {t("snapshot_preview.back")}
-        </Button>
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="shrink-0 min-w-0">
+        <p className="text-sm font-semibold text-fg break-words">{snap.label}</p>
+        <p className="text-[11px] text-dim">{new Date(snap.createdAt).toLocaleString()}</p>
       </div>
 
       {diff.length === 0 ? (
@@ -31,7 +26,7 @@ export function SnapshotPreview({ snap, diff, onRestore, onCancel }: SnapshotPre
         <DiffTable diff={diff} />
       )}
 
-      <div className="flex gap-2">
+      <div className="flex shrink-0 gap-2 border-t border-rim pt-4">
         <Button variant={diff.length === 0 ? "secondary" : "primary"} size="md" onClick={onRestore}>
           {diff.length === 0 ? t("snapshot_preview.no_changes") : t("snapshot_preview.restore")}
         </Button>

@@ -7,6 +7,7 @@ import { computeDiff } from "../../lib/diff";
 import type { EnvSnapshot, SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
+import { Modal } from "../ui/Modal";
 import { TextInput } from "../ui/TextInput";
 import { SnapshotCompare } from "./SnapshotCompare";
 import { SnapshotPreview } from "./SnapshotPreview";
@@ -184,54 +185,37 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   };
 
   return (
-    <div
-      data-testid="snapshot-panel-scroll"
-      className="h-full min-h-0 w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto"
-    >
-      <div>
-        <h2 className="text-sm font-semibold text-fg mb-1">{t("snapshot.title")}</h2>
-        <p className="text-xs text-muted">{t("snapshot.description")}</p>
-      </div>
+    <>
+      <div
+        data-testid="snapshot-panel-scroll"
+        className="h-full min-h-0 w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto"
+      >
+        <div>
+          <h2 className="text-sm font-semibold text-fg mb-1">{t("snapshot.title")}</h2>
+          <p className="text-xs text-muted">{t("snapshot.description")}</p>
+        </div>
 
-      <div className="flex gap-2">
-        <TextInput
-          label="Snapshot label"
-          labelHidden
-          placeholder={t("snapshot.label_placeholder")}
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-          className="flex-1"
-        />
-        <Button variant="primary" size="md" onClick={handleCreate} disabled={busy}>
-          {busy && !previewing ? t("snapshot.saving") : t("snapshot.save")}
-        </Button>
-      </div>
+        <div className="flex gap-2">
+          <TextInput
+            label="Snapshot label"
+            labelHidden
+            placeholder={t("snapshot.label_placeholder")}
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+            className="flex-1"
+          />
+          <Button variant="primary" size="md" onClick={handleCreate} disabled={busy}>
+            {busy && !previewing ? t("snapshot.saving") : t("snapshot.save")}
+          </Button>
+        </div>
 
-      {status && (
-        <p className={cn("text-xs", status.kind === "error" ? "text-danger" : "text-success")}>
-          {status.message}
-        </p>
-      )}
+        {status && (
+          <p className={cn("text-xs", status.kind === "error" ? "text-danger" : "text-success")}>
+            {status.message}
+          </p>
+        )}
 
-      {compareResult ? (
-        <SnapshotCompare
-          from={compareResult.from}
-          to={compareResult.to}
-          diff={compareResult.diff}
-          onBack={handleCancelCompare}
-        />
-      ) : previewing ? (
-        <SnapshotPreview
-          snap={previewing}
-          diff={previewDiff}
-          onRestore={handleRestore}
-          onCancel={() => {
-            setPreviewing(null);
-            setPreviewDiff([]);
-          }}
-        />
-      ) : (
         <div className="flex flex-col gap-2">
           {comparingFrom && (
             <div className="flex items-center justify-between px-2 py-2 rounded border border-accent/30 bg-accent/10 text-accent text-xs">
@@ -365,7 +349,50 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
             );
           })}
         </div>
-      )}
-    </div>
+      </div>
+
+      <Modal
+        open={previewing !== null}
+        onClose={() => {
+          setPreviewing(null);
+          setPreviewDiff([]);
+        }}
+        title={t("snapshot_preview.title")}
+        size="xl"
+        flex
+      >
+        {previewing && (
+          <div className="flex-1 min-h-0 px-6 py-5">
+            <SnapshotPreview
+              snap={previewing}
+              diff={previewDiff}
+              onRestore={handleRestore}
+              onCancel={() => {
+                setPreviewing(null);
+                setPreviewDiff([]);
+              }}
+            />
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={compareResult !== null}
+        onClose={handleCancelCompare}
+        title={t("snapshot_compare.title")}
+        size="xl"
+        flex
+      >
+        {compareResult && (
+          <div className="flex-1 min-h-0 px-6 py-5">
+            <SnapshotCompare
+              from={compareResult.from}
+              to={compareResult.to}
+              diff={compareResult.diff}
+            />
+          </div>
+        )}
+      </Modal>
+    </>
   );
 }
