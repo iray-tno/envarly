@@ -1,14 +1,14 @@
-import { type FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { cn } from "../../lib/cn";
 import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
-import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
 import { computeDiff } from "../../lib/diff";
 import type { EnvSnapshot, SnapshotMeta } from "../../types";
 import { Button } from "../ui/Button";
-import { IconButton } from "../ui/IconButton";
 import { Modal } from "../ui/Modal";
 import { TextInput } from "../ui/TextInput";
+import { SnapshotCard } from "./SnapshotCard";
 import { SnapshotCompare } from "./SnapshotCompare";
 import { SnapshotPreview } from "./SnapshotPreview";
 
@@ -42,7 +42,6 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [comparingFrom, setComparingFrom] = useState<SnapshotMeta | null>(null);
   const [compareResult, setCompareResult] = useState<CompareResult | null>(null);
-  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     try {
@@ -55,12 +54,6 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
   useEffect(() => {
     void load();
   }, [load]);
-
-  useEffect(() => {
-    if (!editingId) return;
-    renameInputRef.current?.focus();
-    renameInputRef.current?.select();
-  }, [editingId]);
 
   const handleCreate = async () => {
     const snapshotLabel = label.trim() || new Date().toLocaleString();
@@ -228,126 +221,34 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
           {snapshots.length === 0 && (
             <p className="text-center text-dim text-xs py-6">{t("snapshot.no_snapshots")}</p>
           )}
-          {snapshots.map((s) => {
-            const isComparingSource = comparingFrom?.id === s.id;
-            return (
-              <div
-                key={s.id}
-                data-snapshot-id={s.id}
-                className={cn(
-                  "flex flex-col gap-2 px-4 py-2 bg-panel border rounded",
-                  isComparingSource ? "border-accent/40 bg-accent/5" : "border-rim",
-                )}
-              >
-                {editingId === s.id ? (
-                  <form className="flex items-center gap-1" onSubmit={(e) => handleRename(e, s.id)}>
-                    <input
-                      ref={renameInputRef}
-                      aria-label={t("snapshot.rename_label")}
-                      value={editingLabel}
-                      onChange={(e) => setEditingLabel(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Escape") {
-                          e.preventDefault();
-                          handleCancelRename();
-                        }
-                      }}
-                      className="h-8 min-w-0 flex-1 rounded border border-rim bg-surface px-2 text-sm text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                    />
-                    <IconButton
-                      aria-label={t("snapshot.save_rename")}
-                      icon="check"
-                      type="submit"
-                      disabled={!editingLabel.trim() || renamingId === s.id}
-                      title={t("snapshot.save_rename")}
-                    />
-                    <IconButton
-                      aria-label={t("snapshot.cancel_rename")}
-                      icon="x"
-                      onClick={handleCancelRename}
-                      disabled={renamingId === s.id}
-                      title={t("snapshot.cancel_rename")}
-                    />
-                  </form>
-                ) : (
-                  <p
-                    className="text-sm font-medium leading-snug text-fg break-words"
-                    title={s.label}
-                  >
-                    {s.label}
-                  </p>
-                )}
-                <div>
-                  <p className="text-[11px] text-dim">{formatDate(s.createdAt)}</p>
-                </div>
-                {editingId !== s.id && (
-                  <div className="flex min-h-8 items-center gap-1">
-                    {comparingFrom ? (
-                      !isComparingSource && (
-                        <Button
-                          variant="secondary"
-                          size="xs"
-                          onClick={() => handlePickCompareTarget(s)}
-                        >
-                          {t("snapshot.compare_with")}
-                        </Button>
-                      )
-                    ) : confirmDeleteId === s.id ? (
-                      <>
-                        <span className="min-w-0 flex-1 text-xs text-danger">
-                          {t("snapshot.confirm_delete")}
-                        </span>
-                        <Button variant="danger" size="xs" onClick={() => handleDelete(s.id)}>
-                          {t("snapshot.delete")}
-                        </Button>
-                        <Button variant="ghost" size="xs" onClick={() => setConfirmDeleteId(null)}>
-                          {t("snapshot.cancel")}
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="secondary"
-                          size="xs"
-                          onClick={() => handlePreview(s)}
-                          disabled={loadingPreview}
-                        >
-                          {loadingPreview ? "…" : t("snapshot.preview")}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          onClick={() => handleStartCompare(s)}
-                          disabled={snapshots.length < 2}
-                          title={snapshots.length < 2 ? t("snapshot.need_two") : undefined}
-                        >
-                          {t("snapshot.compare")}
-                        </Button>
-                        <span className="ml-auto flex items-center gap-1">
-                          <IconButton
-                            aria-label={t("snapshot.rename")}
-                            icon="pencil"
-                            onClick={() => handleStartRename(s)}
-                            title={t("snapshot.rename")}
-                          />
-                          <IconButton
-                            aria-label={t("snapshot.delete_action")}
-                            icon="trash"
-                            variant="danger"
-                            onClick={() => {
-                              setEditingId(null);
-                              setConfirmDeleteId(s.id);
-                            }}
-                            title={t("snapshot.delete_action")}
-                          />
-                        </span>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {snapshots.map((s) => (
+            <SnapshotCard
+              key={s.id}
+              snap={s}
+              isComparingSource={comparingFrom?.id === s.id}
+              comparingFrom={comparingFrom}
+              confirmDeleteId={confirmDeleteId}
+              editingId={editingId}
+              editingLabel={editingLabel}
+              renamingId={renamingId}
+              loadingPreview={loadingPreview}
+              canCompare={snapshots.length >= 2}
+              formatDate={formatDate}
+              onSetEditingLabel={setEditingLabel}
+              onRename={handleRename}
+              onCancelRename={handleCancelRename}
+              onPreview={() => handlePreview(s)}
+              onStartCompare={() => handleStartCompare(s)}
+              onPickCompareTarget={() => handlePickCompareTarget(s)}
+              onStartRename={() => handleStartRename(s)}
+              onStartDelete={() => {
+                setEditingId(null);
+                setConfirmDeleteId(s.id);
+              }}
+              onDelete={() => handleDelete(s.id)}
+              onCancelDelete={() => setConfirmDeleteId(null)}
+            />
+          ))}
         </div>
       </div>
 
