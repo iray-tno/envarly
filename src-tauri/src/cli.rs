@@ -150,18 +150,18 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
             output,
         } => {
             let snapshot = env_store::read_snapshot()?;
-            let scope_str = match scope {
-                ScopeArg::User => "User",
-                ScopeArg::System => "System",
-                ScopeArg::All => "All",
+            let export_scope = match scope {
+                ScopeArg::User => export::ExportScope::User,
+                ScopeArg::System => export::ExportScope::System,
+                ScopeArg::All => export::ExportScope::All,
             };
             let content = match format {
-                ExportFormat::Json => export::to_json(&snapshot, scope_str),
-                ExportFormat::Reg => export::to_reg(&snapshot, scope_str),
-                ExportFormat::Ps1 => export::to_ps1(&snapshot, scope_str),
-                ExportFormat::DscV2 => export::to_dsc_v2(&snapshot, scope_str),
-                ExportFormat::DscV3 => export::to_dsc_v3(&snapshot, scope_str),
-                ExportFormat::Ansible => export::to_ansible(&snapshot, scope_str),
+                ExportFormat::Json => export::to_json(&snapshot, export_scope),
+                ExportFormat::Reg => export::to_reg(&snapshot, export_scope),
+                ExportFormat::Ps1 => export::to_ps1(&snapshot, export_scope),
+                ExportFormat::DscV2 => export::to_dsc_v2(&snapshot, export_scope),
+                ExportFormat::DscV3 => export::to_dsc_v3(&snapshot, export_scope),
+                ExportFormat::Ansible => export::to_ansible(&snapshot, export_scope),
             };
             match output {
                 Some(path) => std::fs::write(&path, content.as_bytes())

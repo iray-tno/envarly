@@ -155,68 +155,33 @@ pub async fn export_vars(
     scope: String,
     format: String,
 ) -> Result<Option<String>, EnvarlyError> {
+    use crate::export::ExportScope;
     use tauri_plugin_dialog::{DialogExt, FilePath};
 
+    let export_scope = ExportScope::try_from(scope.as_str())?;
     let snapshot = env_store::read_snapshot()?;
-    let (content, ext, default_stem, filter_name) = match format.as_str() {
-        "reg" => (
-            crate::export::to_reg(&snapshot, &scope),
-            "reg",
-            "envarly",
-            "Registry files",
-        ),
-        "ps1" => (
-            crate::export::to_ps1(&snapshot, &scope),
-            "ps1",
-            "envarly",
-            "PowerShell Script",
-        ),
-        "dsc_v2" => (
-            crate::export::to_dsc_v2(&snapshot, &scope),
-            "ps1",
-            "envarly-dsc",
-            "PowerShell DSC Configuration",
-        ),
-        "dsc_v3" => (
-            crate::export::to_dsc_v3(&snapshot, &scope),
-            "dsc.yaml",
-            "envarly-dsc3",
-            "DSC v3 Configuration",
-        ),
-        "ansible" => (
-            crate::export::to_ansible(&snapshot, &scope),
-            "yml",
-            "envarly-ansible",
-            "Ansible Playbook",
-        ),
-        _ => (
-            crate::export::to_json(&snapshot, &scope),
-            "json",
-            "envarly",
-            "JSON files",
-        ),
-    };
+    let spec = crate::export::resolve_export(&snapshot, &format, export_scope, "envarly");
 
     let default_name = format!(
         "{}-{}.{}",
-        default_stem,
+        spec.file_stem,
         chrono::Local::now().format("%Y%m%d"),
-        ext
+        spec.ext
     );
 
     let path = app
         .dialog()
         .file()
         .set_file_name(&default_name)
-        .add_filter(filter_name, &[ext])
+        .add_filter(spec.filter_name, &[spec.ext])
         .blocking_save_file();
 
     match path {
         Some(FilePath::Path(p)) => {
-            std::fs::write(&p, content.as_bytes()).map_err(EnvarlyError::Registry)?;
+            std::fs::write(&p, spec.content.as_bytes()).map_err(EnvarlyError::Registry)?;
             Ok(Some(p.to_string_lossy().into_owned()))
         }
-        _ => Ok(None), // cancelled
+        _ => Ok(None),
     }
 }
 
@@ -238,6 +203,7 @@ pub async fn export_custom(
     format: String,
 ) -> Result<Option<String>, EnvarlyError> {
     use std::collections::HashMap;
+    use crate::export::ExportScope;
     use tauri_plugin_dialog::{DialogExt, FilePath};
 
     let mut snapshot = EnvSnapshot {
@@ -266,62 +232,25 @@ pub async fn export_custom(
         }
     }
 
-    let (content, ext, default_stem, filter_name) = match format.as_str() {
-        "reg" => (
-            crate::export::to_reg(&snapshot, "All"),
-            "reg",
-            "envarly-custom",
-            "Registry files",
-        ),
-        "ps1" => (
-            crate::export::to_ps1(&snapshot, "All"),
-            "ps1",
-            "envarly-custom",
-            "PowerShell Script",
-        ),
-        "dsc_v2" => (
-            crate::export::to_dsc_v2(&snapshot, "All"),
-            "ps1",
-            "envarly-custom-dsc",
-            "PowerShell DSC Configuration",
-        ),
-        "dsc_v3" => (
-            crate::export::to_dsc_v3(&snapshot, "All"),
-            "dsc.yaml",
-            "envarly-custom-dsc3",
-            "DSC v3 Configuration",
-        ),
-        "ansible" => (
-            crate::export::to_ansible(&snapshot, "All"),
-            "yml",
-            "envarly-custom-ansible",
-            "Ansible Playbook",
-        ),
-        _ => (
-            crate::export::to_json(&snapshot, "All"),
-            "json",
-            "envarly-custom",
-            "JSON files",
-        ),
-    };
+    let spec = crate::export::resolve_export(&snapshot, &format, ExportScope::All, "envarly-custom");
 
     let default_name = format!(
         "{}-{}.{}",
-        default_stem,
+        spec.file_stem,
         chrono::Local::now().format("%Y%m%d"),
-        ext
+        spec.ext
     );
 
     let path = app
         .dialog()
         .file()
         .set_file_name(&default_name)
-        .add_filter(filter_name, &[ext])
+        .add_filter(spec.filter_name, &[spec.ext])
         .blocking_save_file();
 
     match path {
         Some(FilePath::Path(p)) => {
-            std::fs::write(&p, content.as_bytes()).map_err(EnvarlyError::Registry)?;
+            std::fs::write(&p, spec.content.as_bytes()).map_err(EnvarlyError::Registry)?;
             Ok(Some(p.to_string_lossy().into_owned()))
         }
         _ => Ok(None),

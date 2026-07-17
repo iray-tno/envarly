@@ -1,4 +1,3 @@
-import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
@@ -8,14 +7,11 @@ import { stagedKey } from "../../hooks/useStaged";
 import { lookupEnvDescription } from "../../lib/envDescriptions";
 import { resolveEnvValueKind } from "../../lib/envValueKind";
 import type { EnvValueKindSelection, EnvVar, VarScope } from "../../types";
-import { ListEditor } from "../ListEditor/ListEditor";
-import { PathEditor } from "../PathEditor/PathEditor";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
-import { IconButton } from "../ui/IconButton";
 import { Select } from "../ui/Select";
-import { Textarea } from "../ui/Textarea";
+import { VariableEditor } from "./VariableEditor";
 
 interface Props {
   variable: EnvVar | null;
@@ -37,40 +33,6 @@ interface Props {
   onRegisterLocalUndo?: (fn: (() => void) | null) => void;
 }
 
-const PATH_NAME_SUFFIXES = ["_HOME", "_ROOT", "_PATH", "_DIR", "_DIRECTORY"];
-const PATH_NAME_EXACT = new Set([
-  "APPDATA",
-  "CUDA_PATH",
-  "LOCALAPPDATA",
-  "PROGRAMDATA",
-  "PROGRAMFILES",
-  "PROGRAMFILES(X86)",
-  "PUBLIC",
-  "SYSTEMDRIVE",
-  "SYSTEMROOT",
-  "TEMP",
-  "TMP",
-  "USERPROFILE",
-  "WINDIR",
-]);
-
-function looksLikeSinglePath(name: string, value: string) {
-  const normalizedName = name.toUpperCase();
-  const trimmedValue = value.trim();
-
-  if (
-    PATH_NAME_EXACT.has(normalizedName) ||
-    PATH_NAME_SUFFIXES.some((suffix) => normalizedName.endsWith(suffix))
-  ) {
-    return true;
-  }
-
-  return (
-    /^[a-z]:[\\/]/i.test(trimmedValue) ||
-    trimmedValue.startsWith("/") ||
-    trimmedValue.startsWith("\\\\")
-  );
-}
 
 export function DetailPanel({
   variable,
@@ -181,17 +143,6 @@ export function DetailPanel({
     setValueKindSelection("Auto");
   };
 
-  const handleBrowseFolder = async () => {
-    const selected = await open({
-      directory: true,
-      multiple: false,
-      defaultPath: value.trim() || undefined,
-    });
-    if (typeof selected === "string") {
-      handleValueChange(selected);
-    }
-  };
-
   /** Auto-detect list separator from pasted text. */
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const text = e.clipboardData.getData("text");
@@ -205,8 +156,6 @@ export function DetailPanel({
   const effectiveSeparator =
     overrideSeparator === "plain" ? null : (overrideSeparator ?? variable.listSeparator);
   const readOnly = variable.scope === "System" && !elevated;
-  const showFolderPicker =
-    !readOnly && effectiveSeparator === null && looksLikeSinglePath(variable.name, value);
   const description = lookupEnvDescription(variable.name);
   const isPathVar = variable.name.toUpperCase() === "PATH";
   const pathInEnvForScope = variable.scope === "System" ? systemPathInEnv : userPathInEnv;
@@ -395,47 +344,16 @@ export function DetailPanel({
             </div>
           </div>
 
-          {effectiveSeparator === ";" ? (
-            <PathEditor
-              rawValue={value}
-              onChange={handleValueChange}
-              readOnly={readOnly}
-              allVars={allVars}
-              skipPathValidation={variable.name.toUpperCase() === "PATHEXT"}
-              allowFolderBrowse={variable.name.toUpperCase() !== "PATHEXT"}
-              onBeforeReorder={onBeforeStructuralChange}
-            />
-          ) : effectiveSeparator === "," ? (
-            <ListEditor
-              separator=","
-              rawValue={value}
-              onChange={handleValueChange}
-              readOnly={readOnly}
-            />
-          ) : (
-            <div className="group relative">
-              <Textarea
-                label="Value"
-                labelHidden
-                value={value}
-                onChange={(e) => handleValueChange(e.target.value)}
-                onPaste={handlePaste}
-                rows={Math.max(3, value.split("\n").length + 1)}
-                spellCheck={false}
-                disabled={readOnly}
-                className={showFolderPicker ? "pr-11" : undefined}
-              />
-              {showFolderPicker && (
-                <IconButton
-                  aria-label={t("detail.browse_folder")}
-                  title={t("detail.browse_folder")}
-                  icon="folder"
-                  onClick={handleBrowseFolder}
-                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-                />
-              )}
-            </div>
-          )}
+          <VariableEditor
+            variable={variable}
+            value={value}
+            separator={effectiveSeparator}
+            readOnly={readOnly}
+            allVars={allVars}
+            onChange={handleValueChange}
+            onPaste={handlePaste}
+            onBeforeReorder={onBeforeStructuralChange}
+          />
 
           {/* Metadata */}
           <div className="flex flex-col gap-1 pt-2 border-t border-rim-subtle mt-1">
