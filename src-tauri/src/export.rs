@@ -26,7 +26,9 @@ impl TryFrom<&str> for ExportScope {
             "User" => Ok(ExportScope::User),
             "System" => Ok(ExportScope::System),
             "All" => Ok(ExportScope::All),
-            other => Err(EnvarlyError::InvalidInput(format!("invalid scope: {other:?}"))),
+            other => Err(EnvarlyError::InvalidInput(format!(
+                "invalid scope: {other:?}"
+            ))),
         }
     }
 }
@@ -61,7 +63,12 @@ pub fn resolve_export(
             "-dsc3",
             "DSC v3 Configuration",
         ),
-        "ansible" => (to_ansible(snapshot, scope), "yml", "-ansible", "Ansible Playbook"),
+        "ansible" => (
+            to_ansible(snapshot, scope),
+            "yml",
+            "-ansible",
+            "Ansible Playbook",
+        ),
         _ => (to_json(snapshot, scope), "json", "", "JSON files"),
     };
     FormatSpec {

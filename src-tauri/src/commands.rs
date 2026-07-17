@@ -202,8 +202,8 @@ pub async fn export_custom(
     vars: Vec<CustomExportVar>,
     format: String,
 ) -> Result<Option<String>, EnvarlyError> {
-    use std::collections::HashMap;
     use crate::export::ExportScope;
+    use std::collections::HashMap;
     use tauri_plugin_dialog::{DialogExt, FilePath};
 
     let mut snapshot = EnvSnapshot {
@@ -232,7 +232,8 @@ pub async fn export_custom(
         }
     }
 
-    let spec = crate::export::resolve_export(&snapshot, &format, ExportScope::All, "envarly-custom");
+    let spec =
+        crate::export::resolve_export(&snapshot, &format, ExportScope::All, "envarly-custom");
 
     let default_name = format!(
         "{}-{}.{}",
