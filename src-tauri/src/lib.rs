@@ -4,9 +4,13 @@ mod cli;
 mod commands;
 #[cfg(windows)]
 mod crypto;
+#[cfg(windows)]
+mod env_backend;
 mod env_store;
 mod error;
 pub mod export;
+#[cfg(windows)]
+mod path_backend;
 mod path_manage;
 #[cfg(windows)]
 mod snapshot;
@@ -33,26 +37,26 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            commands::get_env_vars,
-            commands::get_unsupported_env_values,
-            commands::get_registry_snapshot,
-            commands::set_env_var,
-            commands::delete_env_var,
-            commands::apply_env_changes,
-            commands::create_snapshot,
-            commands::list_snapshots,
-            commands::rename_snapshot,
-            commands::delete_snapshot,
-            commands::validate_paths,
-            commands::export_vars,
-            commands::export_custom,
-            commands::parse_import,
-            commands::is_elevated,
-            commands::restart_as_admin,
-            commands::get_path_status,
-            commands::get_path_proposal,
-            commands::get_launch_options,
-            commands::read_demo_fixture,
+            commands::env::get_env_vars,
+            commands::env::get_unsupported_env_values,
+            commands::env::get_registry_snapshot,
+            commands::env::set_env_var,
+            commands::env::delete_env_var,
+            commands::env::apply_env_changes,
+            commands::snapshot::create_snapshot,
+            commands::snapshot::list_snapshots,
+            commands::snapshot::rename_snapshot,
+            commands::snapshot::delete_snapshot,
+            commands::path::validate_paths,
+            commands::export::export_vars,
+            commands::export::export_custom,
+            commands::export::parse_import,
+            commands::env::is_elevated,
+            commands::env::restart_as_admin,
+            commands::path::get_path_status,
+            commands::path::get_path_proposal,
+            commands::launch::get_launch_options,
+            commands::launch::read_demo_fixture,
         ])
         .run(tauri::generate_context!())
         .expect("error while running envarly");
