@@ -4,61 +4,19 @@ import { useI18n } from "../../hooks/useI18n";
 import { resolveSecret, type SecretInfo } from "../../lib/secrets";
 import type { EnvVar } from "../../types";
 import { Button } from "../ui/Button";
-import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
+import { ExportConfirm } from "./ExportConfirm";
 import {
   type AnyFormat,
   type ExportScope,
   type FlatVar,
+  formatDescriptions,
+  formatExt,
   formatOptions,
   scopeOptions,
   varKey,
 } from "./types";
 import { SecretBanner, VarTable } from "./VarTable";
-
-const FORMAT_EXT: Record<AnyFormat, string> = {
-  json: ".json",
-  reg: ".reg",
-  ps1: ".ps1",
-  dsc_v2: ".ps1",
-  dsc_v3: ".dsc.yaml",
-  ansible: ".yml",
-};
-
-const FORMAT_DESC: Record<AnyFormat, string> = {
-  json: "Envarly JSON — can be re-imported into Envarly.",
-  reg: "Windows Registry Editor format — double-click to merge into the registry directly.",
-  ps1: "PowerShell script — SetEnvironmentVariable calls.",
-  dsc_v2: "PowerShell DSC v2 — Configuration block using PSDscResources.",
-  dsc_v3: "DSC v3 YAML — Microsoft's cross-platform DSC format.",
-  ansible: "Ansible playbook — win_environment tasks.",
-};
-
-interface ExportConfirmProps {
-  secretServices: string[];
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-function ExportConfirm({ secretServices, onConfirm, onCancel }: ExportConfirmProps) {
-  const { t } = useI18n();
-  return (
-    <div className="flex flex-col gap-3 p-3 rounded border border-warn/40 bg-warn/10">
-      <p className="flex gap-2 text-warn text-xs">
-        <Icon name="warning" size={14} className="mt-px" />
-        <span>{t("export.secret_warning", { services: secretServices.join(", ") })}</span>
-      </p>
-      <div className="flex gap-2">
-        <Button variant="primary" size="sm" onClick={onConfirm}>
-          {t("export.export_anyway")}
-        </Button>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          {t("export.cancel")}
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 interface ExportTabProps {
   onStatus: (msg: string | null) => void;
@@ -179,7 +137,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
   };
 
   const canExport = scope !== "Custom" || selectedCustomVars.length > 0;
-  const ext = FORMAT_EXT[format];
+  const ext = formatExt[format];
 
   return (
     <div className="flex flex-col gap-5">
@@ -206,7 +164,7 @@ export function ExportTab({ onStatus }: ExportTabProps) {
           onChange={setFormat}
           className="flex-wrap"
         />
-        <p className="text-xs text-dim">{FORMAT_DESC[format]}</p>
+        <p className="text-xs text-dim">{formatDescriptions[format]}</p>
       </div>
 
       {scope === "Custom" && (

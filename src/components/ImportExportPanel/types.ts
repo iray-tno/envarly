@@ -56,6 +56,24 @@ export const formatOptions: { value: AnyFormat; label: string }[] = [
   { value: "ansible", label: "Ansible" },
 ];
 
+export const formatExt: Record<AnyFormat, string> = {
+  json: ".json",
+  reg: ".reg",
+  ps1: ".ps1",
+  dsc_v2: ".ps1",
+  dsc_v3: ".dsc.yaml",
+  ansible: ".yml",
+};
+
+export const formatDescriptions: Record<AnyFormat, string> = {
+  json: "Envarly JSON — can be re-imported into Envarly.",
+  reg: "Windows Registry Editor format — double-click to merge into the registry directly.",
+  ps1: "PowerShell script — SetEnvironmentVariable calls.",
+  dsc_v2: "PowerShell DSC v2 — Configuration block using PSDscResources.",
+  dsc_v3: "DSC v3 YAML — Microsoft's cross-platform DSC format.",
+  ansible: "Ansible playbook — win_environment tasks.",
+};
+
 export const importFormatOptions: { value: ExportFormat; label: string }[] = [
   { value: "json", label: ".json" },
   { value: "reg", label: ".reg" },
