@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
 import { useLocalHistory } from "../../hooks/useLocalHistory";
 import type { StagedChange } from "../../hooks/useStaged";
@@ -7,10 +6,11 @@ import { stagedKey } from "../../hooks/useStaged";
 import { lookupEnvDescription } from "../../lib/envDescriptions";
 import { resolveEnvValueKind } from "../../lib/envValueKind";
 import type { EnvValueKindSelection, EnvVar, VarScope } from "../../types";
-import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { Select } from "../ui/Select";
+import { DetailHeader } from "./DetailHeader";
+import { DetailMetadata } from "./DetailMetadata";
 import { VariableEditor } from "./VariableEditor";
 
 interface Props {
@@ -175,57 +175,19 @@ export function DetailPanel({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header — fixed height so button appearance doesn't shift layout */}
-      <div className="flex items-center gap-3 px-6 h-[60px] border-b border-rim-subtle shrink-0">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <h2 className="font-mono font-semibold text-base text-fg truncate">{variable.name}</h2>
-          <Badge variant={variable.scope === "User" ? "user" : "system"}>{variable.scope}</Badge>
-          {readOnly && (
-            <>
-              <Badge variant="readonly">{t("detail.readonly_badge")}</Badge>
-              <button
-                type="button"
-                onClick={() => api.restartAsAdmin()}
-                className="text-[10px] text-accent hover:text-accent-hi px-2 py-1 rounded hover:bg-accent/10 transition-colors shrink-0"
-                title="Restart as administrator to edit system variables"
-              >
-                {t("detail.restart_admin")}
-              </button>
-            </>
-          )}
-          {isStagedSet && !dirty && (
-            <span className="text-[10px] font-semibold px-2 py-1 rounded bg-accent/15 text-accent shrink-0">
-              {t("detail.staged_badge")}
-            </span>
-          )}
-          {isStagedDelete && (
-            <span className="text-[10px] font-semibold px-2 py-1 rounded bg-danger/15 text-danger shrink-0">
-              {t("detail.staged_delete_badge")}
-            </span>
-          )}
-        </div>
-
-        <div className="flex gap-2 shrink-0">
-          {editorDirty ? (
-            <>
-              <Button variant="primary" size="sm" onClick={handleApply}>
-                {t("detail.stage")}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleDiscard}>
-                {t("detail.discard")}
-              </Button>
-            </>
-          ) : isStagedSet ? (
-            <Button variant="ghost" size="sm" onClick={handleUnstage}>
-              {t("detail.unstage")}
-            </Button>
-          ) : !isStagedDelete && !readOnly ? (
-            <Button variant="danger" size="sm" onClick={handleDelete}>
-              {t("detail.delete")}
-            </Button>
-          ) : null}
-        </div>
-      </div>
+      <DetailHeader
+        name={variable.name}
+        scope={variable.scope}
+        readOnly={readOnly}
+        isStagedSet={isStagedSet}
+        isStagedDelete={isStagedDelete}
+        dirty={dirty}
+        editorDirty={editorDirty}
+        onApply={handleApply}
+        onDiscard={handleDiscard}
+        onUnstage={handleUnstage}
+        onDelete={handleDelete}
+      />
 
       {description && (
         <div className="flex items-center gap-2 px-6 py-2 border-b border-rim-subtle bg-hover/40 shrink-0">
@@ -355,37 +317,15 @@ export function DetailPanel({
             onBeforeReorder={onBeforeStructuralChange}
           />
 
-          {/* Metadata */}
-          <div className="flex flex-col gap-1 pt-2 border-t border-rim-subtle mt-1">
-            {[
-              [t("detail.meta_scope"), variable.scope],
-              [t("detail.meta_length_label"), t("detail.meta_length", { count: value.length })],
-              ...(entriesCount !== null ? [[t("detail.meta_entries"), String(entriesCount)]] : []),
-              ...(expandedValue !== null
-                ? [
-                    [
-                      t("detail.meta_expanded"),
-                      expandedValue.length > 60 ? `${expandedValue.slice(0, 60)}…` : expandedValue,
-                    ],
-                  ]
-                : []),
-              ...(isStagedSet && stagedChange.originalValue !== null
-                ? [
-                    [
-                      t("detail.meta_original"),
-                      stagedChange.originalValue.length > 40
-                        ? `${stagedChange.originalValue.slice(0, 40)}…`
-                        : stagedChange.originalValue,
-                    ],
-                  ]
-                : []),
-            ].map(([label, val]) => (
-              <div key={label} className="flex gap-3 text-sm">
-                <span className="text-dim w-14 shrink-0">{label}</span>
-                <span className="text-muted font-mono">{val}</span>
-              </div>
-            ))}
-          </div>
+          <DetailMetadata
+            scope={variable.scope}
+            valueLength={value.length}
+            entriesCount={entriesCount}
+            expandedValue={expandedValue}
+            originalValue={
+              isStagedSet && stagedChange.originalValue !== null ? stagedChange.originalValue : null
+            }
+          />
         </div>
       )}
     </div>

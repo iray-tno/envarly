@@ -9,6 +9,7 @@ import { Icon } from "../ui/Icon";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { Select } from "../ui/Select";
 import { TextInput } from "../ui/TextInput";
+import { SidebarRow } from "./SidebarRow";
 
 interface Props {
   vars: EnvVar[];
@@ -180,85 +181,24 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
             {sorted.map((v) => {
               const key = stagedKey(v.name, v.scope);
               const isSelected = selected?.name === v.name && selected?.scope === v.scope;
-              const secret = resolveSecret(v.name, v.value);
-              const stagedChange = staged.get(key);
-              const isDelete = stagedChange?.kind === "delete";
-              const isSet = stagedChange?.kind === "set";
-              const isNew = isSet && stagedChange.originalValue === null;
               return (
-                <li
+                <SidebarRow
                   key={key}
-                  className={cn(
-                    "group flex items-center mx-2 w-[calc(100%-1rem)] rounded transition-colors",
-                    isSelected ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
-                  )}
-                >
-                  <button
-                    ref={(el) => {
-                      if (el) itemRefs.current.set(key, el);
-                      else itemRefs.current.delete(key);
-                    }}
-                    type="button"
-                    aria-current={isSelected ? "true" : undefined}
-                    tabIndex={isSelected || (!selected && sorted[0] === v) ? 0 : -1}
-                    onClick={() => onSelect(v)}
-                    onKeyDown={handleKeyDown}
-                    className={cn(
-                      "flex min-w-0 flex-1 items-center gap-2 px-4 py-2 text-left rounded",
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex-1 font-mono text-sm truncate",
-                        isDelete && "line-through",
-                      )}
-                    >
-                      {v.name}
-                    </span>
-                    {secret && !isDelete && (
-                      <span
-                        title={secret.label}
-                        className="text-[9px] font-medium text-warn shrink-0 max-w-[44px] truncate"
-                      >
-                        {secret.service}
-                      </span>
-                    )}
-                    {isDelete && (
-                      <span className="text-[9px] font-bold text-danger shrink-0">D</span>
-                    )}
-                    {isNew && <span className="text-[9px] font-bold text-success shrink-0">A</span>}
-                    {isSet && !isNew && (
-                      <span className="text-[9px] font-bold text-warn shrink-0">M</span>
-                    )}
-                    <span
-                      className={cn(
-                        "text-[10px] font-semibold w-4 h-4 rounded flex items-center justify-center shrink-0",
-                        v.scope === "User"
-                          ? "bg-accent/15 text-accent"
-                          : "bg-violet/15 text-violet",
-                      )}
-                    >
-                      {v.scope[0]}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopy(v.value, key);
-                    }}
-                    aria-label={`Copy value of ${v.name}`}
-                    title="Copy value"
-                    className={cn(
-                      "shrink-0 text-[10px] px-1 py-1 rounded transition-all",
-                      "mr-2 opacity-0 group-hover:opacity-100 focus:opacity-100",
-                      copiedKey === key ? "text-success" : "text-dim hover:text-muted",
-                    )}
-                  >
-                    <Icon name={copiedKey === key ? "check" : "copy"} size={12} />
-                  </button>
-                </li>
+                  entryKey={key}
+                  v={v}
+                  isSelected={isSelected}
+                  isFirstWhenNoneSelected={!selected && sorted[0] === v}
+                  secret={resolveSecret(v.name, v.value)}
+                  stagedChange={staged.get(key)}
+                  copiedKey={copiedKey}
+                  onSelect={() => onSelect(v)}
+                  onKeyDown={handleKeyDown}
+                  onCopy={() => handleCopy(v.value, key)}
+                  registerRef={(el) => {
+                    if (el) itemRefs.current.set(key, el);
+                    else itemRefs.current.delete(key);
+                  }}
+                />
               );
             })}
           </ul>
