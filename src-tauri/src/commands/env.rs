@@ -1,5 +1,6 @@
-use crate::env_store::{self, EnvChange, EnvValueKind, EnvVar, VarScope};
+use crate::env_store;
 use crate::error::EnvarlyError;
+use crate::model::{EnvChange, EnvSnapshot, EnvValueKind, EnvVar, UnsupportedEnvValue, VarScope};
 use crate::snapshot;
 
 #[tauri::command]
@@ -8,12 +9,12 @@ pub fn get_env_vars() -> Result<Vec<EnvVar>, EnvarlyError> {
 }
 
 #[tauri::command]
-pub fn get_unsupported_env_values() -> Result<Vec<env_store::UnsupportedEnvValue>, EnvarlyError> {
+pub fn get_unsupported_env_values() -> Result<Vec<UnsupportedEnvValue>, EnvarlyError> {
     env_store::read_unsupported_values()
 }
 
 #[tauri::command]
-pub fn get_registry_snapshot() -> Result<crate::env_store::EnvSnapshot, EnvarlyError> {
+pub fn get_registry_snapshot() -> Result<EnvSnapshot, EnvarlyError> {
     env_store::read_snapshot()
 }
 

@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use super::ExportScope;
-use crate::env_store::{EnvSnapshot, EnvValue};
 use crate::error::EnvarlyError;
+use crate::model::{EnvSnapshot, EnvValue};
 
 /// Export snapshot as pretty-printed JSON.
 pub fn to_json(snapshot: &EnvSnapshot, scope: ExportScope) -> String {
@@ -61,7 +61,7 @@ pub fn parse_json(content: &str) -> Result<EnvSnapshot, EnvarlyError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::env_store::EnvValueKind;
+    use crate::model::EnvValueKind;
 
     fn string(value: &str) -> EnvValue {
         EnvValue::typed(value.to_string(), EnvValueKind::String)

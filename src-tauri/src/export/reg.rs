@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use super::ExportScope;
-use crate::env_store::{EnvSnapshot, EnvValue, EnvValueKind};
 use crate::error::EnvarlyError;
+use crate::model::{EnvSnapshot, EnvValue, EnvValueKind};
 
 /// Export snapshot in Windows Registry .reg format.
 pub fn to_reg(snapshot: &EnvSnapshot, scope: ExportScope) -> String {

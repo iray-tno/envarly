@@ -4,8 +4,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::crypto;
-use crate::env_store::EnvSnapshot;
 use crate::error::EnvarlyError;
+use crate::model::EnvSnapshot;
 
 /// Snapshot file format version. Increment when the serialized shape changes.
 /// Version history:
@@ -82,7 +82,7 @@ impl From<LegacySnapshotMeta> for SnapshotMeta {
         let unresolved = |values: std::collections::HashMap<String, String>| {
             values
                 .into_iter()
-                .map(|(name, value)| (name, crate::env_store::EnvValue { value, kind: None }))
+                .map(|(name, value)| (name, crate::model::EnvValue { value, kind: None }))
                 .collect()
         };
         Self {
@@ -200,9 +200,9 @@ mod tests {
         EnvSnapshot {
             user: HashMap::from([(
                 "MY_VAR".to_string(),
-                crate::env_store::EnvValue::typed(
+                crate::model::EnvValue::typed(
                     "hello".to_string(),
-                    crate::env_store::EnvValueKind::String,
+                    crate::model::EnvValueKind::String,
                 ),
             )]),
             system: HashMap::new(),

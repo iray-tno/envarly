@@ -4,8 +4,9 @@ use std::collections::HashMap;
 use winreg::enums::*;
 use winreg::{RegKey, RegValue};
 
-use crate::env_store::{EnvBackend, EnvValue, EnvValueKind, UnsupportedEnvValue, VarScope};
+use crate::env_store::EnvBackend;
 use crate::error::EnvarlyError;
+use crate::model::{EnvValue, EnvValueKind, UnsupportedEnvValue, VarScope};
 
 const USER_ENV_KEY: &str = "Environment";
 const SYSTEM_ENV_KEY: &str = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment";

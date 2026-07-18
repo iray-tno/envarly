@@ -86,8 +86,9 @@ pub fn run() -> ! {
 }
 
 fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
-    use crate::env_store::{self, VarScope};
+    use crate::env_store;
     use crate::export;
+    use crate::model::VarScope;
 
     match command {
         Command::Get { name, scope } => {

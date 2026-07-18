@@ -1,5 +1,5 @@
 use super::{ps1_quote, type_limitation_notice, yaml_quote, ExportScope};
-use crate::env_store::EnvSnapshot;
+use crate::model::EnvSnapshot;
 
 /// Sanitised identifier for a DSC v2 resource instance (alphanumeric + underscore, scope-prefixed).
 fn dsc_id(name: &str, scope: &str) -> String {
@@ -81,7 +81,7 @@ pub fn to_dsc_v3(snapshot: &EnvSnapshot, scope: ExportScope) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::env_store::{EnvValue, EnvValueKind};
+    use crate::model::{EnvValue, EnvValueKind};
 
     fn string(value: &str) -> EnvValue {
         EnvValue::typed(value.to_string(), EnvValueKind::String)

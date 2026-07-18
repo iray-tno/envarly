@@ -1,8 +1,9 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
-use crate::env_store::{self, EnvSnapshot, EnvValue, EnvValueKind};
+use crate::env_store;
 use crate::error::EnvarlyError;
+use crate::model::{EnvSnapshot, EnvValue, EnvValueKind};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]

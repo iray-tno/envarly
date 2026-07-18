@@ -1,5 +1,5 @@
 use super::{type_limitation_notice, yaml_quote, ExportScope};
-use crate::env_store::EnvSnapshot;
+use crate::model::EnvSnapshot;
 
 /// Export snapshot as an Ansible playbook (.yml).
 pub fn to_ansible(snapshot: &EnvSnapshot, scope: ExportScope) -> String {
@@ -38,7 +38,7 @@ pub fn to_ansible(snapshot: &EnvSnapshot, scope: ExportScope) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::env_store::{EnvValue, EnvValueKind};
+    use crate::model::{EnvValue, EnvValueKind};
 
     fn string(value: &str) -> EnvValue {
         EnvValue::typed(value.to_string(), EnvValueKind::String)

@@ -1,5 +1,5 @@
 use super::{ps1_quote, ExportScope};
-use crate::env_store::{EnvSnapshot, EnvValueKind};
+use crate::model::{EnvSnapshot, EnvValueKind};
 
 /// Export snapshot as a PowerShell script that preserves registry value types.
 pub fn to_ps1(snapshot: &EnvSnapshot, scope: ExportScope) -> String {
@@ -51,7 +51,7 @@ fn ps1_kind(kind: Option<EnvValueKind>) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::env_store::EnvValue;
+    use crate::model::EnvValue;
 
     fn string(value: &str) -> EnvValue {
         EnvValue::typed(value.to_string(), EnvValueKind::String)

@@ -9,6 +9,7 @@ mod env_backend;
 mod env_store;
 mod error;
 pub mod export;
+mod model;
 #[cfg(windows)]
 mod path_backend;
 mod path_manage;
