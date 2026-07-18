@@ -1,6 +1,7 @@
 {
   "app": {
-    "registry_error": "Registry error: {{error}}"
+    "registry_error": "Registry error: {{error}}",
+    "loading": "Loading…"
   },
   "diagnostics": {
     "summary_one": "{{count}} environment issue found",

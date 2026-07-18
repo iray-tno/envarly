@@ -53,8 +53,8 @@ export function useDiff(refresh: () => Promise<void>, setDialog: SetDialog): Use
         }
         if (baselineRef.current) baselineRef.current = applyAccepted(baselineRef.current, accepted);
         setDiffEntries([]);
-        setDialog(null);
         await refresh();
+        setDialog(null);
       } catch (err) {
         console.error("Failed to apply diff", err);
         setApplyError(String(err));

@@ -77,18 +77,38 @@ const normalApi: EnvarlyApi = {
 
 let apiPromise: Promise<EnvarlyApi> | null = null;
 
+/** get_launch_options should resolve almost instantly; this bounds how long a
+ * stuck IPC call can block every other command in the app behind `getApi()`. */
+const LAUNCH_OPTIONS_TIMEOUT_MS = 3000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
 async function getApi(): Promise<EnvarlyApi> {
   if (!isTauri()) {
     throw new Error("Tauri runtime unavailable. Start Envarly with `npm run dev`.");
   }
   if (!apiPromise) {
-    apiPromise = normalApi
-      .getLaunchOptions()
-      .catch(() => ({ demo: false, demoFixture: null }))
-      .then(async (options) => {
-        if (!options.demo) return normalApi;
-        return createDemoApi(options, await loadDemoFixture(options), normalApi);
-      });
+    apiPromise = withTimeout(normalApi.getLaunchOptions(), LAUNCH_OPTIONS_TIMEOUT_MS, {
+      demo: false,
+      demoFixture: null,
+    }).then(async (options) => {
+      if (!options.demo) return normalApi;
+      return createDemoApi(options, await loadDemoFixture(options), normalApi);
+    });
   }
   return apiPromise;
 }

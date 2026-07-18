@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { AppHeader } from "./components/AppHeader/AppHeader";
+import { AppLoading } from "./components/AppLoading/AppLoading";
 import { AppModals } from "./components/AppModals/AppModals";
 import { DetailPanel } from "./components/DetailPanel/DetailPanel";
 import { DiagnosticsPanel } from "./components/DiagnosticsPanel/DiagnosticsPanel";
@@ -73,7 +74,7 @@ export default function App() {
     applyError,
   } = useDiff(refresh, setDialog);
 
-  const { handleRefresh } = useAppInit({
+  const { handleRefresh, initializing } = useAppInit({
     baselineRef,
     setElevated,
     refreshPathStatus,
@@ -140,6 +141,14 @@ export default function App() {
       handleStage(variable.name, variable.scope, variable.value, action.valueKind);
     }
   };
+
+  if (initializing) {
+    return (
+      <ThemeContext.Provider value={theme}>
+        <AppLoading />
+      </ThemeContext.Provider>
+    );
+  }
 
   return (
     <ThemeContext.Provider value={theme}>

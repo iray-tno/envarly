@@ -1,6 +1,7 @@
 {
   "app": {
-    "registry_error": "レジストリエラー: {{error}}"
+    "registry_error": "レジストリエラー: {{error}}",
+    "loading": "読み込み中…"
   },
   "diagnostics": {
     "summary_one": "環境変数の要確認項目が {{count}} 件あります",
