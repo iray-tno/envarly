@@ -48,12 +48,12 @@ export function useApplyStaged({
         );
         await api.applyEnvChanges(changes);
         clearStaged();
-        setDialog(null);
         await refresh();
         try {
           baselineRef.current = await api.getRegistrySnapshot();
         } catch {}
         await refreshPathStatus();
+        setDialog(null);
       } catch (err) {
         console.error("Failed to apply staged changes", err);
         setError(String(err));

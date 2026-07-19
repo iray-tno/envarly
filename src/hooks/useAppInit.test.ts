@@ -15,7 +15,7 @@ function makeParams(overrides: Partial<Parameters<typeof useAppInit>[0]> = {}) {
     baselineRef: { current: null },
     setElevated: vi.fn(),
     refreshPathStatus: vi.fn().mockResolvedValue(undefined),
-    refresh: vi.fn(),
+    refresh: vi.fn().mockResolvedValue(undefined),
     checkForExternalChanges: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
@@ -66,5 +66,12 @@ describe("useAppInit", () => {
     renderHook(() => useAppInit(params));
     await waitFor(() => expect(params.refresh).toHaveBeenCalled());
     expect(params.setElevated).toHaveBeenCalled();
+  });
+
+  it("initializing is true until refresh resolves, then false", async () => {
+    const params = makeParams();
+    const { result } = renderHook(() => useAppInit(params));
+    expect(result.current.initializing).toBe(true);
+    await waitFor(() => expect(result.current.initializing).toBe(false));
   });
 });
