@@ -115,6 +115,34 @@ export const ManySnapshots: Story = {
   },
 };
 
+export const Compare: Story = {
+  play: async ({ canvasElement }) => {
+    // Button text is localized, so navigate by structural position instead:
+    // each card renders [Preview, Compare, rename-icon, delete-icon] normally,
+    // and just [Compare with] once a compare source is picked.
+    const cards = await waitFor(() => {
+      const els = Array.from(canvasElement.querySelectorAll<HTMLElement>("[data-snapshot-id]"));
+      expect(els.length).toBeGreaterThanOrEqual(2);
+      return els;
+    });
+
+    const compareButton = cards[0].querySelectorAll("button")[1];
+    compareButton.click();
+
+    const compareWithButton = await waitFor(() => {
+      const button = cards[1].querySelector("button");
+      expect(button).toBeTruthy();
+      return button;
+    });
+    compareWithButton?.click();
+
+    await waitFor(() => {
+      const dialog = canvasElement.ownerDocument.querySelector<HTMLElement>('[role="dialog"]');
+      expect(dialog?.parentElement).toBe(canvasElement.ownerDocument.body);
+    });
+  },
+};
+
 export const WidePreviewDiff: Story = {
   parameters: { snapshotFixtures: [wideDiffSnapshot] },
   play: async ({ canvasElement }) => {

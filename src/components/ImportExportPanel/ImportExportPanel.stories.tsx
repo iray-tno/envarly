@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { ComponentProps } from "react";
 import { useEffect } from "react";
-import { fn } from "storybook/test";
+import { fn, within } from "storybook/test";
 import { api } from "../../api";
 import type { EnvSnapshot, EnvVar } from "../../types";
 import { ImportExportPanel } from "./ImportExportPanel";
@@ -110,5 +110,16 @@ export const ImportEmpty: Story = {
       label.textContent?.includes("Import"),
     );
     importTab?.click();
+  },
+};
+
+export const SecretWarning: Story = {
+  decorators: withStoryApi,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const exportButton = await canvas.findByRole("button", { name: /\.json/i });
+    exportButton.click();
+    // "GitHub" (the secret service name) isn't translated, so it's a safe locale-agnostic anchor.
+    await canvas.findByText(/github/i);
   },
 };
