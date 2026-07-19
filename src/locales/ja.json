@@ -39,7 +39,9 @@
     "run_as_admin": "管理者として実行",
     "run_as_admin_title": "システム変数は読み取り専用です。編集するには管理者として再起動してください。",
     "administrator": "管理者モード",
-    "licenses": "ライセンス"
+    "licenses": "ライセンス",
+    "update_available": "アップデートあり: v{{version}}",
+    "update_available_title": "新しいバージョンのEnvarlyがあります。クリックしてリリースページを見る。"
   },
   "path_banner": {
     "prefix": "Envarly が {{scope}} の PATH に含まれていません — ターミナルから",

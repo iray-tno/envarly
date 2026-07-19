@@ -7,6 +7,7 @@ import type {
   EnvVar,
   SnapshotMeta,
   UnsupportedEnvValue,
+  UpdateInfo,
   VarScope,
 } from "./types";
 
@@ -47,6 +48,7 @@ export interface EnvarlyApi {
     systemHasEntry: boolean;
   }>;
   getPathProposal: (scope: "User" | "System") => Promise<string | null>;
+  checkForUpdate: () => Promise<UpdateInfo | null>;
 }
 
 const normalApi: EnvarlyApi = {
@@ -73,6 +75,7 @@ const normalApi: EnvarlyApi = {
       "get_path_status",
     ),
   getPathProposal: (scope) => invoke<string | null>("get_path_proposal", { scope }),
+  checkForUpdate: () => invoke<UpdateInfo | null>("check_for_update"),
 };
 
 let apiPromise: Promise<EnvarlyApi> | null = null;
@@ -134,4 +137,5 @@ export const api: EnvarlyApi = {
   parseImport: async (content, format) => (await getApi()).parseImport(content, format),
   getPathStatus: async () => (await getApi()).getPathStatus(),
   getPathProposal: async (scope) => (await getApi()).getPathProposal(scope),
+  checkForUpdate: async () => (await getApi()).checkForUpdate(),
 };

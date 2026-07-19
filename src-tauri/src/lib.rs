@@ -58,6 +58,7 @@ pub fn run() {
             commands::path::get_path_proposal,
             commands::launch::get_launch_options,
             commands::launch::read_demo_fixture,
+            commands::update::check_for_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running envarly");

@@ -12,6 +12,7 @@ const meta: Meta<typeof AppHeader> = {
     elevated: false,
     snapshotsOpen: false,
     theme: "dark",
+    updateInfo: null,
   },
   argTypes: {
     loading: { control: "boolean" },
@@ -46,4 +47,8 @@ export const SnapshotsOpen: Story = {
 
 export const Loading: Story = {
   args: { loading: true },
+};
+
+export const UpdateAvailable: Story = {
+  args: { updateInfo: { version: "1.3.0", url: "https://github.com/iray-tno/envarly/releases" } },
 };

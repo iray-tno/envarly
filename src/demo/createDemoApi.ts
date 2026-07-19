@@ -191,5 +191,6 @@ export function createDemoApi(
       }
       return [fixture.installDir, ...entries].join(";");
     },
+    checkForUpdate: async () => null,
   };
 }

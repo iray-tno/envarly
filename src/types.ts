@@ -36,6 +36,11 @@ export interface SnapshotMeta {
   snapshot: EnvSnapshot;
 }
 
+export interface UpdateInfo {
+  version: string;
+  url: string;
+}
+
 export type EnvChange =
   | {
       changeType: "set";

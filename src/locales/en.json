@@ -39,7 +39,9 @@
     "run_as_admin": "Run as admin",
     "run_as_admin_title": "System variables are read-only. Restart as administrator to edit them.",
     "administrator": "Administrator",
-    "licenses": "Licenses"
+    "licenses": "Licenses",
+    "update_available": "Update available: v{{version}}",
+    "update_available_title": "A new version of Envarly is available. Click to view the release."
   },
   "path_banner": {
     "prefix": "Envarly is not in your {{scope}} PATH — add it to run",
