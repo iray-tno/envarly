@@ -23,6 +23,7 @@ import { usePresence } from "./hooks/usePresence";
 import { useStaged } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
+import { useUpdateCheck } from "./hooks/useUpdateCheck";
 import type { DiagnosticAction, EnvironmentDiagnostic } from "./lib/environmentDiagnostics";
 import { stagedToDiff } from "./lib/stagedToDiff";
 import type { EnvVar } from "./types";
@@ -83,6 +84,8 @@ export default function App() {
   });
 
   useKeyboardShortcuts(undo, redo, localUndoRef);
+
+  const updateInfo = useUpdateCheck();
 
   const {
     handleStage,
@@ -168,6 +171,7 @@ export default function App() {
           onToggleSnapshots={() => setSnapshotsOpen((o) => !o)}
           onToggleTheme={toggleTheme}
           onLicenses={() => setDialog("licenses")}
+          updateInfo={updateInfo}
         />
 
         {(elevated ? !systemPathInEnv : !userPathInEnv) && !pathBannerDismissed && (

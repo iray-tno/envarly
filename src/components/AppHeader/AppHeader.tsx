@@ -1,6 +1,7 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
+import type { UpdateInfo } from "../../types";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { Select } from "../ui/Select";
@@ -20,6 +21,7 @@ interface AppHeaderProps {
   onToggleSnapshots: () => void;
   onToggleTheme: () => void;
   onLicenses: () => void;
+  updateInfo: UpdateInfo | null;
 }
 
 export function AppHeader({
@@ -37,6 +39,7 @@ export function AppHeader({
   onToggleSnapshots,
   onToggleTheme,
   onLicenses,
+  updateInfo,
 }: AppHeaderProps) {
   const { t, language, setLanguage } = useI18n();
   const languageOptions = [
@@ -107,6 +110,18 @@ export function AppHeader({
             <Icon name="shield" size={14} />
             {t("header.administrator")}
           </span>
+        )}
+        {updateInfo && (
+          <Button
+            variant="ghost"
+            size="xs"
+            icon="info"
+            onClick={() => openUrl(updateInfo.url)}
+            title={t("header.update_available_title")}
+            className="text-accent"
+          >
+            {t("header.update_available", { version: updateInfo.version })}
+          </Button>
         )}
         <Button
           variant="ghost"
