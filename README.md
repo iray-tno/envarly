@@ -240,77 +240,15 @@ Snapshots are stored as JSON files under `%LOCALAPPDATA%\Envarly\snapshots\`. Ea
 
 ```
 envarly/
-├── src/                          # React frontend
-│   ├── api.ts                    # Tauri invoke wrappers; demo/real API gate; apply-progress event bridge
-│   ├── types.ts                  # Shared TypeScript types
-│   ├── context/
-│   │   └── ThemeContext.tsx      # Dark/light theme context
-│   ├── hooks/
-│   │   ├── useEnvVars.ts         # Variable list data hook
-│   │   ├── useStaged.ts          # Staging area hook; wires stagingLogic.ts into React state
-│   │   ├── stagingLogic.ts       # Pure Map transforms for staging (set/delete/import/snapshot) — no React
-│   │   ├── useAppInit.ts         # Startup sequencing; exposes `initializing` for the loading screen
-│   │   ├── useApplyStaged.ts     # Atomic apply + apply-progress event subscription for the log/bar
-│   │   ├── useDiff.ts            # External-change detection + selective apply
-│   │   ├── useDiagnostics.ts     # Environment diagnostics (unsupported values, dangling paths)
-│   │   ├── usePathStatus.ts      # PATH banner state + stage-add-to-PATH
-│   │   ├── useUpdateCheck.ts     # Daily GitHub release check, rate-limited via localStorage
-│   │   ├── useUndoStack.ts       # Generic undo/redo stack (stage-level operations)
-│   │   ├── useStagingHandlers.ts # Orchestrates stageSet/stageDelete/stageImport/stageSnapshot
-│   │   └── useTheme.ts           # Theme persistence + toggle
-│   ├── lib/
-│   │   ├── cn.ts                 # clsx + tailwind-merge helper
-│   │   ├── diff.ts               # Pure diff computation (no side effects)
-│   │   ├── lint.ts               # %VAR% reference lint for path values; Windows built-in allowlist
-│   │   └── secrets.ts            # Secret detection: name-based + value pattern (35+ token formats)
-│   └── components/
-│       ├── ui/                   # Atomic UI primitives (Button, Modal, Badge, …)
-│       ├── AppHeader/            # Top bar: refresh, staged-changes count, apply/discard, update badge
-│       ├── AppLoading/           # Full-screen loading state shown until the variable list is ready
-│       ├── ErrorBoundary/        # Catches uncaught render errors; shows a diagnosable crash screen
-│       ├── Sidebar/              # Variable list with search, scope filter, ⚠ Secrets tab
-│       ├── DetailPanel/          # Variable editor with local undo (Ctrl+Z pre-stage)
-│       ├── PathEditor/           # Drag-and-drop list editor + path validation + %VAR% lint
-│       ├── ListEditor/           # Generic sortable list editor (comma/semicolon separator)
-│       ├── PathBanner/           # Banner shown when Envarly is not yet in PATH
-│       ├── StagedModal/          # Apply confirmation: per-entry Delta/Full diff + apply progress/log
-│       ├── NewVarModal/          # New variable creation dialog
-│       ├── SnapshotPanel/        # Snapshot list, create, restore, compare
-│       ├── DiffPanel/            # External-change diff with selective apply
-│       ├── DiagnosticsPanel/     # Environment diagnostics banner
-│       ├── ImportExportPanel/    # File import / export UI
-│       └── LicensesPanel/        # OSS licenses: Envarly (MIT) + third-party (npm + Rust)
-├── public/
-│   └── theme-init.js             # Runs before React; sets theme class to avoid flash
-├── src-tauri/
-│   ├── icons/source/             # Logo SVG sources (aurora + monochrome)
-│   ├── wix/                      # WiX installer template + branded images; PATH cleanup CA
-│   └── src/                      # Rust backend
-│       ├── main.rs               # Entry point; CLI dispatch then GUI launch
-│       ├── lib.rs                # Tauri builder + command registration
-│       ├── cli.rs                # clap CLI (get / list / export)
-│       ├── commands/             # Tauri commands, one module per domain (env, snapshot, export, path, launch, update)
-│       ├── model.rs              # Shared domain types (EnvValue, EnvVar, EnvSnapshot, EnvChange, …)
-│       ├── env_store.rs          # EnvBackend trait + backend-agnostic business logic + MemBackend (tests)
-│       ├── env_backend.rs        # WinregBackend — the Windows registry implementation of EnvBackend
-│       ├── export/               # JSON, .reg, and IaC format serialisation / parsing, one module per format
-│       ├── path_manage.rs        # PATH status check + propose-add logic (install dir detection)
-│       ├── path_backend.rs       # Windows registry access for the PATH value
-│       ├── snapshot.rs           # Snapshot persistence (%LOCALAPPDATA%\Envarly)
-│       └── error.rs              # EnvarlyError (thiserror + Serialize)
-├── lp/                           # Astro landing page (published to GitHub Pages)
-├── scripts/
-│   ├── sync-version.mjs          # Propagates package.json version to tauri.conf.json, Cargo.toml, Cargo.lock, lp/src/lib/lpContent.ts
-│   ├── check-version.mjs         # Verifies all version fields match
-│   └── gen-licenses.mjs          # Generates src/assets/oss-licenses.json
-├── .github/workflows/
-│   ├── test.yml                  # Per-push test + version check
-│   ├── release.yml               # Tag-triggered Windows build
-│   └── security.yml              # Weekly vulnerability audit
-├── .mise.toml                    # Tool versions (Node 22, Rust stable)
-├── biome.json                    # Lint / format config
-└── vitest.config.ts              # Test config
+├── src/              # React frontend — components/, hooks/, lib/, api.ts, types.ts
+├── src-tauri/         # Rust backend — Tauri commands, registry access, export formats, snapshots
+├── lp/                # Astro landing page (published to GitHub Pages)
+├── scripts/           # Version sync/check, license generation
+├── docs/              # Release/distribution notes
+└── .github/workflows/ # CI: tests, release builds, security audit
 ```
+
+Frontend code is organized by feature under `src/components/`, with shared hooks in `src/hooks/` and framework-agnostic logic in `src/lib/`. The Rust backend mirrors this: `src-tauri/src/commands/` holds one module per domain (env, snapshot, export, path, launch, update), with the underlying logic in `env_store.rs` (backend-agnostic) and `env_backend.rs` (the Windows registry implementation).
 
 ## Architecture notes
 
