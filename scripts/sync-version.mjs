@@ -19,4 +19,22 @@ const cargo = readFileSync(cargoPath, "utf8").replace(
 );
 writeFileSync(cargoPath, cargo);
 
-console.log(`synced version ${version} → tauri.conf.json, Cargo.toml`);
+// Cargo.lock — the envarly package's own (self-referential) locked version
+const cargoLockPath = join(root, "src-tauri", "Cargo.lock");
+const cargoLock = readFileSync(cargoLockPath, "utf8").replace(
+  /(\[\[package\]\]\nname = "envarly"\nversion = ")[^"]*(")/,
+  `$1${version}$2`
+);
+writeFileSync(cargoLockPath, cargoLock);
+
+// Landing page version display
+const lpContentPath = join(root, "lp", "src", "lib", "lpContent.ts");
+const lpContent = readFileSync(lpContentPath, "utf8").replace(
+  /export const VERSION = '[^']*';/,
+  `export const VERSION = '${version}';`
+);
+writeFileSync(lpContentPath, lpContent);
+
+console.log(
+  `synced version ${version} → tauri.conf.json, Cargo.toml, Cargo.lock, lpContent.ts`
+);

@@ -21,7 +21,7 @@
     "format": "biome format --write src",
     "gen-licenses": "node scripts/gen-licenses.mjs",
     "check-version": "node scripts/check-version.mjs",
-    "version": "node scripts/sync-version.mjs && git add src-tauri/tauri.conf.json src-tauri/Cargo.toml"
+    "version": "node scripts/sync-version.mjs && git add src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock lp/src/lib/lpContent.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
