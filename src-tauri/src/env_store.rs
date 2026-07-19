@@ -207,10 +207,12 @@ pub fn delete_var_with(
 pub fn apply_changes_with(
     backend: &dyn EnvBackend,
     changes: &[EnvChange],
+    mut on_progress: impl FnMut(usize, usize, &EnvChange, &Result<(), EnvarlyError>),
 ) -> Result<(), EnvarlyError> {
     let baseline = read_snapshot_with(backend)?;
+    let total = changes.len();
 
-    for change in changes {
+    for (index, change) in changes.iter().enumerate() {
         let result = match change {
             EnvChange::Set {
                 name,
@@ -231,6 +233,8 @@ pub fn apply_changes_with(
             }
             .and_then(|()| verify_value(backend, name, scope, None)),
         };
+
+        on_progress(index, total, change, &result);
 
         if let Err(error) = result {
             let rollback = restore_snapshot_with(backend, &baseline);
@@ -330,8 +334,11 @@ pub fn delete_var(name: &str, scope: &VarScope) -> Result<(), EnvarlyError> {
 }
 
 #[cfg(windows)]
-pub fn apply_changes(changes: &[EnvChange]) -> Result<(), EnvarlyError> {
-    apply_changes_with(&WinregBackend, changes)
+pub fn apply_changes(
+    changes: &[EnvChange],
+    on_progress: impl FnMut(usize, usize, &EnvChange, &Result<(), EnvarlyError>),
+) -> Result<(), EnvarlyError> {
+    apply_changes_with(&WinregBackend, changes, on_progress)
 }
 
 #[cfg(windows)]
@@ -544,6 +551,7 @@ mod tests {
                 value_kind: EnvValueKind::ExpandString,
                 scope: VarScope::User,
             }],
+            |_, _, _, _| {},
         )
         .unwrap();
 
@@ -573,6 +581,7 @@ mod tests {
                     scope: VarScope::System,
                 },
             ],
+            |_, _, _, _| {},
         );
 
         assert!(result.is_err());
@@ -580,5 +589,32 @@ mod tests {
             read_snapshot_with(&b).unwrap().user["KEEP"].value,
             "original"
         );
+    }
+
+    #[test]
+    fn apply_reports_progress_for_each_change() {
+        let b = backend();
+        let mut seen: Vec<(usize, usize, bool)> = Vec::new();
+        apply_changes_with(
+            &b,
+            &[
+                EnvChange::Set {
+                    name: "A".into(),
+                    value: "1".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::User,
+                },
+                EnvChange::Set {
+                    name: "B".into(),
+                    value: "2".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::User,
+                },
+            ],
+            |index, total, _change, result| seen.push((index, total, result.is_ok())),
+        )
+        .unwrap();
+
+        assert_eq!(seen, vec![(0, 2, true), (1, 2, true)]);
     }
 }

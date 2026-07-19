@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../api";
+import type { ApplyProgressEvent } from "../types";
 import { useApplyStaged } from "./useApplyStaged";
 import type { StagedChange } from "./useStaged";
 
@@ -11,6 +12,7 @@ vi.mock("../api", () => ({
     applyEnvChanges: vi.fn(),
     createSnapshot: vi.fn(),
     getRegistrySnapshot: vi.fn(),
+    onApplyProgress: vi.fn(async () => () => {}),
   },
 }));
 
@@ -148,5 +150,43 @@ describe("useApplyStaged", () => {
       await applyPromise;
     });
     expect(result.current.busy).toBe(false);
+  });
+
+  it("tracks progress and log from apply-progress events, then unsubscribes", async () => {
+    let capturedCallback: ((event: ApplyProgressEvent) => void) | undefined;
+    const unsubscribe = vi.fn();
+    vi.mocked(api.onApplyProgress).mockImplementation(async (cb) => {
+      capturedCallback = cb;
+      return unsubscribe;
+    });
+    const change: StagedChange = {
+      kind: "set",
+      name: "A",
+      scope: "User",
+      originalValue: null,
+      originalValueKind: null,
+      newValue: "1",
+      newValueKind: "String",
+    };
+    const params = makeParams({ staged: makeStaged([["User:A", change]]) });
+    const { result } = renderHook(() => useApplyStaged(params));
+
+    await act(async () => {
+      const promise = result.current.handleApplyStaged(false);
+      capturedCallback?.({
+        index: 0,
+        total: 1,
+        name: "A",
+        scope: "User",
+        action: "set",
+        success: true,
+        error: null,
+      });
+      await promise;
+    });
+
+    expect(result.current.progress).toEqual({ index: 0, total: 1 });
+    expect(result.current.log).toHaveLength(1);
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 });

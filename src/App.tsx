@@ -114,6 +114,8 @@ export default function App() {
     handleApplyStaged,
     busy: stagedBusy,
     error: stagedError,
+    progress: stagedProgress,
+    log: stagedLog,
   } = useApplyStaged({
     staged,
     clearStaged,
@@ -249,6 +251,8 @@ export default function App() {
           stagedDiff={stagedDiff}
           stagedBusy={stagedBusy}
           stagedError={stagedError}
+          stagedProgress={stagedProgress}
+          stagedLog={stagedLog}
           onApplyStaged={handleApplyStaged}
           diffEntries={diffEntries}
           applyBusy={applyBusy}

@@ -1,7 +1,13 @@
 import { useI18n } from "../../hooks/useI18n";
 import type { StagedChange } from "../../hooks/useStaged";
 import type { DiffEntry } from "../../lib/diff";
-import type { EnvValueKind, EnvValueKindSelection, EnvVar, VarScope } from "../../types";
+import type {
+  ApplyProgressEvent,
+  EnvValueKind,
+  EnvValueKindSelection,
+  EnvVar,
+  VarScope,
+} from "../../types";
 import { DiffPanel } from "../DiffPanel/DiffPanel";
 import { ImportExportPanel } from "../ImportExportPanel/ImportExportPanel";
 import { LicensesPanel } from "../LicensesPanel/LicensesPanel";
@@ -18,6 +24,8 @@ interface Props {
   stagedDiff: DiffEntry[];
   stagedBusy: boolean;
   stagedError: string | null;
+  stagedProgress: { index: number; total: number } | null;
+  stagedLog: ApplyProgressEvent[];
   onApplyStaged: (takeSnapshot: boolean) => Promise<void>;
   diffEntries: DiffEntry[];
   applyBusy: boolean;
@@ -50,6 +58,8 @@ export function AppModals({
   stagedDiff,
   stagedBusy,
   stagedError,
+  stagedProgress,
+  stagedLog,
   onApplyStaged,
   diffEntries,
   applyBusy,
@@ -84,6 +94,8 @@ export function AppModals({
           diff={stagedDiff}
           busy={stagedBusy}
           error={stagedError}
+          progress={stagedProgress}
+          log={stagedLog}
           onApply={onApplyStaged}
           onClose={() => setDialog(null)}
         />

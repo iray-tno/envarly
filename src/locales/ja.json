@@ -127,6 +127,7 @@
     "apply_one": "{{count}} 件の変更をレジストリに適用",
     "apply_other": "{{count}} 件の変更をレジストリに適用",
     "applying": "適用中…",
+    "apply_progress_count": "{{current}} / {{total}}",
     "kind_added": "追加",
     "kind_removed": "削除",
     "kind_changed": "変更"

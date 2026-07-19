@@ -30,7 +30,7 @@ const meta: Meta<typeof StagedModal> = {
   title: "Components/StagedModal",
   component: StagedModal,
   tags: ["autodocs"],
-  args: { busy: false },
+  args: { busy: false, progress: null, log: [] },
   argTypes: { busy: { control: "boolean" } },
 };
 export default meta;
@@ -49,5 +49,29 @@ export const CriticalVar: Story = {
 };
 
 export const Busy: Story = {
-  args: { diff: [added, changed], busy: true },
+  args: {
+    diff: [added, changed],
+    busy: true,
+    progress: { index: 1, total: 2 },
+    log: [
+      {
+        index: 0,
+        total: 2,
+        name: "NEW_VAR",
+        scope: "User",
+        action: "set",
+        success: true,
+        error: null,
+      },
+      {
+        index: 1,
+        total: 2,
+        name: "PATH",
+        scope: "User",
+        action: "set",
+        success: false,
+        error: "registry verification failed",
+      },
+    ],
+  },
 };

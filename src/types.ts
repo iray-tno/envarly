@@ -41,6 +41,16 @@ export interface UpdateInfo {
   url: string;
 }
 
+export interface ApplyProgressEvent {
+  index: number;
+  total: number;
+  name: string;
+  scope: VarScope;
+  action: "set" | "delete";
+  success: boolean;
+  error: string | null;
+}
+
 export type EnvChange =
   | {
       changeType: "set";
