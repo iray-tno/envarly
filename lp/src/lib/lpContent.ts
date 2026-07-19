@@ -117,6 +117,11 @@ export const enCopy: LandingCopy = {
       desc: 'Detects registry changes made by other processes while Envarly is open. Shows a diff with selective apply per entry.',
     },
     {
+      icon: '⏳',
+      title: 'Apply progress & log',
+      desc: 'A progress bar and per-variable log show exactly what happened while staged changes are written to the registry.',
+    },
+    {
       icon: '⇅',
       title: 'Import / Export',
       desc: 'Read and write .json and .reg formats, plus export to PowerShell, DSC, and Ansible-friendly files. Preview before any write.',
@@ -203,6 +208,11 @@ export const jaCopy: LandingCopy = {
       icon: '⇄',
       title: '外部変更の差分検出',
       desc: 'Envarly を開いている間に他プロセスがレジストリを変更した場合、差分を検出。項目ごとに受け入れる変更を選べます。',
+    },
+    {
+      icon: '⏳',
+      title: '適用の進捗とログ',
+      desc: 'ステージした変更をレジストリに書き込む間、進捗バーと変数ごとのログで何が起きているか確認できます。',
     },
     {
       icon: '⇅',
