@@ -1,7 +1,24 @@
+use serde::Serialize;
+use tauri::Emitter;
+
 use crate::env_store;
 use crate::error::EnvarlyError;
 use crate::model::{EnvChange, EnvSnapshot, EnvValueKind, EnvVar, UnsupportedEnvValue, VarScope};
 use crate::snapshot;
+
+/// Emitted on the "apply-progress" channel as each staged change is applied,
+/// so the frontend can render a progress bar and a per-variable log.
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ApplyProgressEvent {
+    pub index: usize,
+    pub total: usize,
+    pub name: String,
+    pub scope: VarScope,
+    pub action: &'static str,
+    pub success: bool,
+    pub error: Option<String>,
+}
 
 #[tauri::command]
 pub fn get_env_vars() -> Result<Vec<EnvVar>, EnvarlyError> {
@@ -34,10 +51,30 @@ pub fn delete_env_var(name: String, scope: VarScope) -> Result<(), EnvarlyError>
 }
 
 #[tauri::command]
-pub fn apply_env_changes(changes: Vec<EnvChange>) -> Result<(), EnvarlyError> {
+pub fn apply_env_changes(
+    app: tauri::AppHandle,
+    changes: Vec<EnvChange>,
+) -> Result<(), EnvarlyError> {
     let snapshot = env_store::read_snapshot()?;
     snapshot::save_snapshot(snapshot, "auto: before apply")?;
-    env_store::apply_changes(&changes)
+    env_store::apply_changes(&changes, |index, total, change, result| {
+        let (name, scope, action) = match change {
+            EnvChange::Set { name, scope, .. } => (name.clone(), scope.clone(), "set"),
+            EnvChange::Delete { name, scope } => (name.clone(), scope.clone(), "delete"),
+        };
+        let _ = app.emit(
+            "apply-progress",
+            ApplyProgressEvent {
+                index,
+                total,
+                name,
+                scope,
+                action,
+                success: result.is_ok(),
+                error: result.as_ref().err().map(|e| e.to_string()),
+            },
+        );
+    })
 }
 
 /// Returns true when the process has write access to HKLM (admin / elevated).

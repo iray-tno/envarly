@@ -1,6 +1,8 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { createDemoApi, loadDemoFixture } from "./demo/createDemoApi";
 import type {
+  ApplyProgressEvent,
   EnvChange,
   EnvSnapshot,
   EnvValueKind,
@@ -49,6 +51,13 @@ export interface EnvarlyApi {
   }>;
   getPathProposal: (scope: "User" | "System") => Promise<string | null>;
   checkForUpdate: () => Promise<UpdateInfo | null>;
+  /**
+   * Subscribe to per-variable progress while `applyEnvChanges` runs. Resolves
+   * once the listener is actually registered — callers must await this before
+   * invoking `applyEnvChanges`, or fast applies can finish (and emit all their
+   * events) before the subscription exists to hear them.
+   */
+  onApplyProgress: (callback: (event: ApplyProgressEvent) => void) => Promise<() => void>;
 }
 
 const normalApi: EnvarlyApi = {
@@ -76,6 +85,8 @@ const normalApi: EnvarlyApi = {
     ),
   getPathProposal: (scope) => invoke<string | null>("get_path_proposal", { scope }),
   checkForUpdate: () => invoke<UpdateInfo | null>("check_for_update"),
+  onApplyProgress: async (callback) =>
+    listen<ApplyProgressEvent>("apply-progress", (event) => callback(event.payload)),
 };
 
 let apiPromise: Promise<EnvarlyApi> | null = null;
@@ -138,4 +149,5 @@ export const api: EnvarlyApi = {
   getPathStatus: async () => (await getApi()).getPathStatus(),
   getPathProposal: async (scope) => (await getApi()).getPathProposal(scope),
   checkForUpdate: async () => (await getApi()).checkForUpdate(),
+  onApplyProgress: async (callback) => (await getApi()).onApplyProgress(callback),
 };

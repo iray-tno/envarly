@@ -127,6 +127,7 @@
     "apply_one": "Apply {{count}} change to registry",
     "apply_other": "Apply {{count}} changes to registry",
     "applying": "Applying…",
+    "apply_progress_count": "{{current}} / {{total}}",
     "kind_added": "ADDED",
     "kind_removed": "REMOVED",
     "kind_changed": "CHANGED"

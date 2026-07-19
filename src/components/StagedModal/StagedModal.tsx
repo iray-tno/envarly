@@ -3,8 +3,10 @@ import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
 import type { DiffEntry } from "../../lib/diff";
 import { registryKindLabel } from "../../lib/envValueKind";
+import type { ApplyProgressEvent } from "../../types";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
+import { ApplyProgress } from "./ApplyProgress";
 import { ListDiffDelta, ListDiffFull, ListEntries } from "./ListDiff";
 import { entryHasListValue, isList } from "./listDiffUtils";
 
@@ -16,11 +18,21 @@ interface StagedModalProps {
   diff: DiffEntry[];
   busy: boolean;
   error?: string | null;
+  progress: { index: number; total: number } | null;
+  log: ApplyProgressEvent[];
   onApply: (takeSnapshot: boolean) => void;
   onClose: () => void;
 }
 
-export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModalProps) {
+export function StagedModal({
+  diff,
+  busy,
+  error,
+  progress,
+  log,
+  onApply,
+  onClose,
+}: StagedModalProps) {
   const { t } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>("delta");
 
@@ -159,6 +171,7 @@ export function StagedModal({ diff, busy, error, onApply, onClose }: StagedModal
       </div>
 
       <div className="px-6 py-4 border-t border-rim shrink-0 flex flex-col gap-3">
+        {busy && <ApplyProgress progress={progress} log={log} />}
         {error && (
           <p className="rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
             {error}
