@@ -27,7 +27,7 @@ If MSI testing shows a better direct-user experience for a specific release, upd
 
 Before tagging a release:
 
-- Confirm `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` have the same version.
+- Run `npm run check-version` to confirm `package.json`, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, and `lp/src/lib/lpContent.ts` all have the same version.
 - Confirm the release workflow still uploads NSIS `.exe`, WiX `.msi`, portable `.zip`, and `SHA256SUMS.txt`.
 - Build locally if the change touches installer configuration:
 

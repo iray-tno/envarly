@@ -22,6 +22,8 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 - **Dark / light mode** — follows system preference on first launch; persists across sessions; no flash on load
 - **Snapshot / time-travel** — save named snapshots, restore to any previous state
 - **Diff detection** — detects registry changes made by other processes while Envarly is open; shows a diff with selective apply (accept or revert per entry)
+- **Apply progress & log** — a progress bar and per-variable log (✓/✗) show exactly what happened while staged changes are written to the registry
+- **Update check** — checks GitHub Releases once per day; shows a subtle header badge linking to the release when a newer version is available
 - **Import / Export** — read/write `.json` and `.reg` formats; export to IaC formats (PowerShell script, DSC v2/v3, Ansible playbook)
   - *Custom export*: pick individual variables, with secret-variable warnings
   - *Import merge strategy*: Merge (additive) or Replace (sync — removes variables not in the file)
@@ -41,7 +43,7 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 | Desktop shell | Tauri v2 |
 | Frontend | React 19 + TypeScript |
 | Styling | Tailwind CSS v4 |
-| Rust backend | winreg, clap, serde\_json, chrono, thiserror |
+| Rust backend | winreg, clap, serde\_json, chrono, thiserror, reqwest (native-tls) |
 | Linter / formatter | Biome |
 | JS tests | Vitest + @testing-library/react |
 | Rust tests | cargo test (MemBackend — no real registry writes) |
@@ -107,7 +109,8 @@ Release artifact policy and installer checks are documented in [docs/distributio
 
 ```sh
 npm version patch     # or minor / major
-# → bumps package.json, syncs tauri.conf.json and Cargo.toml, commits + tags
+# → bumps package.json, syncs tauri.conf.json, Cargo.toml, Cargo.lock, and
+#   lp/src/lib/lpContent.ts, commits + tags
 git push --follow-tags
 # → triggers the Release workflow on GitHub Actions (builds installer, uploads to GitHub Releases)
 ```
@@ -237,70 +240,15 @@ Snapshots are stored as JSON files under `%LOCALAPPDATA%\Envarly\snapshots\`. Ea
 
 ```
 envarly/
-├── src/                          # React frontend
-│   ├── api.ts                    # Tauri invoke wrappers
-│   ├── types.ts                  # Shared TypeScript types
-│   ├── context/
-│   │   └── ThemeContext.tsx      # Dark/light theme context
-│   ├── hooks/
-│   │   ├── useEnvVars.ts         # Variable list data hook
-│   │   ├── useStaged.ts          # Staging area: Map<"Scope:name", StagedChange>; effectiveVars merge
-│   │   ├── useUndoStack.ts       # Generic undo/redo stack (stage-level operations)
-│   │   ├── useStagingHandlers.ts # Orchestrates stageSet/stageDelete/stageImport/stageSnapshot
-│   │   └── useTheme.ts           # Theme persistence + toggle
-│   ├── lib/
-│   │   ├── cn.ts                 # clsx + tailwind-merge helper
-│   │   ├── diff.ts               # Pure diff computation (no side effects)
-│   │   ├── lint.ts               # %VAR% reference lint for path values; Windows built-in allowlist
-│   │   └── secrets.ts            # Secret detection: name-based + value pattern (35+ token formats)
-│   └── components/
-│       ├── ui/                   # Atomic UI primitives
-│       │   ├── Badge.tsx
-│       │   ├── Button.tsx
-│       │   ├── IconButton.tsx
-│       │   ├── Modal.tsx
-│       │   ├── SegmentedControl.tsx
-│       │   ├── TextInput.tsx
-│       │   └── Textarea.tsx
-│       ├── AppHeader/            # Top bar: refresh, staged-changes count, apply/discard, menu
-│       ├── Sidebar/              # Variable list with search, scope filter, ⚠ Secrets tab
-│       ├── DetailPanel/          # Variable editor with local undo (Ctrl+Z pre-stage)
-│       ├── PathEditor/           # Drag-and-drop list editor + path validation + %VAR% lint
-│       ├── ListEditor/           # Generic sortable list editor (comma/semicolon separator)
-│       ├── PathBanner/           # Banner shown when Envarly is not yet in PATH
-│       ├── StagedModal/          # Apply confirmation: per-entry Delta/Full diff for list values
-│       ├── NewVarModal/          # New variable creation dialog
-│       ├── SnapshotPanel/        # Snapshot list, create, restore
-│       ├── DiffPanel/            # External-change diff with selective apply
-│       ├── ImportExportPanel/    # File import / export UI
-│       └── LicensesPanel/        # OSS licenses: Envarly (MIT) + third-party (npm + Rust)
-├── public/
-│   └── theme-init.js             # Runs before React; sets theme class to avoid flash
-├── src-tauri/
-│   ├── icons/source/             # Logo SVG sources (aurora + monochrome)
-│   ├── wix/                      # WiX installer template + branded images; PATH cleanup CA
-│   └── src/                      # Rust backend
-│       ├── main.rs               # Entry point; CLI dispatch then GUI launch
-│       ├── lib.rs                # Tauri builder + command registration
-│       ├── cli.rs                # clap CLI (get / list / export)
-│       ├── commands.rs           # Tauri commands
-│       ├── env_store.rs          # Registry read/write + EnvBackend trait + MemBackend
-│       ├── export.rs             # JSON, .reg, and IaC format serialisation / parsing
-│       ├── path_manage.rs        # PATH status check + propose-add logic (install dir detection)
-│       ├── snapshot.rs           # Snapshot persistence (%LOCALAPPDATA%\Envarly)
-│       └── error.rs              # EnvarlyError (thiserror + Serialize)
-├── scripts/
-│   ├── sync-version.mjs          # Propagates package.json version to tauri.conf.json + Cargo.toml
-│   ├── check-version.mjs         # Verifies all three version fields match
-│   └── gen-licenses.mjs          # Generates src/assets/oss-licenses.json
-├── .github/workflows/
-│   ├── test.yml                  # Per-push test + version check
-│   ├── release.yml               # Tag-triggered Windows build
-│   └── security.yml              # Weekly vulnerability audit
-├── .mise.toml                    # Tool versions (Node 22, Rust stable)
-├── biome.json                    # Lint / format config
-└── vitest.config.ts              # Test config
+├── src/              # React frontend — components/, hooks/, lib/, api.ts, types.ts
+├── src-tauri/         # Rust backend — Tauri commands, registry access, export formats, snapshots
+├── lp/                # Astro landing page (published to GitHub Pages)
+├── scripts/           # Version sync/check, license generation
+├── docs/              # Release/distribution notes
+└── .github/workflows/ # CI: tests, release builds, security audit
 ```
+
+Frontend code is organized by feature under `src/components/`, with shared hooks in `src/hooks/` and framework-agnostic logic in `src/lib/`. The Rust backend mirrors this: `src-tauri/src/commands/` holds one module per domain (env, snapshot, export, path, launch, update), with the underlying logic in `env_store.rs` (backend-agnostic) and `env_backend.rs` (the Windows registry implementation).
 
 ## Architecture notes
 
@@ -317,7 +265,11 @@ The baseline snapshot is captured on app mount. Every Refresh call re-reads the 
 
 ### Test isolation
 
-`env_store.rs` exposes an `EnvBackend` trait. The production `WinregBackend` is compiled only on Windows (`#[cfg(windows)]`). Tests use `MemBackend` — an in-memory `Mutex<HashMap>` that never touches the registry. `cargo test` runs on Linux in CI without any Windows-specific dependencies.
+`env_store.rs` defines the `EnvBackend` trait. The production implementation, `WinregBackend` (in `env_backend.rs`), is compiled only on Windows (`#[cfg(windows)]`). Tests use `MemBackend` — an in-memory `Mutex<HashMap>` defined alongside the trait — that never touches the registry. `cargo test` runs on Linux in CI without any Windows-specific dependencies.
+
+### Apply progress
+
+`apply_changes_with` (Rust) takes a per-change progress callback; the `apply_env_changes` Tauri command uses it to emit an `apply-progress` event for each variable as it's written, while keeping the existing atomic all-or-nothing rollback behavior unchanged. The frontend subscribes via `api.onApplyProgress` *before* calling `applyEnvChanges` — subscribing after would race a fast apply, since events emitted before a listener attaches are simply lost.
 
 ## License
 
