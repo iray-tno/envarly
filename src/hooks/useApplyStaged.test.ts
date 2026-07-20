@@ -106,6 +106,28 @@ describe("useApplyStaged", () => {
     expect(params.setDialog).toHaveBeenCalledWith(null);
   });
 
+  it("closes the dialog only after refresh and refreshPathStatus resolve", async () => {
+    const callOrder: string[] = [];
+    const params = makeParams({
+      refresh: vi.fn().mockImplementation(async () => {
+        callOrder.push("refresh");
+      }),
+      refreshPathStatus: vi.fn().mockImplementation(async () => {
+        callOrder.push("refreshPathStatus");
+      }),
+      setDialog: vi.fn().mockImplementation(() => {
+        callOrder.push("setDialog");
+      }),
+    });
+    const { result } = renderHook(() => useApplyStaged(params));
+
+    await act(async () => {
+      await result.current.handleApplyStaged(false);
+    });
+
+    expect(callOrder).toEqual(["refresh", "refreshPathStatus", "setDialog"]);
+  });
+
   it("keeps the modal open and exposes the error when apply fails", async () => {
     vi.mocked(api.applyEnvChanges).mockRejectedValue("Registry error: access denied");
     const params = makeParams();
