@@ -1,0 +1,22 @@
+{
+    "$schema": "https://raw.githubusercontent.com/ScoopInstaller/Scoop/master/schema.json",
+    "version": "1.3.0",
+    "description": "Windows environment variable manager — edit PATH with folder pickers, detect secrets, and preview changes before applying.",
+    "homepage": "https://github.com/iray-tno/envarly",
+    "license": "MIT",
+    "url": "https://github.com/iray-tno/envarly/releases/download/v1.3.0/Envarly_1.3.0_x64-portable.zip",
+    "hash": "08d39116868c5148026904417aeea1375ca3c9f319d41d06ebf214fa51a3bdb6",
+    "bin": "envarly.exe",
+    "shortcuts": [
+        [
+            "envarly.exe",
+            "Envarly"
+        ]
+    ],
+    "checkver": {
+        "github": "https://github.com/iray-tno/envarly"
+    },
+    "autoupdate": {
+        "url": "https://github.com/iray-tno/envarly/releases/download/v$version/Envarly_$version_x64-portable.zip"
+    }
+}
