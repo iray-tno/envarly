@@ -95,7 +95,7 @@ let apiPromise: Promise<EnvarlyApi> | null = null;
  * stuck IPC call can block every other command in the app behind `getApi()`. */
 const LAUNCH_OPTIONS_TIMEOUT_MS = 3000;
 
-function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+export function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   return new Promise((resolve) => {
     const timer = setTimeout(() => resolve(fallback), ms);
     promise.then(
