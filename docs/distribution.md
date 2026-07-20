@@ -79,8 +79,27 @@ For WinGet:
 
 For Scoop:
 
-- Use the GitHub Release artifact URL and the matching SHA256 from `SHA256SUMS.txt`.
-- The portable ZIP is the best candidate if Scoop install behavior should avoid a traditional installer.
+- Manifest source of truth lives at [`scoop/envarly.json`](../scoop/envarly.json) in this repo.
+- Uses the portable ZIP (not the NSIS/MSI installer) — Scoop apps are expected to install without a traditional installer UI.
+- `checkver`/`autoupdate` point at GitHub Releases directly, so `scoop update envarly` on a consumer's machine picks up new tags automatically once the manifest is published in a bucket — but the manifest in *this* repo and the one in the bucket are two separate copies that must be kept in sync manually (see below).
+
+### Updating the Scoop manifest for a new release
+
+After tagging and publishing a release:
+
+1. Download `SHA256SUMS.txt` from the new release and copy the hash for `Envarly_<version>_x64-portable.zip`.
+2. In `scoop/envarly.json`, update `version`, `url` (the `v<version>` tag and filename), and `hash`.
+3. Validate the JSON (`node -e "JSON.parse(require('fs').readFileSync('scoop/envarly.json','utf8'))"`) — a syntax error here fails Scoop's bucket CI.
+4. If the manifest has already been submitted to a bucket (e.g. `ScoopInstaller/Extras`), copy the updated file there and open a PR — Scoop does not offer maintainer-side auto-publish the way `sync-version.mjs` does for our own files.
+
+### Install / uninstall / update behavior
+
+```powershell
+scoop bucket add extras   # if using the extras bucket
+scoop install envarly      # install
+scoop update envarly       # update to the latest manifest version
+scoop uninstall envarly    # uninstall — Scoop removes the shim/shortcut; app data under %LOCALAPPDATA%\Envarly is untouched
+```
 
 ## Release Notes Template
 
