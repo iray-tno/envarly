@@ -152,6 +152,21 @@ const { copy } = Astro.props;
           dots.forEach((d, i) => d?.addEventListener('click', () => restart(i)));
           prevBtn?.addEventListener('click', () => restart((current - 1 + dots.length) % dots.length));
           nextBtn?.addEventListener('click', () => restart((current + 1) % dots.length));
+
+          const SWIPE_THRESHOLD_PX = 40;
+          let touchStartX = 0;
+
+          track?.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+          }, { passive: true });
+
+          track?.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
+            if (dx < 0) restart((current + 1) % dots.length);
+            else restart((current - 1 + dots.length) % dots.length);
+          }, { passive: true });
+
           startAuto();
         }
       </script>
