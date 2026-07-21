@@ -17,11 +17,8 @@ src-tauri/gen/
 # Claude Code local settings (may contain local file paths)
 .claude/settings.local.json
 
-# Promo drafts (local only)
-promo/
-
-# WinGet submission drafts (submitted to microsoft/winget-pkgs)
-winget-manifests/
+# Local scratch/drafts (submission drafts, notes, anything not meant to be committed)
+temp/
 
 # Editor
 .vscode/*
