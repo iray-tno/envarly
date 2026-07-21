@@ -29,6 +29,8 @@ export type LandingCopy = {
     applyModalAlt: string;
     firstLabel: string;
     secondLabel: string;
+    prevLabel: string;
+    nextLabel: string;
   };
   featuresHeading: string;
   featuresLead: string;
@@ -77,6 +79,8 @@ export const enCopy: LandingCopy = {
     applyModalAlt: 'Envarly — Apply confirmation modal with Full diff view for PATH entries',
     firstLabel: 'Screenshot 1',
     secondLabel: 'Screenshot 2',
+    prevLabel: 'Previous screenshot',
+    nextLabel: 'Next screenshot',
   },
   featuresHeading: 'Features',
   featuresLead: 'Everything you need to manage environment variables safely.',
@@ -170,6 +174,8 @@ export const jaCopy: LandingCopy = {
     applyModalAlt: 'Envarly — PATH エントリの詳細差分を表示する適用確認モーダル',
     firstLabel: 'スクリーンショット 1',
     secondLabel: 'スクリーンショット 2',
+    prevLabel: '前のスクリーンショット',
+    nextLabel: '次のスクリーンショット',
   },
   featuresHeading: '機能',
   featuresLead: '環境変数を安全に管理するために必要なものをひとまとめに。',

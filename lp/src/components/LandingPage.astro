@@ -100,6 +100,20 @@ const { copy } = Astro.props;
               loading="lazy"
             />
           </div>
+          <button
+            id="carousel-prev"
+            aria-label={copy.screenshots.prevLabel}
+            class="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-[var(--color-surface)]/80 border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)]/60 transition-colors backdrop-blur"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button
+            id="carousel-next"
+            aria-label={copy.screenshots.nextLabel}
+            class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-[var(--color-surface)]/80 border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)]/60 transition-colors backdrop-blur"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
         </div>
         <!-- Dots -->
         <div class="flex justify-center gap-2 mt-4">
@@ -111,6 +125,8 @@ const { copy } = Astro.props;
         {
           const track = document.getElementById('carousel-track');
           const dots = [document.getElementById('dot-0'), document.getElementById('dot-1')];
+          const prevBtn = document.getElementById('carousel-prev');
+          const nextBtn = document.getElementById('carousel-next');
           let current = 0;
           let timer: ReturnType<typeof setInterval>;
 
@@ -127,7 +143,15 @@ const { copy } = Astro.props;
             timer = setInterval(() => goTo((current + 1) % dots.length), 5000);
           }
 
-          dots.forEach((d, i) => d?.addEventListener('click', () => { clearInterval(timer); goTo(i); startAuto(); }));
+          function restart(i: number) {
+            clearInterval(timer);
+            goTo(i);
+            startAuto();
+          }
+
+          dots.forEach((d, i) => d?.addEventListener('click', () => restart(i)));
+          prevBtn?.addEventListener('click', () => restart((current - 1 + dots.length) % dots.length));
+          nextBtn?.addEventListener('click', () => restart((current + 1) % dots.length));
           startAuto();
         }
       </script>
