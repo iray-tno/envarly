@@ -81,10 +81,11 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
           </div>
           <Button
             variant="primary"
-            size="md"
+            size="sm"
             onClick={handleCreate}
             disabled={busy}
-            className="shrink-0 whitespace-nowrap"
+            // border-transparent matches TextInput's 1px border so both controls share the same height
+            className="shrink-0 whitespace-nowrap border border-transparent"
           >
             {busy && !previewing ? t("snapshot.saving") : t("snapshot.save")}
           </Button>
