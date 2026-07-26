@@ -190,6 +190,7 @@ export function createDemoApi(
       installDir: fixture.installDir,
       userHasEntry: fixture.pathStatus.userHasEntry,
       systemHasEntry: fixture.pathStatus.systemHasEntry,
+      otherUserHasEntry: null, // demo mode has no other-user accounts
     }),
     getPathProposal: async (scope) => {
       const path = scopedRecord(current, scope).Path?.value ?? "";

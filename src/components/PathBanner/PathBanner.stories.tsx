@@ -5,13 +5,11 @@ const meta: Meta<typeof PathBanner> = {
   title: "Components/PathBanner",
   component: PathBanner,
   tags: ["autodocs"],
-  args: { scope: "User" },
-  argTypes: {
-    scope: { control: "radio", options: ["User", "System"] },
-  },
+  args: { scopeLabel: "User" },
 };
 export default meta;
 type Story = StoryObj<typeof PathBanner>;
 
-export const UserScope: Story = { args: { scope: "User" } };
-export const SystemScope: Story = { args: { scope: "System" } };
+export const UserScope: Story = { args: { scopeLabel: "User" } };
+export const SystemScope: Story = { args: { scopeLabel: "System" } };
+export const OtherUserScope: Story = { args: { scopeLabel: "alice" } };

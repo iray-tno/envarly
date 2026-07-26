@@ -50,8 +50,10 @@ export interface EnvarlyApi {
     installDir: string;
     userHasEntry: boolean;
     systemHasEntry: boolean;
+    /** `null` when no other-user account is selected. */
+    otherUserHasEntry: boolean | null;
   }>;
-  getPathProposal: (scope: "User" | "System") => Promise<string | null>;
+  getPathProposal: (scope: VarScope) => Promise<string | null>;
   checkCommand: (input: string) => Promise<CheckCommandResult>;
   checkForUpdate: () => Promise<UpdateInfo | null>;
   /** Local accounts (other than the current one) that can be selected for
@@ -90,9 +92,12 @@ const normalApi: EnvarlyApi = {
   exportCustomVars: (vars, format) => invoke<string | null>("export_custom", { vars, format }),
   parseImport: (content, format) => invoke<EnvSnapshot>("parse_import", { content, format }),
   getPathStatus: () =>
-    invoke<{ installDir: string; userHasEntry: boolean; systemHasEntry: boolean }>(
-      "get_path_status",
-    ),
+    invoke<{
+      installDir: string;
+      userHasEntry: boolean;
+      systemHasEntry: boolean;
+      otherUserHasEntry: boolean | null;
+    }>("get_path_status"),
   getPathProposal: (scope) => invoke<string | null>("get_path_proposal", { scope }),
   checkCommand: (input) => invoke<CheckCommandResult>("check_command", { input }),
   checkForUpdate: () => invoke<UpdateInfo | null>("check_for_update"),

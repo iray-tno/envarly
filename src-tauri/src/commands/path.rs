@@ -87,19 +87,17 @@ pub fn get_path_status() -> path_manage::PathStatus {
 
 /// Returns the proposed new PATH value (with envarly added) for the given scope,
 /// or None if the install directory is already present.
-/// scope: "User" | "System"
+/// scope: "User" | "System" | "OtherUser"
 #[tauri::command]
 pub fn get_path_proposal(scope: String) -> Result<Option<String>, EnvarlyError> {
-    let user = match scope.as_str() {
-        "User" => true,
-        "System" => false,
-        other => {
-            return Err(EnvarlyError::InvalidInput(format!(
-                "invalid scope: {other:?}"
-            )))
-        }
-    };
-    path_manage::propose_add(user)
+    match scope.as_str() {
+        "User" => path_manage::propose_add(true),
+        "System" => path_manage::propose_add(false),
+        "OtherUser" => path_manage::propose_add_for_other_user(),
+        other => Err(EnvarlyError::InvalidInput(format!(
+            "invalid scope: {other:?}"
+        ))),
+    }
 }
 
 /// Checks whether `input` (a command name or full exe path) resolves via the
