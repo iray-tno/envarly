@@ -93,6 +93,7 @@ impl From<LegacySnapshotMeta> for SnapshotMeta {
             snapshot: EnvSnapshot {
                 user: unresolved(legacy.snapshot.user),
                 system: unresolved(legacy.snapshot.system),
+                other_user: None,
             },
         }
     }
@@ -206,6 +207,7 @@ mod tests {
                 ),
             )]),
             system: HashMap::new(),
+            other_user: None,
         }
     }
 

@@ -14,6 +14,9 @@ pub enum EnvarlyError {
 
     #[error("Invalid input: {0}")]
     InvalidInput(String),
+
+    #[error("Could not access that account: {0}")]
+    OtherUserAccount(String),
 }
 
 // Tauri commands must return serializable errors

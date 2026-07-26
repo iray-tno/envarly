@@ -15,6 +15,8 @@ mod path_backend;
 mod path_manage;
 #[cfg(windows)]
 mod snapshot;
+#[cfg(windows)]
+mod user_hive;
 
 /// If CLI subcommand args are present, execute them and exit the process.
 /// Returns normally (unit) when there are no subcommand args, so the caller can launch the GUI.
@@ -60,7 +62,17 @@ pub fn run() {
             commands::launch::get_launch_options,
             commands::launch::read_demo_fixture,
             commands::update::check_for_update,
+            commands::users::list_local_accounts,
+            commands::users::select_account,
+            commands::users::get_selected_account,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running envarly");
+        .build(tauri::generate_context!())
+        .expect("error while running envarly")
+        .run(|_app_handle, event| {
+            // Make sure a crash-free shutdown never leaves an other-user
+            // hive loaded, even if the frontend never explicitly deselected.
+            if let tauri::RunEvent::Exit = event {
+                user_hive::unload_active_hive();
+            }
+        });
 }

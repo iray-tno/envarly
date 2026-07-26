@@ -55,6 +55,7 @@ pub fn parse_json(content: &str) -> Result<EnvSnapshot, EnvarlyError> {
     Ok(EnvSnapshot {
         user: as_map("user"),
         system: as_map("system"),
+        other_user: None,
     })
 }
 
@@ -86,6 +87,7 @@ mod tests {
                 ("OS".to_string(), string("Windows_NT")),
             ]
             .into(),
+            other_user: None,
         }
     }
 

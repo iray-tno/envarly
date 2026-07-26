@@ -75,6 +75,7 @@ pub async fn export_custom(
     let mut snapshot = EnvSnapshot {
         user: HashMap::new(),
         system: HashMap::new(),
+        other_user: None,
     };
     for v in &vars {
         match v.scope.as_str() {
