@@ -6,8 +6,7 @@ import { DetailPanel } from "./components/DetailPanel/DetailPanel";
 import { DiagnosticsPanel } from "./components/DiagnosticsPanel/DiagnosticsPanel";
 import { PathBanner } from "./components/PathBanner/PathBanner";
 import { Sidebar } from "./components/Sidebar/Sidebar";
-import { SnapshotPanel } from "./components/SnapshotPanel/SnapshotPanel";
-import { IconButton } from "./components/ui/IconButton";
+import { SnapshotPanelDock } from "./components/SnapshotPanel/SnapshotPanelDock";
 import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
 import { useAppInit } from "./hooks/useAppInit";
@@ -19,7 +18,6 @@ import { useI18n } from "./hooks/useI18n";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useLocalUndo } from "./hooks/useLocalUndo";
 import { usePathStatus } from "./hooks/usePathStatus";
-import { usePresence } from "./hooks/usePresence";
 import { useStaged } from "./hooks/useStaged";
 import { useStagingHandlers } from "./hooks/useStagingHandlers";
 import { useTheme } from "./hooks/useTheme";
@@ -38,7 +36,6 @@ export default function App() {
   const [elevated, setElevated] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
-  const snapshotsPresence = usePresence(snapshotsOpen);
   const diagnostics = useDiagnostics(vars);
 
   const {
@@ -222,26 +219,11 @@ export default function App() {
             />
           </div>
 
-          {snapshotsPresence.mounted && (
-            <aside
-              className="motion-snapshot-panel min-h-0 shrink-0 border-l border-rim overflow-hidden"
-              data-state={snapshotsPresence.state}
-            >
-              <div className="motion-snapshot-content w-[420px] h-full min-h-0 flex flex-col bg-panel">
-                <div className="flex items-center justify-between px-5 py-3 border-b border-rim shrink-0">
-                  <span className="text-sm font-semibold text-fg">{t("header.snapshots")}</span>
-                  <IconButton
-                    aria-label="Close snapshots"
-                    icon="x"
-                    onClick={() => setSnapshotsOpen(false)}
-                  />
-                </div>
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <SnapshotPanel onStageSnapshot={handleStageSnapshot} />
-                </div>
-              </div>
-            </aside>
-          )}
+          <SnapshotPanelDock
+            open={snapshotsOpen}
+            onClose={() => setSnapshotsOpen(false)}
+            onStageSnapshot={handleStageSnapshot}
+          />
         </main>
 
         <AppModals

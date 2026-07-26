@@ -153,11 +153,15 @@
   }
 
   .motion-snapshot-panel {
-    width: 420px;
+    width: var(--panel-width, 420px);
     opacity: 1;
     transition:
       width 180ms cubic-bezier(0.2, 0, 0, 1),
       opacity 120ms ease-out;
+  }
+
+  .motion-snapshot-panel[data-resizing="true"] {
+    transition: none;
   }
 
   .motion-snapshot-panel[data-state="open"] {

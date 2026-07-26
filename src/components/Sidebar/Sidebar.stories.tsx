@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
+import { expect, waitFor } from "storybook/test";
 import type { StagedChange } from "../../hooks/useStaged";
 import type { EnvVar } from "../../types";
 import { Sidebar } from "./Sidebar";
@@ -119,5 +120,32 @@ export const Empty: Story = {
     onCreateNew: () => {},
     loading: false,
     staged: noStaged,
+  },
+};
+
+/** Forces the sidebar to its minimum resizable width (260px) to verify the
+ * scope filter chips and sort control don't clip or overflow at the floor. */
+export const Narrow: Story = {
+  render: () => {
+    localStorage.setItem("envarly-sidebar-width", "260");
+    const [selected, setSelected] = useState<EnvVar | null>(null);
+    return (
+      <Sidebar
+        vars={SAMPLE_VARS}
+        selected={selected}
+        onSelect={setSelected}
+        onCreateNew={() => {}}
+        loading={false}
+        staged={noStaged}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const scopeFilter = await waitFor(() => {
+      const el = canvasElement.querySelector<HTMLElement>('[role="radiogroup"]');
+      expect(el).toBeTruthy();
+      return el;
+    });
+    expect(scopeFilter?.scrollWidth).toBeLessThanOrEqual(scopeFilter?.clientWidth ?? 0);
   },
 };

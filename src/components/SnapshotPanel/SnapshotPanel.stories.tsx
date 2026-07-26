@@ -143,6 +143,26 @@ export const Compare: Story = {
   },
 };
 
+/** Forces the panel to the snapshot dock's minimum resizable width (260px) to
+ * verify SnapshotCard's action row wraps instead of clipping at the floor. */
+export const Narrow: Story = {
+  decorators: [
+    (Story) => (
+      <div className="h-[500px] w-[260px] overflow-hidden bg-panel">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const card = await waitFor(() => {
+      const el = canvasElement.querySelector<HTMLElement>("[data-snapshot-id]");
+      expect(el).toBeTruthy();
+      return el;
+    });
+    expect(card?.scrollWidth).toBeLessThanOrEqual(card?.clientWidth ?? 0);
+  },
+};
+
 export const WidePreviewDiff: Story = {
   parameters: { snapshotFixtures: [wideDiffSnapshot] },
   play: async ({ canvasElement }) => {

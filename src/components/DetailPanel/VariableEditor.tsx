@@ -90,9 +90,7 @@ export function VariableEditor({
   }
 
   if (separator === ",") {
-    return (
-      <ListEditor separator="," rawValue={value} onChange={onChange} readOnly={readOnly} />
-    );
+    return <ListEditor separator="," rawValue={value} onChange={onChange} readOnly={readOnly} />;
   }
 
   return (

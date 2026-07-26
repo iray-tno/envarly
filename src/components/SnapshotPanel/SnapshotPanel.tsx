@@ -66,16 +66,24 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
         </div>
 
         <div className="flex gap-2">
-          <TextInput
-            label="Snapshot label"
-            labelHidden
-            placeholder={t("snapshot.label_placeholder")}
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            className="flex-1"
-          />
-          <Button variant="primary" size="md" onClick={handleCreate} disabled={busy}>
+          <div className="flex-1 min-w-0">
+            <TextInput
+              label="Snapshot label"
+              labelHidden
+              placeholder={t("snapshot.label_placeholder")}
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+              className="w-full"
+            />
+          </div>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={handleCreate}
+            disabled={busy}
+            className="shrink-0 whitespace-nowrap"
+          >
             {busy && !previewing ? t("snapshot.saving") : t("snapshot.save")}
           </Button>
         </div>

@@ -110,7 +110,7 @@ export function SnapshotCard({
       </div>
 
       {!isEditing && (
-        <div className="flex min-h-8 items-center gap-1">
+        <div className="flex min-h-8 flex-wrap items-center gap-1">
           {comparingFrom ? (
             !isComparingSource && (
               <Button variant="secondary" size="xs" onClick={onPickCompareTarget}>
@@ -131,12 +131,7 @@ export function SnapshotCard({
             </>
           ) : (
             <>
-              <Button
-                variant="secondary"
-                size="xs"
-                onClick={onPreview}
-                disabled={loadingPreview}
-              >
+              <Button variant="secondary" size="xs" onClick={onPreview} disabled={loadingPreview}>
                 {loadingPreview ? "…" : t("snapshot.preview")}
               </Button>
               <Button

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import type { EnvSnapshot, EnvValueKind, EnvValueKindSelection, EnvVar, VarScope } from "../types";
+import type { StagedChange, StagedKey } from "./stagingLogic";
 import {
   computeEffectiveVars,
   computeStageDelete,
@@ -8,7 +9,6 @@ import {
   computeStageSnapshot,
   stagedKey,
 } from "./stagingLogic";
-import type { StagedChange, StagedKey } from "./stagingLogic";
 
 export type { StagedChange, StagedKind } from "./stagingLogic";
 export { stagedKey } from "./stagingLogic";

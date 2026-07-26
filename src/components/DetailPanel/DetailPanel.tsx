@@ -33,7 +33,6 @@ interface Props {
   onRegisterLocalUndo?: (fn: (() => void) | null) => void;
 }
 
-
 export function DetailPanel({
   variable,
   allVars,
