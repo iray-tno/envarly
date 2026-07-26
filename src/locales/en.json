@@ -44,7 +44,10 @@
     "administrator": "Administrator",
     "licenses": "Licenses",
     "update_available": "Update available: v{{version}}",
-    "update_available_title": "A new version of Envarly is available. Click to view the release."
+    "update_available_title": "A new version of Envarly is available. Click to view the release.",
+    "more_options": "More options",
+    "light_mode": "Switch to light mode",
+    "dark_mode": "Switch to dark mode"
   },
   "path_banner": {
     "prefix": "Envarly is not in your {{scope}} PATH — add it to run",
