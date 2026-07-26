@@ -31,6 +31,8 @@
     "refresh": "更新",
     "apply_staged_one": "{{count}} 件の変更を適用",
     "apply_staged_other": "{{count}} 件の変更を適用",
+    "staged_count_one": "{{count}} 件ステージ済み",
+    "staged_count_other": "{{count}} 件ステージ済み",
     "discard_all": "すべて破棄",
     "external_changes_one": "{{count}} 件の外部変更",
     "external_changes_other": "{{count}} 件の外部変更",

@@ -15,7 +15,6 @@ interface AppHeaderProps {
   theme: "dark" | "light";
   onRefresh: () => void;
   onApplyStaged: () => void;
-  onDiscard: () => void;
   onShowChanges: () => void;
   onImportExport: () => void;
   onCheckCommand: () => void;
@@ -34,7 +33,6 @@ export function AppHeader({
   theme,
   onRefresh,
   onApplyStaged,
-  onDiscard,
   onShowChanges,
   onImportExport,
   onCheckCommand,
@@ -63,14 +61,15 @@ export function AppHeader({
         </Button>
 
         {stagedCount > 0 && (
-          <>
-            <Button variant="primary" size="sm" onClick={onApplyStaged}>
-              {t("header.apply_staged", { count: stagedCount })}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={onDiscard}>
-              {t("header.discard_all")}
-            </Button>
-          </>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onApplyStaged}
+            className="shrink-0"
+            title={t("header.apply_staged", { count: stagedCount })}
+          >
+            {t("header.staged_count", { count: stagedCount })}
+          </Button>
         )}
 
         {diffCount > 0 && (

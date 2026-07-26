@@ -164,7 +164,6 @@ export default function App() {
           theme={theme}
           onRefresh={handleRefresh}
           onApplyStaged={() => setDialog("staged")}
-          onDiscard={handleClearStaged}
           onShowChanges={() => setDialog("changes")}
           onImportExport={() => setDialog("importexport")}
           onCheckCommand={() => setDialog("checkcommand")}
@@ -237,6 +236,7 @@ export default function App() {
           stagedProgress={stagedProgress}
           stagedLog={stagedLog}
           onApplyStaged={handleApplyStaged}
+          onDiscardAll={handleClearStaged}
           diffEntries={diffEntries}
           applyBusy={applyBusy}
           applyError={applyError}

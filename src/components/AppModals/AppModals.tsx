@@ -28,6 +28,7 @@ interface Props {
   stagedProgress: { index: number; total: number } | null;
   stagedLog: ApplyProgressEvent[];
   onApplyStaged: (takeSnapshot: boolean) => Promise<void>;
+  onDiscardAll: () => void;
   diffEntries: DiffEntry[];
   applyBusy: boolean;
   applyError: string | null;
@@ -62,6 +63,7 @@ export function AppModals({
   stagedProgress,
   stagedLog,
   onApplyStaged,
+  onDiscardAll,
   diffEntries,
   applyBusy,
   applyError,
@@ -107,6 +109,7 @@ export function AppModals({
           progress={stagedProgress}
           log={stagedLog}
           onApply={onApplyStaged}
+          onDiscardAll={onDiscardAll}
           onClose={() => setDialog(null)}
         />
       </Modal>
