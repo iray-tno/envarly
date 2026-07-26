@@ -8,6 +8,7 @@ import type {
   EnvVar,
   VarScope,
 } from "../../types";
+import { CheckCommandPanel } from "../CheckCommandPanel/CheckCommandPanel";
 import { DiffPanel } from "../DiffPanel/DiffPanel";
 import { ImportExportPanel } from "../ImportExportPanel/ImportExportPanel";
 import { LicensesPanel } from "../LicensesPanel/LicensesPanel";
@@ -15,7 +16,7 @@ import { NewVarModal } from "../NewVarModal/NewVarModal";
 import { StagedModal } from "../StagedModal/StagedModal";
 import { Modal } from "../ui/Modal";
 
-type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | null;
+type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | "checkcommand" | null;
 
 interface Props {
   dialog: Dialog;
@@ -82,6 +83,15 @@ export function AppModals({
         size="xl"
       >
         <ImportExportPanel onStage={onStageImport} />
+      </Modal>
+
+      <Modal
+        open={dialog === "checkcommand"}
+        onClose={() => setDialog(null)}
+        title={t("modal.check_command")}
+        size="lg"
+      >
+        <CheckCommandPanel />
       </Modal>
 
       <Modal

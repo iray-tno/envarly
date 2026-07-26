@@ -3,6 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { createDemoApi, loadDemoFixture } from "./demo/createDemoApi";
 import type {
   ApplyProgressEvent,
+  CheckCommandResult,
   EnvChange,
   EnvSnapshot,
   EnvValueKind,
@@ -50,6 +51,7 @@ export interface EnvarlyApi {
     systemHasEntry: boolean;
   }>;
   getPathProposal: (scope: "User" | "System") => Promise<string | null>;
+  checkCommand: (input: string) => Promise<CheckCommandResult>;
   checkForUpdate: () => Promise<UpdateInfo | null>;
   /**
    * Subscribe to per-variable progress while `applyEnvChanges` runs. Resolves
@@ -84,6 +86,7 @@ const normalApi: EnvarlyApi = {
       "get_path_status",
     ),
   getPathProposal: (scope) => invoke<string | null>("get_path_proposal", { scope }),
+  checkCommand: (input) => invoke<CheckCommandResult>("check_command", { input }),
   checkForUpdate: () => invoke<UpdateInfo | null>("check_for_update"),
   onApplyProgress: async (callback) =>
     listen<ApplyProgressEvent>("apply-progress", (event) => callback(event.payload)),
@@ -148,6 +151,7 @@ export const api: EnvarlyApi = {
   parseImport: async (content, format) => (await getApi()).parseImport(content, format),
   getPathStatus: async () => (await getApi()).getPathStatus(),
   getPathProposal: async (scope) => (await getApi()).getPathProposal(scope),
+  checkCommand: async (input) => (await getApi()).checkCommand(input),
   checkForUpdate: async () => (await getApi()).checkForUpdate(),
   onApplyProgress: async (callback) => (await getApi()).onApplyProgress(callback),
 };

@@ -1,7 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { EnvarlyApi, LaunchOptions } from "../api";
 import { inferEnvValueKind } from "../lib/envValueKind";
-import type { EnvSnapshot, EnvVar, SnapshotMeta, SnapshotValue, VarScope } from "../types";
+import type {
+  EnvSnapshot,
+  EnvVar,
+  FullPathStatus,
+  SnapshotMeta,
+  SnapshotValue,
+  VarScope,
+} from "../types";
 import bundledFixture from "./envarly-demo.json";
 
 interface DemoFixture {
@@ -190,6 +197,55 @@ export function createDemoApi(
         return null;
       }
       return [fixture.installDir, ...entries].join(";");
+    },
+    checkCommand: async (input) => {
+      const unquoted = input.trim().replace(/^"(.*)"$/, "$1");
+      const lastSep = Math.max(unquoted.lastIndexOf("\\"), unquoted.lastIndexOf("/"));
+      const basename = lastSep >= 0 ? unquoted.slice(lastSep + 1) : unquoted;
+      const fullDir = lastSep >= 0 ? unquoted.slice(0, lastSep) : null;
+      const hadExtension = basename.includes(".");
+      const nameOnly = (hadExtension ? basename.replace(/\.[^.]+$/, "") : basename).toLowerCase();
+
+      const dirsWithSource: Array<{ dir: string; source: "User" | "System" }> = [
+        ...(current.system.Path?.value.split(";").filter(Boolean) ?? []).map((dir) => ({
+          dir,
+          source: "System" as const,
+        })),
+        ...(current.user.Path?.value.split(";").filter(Boolean) ?? []).map((dir) => ({
+          dir,
+          source: "User" as const,
+        })),
+      ];
+
+      // Demo heuristic (no real filesystem access): a directory "contains" the
+      // command if its name hints at the tool, e.g. a "nodejs" dir matches "node".
+      const hits = dirsWithSource
+        .filter(({ dir }) => nameOnly && dir.toLowerCase().includes(nameOnly))
+        .map(({ dir, source }) => ({
+          directory: dir,
+          matchedFile: hadExtension ? basename : `${basename}.EXE`,
+          source,
+        }));
+
+      let fullPathStatus: FullPathStatus | null = null;
+      if (fullDir) {
+        const normalize = (d: string) => d.replace(/[\\/]+$/, "").toLowerCase();
+        const idx = hits.findIndex((h) => normalize(h.directory) === normalize(fullDir));
+        fullPathStatus =
+          idx === 0
+            ? { status: "active" }
+            : idx > 0
+              ? { status: "shadowed", shadowedBy: hits[0] }
+              : { status: "notOnEffectivePath" };
+      }
+
+      return {
+        input: unquoted,
+        queriedName: hadExtension ? basename : `${basename}.EXE`,
+        hadExtension,
+        hits,
+        fullPathStatus,
+      };
     },
     checkForUpdate: async () => null,
     onApplyProgress: async () => () => {},

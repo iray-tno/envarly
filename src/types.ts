@@ -64,3 +64,22 @@ export type EnvChange =
       name: string;
       scope: VarScope;
     };
+
+export interface CommandHit {
+  directory: string;
+  matchedFile: string;
+  source: "User" | "System";
+}
+
+export type FullPathStatus =
+  | { status: "active" }
+  | { status: "shadowed"; shadowedBy: CommandHit }
+  | { status: "notOnEffectivePath" };
+
+export interface CheckCommandResult {
+  input: string;
+  queriedName: string;
+  hadExtension: boolean;
+  hits: CommandHit[];
+  fullPathStatus: FullPathStatus | null;
+}

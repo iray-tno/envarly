@@ -18,6 +18,7 @@ interface AppHeaderProps {
   onDiscard: () => void;
   onShowChanges: () => void;
   onImportExport: () => void;
+  onCheckCommand: () => void;
   onToggleSnapshots: () => void;
   onToggleTheme: () => void;
   onLicenses: () => void;
@@ -36,6 +37,7 @@ export function AppHeader({
   onDiscard,
   onShowChanges,
   onImportExport,
+  onCheckCommand,
   onToggleSnapshots,
   onToggleTheme,
   onLicenses,
@@ -87,6 +89,10 @@ export function AppHeader({
           onClick={onToggleSnapshots}
         >
           {t("header.snapshots")}
+        </Button>
+
+        <Button variant="ghost" size="sm" onClick={onCheckCommand}>
+          {t("header.check_command")}
         </Button>
       </div>
 
