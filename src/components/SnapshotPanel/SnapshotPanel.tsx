@@ -56,9 +56,11 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
 
   return (
     <>
+      {/* mr-2 (with no explicit width, so it shrinks to absorb the margin) gives the
+          scrollbar the same breathing room from the edge as the sidebar's list. */}
       <div
         data-testid="snapshot-panel-scroll"
-        className="h-full min-h-0 w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto"
+        className="h-full min-h-0 mr-2 px-5 py-5 flex flex-col gap-4 overflow-y-auto"
       >
         <div>
           <h2 className="text-sm font-semibold text-fg mb-1">{t("snapshot.title")}</h2>
