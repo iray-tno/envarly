@@ -36,9 +36,11 @@ export function SidebarRow({
   const isNew = isSet && stagedChange.originalValue === null;
 
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: mouse-only convenience so the scope badge stays clickable; keyboard selection is already handled by the inner button's onKeyDown
     <li
+      onClick={onSelect}
       className={cn(
-        "group flex items-center mx-2 w-[calc(100%-1rem)] rounded transition-colors",
+        "group flex items-center gap-1 mx-2 w-[calc(100%-1rem)] rounded transition-colors",
         isSelected ? "bg-surface text-fg" : "text-muted hover:bg-hover hover:text-fg",
       )}
     >
@@ -47,10 +49,9 @@ export function SidebarRow({
         type="button"
         aria-current={isSelected ? "true" : undefined}
         tabIndex={isSelected || isFirstWhenNoneSelected ? 0 : -1}
-        onClick={onSelect}
         onKeyDown={onKeyDown}
         className={cn(
-          "flex min-w-0 flex-1 items-center gap-2 px-4 py-2 text-left rounded",
+          "flex min-w-0 flex-1 items-center gap-2 py-2 pl-4 text-left rounded",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset",
         )}
       >
@@ -68,14 +69,6 @@ export function SidebarRow({
         {isDelete && <span className="text-[9px] font-bold text-danger shrink-0">D</span>}
         {isNew && <span className="text-[9px] font-bold text-success shrink-0">A</span>}
         {isSet && !isNew && <span className="text-[9px] font-bold text-warn shrink-0">M</span>}
-        <span
-          className={cn(
-            "text-[10px] font-semibold w-4 h-4 rounded flex items-center justify-center shrink-0",
-            v.scope === "User" ? "bg-accent/15 text-accent" : "bg-violet/15 text-violet",
-          )}
-        >
-          {v.scope[0]}
-        </span>
       </button>
       <button
         type="button"
@@ -86,13 +79,21 @@ export function SidebarRow({
         aria-label={`Copy value of ${v.name}`}
         title="Copy value"
         className={cn(
-          "shrink-0 text-[10px] px-1 py-1 rounded transition-all",
-          "mr-2 opacity-0 group-hover:opacity-100 focus:opacity-100",
+          "shrink-0 text-[10px] p-1 rounded transition-all",
+          "opacity-0 group-hover:opacity-100 focus:opacity-100",
           copiedKey === entryKey ? "text-success" : "text-dim hover:text-muted",
         )}
       >
         <Icon name={copiedKey === entryKey ? "check" : "copy"} size={12} />
       </button>
+      <span
+        className={cn(
+          "text-[10px] font-semibold w-4 h-4 rounded flex items-center justify-center shrink-0 mr-4",
+          v.scope === "User" ? "bg-accent/15 text-accent" : "bg-violet/15 text-violet",
+        )}
+      >
+        {v.scope[0]}
+      </span>
     </li>
   );
 }
