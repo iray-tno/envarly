@@ -54,6 +54,12 @@ pub(crate) fn write_path_str(key: &RegKey, value: &str) -> Result<(), EnvarlyErr
         .unwrap_or(winreg::enums::RegType::REG_EXPAND_SZ);
     let mut bytes: Vec<u8> = value.encode_utf16().flat_map(|w| w.to_le_bytes()).collect();
     bytes.extend([0u8, 0u8]); // null terminator
-    key.set_raw_value(PATH_NAME, &winreg::RegValue { bytes, vtype })
-        .map_err(EnvarlyError::Registry)
+    key.set_raw_value(
+        PATH_NAME,
+        &winreg::RegValue {
+            bytes: bytes.into(),
+            vtype,
+        },
+    )
+    .map_err(EnvarlyError::Registry)
 }

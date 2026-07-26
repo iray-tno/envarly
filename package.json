@@ -59,7 +59,7 @@
     "@xmldom/xmldom": "^0.9.10",
     "allure-commandline": "^2.32.0",
     "jsdom": "^29.1.1",
-    "license-checker-rseidelsohn": "^4.4.2",
+    "license-checker-rseidelsohn": "^5.0.1",
     "playwright": "^1.61.1",
     "storybook": "^10.4.6",
     "typescript": "~5.8.3",
