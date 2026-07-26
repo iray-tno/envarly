@@ -35,6 +35,8 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 - **Admin elevation** — "Run as admin" button restarts the process elevated via UAC; system variables become editable; "Restart as admin →" inline hint appears in the detail panel when viewing a System variable without elevation
 - **CLI mode** — read-only subcommands (`get`, `list`, `export`) run from a terminal without launching the GUI
 - **WM\_SETTINGCHANGE broadcast** — running apps pick up changes without a restart
+- **Resizable panels** — drag the sidebar and snapshots panel to the width you want; sizes persist across restarts
+- **Check command** — find out why a command isn't found: searches the effective PATH (User + System merged, PATHEXT-aware) for a name or exe path and flags shadowed duplicates
 
 ## Stack
 
