@@ -41,7 +41,7 @@ export function Button({
       type="button"
       {...props}
       className={cn(
-        "inline-flex items-center gap-1 rounded font-medium transition-colors",
+        "inline-flex items-center gap-1 rounded font-medium transition-colors whitespace-nowrap shrink-0",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         variantCls[variant],

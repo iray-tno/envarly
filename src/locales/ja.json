@@ -43,7 +43,10 @@
     "administrator": "管理者モード",
     "licenses": "ライセンス",
     "update_available": "アップデートあり: v{{version}}",
-    "update_available_title": "新しいバージョンのEnvarlyがあります。クリックしてリリースページを見る。"
+    "update_available_title": "新しいバージョンのEnvarlyがあります。クリックしてリリースページを見る。",
+    "more_options": "その他のオプション",
+    "light_mode": "ライトモードに切り替え",
+    "dark_mode": "ダークモードに切り替え"
   },
   "path_banner": {
     "prefix": "Envarly が {{scope}} の PATH に含まれていません — ターミナルから",
