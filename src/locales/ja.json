@@ -36,6 +36,7 @@
     "external_changes_other": "{{count}} 件の外部変更",
     "import_export": "インポート / エクスポート",
     "snapshots": "スナップショット",
+    "check_command": "コマンドを調べる",
     "run_as_admin": "管理者として実行",
     "run_as_admin_title": "システム変数は読み取り専用です。編集するには管理者として再起動してください。",
     "administrator": "管理者モード",
@@ -141,7 +142,8 @@
     "apply_staged_other": "{{count}} 件の変更を適用",
     "external_changes": "外部変更を検出 ({{count}} 件)",
     "new_var": "新しい変数",
-    "licenses": "オープンソースライセンス"
+    "licenses": "オープンソースライセンス",
+    "check_command": "コマンドを調べる"
   },
   "diff": {
     "title": "外部変更を検出",
@@ -246,6 +248,19 @@
     "heading": "スナップショットを比較",
     "no_diff": "この2つのスナップショットは同一です — 差分はありません。",
     "to_label": "→ {{label}}"
+  },
+  "check_command": {
+    "input_label": "コマンドまたはパス",
+    "placeholder": "例: node, node.exe, またはフルパス",
+    "check": "チェック",
+    "checking": "確認中…",
+    "empty_state": "コマンド名またはパスを入力してチェックを押してください。",
+    "not_found": "PATH のどこにも見つかりません。",
+    "active": "有効 — 実行される",
+    "shadowed": "シャドーイングされてます",
+    "full_path_active": "このファイルが実際に実行されるものです。",
+    "full_path_shadowed": "このファイルは存在しますが、{{directory}}\\{{file}} にシャドーイングされてます。",
+    "full_path_not_on_path": "このファイルのディレクトリは実効PATHに含まれてません — \"{{name}}\" と入力すると代わりに {{directory}}\\{{file}} が実行されます。"
   },
   "env_desc": {
     "categories": {

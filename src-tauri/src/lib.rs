@@ -56,6 +56,7 @@ pub fn run() {
             commands::env::restart_as_admin,
             commands::path::get_path_status,
             commands::path::get_path_proposal,
+            commands::path::check_command,
             commands::launch::get_launch_options,
             commands::launch::read_demo_fixture,
             commands::update::check_for_update,

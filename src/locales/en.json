@@ -36,6 +36,7 @@
     "external_changes_other": "{{count}} external changes",
     "import_export": "Import / Export",
     "snapshots": "Snapshots",
+    "check_command": "Check command",
     "run_as_admin": "Run as admin",
     "run_as_admin_title": "System variables are read-only. Restart as administrator to edit them.",
     "administrator": "Administrator",
@@ -141,7 +142,8 @@
     "apply_staged_other": "Apply {{count}} staged changes",
     "external_changes": "External changes detected ({{count}})",
     "new_var": "New variable",
-    "licenses": "Open Source Licenses"
+    "licenses": "Open Source Licenses",
+    "check_command": "Check Command"
   },
   "diff": {
     "title": "External changes detected",
@@ -246,6 +248,19 @@
     "heading": "Comparing snapshots",
     "no_diff": "These two snapshots are identical — no differences found.",
     "to_label": "→ {{label}}"
+  },
+  "check_command": {
+    "input_label": "Command or path",
+    "placeholder": "e.g. node, node.exe, or a full path",
+    "check": "Check",
+    "checking": "Checking…",
+    "empty_state": "Enter a command name or path and press Check.",
+    "not_found": "Not found anywhere on PATH.",
+    "active": "Active — runs",
+    "shadowed": "Shadowed",
+    "full_path_active": "This exact file is the one that runs.",
+    "full_path_shadowed": "This file exists but is shadowed by {{directory}}\\{{file}}.",
+    "full_path_not_on_path": "This file's directory isn't on the effective PATH — {{directory}}\\{{file}} runs instead when you type \"{{name}}\"."
   },
   "env_desc": {
     "categories": {

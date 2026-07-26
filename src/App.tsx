@@ -26,7 +26,7 @@ import type { DiagnosticAction, EnvironmentDiagnostic } from "./lib/environmentD
 import { stagedToDiff } from "./lib/stagedToDiff";
 import type { EnvVar } from "./types";
 
-type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | null;
+type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | "checkcommand" | null;
 
 export default function App() {
   const { t } = useI18n();
@@ -167,6 +167,7 @@ export default function App() {
           onDiscard={handleClearStaged}
           onShowChanges={() => setDialog("changes")}
           onImportExport={() => setDialog("importexport")}
+          onCheckCommand={() => setDialog("checkcommand")}
           onToggleSnapshots={() => setSnapshotsOpen((o) => !o)}
           onToggleTheme={toggleTheme}
           onLicenses={() => setDialog("licenses")}

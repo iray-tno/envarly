@@ -18,7 +18,7 @@ pub fn validate_paths(paths: Vec<String>) -> Vec<bool> {
 /// that Rust's Path::exists() (which uses GetFileAttributesExW) can produce
 /// under certain Windows filesystem filter drivers or security software.
 #[cfg(windows)]
-fn dir_exists(path: &str) -> bool {
+pub(crate) fn dir_exists(path: &str) -> bool {
     let wide: Vec<u16> = path.encode_utf16().chain(std::iter::once(0)).collect();
     let attrs =
         unsafe { windows_sys::Win32::Storage::FileSystem::GetFileAttributesW(wide.as_ptr()) };
@@ -27,7 +27,7 @@ fn dir_exists(path: &str) -> bool {
 }
 
 #[cfg(not(windows))]
-fn dir_exists(path: &str) -> bool {
+pub(crate) fn dir_exists(path: &str) -> bool {
     std::path::Path::new(path).exists()
 }
 
@@ -93,6 +93,13 @@ pub fn get_path_proposal(scope: String) -> Result<Option<String>, EnvarlyError> 
         }
     };
     path_manage::propose_add(user)
+}
+
+/// Checks whether `input` (a command name or full exe path) resolves via the
+/// effective PATH, and whether it's shadowed by another same-named file.
+#[tauri::command]
+pub fn check_command(input: String) -> Result<path_manage::CheckCommandResult, EnvarlyError> {
+    path_manage::check_command(&input)
 }
 
 #[cfg(test)]
