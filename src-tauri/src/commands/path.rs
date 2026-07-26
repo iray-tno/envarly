@@ -22,8 +22,15 @@ pub(crate) fn dir_exists(path: &str) -> bool {
     let wide: Vec<u16> = path.encode_utf16().chain(std::iter::once(0)).collect();
     let attrs =
         unsafe { windows_sys::Win32::Storage::FileSystem::GetFileAttributesW(wide.as_ptr()) };
-    // INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF means the call failed (path not found etc.)
-    attrs != u32::MAX
+    if attrs != u32::MAX {
+        return true;
+    }
+    // INVALID_FILE_ATTRIBUTES: could mean "not found" or "access denied" (e.g. a
+    // path under another account's profile, like SYSTEM's WindowsApps folder in
+    // the default System PATH). Access denied only happens for paths that exist,
+    // so treat it as present rather than reporting a false "missing" entry.
+    let err = unsafe { windows_sys::Win32::Foundation::GetLastError() };
+    err == windows_sys::Win32::Foundation::ERROR_ACCESS_DENIED
 }
 
 #[cfg(not(windows))]
@@ -165,6 +172,19 @@ mod tests {
         let results = validate_paths(vec!["C:\\Windows".to_string()]);
         // On non-Windows CI this might be false; guard the assertion
         if cfg!(target_os = "windows") {
+            assert_eq!(results, vec![true]);
+        }
+    }
+
+    #[test]
+    fn dir_exists_treats_access_denied_as_present() {
+        // The SYSTEM account's own profile is a real, standard directory on every
+        // Windows install, but a regular (even Administrator) account gets
+        // ERROR_ACCESS_DENIED trying to stat it — must not be reported as missing.
+        if cfg!(target_os = "windows") {
+            let results = validate_paths(vec![
+                "C:\\Windows\\System32\\config\\systemprofile".to_string()
+            ]);
             assert_eq!(results, vec![true]);
         }
     }

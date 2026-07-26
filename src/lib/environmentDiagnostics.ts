@@ -10,7 +10,6 @@ export type DiagnosticKind =
   | "windows-generated-override"
   | "missing-path-entry"
   | "duplicate-path-entry"
-  | "expandable-without-reference"
   | "system-references-user-variable";
 
 export type DiagnosticAction =
@@ -42,6 +41,10 @@ const WINDOWS_BUILTIN = new Set([
   "OS",
   "PROCESSOR_ARCHITECTURE",
   "PROGRAMDATA",
+  "PROGRAMFILES",
+  "PROGRAMFILES(X86)",
+  "COMMONPROGRAMFILES",
+  "COMMONPROGRAMFILES(X86)",
   "PUBLIC",
   "SYSTEMDRIVE",
   "SYSTEMROOT",
@@ -176,14 +179,6 @@ export async function diagnoseEnvironment(
         name: variable.name,
         scope: variable.scope,
         action: { kind: "set-type", valueKind: "ExpandString" },
-      });
-    } else if (variable.valueKind === "ExpandString" && refs.length === 0) {
-      diagnostics.push({
-        id: diagnosticId("expandable-without-reference", variable.scope, variable.name),
-        kind: "expandable-without-reference",
-        severity: "info",
-        name: variable.name,
-        scope: variable.scope,
       });
     }
 

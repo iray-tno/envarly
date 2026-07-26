@@ -18,7 +18,6 @@
       "windows-generated-override": "通常は Windows が生成しますが、Environment レジストリキーで上書きされています。",
       "missing-path-entry": "存在しない PATH エントリが含まれています: {{detail}}",
       "duplicate-path-entry": "重複した PATH エントリが含まれています: {{detail}}",
-      "expandable-without-reference": "REG_EXPAND_SZ ですが、変数参照が含まれていません。",
       "system-references-user-variable": "システム変数からユーザー変数 %{{detail}}% を参照しています。"
     },
     "action": {
