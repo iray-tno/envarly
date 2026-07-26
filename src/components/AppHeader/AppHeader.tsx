@@ -131,16 +131,6 @@ export function AppHeader({
           </Button>
         )}
         <div className="hidden @5xl:flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="xs"
-            icon="external-link"
-            iconPosition="right"
-            onClick={() => openUrl("https://github.com/iray-tno/envarly")}
-            title="View on GitHub"
-          >
-            GitHub
-          </Button>
           <div className="flex items-center gap-1 text-xs text-dim">
             <Icon name="globe" size={14} className="text-dim" />
             <Select
@@ -160,6 +150,16 @@ export function AppHeader({
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           />
+          <Button
+            variant="ghost"
+            size="xs"
+            icon="external-link"
+            iconPosition="right"
+            onClick={() => openUrl("https://github.com/iray-tno/envarly")}
+            title="View on GitHub"
+          >
+            GitHub
+          </Button>
           <Button variant="ghost" size="xs" onClick={onLicenses} className="text-dim">
             {t("header.licenses")}
           </Button>
@@ -179,14 +179,6 @@ export function AppHeader({
               />
             )}
           >
-            <button
-              type="button"
-              onClick={() => openUrl("https://github.com/iray-tno/envarly")}
-              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-muted hover:bg-hover hover:text-fg"
-            >
-              <Icon name="external-link" size={14} />
-              GitHub
-            </button>
             <div className="flex items-center gap-2 px-2 py-1.5">
               <Icon name="globe" size={14} className="text-dim shrink-0" />
               <Select
@@ -206,6 +198,14 @@ export function AppHeader({
             >
               <Icon name={theme === "dark" ? "sun" : "moon"} size={14} />
               {theme === "dark" ? t("header.light_mode") : t("header.dark_mode")}
+            </button>
+            <button
+              type="button"
+              onClick={() => openUrl("https://github.com/iray-tno/envarly")}
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-muted hover:bg-hover hover:text-fg"
+            >
+              <Icon name="external-link" size={14} />
+              GitHub
             </button>
             <button
               type="button"
