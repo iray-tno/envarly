@@ -110,7 +110,7 @@ fn unsupported_values(
     })
 }
 
-fn to_reg_value(value: &EnvValue) -> Result<RegValue, EnvarlyError> {
+fn to_reg_value(value: &EnvValue) -> Result<RegValue<'_>, EnvarlyError> {
     let kind = value.kind.ok_or_else(|| {
         EnvarlyError::InvalidInput("registry type must be resolved before writing".into())
     })?;
@@ -119,7 +119,7 @@ fn to_reg_value(value: &EnvValue) -> Result<RegValue, EnvarlyError> {
         bytes.extend_from_slice(&unit.to_le_bytes());
     }
     Ok(RegValue {
-        bytes,
+        bytes: bytes.into(),
         vtype: match kind {
             EnvValueKind::String => REG_SZ,
             EnvValueKind::ExpandString => REG_EXPAND_SZ,

@@ -343,10 +343,22 @@
       "repository": "https://github.com/ExodusOSS/bytes"
     },
     {
-      "name": "@isaacs/cliui",
-      "version": "8.0.2",
+      "name": "@gar/promise-retry",
+      "version": "1.0.3",
+      "license": "MIT",
+      "repository": "https://github.com/wraithgar/node-promise-retry"
+    },
+    {
+      "name": "@isaacs/fs-minipass",
+      "version": "4.0.1",
       "license": "ISC",
-      "repository": "https://github.com/yargs/cliui"
+      "repository": "https://github.com/npm/fs-minipass"
+    },
+    {
+      "name": "@isaacs/string-locale-compare",
+      "version": "1.1.0",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/string-locale-compare"
     },
     {
       "name": "@joshwooding/vite-plugin-react-docgen-typescript",
@@ -397,10 +409,88 @@
       "repository": "https://github.com/napi-rs/napi-rs"
     },
     {
+      "name": "@npmcli/agent",
+      "version": "4.0.2",
+      "license": "ISC",
+      "repository": "https://github.com/npm/agent"
+    },
+    {
+      "name": "@npmcli/arborist",
+      "version": "9.6.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/cli"
+    },
+    {
       "name": "@npmcli/fs",
-      "version": "3.1.1",
+      "version": "5.0.0",
       "license": "ISC",
       "repository": "https://github.com/npm/fs"
+    },
+    {
+      "name": "@npmcli/git",
+      "version": "7.0.2",
+      "license": "ISC",
+      "repository": "https://github.com/npm/git"
+    },
+    {
+      "name": "@npmcli/installed-package-contents",
+      "version": "4.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/installed-package-contents"
+    },
+    {
+      "name": "@npmcli/map-workspaces",
+      "version": "5.0.3",
+      "license": "ISC",
+      "repository": "https://github.com/npm/map-workspaces"
+    },
+    {
+      "name": "@npmcli/metavuln-calculator",
+      "version": "9.0.3",
+      "license": "ISC",
+      "repository": "https://github.com/npm/metavuln-calculator"
+    },
+    {
+      "name": "@npmcli/name-from-folder",
+      "version": "4.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/name-from-folder"
+    },
+    {
+      "name": "@npmcli/node-gyp",
+      "version": "5.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/node-gyp"
+    },
+    {
+      "name": "@npmcli/package-json",
+      "version": "7.0.5",
+      "license": "ISC",
+      "repository": "https://github.com/npm/package-json"
+    },
+    {
+      "name": "@npmcli/promise-spawn",
+      "version": "9.0.1",
+      "license": "ISC",
+      "repository": "https://github.com/npm/promise-spawn"
+    },
+    {
+      "name": "@npmcli/query",
+      "version": "5.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/query"
+    },
+    {
+      "name": "@npmcli/redact",
+      "version": "4.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/redact"
+    },
+    {
+      "name": "@npmcli/run-script",
+      "version": "10.0.4",
+      "license": "ISC",
+      "repository": "https://github.com/npm/run-script"
     },
     {
       "name": "@oxc-parser/binding-win32-x64-msvc",
@@ -419,12 +509,6 @@
       "version": "11.23.0",
       "license": "MIT",
       "repository": "https://github.com/oxc-project/oxc-resolver"
-    },
-    {
-      "name": "@pkgjs/parseargs",
-      "version": "0.11.0",
-      "license": "MIT",
-      "repository": "https://github.com/pkgjs/parseargs"
     },
     {
       "name": "@polka/url",
@@ -455,6 +539,42 @@
       "version": "4.62.2",
       "license": "MIT",
       "repository": "https://github.com/rollup/rollup"
+    },
+    {
+      "name": "@sigstore/bundle",
+      "version": "4.0.0",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sigstore/sigstore-js"
+    },
+    {
+      "name": "@sigstore/core",
+      "version": "3.2.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sigstore/sigstore-js"
+    },
+    {
+      "name": "@sigstore/protobuf-specs",
+      "version": "0.5.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sigstore/protobuf-specs"
+    },
+    {
+      "name": "@sigstore/sign",
+      "version": "4.1.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sigstore/sigstore-js"
+    },
+    {
+      "name": "@sigstore/tuf",
+      "version": "4.0.2",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sigstore/sigstore-js"
+    },
+    {
+      "name": "@sigstore/verify",
+      "version": "3.1.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sigstore/sigstore-js"
     },
     {
       "name": "@standard-schema/spec",
@@ -599,6 +719,18 @@
       "version": "14.6.1",
       "license": "MIT",
       "repository": "https://github.com/testing-library/user-event"
+    },
+    {
+      "name": "@tufjs/canonical-json",
+      "version": "2.0.0",
+      "license": "MIT",
+      "repository": "https://github.com/theupdateframework/tuf-js"
+    },
+    {
+      "name": "@tufjs/models",
+      "version": "4.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/theupdateframework/tuf-js"
     },
     {
       "name": "@tybys/wasm-util",
@@ -799,10 +931,22 @@
       "repository": "https://github.com/npm/abbrev-js"
     },
     {
+      "name": "abbrev",
+      "version": "4.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/abbrev-js"
+    },
+    {
       "name": "acorn",
       "version": "8.17.0",
       "license": "MIT",
       "repository": "https://github.com/acornjs/acorn"
+    },
+    {
+      "name": "agent-base",
+      "version": "7.1.4",
+      "license": "MIT",
+      "repository": "https://github.com/TooTallNate/proxy-agents"
     },
     {
       "name": "allure-commandline",
@@ -817,12 +961,6 @@
       "repository": "https://github.com/chalk/ansi-regex"
     },
     {
-      "name": "ansi-regex",
-      "version": "6.2.2",
-      "license": "MIT",
-      "repository": "https://github.com/chalk/ansi-regex"
-    },
-    {
       "name": "ansi-styles",
       "version": "4.3.0",
       "license": "MIT",
@@ -831,12 +969,6 @@
     {
       "name": "ansi-styles",
       "version": "5.2.0",
-      "license": "MIT",
-      "repository": "https://github.com/chalk/ansi-styles"
-    },
-    {
-      "name": "ansi-styles",
-      "version": "6.2.3",
       "license": "MIT",
       "repository": "https://github.com/chalk/ansi-styles"
     },
@@ -890,12 +1022,6 @@
     },
     {
       "name": "balanced-match",
-      "version": "1.0.2",
-      "license": "MIT",
-      "repository": "https://github.com/juliangruber/balanced-match"
-    },
-    {
-      "name": "balanced-match",
       "version": "4.0.4",
       "license": "MIT",
       "repository": "https://github.com/juliangruber/balanced-match"
@@ -913,14 +1039,14 @@
       "repository": "https://github.com/lojjic/bidi-js"
     },
     {
-      "name": "brace-expansion",
-      "version": "2.1.1",
-      "license": "MIT",
-      "repository": "https://github.com/juliangruber/brace-expansion"
+      "name": "bin-links",
+      "version": "6.0.2",
+      "license": "ISC",
+      "repository": "https://github.com/npm/bin-links"
     },
     {
       "name": "brace-expansion",
-      "version": "5.0.7",
+      "version": "5.0.8",
       "license": "MIT",
       "repository": "https://github.com/juliangruber/brace-expansion"
     },
@@ -935,6 +1061,12 @@
       "version": "4.1.0",
       "license": "MIT",
       "repository": "https://github.com/sindresorhus/bundle-name"
+    },
+    {
+      "name": "cacache",
+      "version": "20.0.4",
+      "license": "ISC",
+      "repository": "https://github.com/npm/cacache"
     },
     {
       "name": "callsites",
@@ -973,6 +1105,12 @@
       "repository": "https://github.com/chaijs/check-error"
     },
     {
+      "name": "chownr",
+      "version": "3.0.0",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/chownr"
+    },
+    {
       "name": "classnames",
       "version": "2.5.1",
       "license": "MIT",
@@ -985,6 +1123,12 @@
       "repository": "https://github.com/lukeed/clsx"
     },
     {
+      "name": "cmd-shim",
+      "version": "8.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/cmd-shim"
+    },
+    {
       "name": "color-convert",
       "version": "2.0.1",
       "license": "MIT",
@@ -995,6 +1139,12 @@
       "version": "1.1.4",
       "license": "MIT",
       "repository": "https://github.com/colorjs/color-name"
+    },
+    {
+      "name": "common-ancestor-path",
+      "version": "2.0.0",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/common-ancestor-path"
     },
     {
       "name": "convert-source-map",
@@ -1015,12 +1165,6 @@
       "repository": "https://github.com/davidtheclark/cosmiconfig"
     },
     {
-      "name": "cross-spawn",
-      "version": "7.0.6",
-      "license": "MIT",
-      "repository": "https://github.com/moxystudio/node-cross-spawn"
-    },
-    {
       "name": "css-tree",
       "version": "3.2.1",
       "license": "MIT",
@@ -1031,6 +1175,12 @@
       "version": "1.5.1",
       "license": "MIT",
       "repository": "https://github.com/mathiasbynens/CSS.escape"
+    },
+    {
+      "name": "cssesc",
+      "version": "3.0.0",
+      "license": "MIT",
+      "repository": "https://github.com/mathiasbynens/cssesc"
     },
     {
       "name": "csstype",
@@ -1117,28 +1267,10 @@
       "repository": "https://github.com/eps1lon/dom-accessibility-api"
     },
     {
-      "name": "eastasianwidth",
-      "version": "0.2.0",
-      "license": "MIT",
-      "repository": "https://github.com/komagata/eastasianwidth"
-    },
-    {
       "name": "electron-to-chromium",
       "version": "1.5.377",
       "license": "ISC",
       "repository": "https://github.com/Kilian/electron-to-chromium"
-    },
-    {
-      "name": "emoji-regex",
-      "version": "8.0.0",
-      "license": "MIT",
-      "repository": "https://github.com/mathiasbynens/emoji-regex"
-    },
-    {
-      "name": "emoji-regex",
-      "version": "9.2.2",
-      "license": "MIT",
-      "repository": "https://github.com/mathiasbynens/emoji-regex"
     },
     {
       "name": "empathic",
@@ -1157,6 +1289,12 @@
       "version": "8.0.0",
       "license": "BSD-2-Clause",
       "repository": "https://github.com/fb55/entities"
+    },
+    {
+      "name": "env-paths",
+      "version": "2.2.1",
+      "license": "MIT",
+      "repository": "https://github.com/sindresorhus/env-paths"
     },
     {
       "name": "error-ex",
@@ -1225,6 +1363,12 @@
       "repository": "https://github.com/mmkal/expect-type"
     },
     {
+      "name": "exponential-backoff",
+      "version": "3.1.3",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/coveooss/exponential-backoff"
+    },
+    {
       "name": "fdir",
       "version": "6.5.0",
       "license": "MIT",
@@ -1237,10 +1381,10 @@
       "repository": "https://github.com/js-n/find-root"
     },
     {
-      "name": "foreground-child",
-      "version": "3.3.1",
+      "name": "fs-minipass",
+      "version": "3.0.3",
       "license": "ISC",
-      "repository": "https://github.com/tapjs/foreground-child"
+      "repository": "https://github.com/npm/fs-minipass"
     },
     {
       "name": "function-bind",
@@ -1253,12 +1397,6 @@
       "version": "1.0.0-beta.2",
       "license": "MIT",
       "repository": "https://github.com/loganfsmyth/gensync"
-    },
-    {
-      "name": "glob",
-      "version": "10.5.0",
-      "license": "ISC",
-      "repository": "https://github.com/isaacs/node-glob"
     },
     {
       "name": "glob",
@@ -1292,7 +1430,7 @@
     },
     {
       "name": "hosted-git-info",
-      "version": "6.1.3",
+      "version": "9.0.3",
       "license": "ISC",
       "repository": "https://github.com/npm/hosted-git-info"
     },
@@ -1315,10 +1453,40 @@
       "repository": "https://github.com/henrikjoreteg/html-parse-stringify"
     },
     {
+      "name": "http-cache-semantics",
+      "version": "4.2.0",
+      "license": "BSD-2-Clause",
+      "repository": "https://github.com/kornelski/http-cache-semantics"
+    },
+    {
+      "name": "http-proxy-agent",
+      "version": "7.0.2",
+      "license": "MIT",
+      "repository": "https://github.com/TooTallNate/proxy-agents"
+    },
+    {
+      "name": "https-proxy-agent",
+      "version": "7.0.6",
+      "license": "MIT",
+      "repository": "https://github.com/TooTallNate/proxy-agents"
+    },
+    {
       "name": "i18next",
       "version": "26.3.4",
       "license": "MIT",
       "repository": "https://github.com/i18next/i18next"
+    },
+    {
+      "name": "iconv-lite",
+      "version": "0.7.3",
+      "license": "MIT",
+      "repository": "https://github.com/pillarjs/iconv-lite"
+    },
+    {
+      "name": "ignore-walk",
+      "version": "8.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/ignore-walk"
     },
     {
       "name": "import-fresh",
@@ -1331,6 +1499,18 @@
       "version": "4.0.0",
       "license": "MIT",
       "repository": "https://github.com/sindresorhus/indent-string"
+    },
+    {
+      "name": "ini",
+      "version": "6.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/ini"
+    },
+    {
+      "name": "ip-address",
+      "version": "10.3.1",
+      "license": "MIT",
+      "repository": "https://github.com/beaugunderson/ip-address"
     },
     {
       "name": "is-arrayish",
@@ -1349,12 +1529,6 @@
       "version": "3.0.0",
       "license": "MIT",
       "repository": "https://github.com/sindresorhus/is-docker"
-    },
-    {
-      "name": "is-fullwidth-code-point",
-      "version": "3.0.0",
-      "license": "MIT",
-      "repository": "https://github.com/sindresorhus/is-fullwidth-code-point"
     },
     {
       "name": "is-inside-container",
@@ -1376,8 +1550,8 @@
     },
     {
       "name": "isexe",
-      "version": "2.0.0",
-      "license": "ISC",
+      "version": "4.0.0",
+      "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/isexe"
     },
     {
@@ -1399,12 +1573,6 @@
       "repository": "https://github.com/istanbuljs/istanbuljs"
     },
     {
-      "name": "jackspeak",
-      "version": "3.4.3",
-      "license": "BlueOak-1.0.0",
-      "repository": "https://github.com/isaacs/jackspeak"
-    },
-    {
       "name": "jiti",
       "version": "2.7.0",
       "license": "MIT",
@@ -1424,7 +1592,7 @@
     },
     {
       "name": "js-yaml",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "license": "MIT",
       "repository": "https://github.com/nodeca/js-yaml"
     },
@@ -1448,9 +1616,15 @@
     },
     {
       "name": "json-parse-even-better-errors",
-      "version": "3.0.2",
+      "version": "5.0.0",
       "license": "MIT",
       "repository": "https://github.com/npm/json-parse-even-better-errors"
+    },
+    {
+      "name": "json-stringify-nice",
+      "version": "1.1.4",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/json-stringify-nice"
     },
     {
       "name": "json5",
@@ -1459,8 +1633,26 @@
       "repository": "https://github.com/json5/json5"
     },
     {
+      "name": "jsonparse",
+      "version": "1.3.1",
+      "license": "MIT",
+      "repository": "https://github.com/creationix/jsonparse"
+    },
+    {
+      "name": "just-diff",
+      "version": "6.0.2",
+      "license": "MIT",
+      "repository": "https://github.com/angus-c/just"
+    },
+    {
+      "name": "just-diff-apply",
+      "version": "5.5.0",
+      "license": "MIT",
+      "repository": "https://github.com/angus-c/just"
+    },
+    {
       "name": "license-checker-rseidelsohn",
-      "version": "4.4.2",
+      "version": "5.0.1",
       "license": "BSD-3-Clause",
       "repository": "https://github.com/RSeidelsohn/license-checker-rseidelsohn"
     },
@@ -1496,25 +1688,19 @@
     },
     {
       "name": "lru-cache",
-      "version": "10.4.3",
-      "license": "ISC",
-      "repository": "https://github.com/isaacs/node-lru-cache"
-    },
-    {
-      "name": "lru-cache",
       "version": "11.5.1",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/node-lru-cache"
     },
     {
       "name": "lru-cache",
-      "version": "5.1.1",
-      "license": "ISC",
+      "version": "11.5.2",
+      "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/node-lru-cache"
     },
     {
       "name": "lru-cache",
-      "version": "7.18.3",
+      "version": "5.1.1",
       "license": "ISC",
       "repository": "https://github.com/isaacs/node-lru-cache"
     },
@@ -1543,6 +1729,12 @@
       "repository": "https://github.com/sindresorhus/make-dir"
     },
     {
+      "name": "make-fetch-happen",
+      "version": "15.0.6",
+      "license": "ISC",
+      "repository": "https://github.com/npm/make-fetch-happen"
+    },
+    {
       "name": "mdn-data",
       "version": "2.27.1",
       "license": "CC0-1.0",
@@ -1567,12 +1759,6 @@
       "repository": "https://github.com/isaacs/minimatch"
     },
     {
-      "name": "minimatch",
-      "version": "9.0.9",
-      "license": "ISC",
-      "repository": "https://github.com/isaacs/minimatch"
-    },
-    {
       "name": "minimist",
       "version": "1.2.8",
       "license": "MIT",
@@ -1580,9 +1766,51 @@
     },
     {
       "name": "minipass",
+      "version": "3.3.6",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/minipass"
+    },
+    {
+      "name": "minipass",
       "version": "7.1.3",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/minipass"
+    },
+    {
+      "name": "minipass-collect",
+      "version": "2.0.1",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/minipass-collect"
+    },
+    {
+      "name": "minipass-fetch",
+      "version": "5.0.2",
+      "license": "MIT",
+      "repository": "https://github.com/npm/minipass-fetch"
+    },
+    {
+      "name": "minipass-flush",
+      "version": "1.0.7",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/minipass-flush"
+    },
+    {
+      "name": "minipass-pipeline",
+      "version": "1.2.4",
+      "license": "ISC",
+      "repository": ""
+    },
+    {
+      "name": "minipass-sized",
+      "version": "2.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/minipass-sized"
+    },
+    {
+      "name": "minizlib",
+      "version": "3.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/isaacs/minizlib"
     },
     {
       "name": "mkdirp",
@@ -1604,9 +1832,21 @@
     },
     {
       "name": "nanoid",
-      "version": "3.3.15",
+      "version": "3.3.16",
       "license": "MIT",
       "repository": "https://github.com/ai/nanoid"
+    },
+    {
+      "name": "negotiator",
+      "version": "1.0.0",
+      "license": "MIT",
+      "repository": "https://github.com/jshttp/negotiator"
+    },
+    {
+      "name": "node-gyp",
+      "version": "12.4.0",
+      "license": "MIT",
+      "repository": "https://github.com/nodejs/node-gyp"
     },
     {
       "name": "node-releases",
@@ -1621,16 +1861,52 @@
       "repository": "https://github.com/npm/nopt"
     },
     {
-      "name": "normalize-package-data",
+      "name": "nopt",
+      "version": "9.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/nopt"
+    },
+    {
+      "name": "npm-bundled",
       "version": "5.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/npm-bundled"
+    },
+    {
+      "name": "npm-install-checks",
+      "version": "8.0.0",
       "license": "BSD-2-Clause",
-      "repository": "https://github.com/npm/normalize-package-data"
+      "repository": "https://github.com/npm/npm-install-checks"
     },
     {
       "name": "npm-normalize-package-bin",
-      "version": "3.0.1",
+      "version": "5.0.0",
       "license": "ISC",
       "repository": "https://github.com/npm/npm-normalize-package-bin"
+    },
+    {
+      "name": "npm-package-arg",
+      "version": "13.0.2",
+      "license": "ISC",
+      "repository": "https://github.com/npm/npm-package-arg"
+    },
+    {
+      "name": "npm-packlist",
+      "version": "10.0.4",
+      "license": "ISC",
+      "repository": "https://github.com/npm/npm-packlist"
+    },
+    {
+      "name": "npm-pick-manifest",
+      "version": "11.0.3",
+      "license": "ISC",
+      "repository": "https://github.com/npm/npm-pick-manifest"
+    },
+    {
+      "name": "npm-registry-fetch",
+      "version": "19.1.1",
+      "license": "ISC",
+      "repository": "https://github.com/npm/npm-registry-fetch"
     },
     {
       "name": "obug",
@@ -1657,16 +1933,28 @@
       "repository": "https://github.com/oxc-project/oxc-resolver"
     },
     {
-      "name": "package-json-from-dist",
-      "version": "1.0.1",
-      "license": "BlueOak-1.0.0",
-      "repository": "https://github.com/isaacs/package-json-from-dist"
+      "name": "p-map",
+      "version": "7.0.6",
+      "license": "MIT",
+      "repository": "https://github.com/sindresorhus/p-map"
+    },
+    {
+      "name": "pacote",
+      "version": "21.5.1",
+      "license": "ISC",
+      "repository": "https://github.com/npm/pacote"
     },
     {
       "name": "parent-module",
       "version": "1.0.1",
       "license": "MIT",
       "repository": "https://github.com/sindresorhus/parent-module"
+    },
+    {
+      "name": "parse-conflict-json",
+      "version": "5.0.1",
+      "license": "ISC",
+      "repository": "https://github.com/npm/parse-conflict-json"
     },
     {
       "name": "parse-json",
@@ -1681,22 +1969,10 @@
       "repository": "https://github.com/inikulin/parse5"
     },
     {
-      "name": "path-key",
-      "version": "3.1.1",
-      "license": "MIT",
-      "repository": "https://github.com/sindresorhus/path-key"
-    },
-    {
       "name": "path-parse",
       "version": "1.0.7",
       "license": "MIT",
       "repository": "https://github.com/jbgutierrez/path-parse"
-    },
-    {
-      "name": "path-scurry",
-      "version": "1.11.1",
-      "license": "BlueOak-1.0.0",
-      "repository": "https://github.com/isaacs/path-scurry"
     },
     {
       "name": "path-scurry",
@@ -1754,15 +2030,45 @@
     },
     {
       "name": "postcss",
-      "version": "8.5.15",
+      "version": "8.5.23",
       "license": "MIT",
       "repository": "https://github.com/postcss/postcss"
+    },
+    {
+      "name": "postcss-selector-parser",
+      "version": "7.1.4",
+      "license": "MIT",
+      "repository": "https://github.com/postcss/postcss-selector-parser"
     },
     {
       "name": "pretty-format",
       "version": "27.5.1",
       "license": "MIT",
       "repository": "https://github.com/facebook/jest"
+    },
+    {
+      "name": "proc-log",
+      "version": "6.1.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/proc-log"
+    },
+    {
+      "name": "proggy",
+      "version": "4.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/proggy"
+    },
+    {
+      "name": "promise-all-reject-late",
+      "version": "1.0.1",
+      "license": "ISC",
+      "repository": ""
+    },
+    {
+      "name": "promise-call-limit",
+      "version": "3.0.2",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/promise-call-limit"
     },
     {
       "name": "punycode",
@@ -1825,16 +2131,10 @@
       "repository": "https://github.com/facebook/react"
     },
     {
-      "name": "read-installed-packages",
-      "version": "2.0.1",
+      "name": "read-cmd-shim",
+      "version": "6.0.0",
       "license": "ISC",
-      "repository": "https://github.com/Semigradsky/read-installed"
-    },
-    {
-      "name": "read-package-json",
-      "version": "6.0.4",
-      "license": "ISC",
-      "repository": "https://github.com/npm/read-package-json"
+      "repository": "https://github.com/npm/read-cmd-shim"
     },
     {
       "name": "recast",
@@ -1879,6 +2179,12 @@
       "repository": "https://github.com/sindresorhus/run-applescript"
     },
     {
+      "name": "safer-buffer",
+      "version": "2.1.2",
+      "license": "MIT",
+      "repository": "https://github.com/ChALkeR/safer-buffer"
+    },
+    {
       "name": "saxes",
       "version": "6.0.0",
       "license": "ISC",
@@ -1903,18 +2209,6 @@
       "repository": "https://github.com/npm/node-semver"
     },
     {
-      "name": "shebang-command",
-      "version": "2.0.0",
-      "license": "MIT",
-      "repository": "https://github.com/kevva/shebang-command"
-    },
-    {
-      "name": "shebang-regex",
-      "version": "3.0.0",
-      "license": "MIT",
-      "repository": "https://github.com/sindresorhus/shebang-regex"
-    },
-    {
       "name": "siginfo",
       "version": "2.0.0",
       "license": "ISC",
@@ -1927,16 +2221,34 @@
       "repository": "https://github.com/tapjs/signal-exit"
     },
     {
+      "name": "sigstore",
+      "version": "4.1.1",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sigstore/sigstore-js"
+    },
+    {
       "name": "sirv",
       "version": "3.0.2",
       "license": "MIT",
       "repository": "https://github.com/lukeed/sirv"
     },
     {
-      "name": "slide",
-      "version": "1.1.6",
-      "license": "ISC",
-      "repository": "https://github.com/isaacs/slide-flow-control"
+      "name": "smart-buffer",
+      "version": "4.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/JoshGlazebrook/smart-buffer"
+    },
+    {
+      "name": "socks",
+      "version": "2.8.9",
+      "license": "MIT",
+      "repository": "https://github.com/JoshGlazebrook/socks"
+    },
+    {
+      "name": "socks-proxy-agent",
+      "version": "8.0.5",
+      "license": "MIT",
+      "repository": "https://github.com/TooTallNate/proxy-agents"
     },
     {
       "name": "source-map",
@@ -1981,6 +2293,12 @@
       "repository": "https://github.com/jslicense/spdx-expression-parse.js"
     },
     {
+      "name": "spdx-expression-parse",
+      "version": "4.0.0",
+      "license": "MIT",
+      "repository": "https://github.com/jslicense/spdx-expression-parse.js"
+    },
+    {
       "name": "spdx-license-ids",
       "version": "3.0.23",
       "license": "CC0-1.0",
@@ -1994,9 +2312,15 @@
     },
     {
       "name": "spdx-satisfies",
-      "version": "5.0.1",
+      "version": "6.0.0",
       "license": "MIT",
       "repository": "https://github.com/kemitchell/spdx-satisfies.js"
+    },
+    {
+      "name": "ssri",
+      "version": "13.0.1",
+      "license": "ISC",
+      "repository": "https://github.com/npm/ssri"
     },
     {
       "name": "stackback",
@@ -2015,30 +2339,6 @@
       "version": "10.4.6",
       "license": "MIT",
       "repository": "https://github.com/storybookjs/storybook"
-    },
-    {
-      "name": "string-width",
-      "version": "4.2.3",
-      "license": "MIT",
-      "repository": "https://github.com/sindresorhus/string-width"
-    },
-    {
-      "name": "string-width",
-      "version": "5.1.2",
-      "license": "MIT",
-      "repository": "https://github.com/sindresorhus/string-width"
-    },
-    {
-      "name": "strip-ansi",
-      "version": "6.0.1",
-      "license": "MIT",
-      "repository": "https://github.com/chalk/strip-ansi"
-    },
-    {
-      "name": "strip-ansi",
-      "version": "7.2.0",
-      "license": "MIT",
-      "repository": "https://github.com/chalk/strip-ansi"
     },
     {
       "name": "strip-bom",
@@ -2099,6 +2399,12 @@
       "version": "2.3.3",
       "license": "MIT",
       "repository": "https://github.com/webpack/tapable"
+    },
+    {
+      "name": "tar",
+      "version": "7.5.22",
+      "license": "BlueOak-1.0.0",
+      "repository": "https://github.com/isaacs/node-tar"
     },
     {
       "name": "tiny-invariant",
@@ -2179,6 +2485,12 @@
       "repository": "https://github.com/notatestuser/treeify"
     },
     {
+      "name": "treeverse",
+      "version": "3.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/npm/treeverse"
+    },
+    {
       "name": "ts-dedent",
       "version": "2.3.0",
       "license": "MIT",
@@ -2197,10 +2509,22 @@
       "repository": "https://github.com/Microsoft/tslib"
     },
     {
+      "name": "tuf-js",
+      "version": "4.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/theupdateframework/tuf-js"
+    },
+    {
       "name": "typescript",
       "version": "5.8.3",
       "license": "Apache-2.0",
       "repository": "https://github.com/microsoft/TypeScript"
+    },
+    {
+      "name": "undici",
+      "version": "6.28.0",
+      "license": "MIT",
+      "repository": "https://github.com/nodejs/undici"
     },
     {
       "name": "undici",
@@ -2227,10 +2551,16 @@
       "repository": "https://github.com/facebook/react"
     },
     {
-      "name": "validate-npm-package-license",
-      "version": "3.0.4",
-      "license": "Apache-2.0",
-      "repository": "https://github.com/kemitchell/validate-npm-package-license.js"
+      "name": "util-deprecate",
+      "version": "1.0.2",
+      "license": "MIT",
+      "repository": "https://github.com/TooTallNate/util-deprecate"
+    },
+    {
+      "name": "validate-npm-package-name",
+      "version": "7.0.2",
+      "license": "ISC",
+      "repository": "https://github.com/npm/validate-npm-package-name"
     },
     {
       "name": "vite",
@@ -2255,6 +2585,12 @@
       "version": "5.0.0",
       "license": "MIT",
       "repository": "https://github.com/jsdom/w3c-xmlserializer"
+    },
+    {
+      "name": "walk-up-path",
+      "version": "4.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/walk-up-path"
     },
     {
       "name": "webidl-conversions",
@@ -2282,9 +2618,9 @@
     },
     {
       "name": "which",
-      "version": "2.0.2",
+      "version": "6.0.1",
       "license": "ISC",
-      "repository": "https://github.com/isaacs/node-which"
+      "repository": "https://github.com/npm/node-which"
     },
     {
       "name": "why-is-node-running",
@@ -2293,16 +2629,10 @@
       "repository": "https://github.com/mafintosh/why-is-node-running"
     },
     {
-      "name": "wrap-ansi",
-      "version": "7.0.0",
-      "license": "MIT",
-      "repository": "https://github.com/chalk/wrap-ansi"
-    },
-    {
-      "name": "wrap-ansi",
-      "version": "8.1.0",
-      "license": "MIT",
-      "repository": "https://github.com/chalk/wrap-ansi"
+      "name": "write-file-atomic",
+      "version": "7.0.1",
+      "license": "ISC",
+      "repository": "https://github.com/npm/write-file-atomic"
     },
     {
       "name": "ws",
@@ -2332,6 +2662,18 @@
       "name": "yallist",
       "version": "3.1.1",
       "license": "ISC",
+      "repository": "https://github.com/isaacs/yallist"
+    },
+    {
+      "name": "yallist",
+      "version": "4.0.0",
+      "license": "ISC",
+      "repository": "https://github.com/isaacs/yallist"
+    },
+    {
+      "name": "yallist",
+      "version": "5.0.0",
+      "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/yallist"
     },
     {
@@ -2404,7 +2746,7 @@
     },
     {
       "name": "anyhow",
-      "version": "1.0.102",
+      "version": "1.0.103",
       "license": "MIT OR Apache-2.0",
       "repository": "https://github.com/dtolnay/anyhow"
     },
@@ -3034,6 +3376,12 @@
     },
     {
       "name": "foreign-types",
+      "version": "0.3.2",
+      "license": "MIT/Apache-2.0",
+      "repository": "https://github.com/sfackler/foreign-types"
+    },
+    {
+      "name": "foreign-types",
       "version": "0.5.0",
       "license": "MIT/Apache-2.0",
       "repository": "https://github.com/sfackler/foreign-types"
@@ -3041,6 +3389,12 @@
     {
       "name": "foreign-types-macros",
       "version": "0.2.3",
+      "license": "MIT/Apache-2.0",
+      "repository": "https://github.com/sfackler/foreign-types"
+    },
+    {
+      "name": "foreign-types-shared",
+      "version": "0.1.1",
       "license": "MIT/Apache-2.0",
       "repository": "https://github.com/sfackler/foreign-types"
     },
@@ -3307,6 +3661,12 @@
       "version": "1.10.1",
       "license": "MIT",
       "repository": "https://github.com/hyperium/hyper"
+    },
+    {
+      "name": "hyper-tls",
+      "version": "0.6.0",
+      "license": "MIT/Apache-2.0",
+      "repository": "https://github.com/hyperium/hyper-tls"
     },
     {
       "name": "hyper-util",
@@ -3603,6 +3963,12 @@
       "repository": "https://github.com/tauri-apps/muda"
     },
     {
+      "name": "native-tls",
+      "version": "0.2.18",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/rust-native-tls/rust-native-tls"
+    },
+    {
       "name": "ndk",
       "version": "0.9.0",
       "license": "MIT OR Apache-2.0",
@@ -3765,6 +4131,30 @@
       "repository": "https://github.com/Byron/open-rs"
     },
     {
+      "name": "openssl",
+      "version": "0.10.81",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/rust-openssl/rust-openssl"
+    },
+    {
+      "name": "openssl-macros",
+      "version": "0.1.1",
+      "license": "MIT/Apache-2.0",
+      "repository": ""
+    },
+    {
+      "name": "openssl-probe",
+      "version": "0.2.1",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/rustls/openssl-probe"
+    },
+    {
+      "name": "openssl-sys",
+      "version": "0.9.117",
+      "license": "MIT",
+      "repository": "https://github.com/rust-openssl/rust-openssl"
+    },
+    {
       "name": "option-ext",
       "version": "0.2.0",
       "license": "MPL-2.0",
@@ -3868,7 +4258,7 @@
     },
     {
       "name": "plist",
-      "version": "1.9.0",
+      "version": "1.10.0",
       "license": "MIT",
       "repository": "https://github.com/ebarnard/rust-plist/"
     },
@@ -3946,7 +4336,7 @@
     },
     {
       "name": "quick-xml",
-      "version": "0.39.4",
+      "version": "0.41.0",
       "license": "MIT",
       "repository": "https://github.com/tafia/quick-xml"
     },
@@ -4053,6 +4443,12 @@
       "repository": "https://github.com/bytecodealliance/rustix"
     },
     {
+      "name": "rustls-pki-types",
+      "version": "1.15.0",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/rustls/pki-types"
+    },
+    {
       "name": "rustversion",
       "version": "1.0.22",
       "license": "MIT OR Apache-2.0",
@@ -4063,6 +4459,12 @@
       "version": "1.0.6",
       "license": "Unlicense/MIT",
       "repository": "https://github.com/BurntSushi/same-file"
+    },
+    {
+      "name": "schannel",
+      "version": "0.1.29",
+      "license": "MIT",
+      "repository": "https://github.com/steffengy/schannel-rs"
     },
     {
       "name": "schemars",
@@ -4093,6 +4495,18 @@
       "version": "1.2.0",
       "license": "MIT OR Apache-2.0",
       "repository": "https://github.com/bluss/scopeguard"
+    },
+    {
+      "name": "security-framework",
+      "version": "3.7.0",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/kornelski/rust-security-framework"
+    },
+    {
+      "name": "security-framework-sys",
+      "version": "2.17.0",
+      "license": "MIT OR Apache-2.0",
+      "repository": "https://github.com/kornelski/rust-security-framework"
     },
     {
       "name": "selectors",
@@ -4491,6 +4905,12 @@
       "repository": "https://github.com/tokio-rs/tokio"
     },
     {
+      "name": "tokio-native-tls",
+      "version": "0.3.1",
+      "license": "MIT",
+      "repository": "https://github.com/tokio-rs/tls"
+    },
+    {
       "name": "tokio-util",
       "version": "0.7.18",
       "license": "MIT",
@@ -4711,6 +5131,12 @@
       "version": "1.23.3",
       "license": "Apache-2.0 OR MIT",
       "repository": "https://github.com/uuid-rs/uuid"
+    },
+    {
+      "name": "vcpkg",
+      "version": "0.2.15",
+      "license": "MIT/Apache-2.0",
+      "repository": "https://github.com/mcgoo/vcpkg-rs"
     },
     {
       "name": "version_check",
@@ -5239,6 +5665,12 @@
       "version": "0.1.7",
       "license": "Unicode-3.0",
       "repository": "https://github.com/unicode-org/icu4x"
+    },
+    {
+      "name": "zeroize",
+      "version": "1.9.0",
+      "license": "Apache-2.0 OR MIT",
+      "repository": "https://github.com/RustCrypto/utils"
     },
     {
       "name": "zerotrie",
