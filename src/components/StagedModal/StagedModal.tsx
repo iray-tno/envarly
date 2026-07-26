@@ -21,6 +21,7 @@ interface StagedModalProps {
   progress: { index: number; total: number } | null;
   log: ApplyProgressEvent[];
   onApply: (takeSnapshot: boolean) => void;
+  onDiscardAll: () => void;
   onClose: () => void;
 }
 
@@ -31,6 +32,7 @@ export function StagedModal({
   progress,
   log,
   onApply,
+  onDiscardAll,
   onClose,
 }: StagedModalProps) {
   const { t } = useI18n();
@@ -177,13 +179,27 @@ export function StagedModal({
             {error}
           </p>
         )}
-        <div className="flex gap-2 justify-end">
-          <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>
-            {t("staged.cancel")}
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            variant="ghost"
+            size="md"
+            onClick={() => {
+              onDiscardAll();
+              onClose();
+            }}
+            disabled={busy}
+            className="text-danger"
+          >
+            {t("header.discard_all")}
           </Button>
-          <Button variant="primary" size="md" onClick={() => onApply(true)} disabled={busy}>
-            {busy ? t("staged.applying") : t("staged.apply", { count: diff.length })}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="md" onClick={onClose} disabled={busy}>
+              {t("staged.cancel")}
+            </Button>
+            <Button variant="primary" size="md" onClick={() => onApply(true)} disabled={busy}>
+              {busy ? t("staged.applying") : t("staged.apply", { count: diff.length })}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

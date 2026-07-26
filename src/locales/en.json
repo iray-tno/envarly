@@ -30,6 +30,8 @@
     "refresh": "Refresh",
     "apply_staged_one": "Apply {{count}} staged change",
     "apply_staged_other": "Apply {{count}} staged changes",
+    "staged_count_one": "{{count}} staged",
+    "staged_count_other": "{{count}} staged",
     "discard_all": "Discard all",
     "external_changes_one": "{{count}} external change",
     "external_changes_other": "{{count}} external changes",
