@@ -56,7 +56,9 @@ export function ImportExportPanel({ onStage }: Props) {
           </div>
         </div>
         {status && (
-          <p className={cn("mt-2 text-xs", status.ok ? "text-success" : "text-danger")}>{status.msg}</p>
+          <p className={cn("mt-2 text-xs", status.ok ? "text-success" : "text-danger")}>
+            {status.msg}
+          </p>
         )}
       </div>
 

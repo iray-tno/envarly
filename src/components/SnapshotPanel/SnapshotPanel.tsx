@@ -56,9 +56,11 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
 
   return (
     <>
+      {/* mr-2 (with no explicit width, so it shrinks to absorb the margin) gives the
+          scrollbar the same breathing room from the edge as the sidebar's list. */}
       <div
         data-testid="snapshot-panel-scroll"
-        className="h-full min-h-0 w-full px-5 py-5 flex flex-col gap-4 overflow-y-auto"
+        className="h-full min-h-0 mr-2 px-5 py-5 flex flex-col gap-4 overflow-y-auto"
       >
         <div>
           <h2 className="text-sm font-semibold text-fg mb-1">{t("snapshot.title")}</h2>
@@ -66,16 +68,25 @@ export function SnapshotPanel({ onStageSnapshot }: Props) {
         </div>
 
         <div className="flex gap-2">
-          <TextInput
-            label="Snapshot label"
-            labelHidden
-            placeholder={t("snapshot.label_placeholder")}
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            className="flex-1"
-          />
-          <Button variant="primary" size="md" onClick={handleCreate} disabled={busy}>
+          <div className="flex-1 min-w-0">
+            <TextInput
+              label="Snapshot label"
+              labelHidden
+              placeholder={t("snapshot.label_placeholder")}
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+              className="w-full"
+            />
+          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleCreate}
+            disabled={busy}
+            // border-transparent matches TextInput's 1px border so both controls share the same height
+            className="shrink-0 whitespace-nowrap border border-transparent"
+          >
             {busy && !previewing ? t("snapshot.saving") : t("snapshot.save")}
           </Button>
         </div>

@@ -90,7 +90,8 @@
     "sort_staged": "Staged first",
     "loading": "Loading…",
     "empty": "No variables found",
-    "new_var": "New variable"
+    "new_var": "New variable",
+    "resize": "Resize sidebar"
   },
   "new_var": {
     "name": "Name",
@@ -204,6 +205,7 @@
   },
   "snapshot": {
     "title": "Snapshots",
+    "resize": "Resize snapshots panel",
     "description": "Save the current state of all environment variables. Preview and restore any snapshot.",
     "confirm_legacy_restore": "This snapshot does not include registry types. Existing variables will keep their current type and new variables will use automatic detection. Continue?",
     "label_placeholder": "Snapshot label (optional)…",

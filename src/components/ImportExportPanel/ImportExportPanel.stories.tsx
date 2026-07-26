@@ -73,8 +73,7 @@ const withStoryApi: Story["decorators"] = [
     api.getEnvVars = async () => storyVars;
     api.getRegistrySnapshot = async () => storySnapshot;
     api.exportVars = async () => "C:\\Users\\tanao\\Downloads\\envarly-20260712.json";
-    api.exportCustomVars = async () =>
-      "C:\\Users\\tanao\\Downloads\\envarly-custom-20260712.json";
+    api.exportCustomVars = async () => "C:\\Users\\tanao\\Downloads\\envarly-custom-20260712.json";
     api.parseImport = async () => storySnapshot;
     return <Story />;
   },

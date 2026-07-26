@@ -1,15 +1,24 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
+import { useResizableWidth } from "../../hooks/useResizableWidth";
 import type { StagedChange } from "../../hooks/useStaged";
 import { stagedKey } from "../../hooks/useStaged";
 import { cn } from "../../lib/cn";
 import { resolveSecret } from "../../lib/secrets";
 import type { EnvVar, VarScope } from "../../types";
 import { Icon } from "../ui/Icon";
+import { ResizeHandle } from "../ui/ResizeHandle";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { Select } from "../ui/Select";
 import { TextInput } from "../ui/TextInput";
 import { SidebarRow } from "./SidebarRow";
+
+const SIDEBAR_WIDTH = {
+  storageKey: "envarly-sidebar-width",
+  defaultWidth: 300,
+  min: 260,
+  max: 480,
+} as const;
 
 interface Props {
   vars: EnvVar[];
@@ -26,6 +35,7 @@ type SortOrder = "name-asc" | "name-desc" | "scope" | "staged";
 
 export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged }: Props) {
   const { t } = useI18n();
+  const { width, isDragging, handleProps } = useResizableWidth({ ...SIDEBAR_WIDTH, side: "left" });
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
   const [secretsOnly, setSecretsOnly] = useState(false);
@@ -118,7 +128,10 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
   );
 
   return (
-    <aside className="w-[300px] shrink-0 flex flex-col bg-panel border-r border-rim overflow-hidden">
+    <aside
+      style={{ width }}
+      className="relative shrink-0 flex flex-col bg-panel border-r border-rim overflow-hidden"
+    >
       <div className="px-3 pt-3 pb-2">
         <TextInput
           label="Search"
@@ -137,7 +150,8 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
           options={scopeOptions}
           value={scopeFilter}
           onChange={setScopeFilter}
-          className="w-full [&>button]:flex-1 [&>button]:justify-center"
+          stretch
+          className="w-full"
         />
       </div>
 
@@ -171,7 +185,8 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto py-1">
+      {/* mr-2 keeps the scrollbar clear of the resize handle's hit area at the right edge */}
+      <div className="flex-1 overflow-y-auto py-1 mr-2">
         {loading && <p className="text-center text-dim text-sm py-8">{t("sidebar.loading")}</p>}
         {!loading && sorted.length === 0 && (
           <p className="text-center text-dim text-sm py-8">{t("sidebar.empty")}</p>
@@ -216,6 +231,16 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
           {t("sidebar.new_var")}
         </button>
       </div>
+
+      <ResizeHandle
+        edge="right"
+        isDragging={isDragging}
+        width={width}
+        min={SIDEBAR_WIDTH.min}
+        max={SIDEBAR_WIDTH.max}
+        aria-label={t("sidebar.resize")}
+        handleProps={handleProps}
+      />
     </aside>
   );
 }

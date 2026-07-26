@@ -42,7 +42,13 @@ describe("useDiff", () => {
     const setDialog = vi.fn();
     const { result } = renderHook(() => useDiff(refresh, setDialog));
 
-    const added: DiffEntry = { kind: "added", name: "NEW_VAR", scope: "User", value: "x", valueKind: "String" };
+    const added: DiffEntry = {
+      kind: "added",
+      name: "NEW_VAR",
+      scope: "User",
+      value: "x",
+      valueKind: "String",
+    };
     await act(async () => {
       await result.current.handleDiffApply([], [added]);
     });
@@ -75,7 +81,13 @@ describe("useDiff", () => {
     const setDialog = vi.fn();
     const { result } = renderHook(() => useDiff(refresh, setDialog));
 
-    const added: DiffEntry = { kind: "added", name: "NEW_VAR", scope: "User", value: "x", valueKind: "String" };
+    const added: DiffEntry = {
+      kind: "added",
+      name: "NEW_VAR",
+      scope: "User",
+      value: "x",
+      valueKind: "String",
+    };
     await act(async () => {
       await result.current.handleDiffApply([], [added]);
     });

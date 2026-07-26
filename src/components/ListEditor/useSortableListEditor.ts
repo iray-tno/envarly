@@ -1,4 +1,4 @@
-import { type DragEndEvent } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
