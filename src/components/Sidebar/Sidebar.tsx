@@ -185,7 +185,8 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto py-1">
+      {/* mr-2 keeps the scrollbar clear of the resize handle's hit area at the right edge */}
+      <div className="flex-1 overflow-y-auto py-1 mr-2">
         {loading && <p className="text-center text-dim text-sm py-8">{t("sidebar.loading")}</p>}
         {!loading && sorted.length === 0 && (
           <p className="text-center text-dim text-sm py-8">{t("sidebar.empty")}</p>
