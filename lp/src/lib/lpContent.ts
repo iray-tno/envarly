@@ -2,7 +2,7 @@ export const GITHUB_URL = 'https://github.com/iray-tno/envarly';
 export const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest';
 export const STORYBOOK_URL = '/envarly/storybook/';
 export const REPORTS_URL = '/envarly/reports/';
-export const VERSION = '1.3.0';
+export const VERSION = '1.4.0';
 
 export type LandingCopy = {
   lang: 'en' | 'ja';
@@ -130,6 +130,16 @@ export const enCopy: LandingCopy = {
       title: 'Import / Export',
       desc: 'Read and write .json and .reg formats, plus export to PowerShell, DSC, and Ansible-friendly files. Preview before any write.',
     },
+    {
+      icon: '↔',
+      title: 'Resizable panels',
+      desc: 'Drag the sidebar and snapshots panel to the width you want. Sizes are remembered across restarts.',
+    },
+    {
+      icon: '🔎',
+      title: 'Check command',
+      desc: "Find out why a command isn't found — searches the effective PATH for a name or exe path and flags shadowed duplicates.",
+    },
   ],
   audience: {
     heading: 'Who is it for?',
@@ -224,6 +234,16 @@ export const jaCopy: LandingCopy = {
       icon: '⇅',
       title: 'インポート / エクスポート',
       desc: '.json と .reg 形式の読み書きに加えて、PowerShell、DSC、Ansible 向けの形式へエクスポートできます。書き込み前にプレビューできます。',
+    },
+    {
+      icon: '↔',
+      title: 'パネルの幅を変更',
+      desc: 'サイドバーとスナップショットパネルの幅をドラッグで調整できます。次回起動時も幅を記憶します。',
+    },
+    {
+      icon: '🔎',
+      title: 'コマンドを調べる',
+      desc: 'コマンドが見つからない理由を調査。実効PATHをコマンド名やexeパスで検索し、シャドーイングされた重複も検出します。',
     },
   ],
   audience: {
