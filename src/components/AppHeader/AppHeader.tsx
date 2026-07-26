@@ -3,7 +3,9 @@ import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
 import type { UpdateInfo } from "../../types";
 import { Button } from "../ui/Button";
+import { Dropdown } from "../ui/Dropdown";
 import { Icon } from "../ui/Icon";
+import { IconButton } from "../ui/IconButton";
 import { Select } from "../ui/Select";
 
 interface AppHeaderProps {
@@ -49,7 +51,7 @@ export function AppHeader({
 
   return (
     <header
-      className="flex items-center gap-2 h-13 px-5 bg-panel border-b border-rim shrink-0"
+      className="@container flex items-center gap-2 h-13 px-5 bg-panel border-b border-rim shrink-0"
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
       <div
@@ -128,38 +130,92 @@ export function AppHeader({
             {t("header.update_available", { version: updateInfo.version })}
           </Button>
         )}
-        <Button
-          variant="ghost"
-          size="xs"
-          icon="external-link"
-          iconPosition="right"
-          onClick={() => openUrl("https://github.com/iray-tno/envarly")}
-          title="View on GitHub"
-        >
-          GitHub
-        </Button>
-        <div className="flex items-center gap-1 text-xs text-dim">
-          <Icon name="globe" size={14} className="text-dim" />
-          <Select
-            aria-label="Language"
-            value={language}
-            onValueChange={setLanguage}
-            options={languageOptions}
-            density="compact"
-            className="text-xs"
+        <div className="hidden @5xl:flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="xs"
+            icon="external-link"
+            iconPosition="right"
+            onClick={() => openUrl("https://github.com/iray-tno/envarly")}
+            title="View on GitHub"
+          >
+            GitHub
+          </Button>
+          <div className="flex items-center gap-1 text-xs text-dim">
+            <Icon name="globe" size={14} className="text-dim" />
+            <Select
+              aria-label="Language"
+              value={language}
+              onValueChange={setLanguage}
+              options={languageOptions}
+              density="compact"
+              className="text-xs"
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="xs"
+            icon={theme === "dark" ? "sun" : "moon"}
+            onClick={onToggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           />
+          <Button variant="ghost" size="xs" onClick={onLicenses} className="text-dim">
+            {t("header.licenses")}
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="xs"
-          icon={theme === "dark" ? "sun" : "moon"}
-          onClick={onToggleTheme}
-          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        />
-        <Button variant="ghost" size="xs" onClick={onLicenses} className="text-dim">
-          {t("header.licenses")}
-        </Button>
+
+        <div className="@5xl:hidden">
+          <Dropdown
+            align="right"
+            aria-label={t("header.more_options")}
+            trigger={(triggerProps) => (
+              <IconButton
+                {...triggerProps}
+                icon="more"
+                aria-label={t("header.more_options")}
+                title={t("header.more_options")}
+                data-testid="header-more-trigger"
+              />
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => openUrl("https://github.com/iray-tno/envarly")}
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-muted hover:bg-hover hover:text-fg"
+            >
+              <Icon name="external-link" size={14} />
+              GitHub
+            </button>
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <Icon name="globe" size={14} className="text-dim shrink-0" />
+              <Select
+                aria-label="Language"
+                value={language}
+                onValueChange={setLanguage}
+                options={languageOptions}
+                density="compact"
+                containerClassName="flex-1"
+                className="w-full"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-muted hover:bg-hover hover:text-fg"
+            >
+              <Icon name={theme === "dark" ? "sun" : "moon"} size={14} />
+              {theme === "dark" ? t("header.light_mode") : t("header.dark_mode")}
+            </button>
+            <button
+              type="button"
+              onClick={onLicenses}
+              className="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-muted hover:bg-hover hover:text-fg"
+            >
+              {t("header.licenses")}
+            </button>
+          </Dropdown>
+        </div>
       </div>
     </header>
   );
