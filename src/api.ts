@@ -8,6 +8,7 @@ import type {
   EnvSnapshot,
   EnvValueKind,
   EnvVar,
+  LocalAccount,
   SnapshotMeta,
   UnsupportedEnvValue,
   UpdateInfo,
@@ -53,6 +54,13 @@ export interface EnvarlyApi {
   getPathProposal: (scope: "User" | "System") => Promise<string | null>;
   checkCommand: (input: string) => Promise<CheckCommandResult>;
   checkForUpdate: () => Promise<UpdateInfo | null>;
+  /** Local accounts (other than the current one) that can be selected for
+   * editing when running elevated. */
+  listLocalAccounts: () => Promise<LocalAccount[]>;
+  /** Switch the active other-user account; `null` deselects. Callers must
+   * re-fetch vars/snapshot/path-status afterward — this alone doesn't. */
+  selectAccount: (sid: string | null) => Promise<LocalAccount | null>;
+  getSelectedAccount: () => Promise<LocalAccount | null>;
   /**
    * Subscribe to per-variable progress while `applyEnvChanges` runs. Resolves
    * once the listener is actually registered — callers must await this before
@@ -88,6 +96,9 @@ const normalApi: EnvarlyApi = {
   getPathProposal: (scope) => invoke<string | null>("get_path_proposal", { scope }),
   checkCommand: (input) => invoke<CheckCommandResult>("check_command", { input }),
   checkForUpdate: () => invoke<UpdateInfo | null>("check_for_update"),
+  listLocalAccounts: () => invoke<LocalAccount[]>("list_local_accounts"),
+  selectAccount: (sid) => invoke<LocalAccount | null>("select_account", { sid }),
+  getSelectedAccount: () => invoke<LocalAccount | null>("get_selected_account"),
   onApplyProgress: async (callback) =>
     listen<ApplyProgressEvent>("apply-progress", (event) => callback(event.payload)),
 };
@@ -153,5 +164,8 @@ export const api: EnvarlyApi = {
   getPathProposal: async (scope) => (await getApi()).getPathProposal(scope),
   checkCommand: async (input) => (await getApi()).checkCommand(input),
   checkForUpdate: async () => (await getApi()).checkForUpdate(),
+  listLocalAccounts: async () => (await getApi()).listLocalAccounts(),
+  selectAccount: async (sid) => (await getApi()).selectAccount(sid),
+  getSelectedAccount: async () => (await getApi()).getSelectedAccount(),
   onApplyProgress: async (callback) => (await getApi()).onApplyProgress(callback),
 };

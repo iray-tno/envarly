@@ -10,14 +10,24 @@ import { Select } from "../ui/Select";
 interface NewVarModalProps {
   vars: EnvVar[];
   elevated: boolean;
+  /** "User" normally; "OtherUser" while another account is selected. */
+  personalScope: VarScope;
+  personalScopeLabel?: string;
   onStage: (name: string, scope: VarScope, value: string, valueKind: EnvValueKindSelection) => void;
   onClose: () => void;
 }
 
-export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalProps) {
+export function NewVarModal({
+  vars,
+  elevated,
+  personalScope,
+  personalScopeLabel,
+  onStage,
+  onClose,
+}: NewVarModalProps) {
   const { t } = useI18n();
   const [name, setName] = useState("");
-  const [scope, setScope] = useState<VarScope>("User");
+  const [scope, setScope] = useState<VarScope>(personalScope);
   const [value, setValue] = useState("");
   const [valueKind, setValueKind] = useState<EnvValueKindSelection>("Auto");
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -101,7 +111,10 @@ export function NewVarModal({ vars, elevated, onStage, onClose }: NewVarModalPro
         <SegmentedControl
           aria-label="Variable scope"
           options={[
-            { value: "User" as VarScope, label: "User" },
+            {
+              value: personalScope,
+              label: personalScope === "OtherUser" ? (personalScopeLabel ?? personalScope) : "User",
+            },
             {
               value: "System" as VarScope,
               label: elevated ? "System" : t("new_var.system_admin"),

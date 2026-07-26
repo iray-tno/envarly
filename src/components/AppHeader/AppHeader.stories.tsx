@@ -14,6 +14,10 @@ const meta: Meta<typeof AppHeader> = {
     snapshotsOpen: false,
     theme: "dark",
     updateInfo: null,
+    accounts: [],
+    selectedAccount: null,
+    onSelectAccount: () => {},
+    accountSwitchDisabled: false,
   },
   argTypes: {
     loading: { control: "boolean" },
@@ -52,6 +56,22 @@ export const Loading: Story = {
 
 export const UpdateAvailable: Story = {
   args: { updateInfo: { version: "1.3.0", url: "https://github.com/iray-tno/envarly/releases" } },
+};
+
+export const WithAccounts: Story = {
+  args: {
+    elevated: true,
+    accounts: [
+      { sid: "S-1-5-21-1", username: "alice", hasProfile: true, currentlyLoggedIn: true },
+      { sid: "S-1-5-21-2", username: "bob", hasProfile: true, currentlyLoggedIn: false },
+    ],
+    selectedAccount: {
+      sid: "S-1-5-21-1",
+      username: "alice",
+      hasProfile: true,
+      currentlyLoggedIn: true,
+    },
+  },
 };
 
 /** Forces the header below the lg (1024px) breakpoint, where GitHub/Language/

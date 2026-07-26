@@ -90,8 +90,10 @@ export function DetailPanel({
       .forEach((v) => {
         lookup.set(v.name.toUpperCase(), v.value);
       });
+    // "User" or "OtherUser" — whichever personal scope is currently active
+    // (switch mode never shows both at once).
     allVars
-      .filter((v) => v.scope === "User")
+      .filter((v) => v.scope === "User" || v.scope === "OtherUser")
       .forEach((v) => {
         lookup.set(v.name.toUpperCase(), v.value);
       });
@@ -157,9 +159,16 @@ export function DetailPanel({
   const readOnly = variable.scope === "System" && !elevated;
   const description = lookupEnvDescription(variable.name);
   const isPathVar = variable.name.toUpperCase() === "PATH";
-  const pathInEnvForScope = variable.scope === "System" ? systemPathInEnv : userPathInEnv;
+  // PATH tooling doesn't support the OtherUser scope yet (a separate,
+  // deferred follow-up) — treat it as "already present" so the hint never
+  // offers an action that would target the wrong hive.
+  const pathInEnvForScope =
+    variable.scope === "System" ? systemPathInEnv : variable.scope === "User" ? userPathInEnv : true;
   const showAddToPathHint =
-    isPathVar && !pathInEnvForScope && !isStagedDelete && (variable.scope === "User" || elevated);
+    isPathVar &&
+    !pathInEnvForScope &&
+    !isStagedDelete &&
+    (variable.scope === "User" || (variable.scope === "System" && elevated));
 
   const editorLabel =
     effectiveSeparator === ";"

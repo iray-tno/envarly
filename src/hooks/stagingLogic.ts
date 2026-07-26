@@ -198,10 +198,14 @@ export function computeStageSnapshot(
   for (const [name, value] of Object.entries(snap.system)) {
     stageValue(name, "System", value);
   }
+  for (const [name, value] of Object.entries(snap.otherUser ?? {})) {
+    stageValue(name, "OtherUser", value);
+  }
 
   // Stage deletes for registry vars not present in the snapshot
   for (const v of registryVars) {
-    const inSnap = v.scope === "User" ? snap.user : snap.system;
+    const inSnap =
+      v.scope === "User" ? snap.user : v.scope === "System" ? snap.system : (snap.otherUser ?? {});
     if (!(v.name in inSnap)) {
       const k = stagedKey(v.name, v.scope);
       next.set(k, {

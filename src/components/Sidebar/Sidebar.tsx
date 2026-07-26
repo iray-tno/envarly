@@ -27,14 +27,33 @@ interface Props {
   onCreateNew: () => void;
   loading: boolean;
   staged: Map<string, StagedChange>;
+  /** "User" normally; "OtherUser" while another account is selected — the
+   * personal-scope tab swaps to show that account's variables instead of
+   * the current user's (switch mode, never both at once). */
+  personalScope: "User" | "OtherUser";
+  /** Display label for the personal-scope tab when it's "OtherUser" (e.g.
+   * the selected account's username). Ignored when personalScope is "User". */
+  personalScopeLabel?: string;
 }
 
-const SCOPES = ["All", "User", "System"] as const;
-type ScopeFilter = (typeof SCOPES)[number];
+type ScopeFilter = "All" | VarScope;
 type SortOrder = "name-asc" | "name-desc" | "scope" | "staged";
 
-export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged }: Props) {
+export function Sidebar({
+  vars,
+  selected,
+  onSelect,
+  onCreateNew,
+  loading,
+  staged,
+  personalScope,
+  personalScopeLabel,
+}: Props) {
   const { t } = useI18n();
+  const scopeTabs = useMemo(
+    () => ["All", personalScope, "System"] as const,
+    [personalScope],
+  );
   const { width, isDragging, handleProps } = useResizableWidth({ ...SIDEBAR_WIDTH, side: "left" });
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
@@ -84,16 +103,13 @@ export function Sidebar({ vars, selected, onSelect, onCreateNew, loading, staged
     }
   }, [filtered, sortBy, staged]);
 
-  const counts: Record<VarScope, number> = {
-    User: vars.filter((v) => v.scope === "User").length,
-    System: vars.filter((v) => v.scope === "System").length,
-  };
+  const countFor = (scope: VarScope) => vars.filter((v) => v.scope === scope).length;
   const secretCount = vars.filter((v) => resolveSecret(v.name, v.value) !== null).length;
 
-  const scopeOptions = SCOPES.map((s) => ({
+  const scopeOptions = scopeTabs.map((s) => ({
     value: s,
-    label: s,
-    count: s === "All" ? vars.length : counts[s as VarScope],
+    label: s === "OtherUser" ? (personalScopeLabel ?? s) : s,
+    count: s === "All" ? vars.length : countFor(s),
   }));
   const sortOptions = [
     { value: "name-asc", label: t("sidebar.sort_name_asc") },

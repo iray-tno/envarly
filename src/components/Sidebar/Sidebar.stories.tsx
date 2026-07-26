@@ -80,6 +80,7 @@ export const Default: Story = {
         onCreateNew={() => {}}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />
     );
   },
@@ -96,6 +97,7 @@ export const WithStagedChanges: Story = {
         onCreateNew={() => {}}
         loading={false}
         staged={withStaged}
+        personalScope="User"
       />
     );
   },
@@ -109,6 +111,7 @@ export const Loading: Story = {
     onCreateNew: () => {},
     loading: true,
     staged: noStaged,
+    personalScope: "User",
   },
 };
 
@@ -120,6 +123,7 @@ export const Empty: Story = {
     onCreateNew: () => {},
     loading: false,
     staged: noStaged,
+    personalScope: "User",
   },
 };
 
@@ -137,6 +141,7 @@ export const Narrow: Story = {
         onCreateNew={() => {}}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />
     );
   },

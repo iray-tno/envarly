@@ -31,6 +31,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     for (const v of vars) {
@@ -48,6 +49,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     await user.type(screen.getByPlaceholderText("Search variables..."), "JAVA");
@@ -65,6 +67,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     await user.click(screen.getByRole("radio", { name: /^user/i }));
@@ -83,6 +86,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     await user.click(screen.getByText("JAVA_HOME"));
@@ -98,6 +102,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={true}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     expect(screen.getByText("Loading…")).toBeInTheDocument();
@@ -113,6 +118,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     await user.type(screen.getByPlaceholderText("Search variables..."), "ZZZNOMATCH");
@@ -128,6 +134,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     // All=4, User=2, System=2 — no secret chip when secretCount=0
@@ -153,6 +160,7 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     // "GitHub" service badge should appear next to MY_KEY
@@ -174,11 +182,33 @@ describe("Sidebar", () => {
         onCreateNew={vi.fn()}
         loading={false}
         staged={noStaged}
+        personalScope="User"
       />,
     );
     await user.click(screen.getByRole("button", { name: /secrets/i }));
     expect(screen.getByText("AWS_SECRET_ACCESS_KEY")).toBeInTheDocument();
     expect(screen.getByText("GITHUB_TOKEN")).toBeInTheDocument();
     expect(screen.queryByText("JAVA_HOME")).not.toBeInTheDocument();
+  });
+
+  it("swaps the personal-scope tab to the selected account while in switch mode", () => {
+    const otherUserVars: EnvVar[] = [
+      { name: "THEIR_VAR", value: "v", scope: "OtherUser", listSeparator: null },
+      makeVar("WINDIR", "System"),
+    ];
+    render(
+      <Sidebar
+        vars={otherUserVars}
+        selected={null}
+        onSelect={vi.fn()}
+        onCreateNew={vi.fn()}
+        loading={false}
+        staged={noStaged}
+        personalScope="OtherUser"
+        personalScopeLabel="alice"
+      />,
+    );
+    expect(screen.getByRole("radio", { name: /alice/i })).toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: /^user/i })).not.toBeInTheDocument();
   });
 });

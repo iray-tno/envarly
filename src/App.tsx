@@ -9,6 +9,7 @@ import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanelDock } from "./components/SnapshotPanel/SnapshotPanelDock";
 import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
+import { useAccountSwitch } from "./hooks/useAccountSwitch";
 import { useAppInit } from "./hooks/useAppInit";
 import { useApplyStaged } from "./hooks/useApplyStaged";
 import { useDiagnostics } from "./hooks/useDiagnostics";
@@ -79,6 +80,17 @@ export default function App() {
     refresh,
     checkForExternalChanges,
   });
+
+  const { accounts, selectedAccount, handleSelectAccount } = useAccountSwitch({
+    elevated,
+    hasStagedChanges: staged.size > 0,
+    refresh: async () => {
+      await refresh();
+      await checkForExternalChanges();
+      await refreshPathStatus();
+    },
+  });
+  const personalScope = selectedAccount ? "OtherUser" : "User";
 
   useKeyboardShortcuts(undo, redo, localUndoRef);
 
@@ -171,6 +183,10 @@ export default function App() {
           onToggleTheme={toggleTheme}
           onLicenses={() => setDialog("licenses")}
           updateInfo={updateInfo}
+          accounts={accounts}
+          selectedAccount={selectedAccount}
+          onSelectAccount={handleSelectAccount}
+          accountSwitchDisabled={staged.size > 0}
         />
 
         {(elevated ? !systemPathInEnv : !userPathInEnv) && !pathBannerDismissed && (
@@ -201,6 +217,8 @@ export default function App() {
             onCreateNew={() => setDialog("newvar")}
             loading={loading}
             staged={staged}
+            personalScope={personalScope}
+            personalScopeLabel={selectedAccount?.username}
           />
 
           <div className="flex flex-1 overflow-hidden">
@@ -245,6 +263,8 @@ export default function App() {
           onStageImport={handleStageImport}
           effectiveVars={effectiveVars}
           elevated={elevated}
+          personalScope={personalScope}
+          personalScopeLabel={selectedAccount?.username}
           onNewVarStage={handleNewVarStage}
         />
       </div>

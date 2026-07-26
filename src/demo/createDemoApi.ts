@@ -69,6 +69,7 @@ function normalizeSnapshot(snapshot: {
   return {
     user: normalizeValues(snapshot.user),
     system: normalizeValues(snapshot.system),
+    otherUser: null,
   };
 }
 
@@ -248,6 +249,10 @@ export function createDemoApi(
       };
     },
     checkForUpdate: async () => null,
+    // Demo mode has no other-user accounts to switch between.
+    listLocalAccounts: async () => [],
+    selectAccount: async () => null,
+    getSelectedAccount: async () => null,
     onApplyProgress: async () => () => {},
   };
 }

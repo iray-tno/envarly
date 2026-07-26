@@ -1,7 +1,7 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
-import type { UpdateInfo } from "../../types";
+import type { LocalAccount, UpdateInfo } from "../../types";
 import { Button } from "../ui/Button";
 import { Dropdown } from "../ui/Dropdown";
 import { Icon } from "../ui/Icon";
@@ -24,6 +24,10 @@ interface AppHeaderProps {
   onToggleTheme: () => void;
   onLicenses: () => void;
   updateInfo: UpdateInfo | null;
+  accounts: LocalAccount[];
+  selectedAccount: LocalAccount | null;
+  onSelectAccount: (sid: string | null) => void;
+  accountSwitchDisabled: boolean;
 }
 
 export function AppHeader({
@@ -42,8 +46,16 @@ export function AppHeader({
   onToggleTheme,
   onLicenses,
   updateInfo,
+  accounts,
+  selectedAccount,
+  onSelectAccount,
+  accountSwitchDisabled,
 }: AppHeaderProps) {
   const { t, language, setLanguage } = useI18n();
+  const accountOptions = [
+    { value: "", label: t("account_picker.my_variables") },
+    ...accounts.map((a) => ({ value: a.sid, label: a.username })),
+  ];
   const languageOptions = [
     { value: "en", label: "English" },
     { value: "ja", label: "日本語" },
@@ -131,6 +143,18 @@ export function AppHeader({
           </Button>
         )}
         <div className="hidden @5xl:flex items-center gap-2">
+          {accounts.length > 0 && (
+            <Select
+              aria-label={t("account_picker.aria_label")}
+              value={selectedAccount?.sid ?? ""}
+              onValueChange={(v) => onSelectAccount(v || null)}
+              options={accountOptions}
+              density="compact"
+              className="text-xs"
+              disabled={accountSwitchDisabled}
+              title={accountSwitchDisabled ? t("account_picker.disabled_hint") : undefined}
+            />
+          )}
           <div className="flex items-center gap-1 text-xs text-dim">
             <Icon name="globe" size={14} className="text-dim" />
             <Select
@@ -179,6 +203,21 @@ export function AppHeader({
               />
             )}
           >
+            {accounts.length > 0 && (
+              <div className="flex items-center gap-2 px-2 py-1.5">
+                <Select
+                  aria-label={t("account_picker.aria_label")}
+                  value={selectedAccount?.sid ?? ""}
+                  onValueChange={(v) => onSelectAccount(v || null)}
+                  options={accountOptions}
+                  density="compact"
+                  containerClassName="flex-1"
+                  className="w-full"
+                  disabled={accountSwitchDisabled}
+                  title={accountSwitchDisabled ? t("account_picker.disabled_hint") : undefined}
+                />
+              </div>
+            )}
             <div className="flex items-center gap-2 px-2 py-1.5">
               <Icon name="globe" size={14} className="text-dim shrink-0" />
               <Select
