@@ -63,3 +63,13 @@ pub(crate) fn write_path_str(key: &RegKey, value: &str) -> Result<(), EnvarlyErr
     )
     .map_err(EnvarlyError::Registry)
 }
+
+/// Read-only PATH access for the currently-selected other-user account, kept
+/// separate from `open_path_key` (HKCU/HKLM) by design — see `user_hive`'s
+/// module doc for why the two are never unified. `Ok(None)` means no account
+/// is active. Writing "Path" for that account goes through the generic
+/// `VarScope::OtherUser` dispatch in `env_store.rs` like any other variable —
+/// there's no separate write path here.
+pub(crate) fn read_other_user_path() -> Result<Option<String>, EnvarlyError> {
+    crate::user_hive::with_active_environment_key(false, |key| Ok(read_path_str(key)))
+}

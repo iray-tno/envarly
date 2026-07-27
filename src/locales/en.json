@@ -85,6 +85,11 @@
     "meta_original": "Original",
     "confirm_delete": "Stage \"{{name}}\" for deletion from {{scope}} environment?"
   },
+  "account_picker": {
+    "aria_label": "Account",
+    "my_variables": "My variables",
+    "disabled_hint": "Apply or discard staged changes before switching accounts"
+  },
   "sidebar": {
     "search_placeholder": "Search variables...",
     "secret_one": "{{count}} secret",

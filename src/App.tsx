@@ -9,6 +9,7 @@ import { Sidebar } from "./components/Sidebar/Sidebar";
 import { SnapshotPanelDock } from "./components/SnapshotPanel/SnapshotPanelDock";
 import { ThemeContext } from "./context/ThemeContext";
 import { useUndo } from "./contexts/UndoContext";
+import { useAccountSwitch } from "./hooks/useAccountSwitch";
 import { useAppInit } from "./hooks/useAppInit";
 import { useApplyStaged } from "./hooks/useApplyStaged";
 import { useDiagnostics } from "./hooks/useDiagnostics";
@@ -24,7 +25,7 @@ import { useTheme } from "./hooks/useTheme";
 import { useUpdateCheck } from "./hooks/useUpdateCheck";
 import type { DiagnosticAction, EnvironmentDiagnostic } from "./lib/environmentDiagnostics";
 import { stagedToDiff } from "./lib/stagedToDiff";
-import type { EnvVar } from "./types";
+import type { EnvVar, VarScope } from "./types";
 
 type Dialog = "importexport" | "changes" | "staged" | "licenses" | "newvar" | "checkcommand" | null;
 
@@ -56,6 +57,7 @@ export default function App() {
   const {
     userPathInEnv,
     systemPathInEnv,
+    otherUserPathInEnv,
     pathBannerDismissed,
     refreshPathStatus,
     handleStageAddToPath,
@@ -79,6 +81,31 @@ export default function App() {
     refresh,
     checkForExternalChanges,
   });
+
+  const { accounts, selectedAccount, handleSelectAccount } = useAccountSwitch({
+    elevated,
+    hasStagedChanges: staged.size > 0,
+    refresh: async () => {
+      await refresh();
+      await checkForExternalChanges();
+      await refreshPathStatus();
+    },
+  });
+  const personalScope = selectedAccount ? "OtherUser" : "User";
+
+  // While an account is selected, its PATH takes priority over the real
+  // current user's — same "switch mode" rule as the sidebar's personal scope.
+  const pathBannerScope: VarScope | null = selectedAccount
+    ? otherUserPathInEnv === false
+      ? "OtherUser"
+      : null
+    : elevated
+      ? !systemPathInEnv
+        ? "System"
+        : null
+      : !userPathInEnv
+        ? "User"
+        : null;
 
   useKeyboardShortcuts(undo, redo, localUndoRef);
 
@@ -171,12 +198,20 @@ export default function App() {
           onToggleTheme={toggleTheme}
           onLicenses={() => setDialog("licenses")}
           updateInfo={updateInfo}
+          accounts={accounts}
+          selectedAccount={selectedAccount}
+          onSelectAccount={handleSelectAccount}
+          accountSwitchDisabled={staged.size > 0}
         />
 
-        {(elevated ? !systemPathInEnv : !userPathInEnv) && !pathBannerDismissed && (
+        {pathBannerScope && !pathBannerDismissed && (
           <PathBanner
-            scope={elevated ? "System" : "User"}
-            onStageAddToPath={() => handleStageAddToPath(elevated ? "System" : "User")}
+            scopeLabel={
+              pathBannerScope === "OtherUser"
+                ? (selectedAccount?.username ?? pathBannerScope)
+                : pathBannerScope
+            }
+            onStageAddToPath={() => handleStageAddToPath(pathBannerScope)}
             onDismiss={handleDismissPathBanner}
           />
         )}
@@ -201,6 +236,8 @@ export default function App() {
             onCreateNew={() => setDialog("newvar")}
             loading={loading}
             staged={staged}
+            personalScope={personalScope}
+            personalScopeLabel={selectedAccount?.username}
           />
 
           <div className="flex flex-1 overflow-hidden">
@@ -245,6 +282,8 @@ export default function App() {
           onStageImport={handleStageImport}
           effectiveVars={effectiveVars}
           elevated={elevated}
+          personalScope={personalScope}
+          personalScopeLabel={selectedAccount?.username}
           onNewVarStage={handleNewVarStage}
         />
       </div>

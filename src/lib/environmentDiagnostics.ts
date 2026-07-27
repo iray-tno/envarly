@@ -104,9 +104,11 @@ export async function diagnoseEnvironment(
       .filter((variable) => variable.scope === "System")
       .map((variable) => variable.name.toUpperCase()),
   );
+  // "User" or "OtherUser" — whichever personal scope is currently loaded
+  // (switch mode never shows both at once).
   const userNames = new Set(
     vars
-      .filter((variable) => variable.scope === "User")
+      .filter((variable) => variable.scope === "User" || variable.scope === "OtherUser")
       .map((variable) => variable.name.toUpperCase()),
   );
   const pathChecks: Array<{

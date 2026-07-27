@@ -76,6 +76,7 @@ mod tests {
                 ("OS".to_string(), string("Windows_NT")),
             ]
             .into(),
+            other_user: None,
         }
     }
 

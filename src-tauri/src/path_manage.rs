@@ -209,6 +209,14 @@ pub struct PathStatus {
     pub install_dir: String,
     pub user_has_entry: bool,
     pub system_has_entry: bool,
+    /// `None` when no other-user account is currently selected.
+    pub other_user_has_entry: Option<bool>,
+}
+
+fn has_entry(current: &str, dir_lc: &str) -> bool {
+    current
+        .split(';')
+        .any(|p| p.trim().to_lowercase() == dir_lc)
 }
 
 /// Read whether the install dir is currently in User / System PATH.
@@ -220,25 +228,23 @@ pub fn path_status() -> PathStatus {
     let dir_lc = dir.to_lowercase();
 
     let user_has = open_path_key(true, false)
-        .map(|k| {
-            read_path_str(&k)
-                .split(';')
-                .any(|p| p.trim().to_lowercase() == dir_lc)
-        })
+        .map(|k| has_entry(&read_path_str(&k), &dir_lc))
         .unwrap_or(false);
 
     let sys_has = open_path_key(false, false)
-        .map(|k| {
-            read_path_str(&k)
-                .split(';')
-                .any(|p| p.trim().to_lowercase() == dir_lc)
-        })
+        .map(|k| has_entry(&read_path_str(&k), &dir_lc))
         .unwrap_or(false);
+
+    let other_user_has = crate::path_backend::read_other_user_path()
+        .ok()
+        .flatten()
+        .map(|current| has_entry(&current, &dir_lc));
 
     PathStatus {
         install_dir: dir,
         user_has_entry: user_has,
         system_has_entry: sys_has,
+        other_user_has_entry: other_user_has,
     }
 }
 
@@ -251,6 +257,17 @@ pub fn propose_add(user: bool) -> Result<Option<String>, EnvarlyError> {
         .unwrap_or_default();
     let key = open_path_key(user, false)?;
     let current = read_path_str(&key);
+    Ok(compute_add(&current, &dir))
+}
+
+/// Same as `propose_add`, but for the currently-selected other-user account.
+#[cfg(windows)]
+pub fn propose_add_for_other_user() -> Result<Option<String>, EnvarlyError> {
+    let dir = install_dir()
+        .map(|p| p.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    let current = crate::path_backend::read_other_user_path()?
+        .ok_or_else(|| EnvarlyError::OtherUserAccount("no other-user account selected".into()))?;
     Ok(compute_add(&current, &dir))
 }
 

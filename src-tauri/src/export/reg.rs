@@ -111,7 +111,11 @@ pub fn parse_reg(content: &str) -> Result<EnvSnapshot, EnvarlyError> {
         }
     }
 
-    Ok(EnvSnapshot { user, system })
+    Ok(EnvSnapshot {
+        user,
+        system,
+        other_user: None,
+    })
 }
 
 fn reg_logical_lines(content: &str) -> Vec<String> {
@@ -216,6 +220,7 @@ mod tests {
                 ("OS".to_string(), string("Windows_NT")),
             ]
             .into(),
+            other_user: None,
         }
     }
 
@@ -240,6 +245,7 @@ mod tests {
         let snap = EnvSnapshot {
             user: [("X".to_string(), string("C:\\foo\\bar"))].into(),
             system: Default::default(),
+            other_user: None,
         };
         let parsed = parse_reg(&to_reg(&snap, ExportScope::User)).unwrap();
         assert_eq!(parsed.user["X"].value, "C:\\foo\\bar");
@@ -250,6 +256,7 @@ mod tests {
         let snap = EnvSnapshot {
             user: [("X".to_string(), string(r#"say "hello""#))].into(),
             system: Default::default(),
+            other_user: None,
         };
         let parsed = parse_reg(&to_reg(&snap, ExportScope::User)).unwrap();
         assert_eq!(parsed.user["X"].value, r#"say "hello""#);

@@ -7,9 +7,11 @@ import { stagedKey } from "./useStaged";
 interface UsePathStatusResult {
   userPathInEnv: boolean;
   systemPathInEnv: boolean;
+  /** `null` when no other-user account is selected. */
+  otherUserPathInEnv: boolean | null;
   pathBannerDismissed: boolean;
   refreshPathStatus: () => Promise<void>;
-  handleStageAddToPath: (scope: "User" | "System") => Promise<void>;
+  handleStageAddToPath: (scope: VarScope) => Promise<void>;
   handleDismissPathBanner: () => void;
   setActualUserPathInEnv: (v: boolean) => void;
   setActualSystemPathInEnv: (v: boolean) => void;
@@ -21,23 +23,29 @@ export function usePathStatus(
 ): UsePathStatusResult {
   const [actualUserPathInEnv, setActualUserPathInEnv] = useState(true);
   const [actualSystemPathInEnv, setActualSystemPathInEnv] = useState(true);
+  const [actualOtherUserPathInEnv, setActualOtherUserPathInEnv] = useState<boolean | null>(null);
   const [pathBannerDismissed, setPathBannerDismissed] = useState(
     () => localStorage.getItem("envarly.pathBannerDismissed") === "1",
   );
 
   const userPathInEnv = actualUserPathInEnv || staged.has(stagedKey("Path", "User"));
   const systemPathInEnv = actualSystemPathInEnv || staged.has(stagedKey("Path", "System"));
+  const otherUserPathInEnv =
+    actualOtherUserPathInEnv === null
+      ? null
+      : actualOtherUserPathInEnv || staged.has(stagedKey("Path", "OtherUser"));
 
   const refreshPathStatus = useCallback(async () => {
     try {
       const ps = await api.getPathStatus();
       setActualUserPathInEnv(ps.userHasEntry);
       setActualSystemPathInEnv(ps.systemHasEntry);
+      setActualOtherUserPathInEnv(ps.otherUserHasEntry);
     } catch {}
   }, []);
 
   const handleStageAddToPath = useCallback(
-    async (scope: "User" | "System") => {
+    async (scope: VarScope) => {
       try {
         const proposed = await api.getPathProposal(scope);
         if (proposed === null) return;
@@ -57,6 +65,7 @@ export function usePathStatus(
   return {
     userPathInEnv,
     systemPathInEnv,
+    otherUserPathInEnv,
     pathBannerDismissed,
     refreshPathStatus,
     handleStageAddToPath,

@@ -85,6 +85,11 @@
     "meta_original": "元の値",
     "confirm_delete": "{{scope}} 環境の \"{{name}}\" を削除としてステージしますか？"
   },
+  "account_picker": {
+    "aria_label": "アカウント",
+    "my_variables": "自分の変数",
+    "disabled_hint": "アカウントを切り替える前に、ステージ済みの変更を適用または破棄してください"
+  },
   "sidebar": {
     "search_placeholder": "変数を検索...",
     "secret_one": "{{count}} 件の機密情報",

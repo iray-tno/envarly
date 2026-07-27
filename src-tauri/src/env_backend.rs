@@ -61,6 +61,18 @@ impl EnvBackend for WinregBackend {
     fn broadcast_changes(&self) {
         broadcast_settings_change();
     }
+
+    fn read_other_user(&self) -> Result<Option<HashMap<String, EnvValue>>, EnvarlyError> {
+        crate::user_hive::read_other_user_vars()
+    }
+
+    fn write_other_user(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError> {
+        crate::user_hive::write_other_user_var(name, value)
+    }
+
+    fn delete_other_user(&self, name: &str) -> Result<(), EnvarlyError> {
+        crate::user_hive::delete_other_user_var(name)
+    }
 }
 
 pub fn read_unsupported_values() -> Result<Vec<UnsupportedEnvValue>, EnvarlyError> {
@@ -73,6 +85,7 @@ pub fn read_unsupported_values() -> Result<Vec<UnsupportedEnvValue>, EnvarlyErro
         let scope_order = |scope: &VarScope| match scope {
             VarScope::User => 0,
             VarScope::System => 1,
+            VarScope::OtherUser => 2,
         };
         scope_order(&a.scope)
             .cmp(&scope_order(&b.scope))
@@ -81,7 +94,7 @@ pub fn read_unsupported_values() -> Result<Vec<UnsupportedEnvValue>, EnvarlyErro
     Ok(values)
 }
 
-fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, EnvValue)> + '_ {
+pub(crate) fn iter_string_values(key: &RegKey) -> impl Iterator<Item = (String, EnvValue)> + '_ {
     key.enum_values().filter_map(|v| {
         let (name, val) = v.ok()?;
         let kind = match val.vtype {
@@ -110,7 +123,7 @@ fn unsupported_values(
     })
 }
 
-fn to_reg_value(value: &EnvValue) -> Result<RegValue<'_>, EnvarlyError> {
+pub(crate) fn to_reg_value(value: &EnvValue) -> Result<RegValue<'_>, EnvarlyError> {
     let kind = value.kind.ok_or_else(|| {
         EnvarlyError::InvalidInput("registry type must be resolved before writing".into())
     })?;

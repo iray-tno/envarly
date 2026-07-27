@@ -134,6 +134,7 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
                         let tag = match v.scope {
                             VarScope::User => "user",
                             VarScope::System => "sys ",
+                            VarScope::OtherUser => "other",
                         };
                         println!("[{}] {}={}", tag, v.name, v.value);
                     }

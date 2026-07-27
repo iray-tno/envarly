@@ -45,6 +45,8 @@ interface Props {
   ) => void;
   effectiveVars: EnvVar[];
   elevated: boolean;
+  personalScope: VarScope;
+  personalScopeLabel?: string;
   onNewVarStage: (
     name: string,
     scope: VarScope,
@@ -72,6 +74,8 @@ export function AppModals({
   onStageImport,
   effectiveVars,
   elevated,
+  personalScope,
+  personalScopeLabel,
   onNewVarStage,
 }: Props) {
   const { t } = useI18n();
@@ -140,6 +144,8 @@ export function AppModals({
         <NewVarModal
           vars={effectiveVars}
           elevated={elevated}
+          personalScope={personalScope}
+          personalScopeLabel={personalScopeLabel}
           onStage={onNewVarStage}
           onClose={() => setDialog(null)}
         />

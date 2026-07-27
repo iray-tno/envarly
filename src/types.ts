@@ -1,4 +1,4 @@
-export type VarScope = "User" | "System";
+export type VarScope = "User" | "System" | "OtherUser";
 export type EnvValueKind = "String" | "ExpandString";
 export type EnvValueKindSelection = "Auto" | EnvValueKind;
 
@@ -26,6 +26,17 @@ export interface UnsupportedEnvValue {
 export interface EnvSnapshot {
   user: Record<string, SnapshotValue>;
   system: Record<string, SnapshotValue>;
+  /** Present only when an other-user account was active when this was taken. */
+  otherUser: Record<string, SnapshotValue> | null;
+}
+
+/** A local Windows account, other than the current one, that can be selected
+ * for editing when running elevated. */
+export interface LocalAccount {
+  sid: string;
+  username: string;
+  hasProfile: boolean;
+  currentlyLoggedIn: boolean;
 }
 
 export interface SnapshotMeta {

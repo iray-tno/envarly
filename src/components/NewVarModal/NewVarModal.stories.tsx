@@ -9,6 +9,7 @@ const meta: Meta<typeof NewVarModal> = {
   args: {
     vars: [],
     elevated: false,
+    personalScope: "User",
     onStage: fn(),
     onClose: fn(),
   },
@@ -36,5 +37,13 @@ export const WithExistingVar: Story = {
         listSeparator: null,
       },
     ],
+  },
+};
+
+export const OtherUserSelected: Story = {
+  args: {
+    elevated: true,
+    personalScope: "OtherUser",
+    personalScopeLabel: "alice",
   },
 };

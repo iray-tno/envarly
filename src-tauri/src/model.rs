@@ -8,6 +8,8 @@ use std::collections::HashMap;
 pub enum VarScope {
     User,
     System,
+    /// Another local account's per-user scope, selected via `select_account`.
+    OtherUser,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -50,6 +52,11 @@ pub struct EnvVar {
 pub struct EnvSnapshot {
     pub user: HashMap<String, EnvValue>,
     pub system: HashMap<String, EnvValue>,
+    /// Present only when an other-user account was active when this snapshot
+    /// was taken. `#[serde(default)]` keeps pre-existing on-disk snapshots
+    /// (without this field) readable.
+    #[serde(default)]
+    pub other_user: Option<HashMap<String, EnvValue>>,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]

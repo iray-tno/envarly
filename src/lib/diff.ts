@@ -29,13 +29,21 @@ function snapshotValue(value: SnapshotValue | string): SnapshotValue {
   return typeof value === "string" ? { value, kind: null } : value;
 }
 
+function recordFor(snapshot: EnvSnapshot, scope: VarScope): Record<string, SnapshotValue> {
+  if (scope === "User") return snapshot.user;
+  if (scope === "System") return snapshot.system;
+  return snapshot.otherUser ?? {};
+}
+
+const SCOPES: readonly VarScope[] = ["User", "System", "OtherUser"];
+
 /** Compare two snapshots and return a sorted list of differences. */
 export function computeDiff(baseline: EnvSnapshot, current: EnvSnapshot): DiffEntry[] {
   const entries: DiffEntry[] = [];
 
-  for (const scope of ["User", "System"] as const) {
-    const old = scope === "User" ? baseline.user : baseline.system;
-    const cur = scope === "User" ? current.user : current.system;
+  for (const scope of SCOPES) {
+    const old = recordFor(baseline, scope);
+    const cur = recordFor(current, scope);
 
     for (const name of Object.keys(cur)) {
       if (!(name in old)) {
@@ -94,9 +102,17 @@ export function snapshotsEqual(a: EnvSnapshot, b: EnvSnapshot): boolean {
 export function applyAccepted(baseline: EnvSnapshot, accepted: DiffEntry[]): EnvSnapshot {
   const user = { ...baseline.user };
   const system = { ...baseline.system };
+  const otherUser = baseline.otherUser ? { ...baseline.otherUser } : null;
+
+  const targetFor = (scope: VarScope) => {
+    if (scope === "User") return user;
+    if (scope === "System") return system;
+    return otherUser;
+  };
 
   for (const entry of accepted) {
-    const target = entry.scope === "User" ? user : system;
+    const target = targetFor(entry.scope);
+    if (!target) continue; // no other-user baseline bucket to merge into
     if (entry.kind === "added") {
       target[entry.name] = { value: entry.value, kind: entry.valueKind };
     } else if (entry.kind === "removed") {
@@ -106,5 +122,5 @@ export function applyAccepted(baseline: EnvSnapshot, accepted: DiffEntry[]): Env
     }
   }
 
-  return { user, system };
+  return { user, system, otherUser };
 }
