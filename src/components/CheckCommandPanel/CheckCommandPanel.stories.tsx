@@ -20,8 +20,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Locale-agnostic: the test environment defaults to Japanese, so play functions
-// must not match on translated text — use data-testid/data-status hooks instead.
+// Query elements using data-testid and data-status attributes to remain locale-independent.
 async function typeAndCheck(canvasElement: HTMLElement, query: string) {
   const canvas = within(canvasElement);
   const input = await canvas.findByTestId("check-command-input");
