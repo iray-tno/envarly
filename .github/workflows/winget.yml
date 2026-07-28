@@ -1,0 +1,33 @@
+name: WinGet Submit
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  winget:
+    name: Submit WinGet manifest update
+    runs-on: windows-latest
+    if: "!github.event.release.prerelease"
+    steps:
+      - name: Determine version and installer URL
+        id: vars
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.release.tag_name }}" -replace '^v', ''
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/Envarly_${version}_x64_en-US.msi"
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "url=$url" >> $env:GITHUB_OUTPUT
+
+      - name: Install wingetcreate
+        shell: pwsh
+        run: Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+
+      - name: Update and submit WinGet manifest
+        shell: pwsh
+        run: |
+          .\wingetcreate.exe update Envarly.Envarly `
+            --version ${{ steps.vars.outputs.version }} `
+            --urls "${{ steps.vars.outputs.url }}" `
+            --submit `
+            --token ${{ secrets.WINGET_TOKEN }}

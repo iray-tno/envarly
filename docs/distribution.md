@@ -73,9 +73,10 @@ Adjust paths and filenames to match the artifacts produced by the release workfl
 
 For WinGet:
 
-- Prefer the MSI artifact first if the release checklist passes for install, upgrade, uninstall, and silent modes.
-- Use the GitHub Release artifact URL and the matching SHA256 from `SHA256SUMS.txt`.
-- Fall back to the EXE installer only if MSI behavior is worse for that release.
+- Package identifier: `Envarly.Envarly`, submitted as a single `wix` (MSI) installer — see the [`.github/workflows/winget.yml`](../.github/workflows/winget.yml) workflow.
+- Automated: publishing a non-prerelease GitHub Release triggers this workflow, which runs `wingetcreate update` against the release's MSI asset and opens the PR against `microsoft/winget-pkgs` directly. Nothing to do manually unless the workflow fails (check the Actions log — a missing/renamed MSI asset or an expired `WINGET_TOKEN` are the likely causes).
+- Requires a repo secret `WINGET_TOKEN`: a GitHub PAT (classic, `public_repo` scope) belonging to the account that will own the fork/PR against `microsoft/winget-pkgs`. Rotate it there if submissions start failing with an auth error.
+- If MSI behavior is ever worse than the EXE installer for a release, switch the installer type manually with `wingetcreate update Envarly.Envarly --version <version> --urls <exe-url> --submit --token <token>` for that one release, then let the automated workflow resume next time.
 
 For Scoop:
 
