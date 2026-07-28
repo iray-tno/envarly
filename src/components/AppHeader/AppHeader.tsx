@@ -52,9 +52,12 @@ export function AppHeader({
   accountSwitchDisabled,
 }: AppHeaderProps) {
   const { t, language, setLanguage } = useI18n();
+  // Accounts without a profile have no Environment key to load — offering
+  // them here would be a guaranteed-to-fail dead end.
+  const selectableAccounts = accounts.filter((a) => a.hasProfile);
   const accountOptions = [
     { value: "", label: t("account_picker.my_variables") },
-    ...accounts.map((a) => ({ value: a.sid, label: a.username })),
+    ...selectableAccounts.map((a) => ({ value: a.sid, label: a.username })),
   ];
   const languageOptions = [
     { value: "en", label: "English" },
@@ -143,7 +146,7 @@ export function AppHeader({
           </Button>
         )}
         <div className="hidden @5xl:flex items-center gap-2">
-          {accounts.length > 0 && (
+          {selectableAccounts.length > 0 && (
             <Select
               aria-label={t("account_picker.aria_label")}
               value={selectedAccount?.sid ?? ""}
@@ -203,7 +206,7 @@ export function AppHeader({
               />
             )}
           >
-            {accounts.length > 0 && (
+            {selectableAccounts.length > 0 && (
               <div className="flex items-center gap-2 px-2 py-1.5">
                 <Select
                   aria-label={t("account_picker.aria_label")}

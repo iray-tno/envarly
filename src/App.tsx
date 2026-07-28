@@ -82,7 +82,7 @@ export default function App() {
     checkForExternalChanges,
   });
 
-  const { accounts, selectedAccount, handleSelectAccount } = useAccountSwitch({
+  const { accounts, selectedAccount, handleSelectAccount, accountSwitchError } = useAccountSwitch({
     elevated,
     hasStagedChanges: staged.size > 0,
     refresh: async () => {
@@ -225,6 +225,12 @@ export default function App() {
         {error && (
           <div className="px-4 py-2 bg-danger/15 border-b border-danger text-danger text-sm shrink-0">
             {t("app.registry_error", { error })}
+          </div>
+        )}
+
+        {accountSwitchError && (
+          <div className="px-4 py-2 bg-danger/15 border-b border-danger text-danger text-sm shrink-0">
+            {t("app.account_switch_error", { error: accountSwitchError })}
           </div>
         )}
 

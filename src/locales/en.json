@@ -1,6 +1,7 @@
 {
   "app": {
     "registry_error": "Registry error: {{error}}",
+    "account_switch_error": "Couldn't switch account: {{error}}",
     "loading": "Loading…"
   },
   "diagnostics": {
