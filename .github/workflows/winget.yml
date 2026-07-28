@@ -52,14 +52,46 @@ jobs:
         shell: pwsh
         run: Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
 
-      - name: Update and submit WinGet manifest
+      - name: Generate manifest locally
+        shell: pwsh
+        run: |
+          # `update` has no flag for setting the ReleaseNotes *text* (only
+          # --release-notes-url, which it already auto-fills from --token).
+          # Generate locally first so the next step can patch that field in
+          # before handing off to `submit`.
+          .\wingetcreate.exe update Envarly.Envarly `
+            --version ${{ steps.vars.outputs.version }} `
+            --urls "${{ steps.vars.outputs.url }}" `
+            --token ${{ secrets.WINGET_TOKEN }} `
+            --out ./wingetcreate-out
+
+      - name: Patch ReleaseNotes into the generated manifest
         shell: pwsh
         env:
           RELEASE_NOTES: ${{ steps.vars.outputs.releaseNotes }}
         run: |
-          .\wingetcreate.exe update Envarly.Envarly `
-            --version ${{ steps.vars.outputs.version }} `
-            --urls "${{ steps.vars.outputs.url }}" `
-            --release-notes "$env:RELEASE_NOTES" `
-            --submit `
-            --token ${{ secrets.WINGET_TOKEN }}
+          $localeFile = Get-ChildItem -Path ./wingetcreate-out -Recurse -Filter "Envarly.Envarly.locale.en-US.yaml" |
+            Select-Object -First 1
+          if (-not $localeFile) {
+            throw "wingetcreate did not produce a locale manifest under ./wingetcreate-out"
+          }
+
+          $noteLines = @("ReleaseNotes: |-")
+          $noteLines += ($env:RELEASE_NOTES -replace "`r`n", "`n") -split "`n" | ForEach-Object { "  $_" }
+
+          $patched = foreach ($line in Get-Content $localeFile.FullName) {
+            if ($line -match '^ManifestType:') { $noteLines }
+            $line
+          }
+          Set-Content -Path $localeFile.FullName -Value $patched
+
+          "manifestDir=$($localeFile.DirectoryName)" >> $env:GITHUB_OUTPUT
+        id: patch
+
+      - name: Submit the patched manifest
+        shell: pwsh
+        run: |
+          .\wingetcreate.exe submit `
+            --prtitle "Update version: Envarly.Envarly version ${{ steps.vars.outputs.version }}" `
+            --token ${{ secrets.WINGET_TOKEN }} `
+            "${{ steps.patch.outputs.manifestDir }}"
