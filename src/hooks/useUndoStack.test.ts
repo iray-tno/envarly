@@ -95,13 +95,13 @@ describe("useUndoStack", () => {
     });
     act(() => {
       result.current.undo();
-    }); // u2 (most recent first)
+    });
     act(() => {
       result.current.undo();
-    }); // u1
+    });
     act(() => {
       result.current.redo();
-    }); // r1 (oldest first)
+    });
     expect(log).toEqual(["u2", "u1", "r1"]);
   });
 
