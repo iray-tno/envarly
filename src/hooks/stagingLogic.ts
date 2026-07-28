@@ -31,7 +31,8 @@ export type StagedChange =
       newValue: null;
     });
 
-export type StagedKey = string; // `${VarScope}:${name}`
+/** Compound key format: `${VarScope}:${name}` */
+export type StagedKey = string;
 
 type RegistryByKey = Map<StagedKey, EnvVar>;
 type StagedMap = Map<StagedKey, StagedChange>;
