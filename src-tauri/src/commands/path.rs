@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn expand_continues_after_unknown_var() {
-        // Regression: unknown var must not stop expansion of subsequent known vars
+        // Unknown variables are preserved while continuing expansion of subsequent variables
         std::env::set_var("_TEST_EXPAND_KNOWN", "found");
         let result = expand_env_vars("%_UNKNOWN_ZZZ_%\\%_TEST_EXPAND_KNOWN%");
         assert_eq!(result, "%_UNKNOWN_ZZZ_%\\found");
@@ -166,9 +166,7 @@ mod tests {
 
     #[test]
     fn validate_paths_existing() {
-        // System32 should always exist on Windows CI
         let results = validate_paths(vec!["C:\\Windows".to_string()]);
-        // On non-Windows CI this might be false; guard the assertion
         if cfg!(target_os = "windows") {
             assert_eq!(results, vec![true]);
         }
