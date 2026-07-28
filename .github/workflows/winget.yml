@@ -16,9 +16,11 @@ jobs:
     runs-on: windows-latest
     if: "github.event_name == 'workflow_dispatch' || !github.event.release.prerelease"
     steps:
-      - name: Determine version and installer URL
+      - name: Determine version, installer URL, and release notes
         id: vars
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             $version = "${{ inputs.version }}"
@@ -28,8 +30,23 @@ jobs:
             $version = $tag -replace '^v', ''
           }
           $url = "https://github.com/${{ github.repository }}/releases/download/$tag/Envarly_${version}_x64_en-US.msi"
+
+          # winget-pkgs flags a version update as inconsistent if ReleaseNotes
+          # was present on the last submitted version and is missing on this
+          # one, so always pull the real release body rather than relying on
+          # wingetcreate to carry anything forward on its own.
+          $releaseNotes = gh release view $tag --repo ${{ github.repository }} --json body -q .body
+          if ([string]::IsNullOrWhiteSpace($releaseNotes)) {
+            $releaseNotes = "See $tag on GitHub Releases for details."
+          }
+
           "version=$version" >> $env:GITHUB_OUTPUT
           "url=$url" >> $env:GITHUB_OUTPUT
+
+          $delimiter = "EOF_$([guid]::NewGuid().ToString('N'))"
+          "releaseNotes<<$delimiter" >> $env:GITHUB_OUTPUT
+          $releaseNotes >> $env:GITHUB_OUTPUT
+          $delimiter >> $env:GITHUB_OUTPUT
 
       - name: Install wingetcreate
         shell: pwsh
@@ -37,9 +54,12 @@ jobs:
 
       - name: Update and submit WinGet manifest
         shell: pwsh
+        env:
+          RELEASE_NOTES: ${{ steps.vars.outputs.releaseNotes }}
         run: |
           .\wingetcreate.exe update Envarly.Envarly `
             --version ${{ steps.vars.outputs.version }} `
             --urls "${{ steps.vars.outputs.url }}" `
+            --release-notes "$env:RELEASE_NOTES" `
             --submit `
             --token ${{ secrets.WINGET_TOKEN }}
