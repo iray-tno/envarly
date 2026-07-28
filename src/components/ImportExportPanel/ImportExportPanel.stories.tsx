@@ -118,7 +118,7 @@ export const SecretWarning: Story = {
     const canvas = within(canvasElement);
     const exportButton = await canvas.findByRole("button", { name: /\.json/i });
     exportButton.click();
-    // "GitHub" (the secret service name) isn't translated, so it's a safe locale-agnostic anchor.
+    // Service names (such as "GitHub") remain unlocalized, serving as reliable test anchors.
     await canvas.findByText(/github/i);
   },
 };

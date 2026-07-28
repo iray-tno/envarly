@@ -63,7 +63,6 @@ describe("ImportExportPanel — Export tab", () => {
   });
 
   it("exports directly without confirmation when no secrets in scope", async () => {
-    // Default mock: JAVA_HOME, MY_VAR, WINDIR — none are secrets
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("button", { name: /export all/i }));
@@ -114,7 +113,6 @@ describe("ImportExportPanel — Export tab", () => {
   });
 
   it("shows success status after export", async () => {
-    // No secrets in default mock → direct export
     const user = userEvent.setup();
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("button", { name: /export all/i }));
@@ -128,7 +126,6 @@ describe("ImportExportPanel — Export tab", () => {
     render(<ImportExportPanel onStage={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: "Custom…" }));
     await waitFor(() => expect(screen.getByText("JAVA_HOME")).toBeInTheDocument());
-    // Test data (JAVA_HOME) has no secrets → no confirmation step
     await user.click(screen.getByRole("button", { name: /export \d+ selected/i }));
     await waitFor(() => expect(api.exportCustomVars).toHaveBeenCalled());
   });
