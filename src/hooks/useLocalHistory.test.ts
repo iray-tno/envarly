@@ -49,7 +49,7 @@ describe("useLocalHistory", () => {
     });
     act(() => {
       result.current.onChange("c");
-    }); // text edit after checkpoint
+    });
     act(() => {
       result.current.discard();
     });
@@ -65,10 +65,10 @@ describe("useLocalHistory", () => {
     });
     act(() => {
       result.current.discard();
-    }); // back to checkpoint (b == top, pop it)
+    });
     act(() => {
       result.current.discard();
-    }); // back to original
+    });
     expect(result.current.value).toBe("a");
     expect(result.current.dirty).toBe(false);
   });
@@ -77,14 +77,14 @@ describe("useLocalHistory", () => {
     const { result } = renderHook(() => useLocalHistory("a"));
     act(() => {
       result.current.onChange("b");
-    }); // text edit
+    });
     act(() => {
       result.current.onBeforeStructuralChange();
       result.current.onChange("c");
     });
     act(() => {
       result.current.discard();
-    }); // current === checkpoint c → pop, go to b
+    });
     expect(result.current.value).toBe("b");
   });
 
@@ -96,14 +96,14 @@ describe("useLocalHistory", () => {
     });
     act(() => {
       result.current.onBeforeStructuralChange();
-      result.current.onChange("c"); // pre-op value b == top checkpoint → skip duplicate
+      result.current.onChange("c");
     });
     act(() => {
       result.current.discard();
-    }); // c → b (top checkpoint)
+    });
     act(() => {
       result.current.discard();
-    }); // b → a (original)
+    });
     expect(result.current.value).toBe("a");
     expect(result.current.dirty).toBe(false);
   });
@@ -118,8 +118,7 @@ describe("useLocalHistory", () => {
       result.current.reset("z");
     });
     expect(result.current.value).toBe("z");
-    expect(result.current.dirty).toBe(true); // z !== originalValue (a)
-    // history cleared: discard goes to original, not b
+    expect(result.current.dirty).toBe(true);
     act(() => {
       result.current.discard();
     });
@@ -147,7 +146,6 @@ describe("useLocalHistory", () => {
     rerender({ v: "x" });
     expect(result.current.value).toBe("x");
     expect(result.current.dirty).toBe(false);
-    // history cleared: discard should stay at x (no checkpoints)
     act(() => {
       result.current.discard();
     });
