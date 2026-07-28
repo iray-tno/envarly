@@ -35,7 +35,9 @@ Before tagging a release:
 npm run tauri build
 ```
 
-After the GitHub Release workflow finishes, download the artifacts from the draft or published release and check:
+The release workflow creates the GitHub Release as a **draft** (artifacts included) rather than publishing it immediately — write the release notes on the draft, then publish it manually (GitHub UI, or `gh release edit <tag> --draft=false`) once you're satisfied. Publishing is what triggers the WinGet submission workflow (see below), so it picks up the final notes rather than an empty body.
+
+After the GitHub Release workflow finishes, download the artifacts from the draft release and check:
 
 | Check | EXE | MSI | ZIP |
 |---|---:|---:|---:|
