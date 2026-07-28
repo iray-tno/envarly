@@ -15,6 +15,7 @@ interface Params {
 export function useAccountSwitch({ elevated, hasStagedChanges, refresh }: Params) {
   const [accounts, setAccounts] = useState<LocalAccount[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<LocalAccount | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!elevated) {
@@ -38,12 +39,17 @@ export function useAccountSwitch({ elevated, hasStagedChanges, refresh }: Params
   const handleSelectAccount = useCallback(
     async (sid: string | null) => {
       if (hasStagedChanges) return;
-      const account = await api.selectAccount(sid);
-      setSelectedAccount(account);
-      await refresh();
+      setError(null);
+      try {
+        const account = await api.selectAccount(sid);
+        setSelectedAccount(account);
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
     },
     [hasStagedChanges, refresh],
   );
 
-  return { accounts, selectedAccount, handleSelectAccount };
+  return { accounts, selectedAccount, handleSelectAccount, accountSwitchError: error };
 }
