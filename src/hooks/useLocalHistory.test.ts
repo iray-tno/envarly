@@ -118,10 +118,11 @@ describe("useLocalHistory", () => {
       result.current.reset("z");
     });
     expect(result.current.value).toBe("z");
-    expect(result.current.dirty).toBe(true);
+    expect(result.current.dirty).toBe(true); // "z" differs from the original value "a"
     act(() => {
       result.current.discard();
     });
+    // reset cleared the "b" checkpoint, so discard falls back to the original value
     expect(result.current.value).toBe("a");
   });
 

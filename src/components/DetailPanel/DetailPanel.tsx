@@ -159,8 +159,8 @@ export function DetailPanel({
   const readOnly = variable.scope === "System" && !elevated;
   const description = lookupEnvDescription(variable.name);
   const isPathVar = variable.name.toUpperCase() === "PATH";
-  // PATH management actions target User or System scopes. For OtherUser variables,
-  // treat PATH status as already present to suppress adding Envarly's install directory.
+  // OtherUser has no PATH tooling of its own yet — treat it as already present
+  // so the hint never offers an action that would write to the wrong hive.
   const pathInEnvForScope =
     variable.scope === "System" ? systemPathInEnv : variable.scope === "User" ? userPathInEnv : true;
   const showAddToPathHint =
