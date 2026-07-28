@@ -75,6 +75,7 @@ For WinGet:
 
 - Package identifier: `Envarly.Envarly`, submitted as a single `wix` (MSI) installer — see the [`.github/workflows/winget.yml`](../.github/workflows/winget.yml) workflow.
 - Automated: publishing a non-prerelease GitHub Release triggers this workflow, which runs `wingetcreate update` against the release's MSI asset and opens the PR against `microsoft/winget-pkgs` directly. Nothing to do manually unless the workflow fails (check the Actions log — a missing/renamed MSI asset or an expired `WINGET_TOKEN` are the likely causes).
+- Can also be run manually (e.g. to submit a version that was released before this automation existed) via `workflow_dispatch`: `gh workflow run winget.yml -f version=1.4.0`, or from the Actions tab in GitHub's UI.
 - Requires a repo secret `WINGET_TOKEN`: a GitHub PAT (classic, `public_repo` scope) belonging to the account that will own the fork/PR against `microsoft/winget-pkgs`. Rotate it there if submissions start failing with an auth error.
 - If MSI behavior is ever worse than the EXE installer for a release, switch the installer type manually with `wingetcreate update Envarly.Envarly --version <version> --urls <exe-url> --submit --token <token>` for that one release, then let the automated workflow resume next time.
 

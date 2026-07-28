@@ -3,19 +3,31 @@ name: WinGet Submit
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to submit, e.g. 1.4.0 (must match an existing vX.Y.Z release tag with an MSI asset)"
+        required: true
+        type: string
 
 jobs:
   winget:
     name: Submit WinGet manifest update
     runs-on: windows-latest
-    if: "!github.event.release.prerelease"
+    if: "github.event_name == 'workflow_dispatch' || !github.event.release.prerelease"
     steps:
       - name: Determine version and installer URL
         id: vars
         shell: pwsh
         run: |
-          $version = "${{ github.event.release.tag_name }}" -replace '^v', ''
-          $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/Envarly_${version}_x64_en-US.msi"
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+            $tag = "v$version"
+          } else {
+            $tag = "${{ github.event.release.tag_name }}"
+            $version = $tag -replace '^v', ''
+          }
+          $url = "https://github.com/${{ github.repository }}/releases/download/$tag/Envarly_${version}_x64_en-US.msi"
           "version=$version" >> $env:GITHUB_OUTPUT
           "url=$url" >> $env:GITHUB_OUTPUT
 
