@@ -32,24 +32,22 @@ export function PathEditor({
   onBeforeReorder,
 }: Props) {
   const [entries, setEntries] = useState<ListEntry[]>([]);
-  // Lint runs against lintedValue, which only updates on blur or when rawValue changes while not focused.
+  // Linting operates on `lintedValue`, updated on blur or when external changes occur while unfocused.
   const [lintedValue, setLintedValue] = useState(rawValue);
   const hasFocusRef = useRef(false);
 
-  // Sync lintedValue when rawValue changes externally (e.g. variable switch) while not focused.
+  // Synchronize `lintedValue` when `rawValue` changes externally (e.g., switching variables).
   useEffect(() => {
     if (!hasFocusRef.current) setLintedValue(rawValue);
   }, [rawValue]);
 
-  // Parse rawValue → entries. Guard prevents reset when the change originated here.
+  // Parse `rawValue` into entry objects, preserving item identity across undo operations.
   useEffect(() => {
     setEntries((prev) => {
       const current = prev.map((e) => e.value).join(";");
       if (current === rawValue) return prev;
       const parts = rawValue.split(";").filter((p) => p.trim().length > 0);
-      // Reuse existing entry IDs to preserve DOM nodes and focus across undo operations.
-      // 1. Value match  — handles drag undo (same values, reordered).
-      // 2. Index match  — handles text-edit undo (same position, different value).
+      // Re-use stable IDs by matching previous values (for reordering) or indices (for text updates).
       const pool = prev.map((e, i) => ({ e, i, used: false }));
       return parts.map((value, i) => {
         const byVal = pool.find((p) => !p.used && p.e.value === value);
@@ -67,7 +65,7 @@ export function PathEditor({
     });
   }, [rawValue]);
 
-  // Validate paths when new entries appear with exists === null.
+  // Asynchronously validate filesystem existence for unverified path entries.
   useEffect(() => {
     if (skipPathValidation || entries.length === 0) return;
     if (entries.every((e) => e.exists !== null && e.exists !== undefined)) return;
