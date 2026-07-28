@@ -53,7 +53,7 @@ describe("DiffPanel", () => {
     const user = userEvent.setup();
     render(<DiffPanel entries={entries} onApply={onApply} onDismiss={vi.fn()} />);
     const checkboxes = screen.getAllByRole("checkbox");
-    await user.click(checkboxes[0]); // uncheck NEW_VAR
+    await user.click(checkboxes[0]); // Uncheck the added entry
     await user.click(screen.getByRole("button", { name: /apply/i }));
     expect(onApply).toHaveBeenCalledWith([removed, changed], [added]);
   });
@@ -71,7 +71,7 @@ describe("DiffPanel", () => {
   it("Select all re-checks all entries", async () => {
     const user = userEvent.setup();
     render(<DiffPanel entries={entries} onApply={vi.fn()} onDismiss={vi.fn()} />);
-    // uncheck first
+    // Uncheck an entry before selecting all
     await user.click(screen.getAllByRole("checkbox")[0]);
     await user.click(screen.getByRole("button", { name: "Select all" }));
     const checkboxes = screen.getAllByRole("checkbox");
