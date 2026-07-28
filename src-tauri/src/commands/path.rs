@@ -166,6 +166,7 @@ mod tests {
 
     #[test]
     fn validate_paths_existing() {
+        // C:\Windows only reliably exists when this actually runs on Windows.
         let results = validate_paths(vec!["C:\\Windows".to_string()]);
         if cfg!(target_os = "windows") {
             assert_eq!(results, vec![true]);
