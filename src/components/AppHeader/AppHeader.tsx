@@ -95,10 +95,6 @@ export function AppHeader({
           </Button>
         )}
 
-        <Button variant="ghost" size="sm" onClick={onImportExport}>
-          {t("header.import_export")}
-        </Button>
-
         <Button
           variant={snapshotsOpen ? "secondary" : "ghost"}
           size="sm"
@@ -107,9 +103,15 @@ export function AppHeader({
           {t("header.snapshots")}
         </Button>
 
-        <Button variant="ghost" size="sm" onClick={onCheckCommand}>
-          {t("header.check_command")}
-        </Button>
+        <div className="hidden @5xl:flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={onImportExport}>
+            {t("header.import_export")}
+          </Button>
+
+          <Button variant="ghost" size="sm" onClick={onCheckCommand}>
+            {t("header.check_command")}
+          </Button>
+        </div>
       </div>
 
       <div
@@ -221,6 +223,20 @@ export function AppHeader({
                 />
               </div>
             )}
+            <button
+              type="button"
+              onClick={onImportExport}
+              className="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-muted hover:bg-hover hover:text-fg"
+            >
+              {t("header.import_export")}
+            </button>
+            <button
+              type="button"
+              onClick={onCheckCommand}
+              className="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-muted hover:bg-hover hover:text-fg"
+            >
+              {t("header.check_command")}
+            </button>
             <div className="flex items-center gap-2 px-2 py-1.5">
               <Icon name="globe" size={14} className="text-dim shrink-0" />
               <Select
