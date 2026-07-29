@@ -94,9 +94,9 @@ export const Narrow: Story = {
     const trigger = await waitFor(() => canvas.getByTestId("header-more-trigger"));
     trigger.click();
     const panel = await waitFor(() => canvas.getByRole("group"));
-    // 3 buttons (GitHub, theme, licenses) + the language <select>.
+    // 5 buttons (import/export, check command, GitHub, theme, licenses) + the language <select>.
     const buttons = within(panel).getAllByRole("button");
-    expect(buttons).toHaveLength(3);
+    expect(buttons).toHaveLength(5);
     expect(within(panel).getByRole("combobox")).toBeVisible();
   },
 };
