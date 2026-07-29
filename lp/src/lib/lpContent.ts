@@ -69,8 +69,8 @@ export type LandingCopy = {
 export const enCopy: LandingCopy = {
   lang: 'en',
   title: 'Envarly — Windows Environment Variable Manager',
-  description: 'Windows environment variable manager — edit PATH with folder pickers, detect secrets, and preview changes before applying. Free & open source on Windows 10 and 11.',
-  ogDescription: 'Windows environment variable manager — edit PATH with folder pickers, detect secrets, and preview changes before applying. Free & open source.',
+  description: 'Edit Windows environment variables safely — PATH editing with folder pickers, secret detection, change previews, and encrypted snapshots. Free & open source.',
+  ogDescription: 'Edit Windows environment variables safely — PATH editing with folder pickers, secret detection, change previews, and encrypted snapshots. Free & open source.',
   canonicalPath: '/envarly/',
   alternatePath: '/envarly/ja/',
   alternateLabel: '日本語',
@@ -177,8 +177,8 @@ export const enCopy: LandingCopy = {
 export const jaCopy: LandingCopy = {
   lang: 'ja',
   title: 'Envarly — Windows 環境変数マネージャー',
-  description: 'Windows の環境変数を安全に編集できるマネージャー。フォルダ選択付きの PATH 編集、シークレット検出、変更前プレビューに対応。Windows 10 / 11 向けの無料オープンソースアプリです。',
-  ogDescription: 'Windows の環境変数を安全に編集。フォルダ選択付きの PATH 編集、シークレット検出、変更前プレビューに対応した無料オープンソースアプリ。',
+  description: 'Windows の環境変数を安全に編集 — フォルダ選択付きの PATH 編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。無料のオープンソースアプリです。',
+  ogDescription: 'Windows の環境変数を安全に編集 — フォルダ選択付きの PATH 編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。無料のオープンソースアプリです。',
   canonicalPath: '/envarly/ja/',
   alternatePath: '/envarly/',
   alternateLabel: 'English',
