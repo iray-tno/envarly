@@ -5,6 +5,7 @@ import {
   RELEASE_URL,
   REPORTS_URL,
   STORYBOOK_URL,
+  WINGET_COMMAND,
   type LandingCopy,
 } from '../lib/lpContent';
 
@@ -78,6 +79,37 @@ const { copy } = Astro.props;
           {copy.hero.github}
         </a>
       </div>
+
+      <!-- WinGet install -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-16 -mt-8 text-sm">
+        <span class="text-[var(--color-muted)]">{copy.install.label}</span>
+        <div class="flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <code id="winget-command" class="font-mono text-xs text-[var(--color-text)]">{WINGET_COMMAND}</code>
+          <button
+            id="winget-copy"
+            type="button"
+            class="px-2 py-1 rounded-md text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-border)]/40 transition-colors"
+            data-copy-label={copy.install.copy}
+            data-copied-label={copy.install.copied}
+          >
+            {copy.install.copy}
+          </button>
+        </div>
+      </div>
+      <script define:vars={{ command: WINGET_COMMAND }}>
+        {
+          const button = document.getElementById('winget-copy');
+          button?.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(command);
+            const copied = button.dataset.copiedLabel ?? 'Copied!';
+            const original = button.dataset.copyLabel ?? button.textContent ?? '';
+            button.textContent = copied;
+            setTimeout(() => {
+              button.textContent = original;
+            }, 1500);
+          });
+        }
+      </script>
 
       <!-- Screenshot carousel -->
       <div class="mx-auto">
@@ -177,12 +209,25 @@ const { copy } = Astro.props;
       <h2 class="text-2xl font-bold text-[var(--color-text)] text-center mb-3">{copy.featuresHeading}</h2>
       <p class="text-[var(--color-muted)] text-center mb-12">{copy.featuresLead}</p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
         {copy.features.map((f) => (
           <div class="p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-colors">
             <div class="text-2xl mb-3">{f.icon}</div>
             <h3 class="text-sm font-semibold text-[var(--color-text)] mb-2">{f.title}</h3>
             <p class="text-xs text-[var(--color-muted)] leading-relaxed">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <p class="text-xs text-[var(--color-muted)] text-center mb-5 uppercase tracking-widest">{copy.otherFeaturesHeading}</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+        {copy.otherFeatures.map((f) => (
+          <div class="flex items-start gap-3 py-2">
+            <div class="text-base shrink-0 mt-0.5">{f.icon}</div>
+            <div>
+              <h3 class="text-xs font-semibold text-[var(--color-text)] mb-0.5">{f.title}</h3>
+              <p class="text-xs text-[var(--color-muted)] leading-relaxed">{f.desc}</p>
+            </div>
           </div>
         ))}
       </div>
