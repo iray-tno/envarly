@@ -402,11 +402,8 @@ fn reg_unload_key(sid: &str) -> Result<(), EnvarlyError> {
 mod manual_smoke_tests {
     use super::*;
 
-    /// Not run in CI (depends on this machine's actual local accounts) — run
-    /// explicitly with `cargo test -- --ignored --nocapture` to manually
-    /// verify the real Win32 calls (NetUserEnum/LookupAccountNameW/SID
-    /// resolution/ProfileList lookup/HKEY_USERS enumeration) against the
-    /// current machine as part of Phase 1 verification.
+    /// Smoke test for local account enumeration and Win32 registry hive operations.
+    /// Ignored in CI; run explicitly on a Windows host using `cargo test -- --ignored --nocapture`.
     #[test]
     #[ignore]
     fn list_and_select_real_accounts() {

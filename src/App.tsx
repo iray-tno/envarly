@@ -93,8 +93,8 @@ export default function App() {
   });
   const personalScope = selectedAccount ? "OtherUser" : "User";
 
-  // While an account is selected, its PATH takes priority over the real
-  // current user's — same "switch mode" rule as the sidebar's personal scope.
+  // When another account is selected, its PATH status takes priority for banner hints,
+  // following the same active scope resolution as the sidebar personal scope.
   const pathBannerScope: VarScope | null = selectedAccount
     ? otherUserPathInEnv === false
       ? "OtherUser"

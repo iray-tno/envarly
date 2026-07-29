@@ -159,9 +159,8 @@ export function DetailPanel({
   const readOnly = variable.scope === "System" && !elevated;
   const description = lookupEnvDescription(variable.name);
   const isPathVar = variable.name.toUpperCase() === "PATH";
-  // PATH tooling doesn't support the OtherUser scope yet (a separate,
-  // deferred follow-up) — treat it as "already present" so the hint never
-  // offers an action that would target the wrong hive.
+  // OtherUser has no PATH tooling of its own yet — treat it as already present
+  // so the hint never offers an action that would write to the wrong hive.
   const pathInEnvForScope =
     variable.scope === "System" ? systemPathInEnv : variable.scope === "User" ? userPathInEnv : true;
   const showAddToPathHint =
