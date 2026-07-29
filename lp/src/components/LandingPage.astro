@@ -83,29 +83,45 @@ const { copy } = Astro.props;
       <!-- WinGet install -->
       <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-16 -mt-8 text-sm">
         <span class="text-[var(--color-muted)]">{copy.install.label}</span>
-        <div class="flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div id="winget-pill" class="flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors">
           <code id="winget-command" class="font-mono text-xs text-[var(--color-text)]">{WINGET_COMMAND}</code>
           <button
             id="winget-copy"
             type="button"
-            class="px-2 py-1 rounded-md text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-border)]/40 transition-colors"
+            class="grid px-2 py-1 rounded-md text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-border)]/40 transition-colors"
             data-copy-label={copy.install.copy}
             data-copied-label={copy.install.copied}
           >
-            {copy.install.copy}
+            {/* Both labels are stacked in the same grid cell so the button
+                width is always the wider of the two — whichever language —
+                and never jitters when the visible label swaps on click. */}
+            <span class="invisible col-start-1 row-start-1 whitespace-nowrap" aria-hidden="true">{copy.install.copy}</span>
+            <span class="invisible col-start-1 row-start-1 whitespace-nowrap" aria-hidden="true">{copy.install.copied}</span>
+            <span id="winget-copy-label" class="col-start-1 row-start-1 whitespace-nowrap">{copy.install.copy}</span>
           </button>
         </div>
       </div>
       <script define:vars={{ command: WINGET_COMMAND }}>
         {
+          // Inline styles, not Tailwind utility classes — classes added via
+          // classList from a script aren't visible to Tailwind's build-time
+          // scanner, so they'd never get generated CSS.
+          const pill = document.getElementById('winget-pill');
           const button = document.getElementById('winget-copy');
+          const label = document.getElementById('winget-copy-label');
+          let resetTimer;
           button?.addEventListener('click', async () => {
             await navigator.clipboard.writeText(command);
             const copied = button.dataset.copiedLabel ?? 'Copied!';
-            const original = button.dataset.copyLabel ?? button.textContent ?? '';
-            button.textContent = copied;
-            setTimeout(() => {
-              button.textContent = original;
+            const original = button.dataset.copyLabel ?? label?.textContent ?? '';
+            if (label) label.textContent = copied;
+            if (label) label.style.color = 'var(--color-accent)';
+            if (pill) pill.style.borderColor = 'var(--color-accent)';
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(() => {
+              if (label) label.textContent = original;
+              if (label) label.style.color = '';
+              if (pill) pill.style.borderColor = '';
             }, 1500);
           });
         }
