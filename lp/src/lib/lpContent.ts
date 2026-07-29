@@ -3,6 +3,7 @@ export const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest'
 export const STORYBOOK_URL = '/envarly/storybook/';
 export const REPORTS_URL = '/envarly/reports/';
 export const VERSION = '1.4.0';
+export const WINGET_COMMAND = 'winget install Envarly.Envarly';
 
 export type LandingCopy = {
   lang: 'en' | 'ja';
@@ -24,6 +25,11 @@ export type LandingCopy = {
     download: string;
     github: string;
   };
+  install: {
+    label: string;
+    copy: string;
+    copied: string;
+  };
   screenshots: {
     pathEditorAlt: string;
     applyModalAlt: string;
@@ -35,6 +41,12 @@ export type LandingCopy = {
   featuresHeading: string;
   featuresLead: string;
   features: Array<{
+    icon: string;
+    title: string;
+    desc: string;
+  }>;
+  otherFeaturesHeading: string;
+  otherFeatures: Array<{
     icon: string;
     title: string;
     desc: string;
@@ -74,6 +86,11 @@ export const enCopy: LandingCopy = {
     download: `Download v${VERSION} for Windows`,
     github: 'View on GitHub →',
   },
+  install: {
+    label: 'Or install with WinGet:',
+    copy: 'Copy',
+    copied: 'Copied!',
+  },
   screenshots: {
     pathEditorAlt: 'Envarly — PATH editor with per-entry validation and staged change',
     applyModalAlt: 'Envarly — Apply confirmation modal with Full diff view for PATH entries',
@@ -88,13 +105,26 @@ export const enCopy: LandingCopy = {
     {
       icon: '⠿',
       title: 'Practical PATH editor',
-      desc: 'Reorder PATH entries, switch between list and plain text, move through rows with the keyboard, and choose folders without leaving the editor.',
+      desc: 'Reorder entries, validate each one with a live ✓ / ✗ existence check, switch between list and plain text, move through rows with the keyboard, and choose folders — all without leaving the editor.',
     },
     {
-      icon: '✓',
-      title: 'Path validation',
-      desc: 'Each entry in PATH-style variables gets a live ✓ / ✗ existence check so broken paths are caught before you apply.',
+      icon: '⚿',
+      title: 'Secret detection',
+      desc: 'Name-based heuristics and value-pattern matching across 35+ token formats — GitHub, AWS, Anthropic, Stripe, npm, and more.',
     },
+    {
+      icon: '⇄',
+      title: 'Diff detection',
+      desc: 'Detects registry changes made by other processes while Envarly is open. Shows a diff with selective apply per entry.',
+    },
+    {
+      icon: '📸',
+      title: 'Snapshots & demo mode',
+      desc: 'Save named snapshots of your full environment, encrypted with DPAPI. Demo mode opens realistic sample data for screenshots and walkthroughs without touching your registry.',
+    },
+  ],
+  otherFeaturesHeading: 'Also included',
+  otherFeatures: [
     {
       icon: '⚠',
       title: 'Environment guidance',
@@ -104,21 +134,6 @@ export const enCopy: LandingCopy = {
       icon: '↩',
       title: 'Local undo before staging',
       desc: 'Multi-step Ctrl+Z in the detail panel before staging. Drag reorders and text edits are independent undo steps.',
-    },
-    {
-      icon: '⚿',
-      title: 'Secret detection',
-      desc: 'Name-based heuristics and value-pattern matching across 35+ token formats — GitHub, AWS, Anthropic, Stripe, npm, and more.',
-    },
-    {
-      icon: '📸',
-      title: 'Snapshots & demo mode',
-      desc: 'Save named snapshots of your full environment, encrypted with DPAPI. Demo mode opens realistic sample data for screenshots and walkthroughs without touching your registry.',
-    },
-    {
-      icon: '⇄',
-      title: 'Diff detection',
-      desc: 'Detects registry changes made by other processes while Envarly is open. Shows a diff with selective apply per entry.',
     },
     {
       icon: '⏳',
@@ -179,6 +194,11 @@ export const jaCopy: LandingCopy = {
     download: `Windows 版 v${VERSION} をダウンロード`,
     github: 'GitHub で見る →',
   },
+  install: {
+    label: 'または WinGet でインストール:',
+    copy: 'コピー',
+    copied: 'コピーしました！',
+  },
   screenshots: {
     pathEditorAlt: 'Envarly — エントリごとの検証とステージ済み変更を表示する PATH エディター',
     applyModalAlt: 'Envarly — PATH エントリの詳細差分を表示する適用確認モーダル',
@@ -193,13 +213,26 @@ export const jaCopy: LandingCopy = {
     {
       icon: '⠿',
       title: '実用的な PATH エディター',
-      desc: 'PATH エントリの並べ替え、リスト表示とプレーンテキストの切り替え、キーボードでの行移動、フォルダ選択に対応しています。',
+      desc: 'エントリの並べ替え、ライブの ✓ / ✗ 存在チェックによる検証、リスト表示とプレーンテキストの切り替え、キーボードでの行移動、フォルダ選択まで、すべてエディターを離れずに行えます。',
     },
     {
-      icon: '✓',
-      title: 'パス検証',
-      desc: 'PATH 系の各エントリに対して存在チェックを行い、壊れたパスを適用前に見つけられます。',
+      icon: '⚿',
+      title: 'シークレット検出',
+      desc: '変数名のヒューリスティックと値のパターン照合で、GitHub、AWS、Anthropic、Stripe、npm など 35 種類以上のトークン形式を検出します。',
     },
+    {
+      icon: '⇄',
+      title: '外部変更の差分検出',
+      desc: 'Envarly を開いている間に他プロセスがレジストリを変更した場合、差分を検出。項目ごとに受け入れる変更を選べます。',
+    },
+    {
+      icon: '📸',
+      title: 'スナップショットとデモモード',
+      desc: '環境変数全体の名前付きスナップショットを DPAPI で暗号化して保存。デモモードでは、実際のレジストリに触れずにサンプルデータで動作を確認できます。',
+    },
+  ],
+  otherFeaturesHeading: 'そのほかの機能',
+  otherFeatures: [
     {
       icon: '⚠',
       title: '環境変数の説明とガイド',
@@ -209,21 +242,6 @@ export const jaCopy: LandingCopy = {
       icon: '↩',
       title: 'ステージ前のローカル Undo',
       desc: '詳細パネルでステージする前に Ctrl+Z を複数段階使えます。ドラッグでの並べ替えとテキスト編集を別の Undo として扱います。',
-    },
-    {
-      icon: '⚿',
-      title: 'シークレット検出',
-      desc: '変数名のヒューリスティックと値のパターン照合で、GitHub、AWS、Anthropic、Stripe、npm など 35 種類以上のトークン形式を検出します。',
-    },
-    {
-      icon: '📸',
-      title: 'スナップショットとデモモード',
-      desc: '環境変数全体の名前付きスナップショットを DPAPI で暗号化して保存。デモモードでは、実際のレジストリに触れずにサンプルデータで動作を確認できます。',
-    },
-    {
-      icon: '⇄',
-      title: '外部変更の差分検出',
-      desc: 'Envarly を開いている間に他プロセスがレジストリを変更した場合、差分を検出。項目ごとに受け入れる変更を選べます。',
     },
     {
       icon: '⏳',
