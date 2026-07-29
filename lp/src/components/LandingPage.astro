@@ -83,7 +83,7 @@ const { copy } = Astro.props;
       <!-- WinGet install -->
       <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-16 -mt-8 text-sm">
         <span class="text-[var(--color-muted)]">{copy.install.label}</span>
-        <div class="flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div id="winget-pill" class="flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors">
           <code id="winget-command" class="font-mono text-xs text-[var(--color-text)]">{WINGET_COMMAND}</code>
           <button
             id="winget-copy"
@@ -103,15 +103,25 @@ const { copy } = Astro.props;
       </div>
       <script define:vars={{ command: WINGET_COMMAND }}>
         {
+          // Inline styles, not Tailwind utility classes — classes added via
+          // classList from a script aren't visible to Tailwind's build-time
+          // scanner, so they'd never get generated CSS.
+          const pill = document.getElementById('winget-pill');
           const button = document.getElementById('winget-copy');
           const label = document.getElementById('winget-copy-label');
+          let resetTimer;
           button?.addEventListener('click', async () => {
             await navigator.clipboard.writeText(command);
             const copied = button.dataset.copiedLabel ?? 'Copied!';
             const original = button.dataset.copyLabel ?? label?.textContent ?? '';
             if (label) label.textContent = copied;
-            setTimeout(() => {
+            if (label) label.style.color = 'var(--color-accent)';
+            if (pill) pill.style.borderColor = 'var(--color-accent)';
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(() => {
               if (label) label.textContent = original;
+              if (label) label.style.color = '';
+              if (pill) pill.style.borderColor = '';
             }, 1500);
           });
         }
