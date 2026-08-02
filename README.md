@@ -33,6 +33,7 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 - **Critical variable warning** — staging changes to `SYSTEMROOT`, `WINDIR`, or `COMSPEC` shows a prominent warning in the Apply confirmation dialog
 - **Secret detection** — name-based + value-pattern detection across 35+ token formats (GitHub `ghp_`, GitLab `glpat-`, Slack `xoxb-`, Anthropic `sk-ant-`, npm `npm_`, PyPI `pypi-`, …); service badge shown on each match; **⚠ Secrets** sidebar tab; export confirmation lists affected services
 - **Admin elevation** — "Run as admin" button restarts the process elevated via UAC; system variables become editable; "Restart as admin →" inline hint appears in the detail panel when viewing a System variable without elevation
+- **Edit other accounts' variables** — when elevated, switch to any local account (including ones not currently logged in) to view/edit its per-user variables and PATH; the header account picker shows "My variables" until one is selected
 - **CLI mode** — read-only subcommands (`get`, `list`, `export`) run from a terminal without launching the GUI
 - **WM\_SETTINGCHANGE broadcast** — running apps pick up changes without a restart
 - **Resizable panels** — drag the sidebar and snapshots panel to the width you want; sizes persist across restarts
