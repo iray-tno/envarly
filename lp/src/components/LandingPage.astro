@@ -31,9 +31,10 @@ const { copy } = Astro.props;
         <a href="#features" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.features}</a>
         <a href={STORYBOOK_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.storybook}</a>
         <a href={REPORTS_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.reports}</a>
-        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
+        <a id="nav-github" href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
         <a href={copy.alternatePath} class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.alternateLabel}</a>
         <a
+          id="nav-download"
           href={RELEASE_URL}
           target="_blank"
           rel="noopener noreferrer"
@@ -63,6 +64,7 @@ const { copy } = Astro.props;
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
         <a
+          id="hero-download"
           href={RELEASE_URL}
           target="_blank"
           rel="noopener noreferrer"
@@ -71,6 +73,7 @@ const { copy } = Astro.props;
           {copy.hero.download}
         </a>
         <a
+          id="hero-github"
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
@@ -112,6 +115,7 @@ const { copy } = Astro.props;
           let resetTimer;
           button?.addEventListener('click', async () => {
             await navigator.clipboard.writeText(command);
+            window.gtag?.('event', 'winget_copy_click');
             const copied = button.dataset.copiedLabel ?? 'Copied!';
             const original = button.dataset.copyLabel ?? label?.textContent ?? '';
             if (label) label.textContent = copied;
@@ -277,7 +281,7 @@ const { copy } = Astro.props;
     <div class="mx-auto max-w-5xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
       <span class="text-xs text-[var(--color-muted)]">{copy.footer.copyright}</span>
       <div class="flex items-center gap-6">
-        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
+        <a id="footer-github" href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
         <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.footer.releases}</a>
         <a href={STORYBOOK_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Storybook</a>
         <a href={REPORTS_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Reports</a>
@@ -285,4 +289,17 @@ const { copy } = Astro.props;
       </div>
     </div>
   </footer>
+
+  <script>
+    const track = (id: string, event: string) => {
+      document.getElementById(id)?.addEventListener('click', () => {
+        window.gtag?.('event', event);
+      });
+    };
+    track('nav-download', 'download_click');
+    track('hero-download', 'download_click');
+    track('nav-github', 'github_link_click');
+    track('hero-github', 'github_link_click');
+    track('footer-github', 'github_link_click');
+  </script>
 </Base>
