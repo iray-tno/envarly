@@ -62,6 +62,7 @@ export function AppHeader({
   const languageOptions = [
     { value: "en", label: "English" },
     { value: "ja", label: "日本語" },
+    { value: "zh-CN", label: "简体中文" },
   ] as const;
 
   return (
