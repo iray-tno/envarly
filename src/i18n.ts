@@ -2,10 +2,11 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 import ja from "./locales/ja.json";
+import ru from "./locales/ru.json";
 import zhCN from "./locales/zh-CN.json";
 
 const STORAGE_KEY = "envarly-language";
-const SUPPORTED_LANGUAGES = ["en", "ja", "zh-CN"] as const;
+const SUPPORTED_LANGUAGES = ["en", "ja", "zh-CN", "ru"] as const;
 
 function getStoredLanguage() {
   try {
@@ -21,6 +22,7 @@ function detectLanguage(): (typeof SUPPORTED_LANGUAGES)[number] {
   const detected = navigator.language;
   if (detected.startsWith("zh")) return "zh-CN";
   if (detected.startsWith("ja")) return "ja";
+  if (detected.startsWith("ru")) return "ru";
   return "en";
 }
 
@@ -33,6 +35,7 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
     ja: { translation: ja },
     "zh-CN": { translation: zhCN },
+    ru: { translation: ru },
   },
   lng,
   fallbackLng: "en",

@@ -63,6 +63,7 @@ export function AppHeader({
     { value: "en", label: "English" },
     { value: "ja", label: "日本語" },
     { value: "zh-CN", label: "简体中文" },
+    { value: "ru", label: "Русский" },
   ] as const;
 
   return (
