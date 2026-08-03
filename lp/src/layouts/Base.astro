@@ -1,13 +1,13 @@
 ---
 import '../styles/global.css';
-import { VERSION } from '../lib/lpContent';
+import { LANGUAGES, VERSION, type LandingLang } from '../lib/lpContent';
 
 interface Props {
   title: string;
   description: string;
   ogDescription: string;
   ogImage?: string;
-  lang: 'en' | 'ja';
+  lang: LandingLang;
   canonicalPath: string;
 }
 
@@ -22,7 +22,7 @@ const {
 
 const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
 const englishURL = new URL('/envarly/', Astro.site);
-const japaneseURL = new URL('/envarly/ja/', Astro.site);
+const alternateURLs = LANGUAGES.map((l) => ({ code: l.code, url: new URL(l.path, Astro.site) }));
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -52,8 +52,7 @@ const CLARITY_ID = 'xeh50yh8uq';
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
-    <link rel="alternate" hreflang="en" href={englishURL} />
-    <link rel="alternate" hreflang="ja" href={japaneseURL} />
+    {alternateURLs.map(({ code, url }) => <link rel="alternate" hreflang={code} href={url} />)}
     <link rel="alternate" hreflang="x-default" href={englishURL} />
 
     <!-- OGP -->

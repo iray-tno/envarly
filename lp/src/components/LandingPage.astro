@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import {
   GITHUB_URL,
+  LANGUAGES,
   RELEASE_URL,
   REPORTS_URL,
   STORYBOOK_URL,
@@ -26,13 +27,21 @@ const { copy } = Astro.props;
   <!-- Nav -->
   <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 backdrop-blur">
     <div class="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
-      <a href={copy.lang === 'ja' ? '/envarly/ja/' : '/envarly/'} class="font-semibold text-[var(--color-text)] tracking-tight">Envarly</a>
+      <a href={copy.canonicalPath} class="font-semibold text-[var(--color-text)] tracking-tight">Envarly</a>
       <nav class="flex items-center gap-6">
         <a href="#features" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.features}</a>
         <a href={STORYBOOK_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.storybook}</a>
         <a href={REPORTS_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.reports}</a>
         <a id="nav-github" href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
-        <a href={copy.alternatePath} class="text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.alternateLabel}</a>
+        <select
+          id="lang-select"
+          aria-label="Language"
+          class="text-sm bg-transparent border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
+        >
+          {LANGUAGES.map((l) => (
+            <option value={l.path} selected={l.code === copy.lang}>{l.label}</option>
+          ))}
+        </select>
         <a
           id="nav-download"
           href={RELEASE_URL}
@@ -301,5 +310,10 @@ const { copy } = Astro.props;
     track('nav-github', 'github_link_click');
     track('hero-github', 'github_link_click');
     track('footer-github', 'github_link_click');
+
+    document.getElementById('lang-select')?.addEventListener('change', (e) => {
+      const path = (e.target as HTMLSelectElement).value;
+      if (path) window.location.href = path;
+    });
   </script>
 </Base>
