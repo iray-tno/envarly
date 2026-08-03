@@ -69,8 +69,8 @@ export type LandingCopy = {
 export const enCopy: LandingCopy = {
   lang: 'en',
   title: 'Envarly — Windows Environment Variable Manager',
-  description: 'Edit Windows environment variables safely — PATH editing with folder pickers, secret detection, change previews, and encrypted snapshots. Free & open source.',
-  ogDescription: 'Edit Windows environment variables safely — PATH editing with folder pickers, secret detection, change previews, and encrypted snapshots. Free & open source.',
+  description: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
+  ogDescription: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
   canonicalPath: '/envarly/',
   alternatePath: '/envarly/ja/',
   alternateLabel: '日本語',
@@ -177,8 +177,8 @@ export const enCopy: LandingCopy = {
 export const jaCopy: LandingCopy = {
   lang: 'ja',
   title: 'Envarly — Windows 環境変数マネージャー',
-  description: 'Windows の環境変数を安全に編集 — フォルダ選択付きの PATH 編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。無料のオープンソースアプリです。',
-  ogDescription: 'Windows の環境変数を安全に編集 — フォルダ選択付きの PATH 編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。無料のオープンソースアプリです。',
+  description: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
+  ogDescription: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
   canonicalPath: '/envarly/ja/',
   alternatePath: '/envarly/',
   alternateLabel: 'English',
