@@ -5,14 +5,22 @@ export const REPORTS_URL = '/envarly/reports/';
 export const VERSION = '1.5.0';
 export const WINGET_COMMAND = 'winget install Envarly.Envarly';
 
+export type LandingLang = 'en' | 'ja' | 'zh-CN' | 'ru' | 'ko';
+
+export const LANGUAGES: Array<{ code: LandingLang; path: string; label: string }> = [
+  { code: 'en', path: '/envarly/', label: 'English' },
+  { code: 'ja', path: '/envarly/ja/', label: '日本語' },
+  { code: 'zh-CN', path: '/envarly/zh-cn/', label: '简体中文' },
+  { code: 'ru', path: '/envarly/ru/', label: 'Русский' },
+  { code: 'ko', path: '/envarly/ko/', label: '한국어' },
+];
+
 export type LandingCopy = {
-  lang: 'en' | 'ja';
+  lang: LandingLang;
   title: string;
   description: string;
   ogDescription: string;
   canonicalPath: string;
-  alternatePath: string;
-  alternateLabel: string;
   nav: {
     features: string;
     storybook: string;
@@ -72,8 +80,6 @@ export const enCopy: LandingCopy = {
   description: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
   ogDescription: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
   canonicalPath: '/envarly/',
-  alternatePath: '/envarly/ja/',
-  alternateLabel: '日本語',
   nav: {
     features: 'Features',
     storybook: 'Storybook',
@@ -180,8 +186,6 @@ export const jaCopy: LandingCopy = {
   description: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
   ogDescription: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
   canonicalPath: '/envarly/ja/',
-  alternatePath: '/envarly/',
-  alternateLabel: 'English',
   nav: {
     features: '機能',
     storybook: 'Storybook',
@@ -279,5 +283,323 @@ export const jaCopy: LandingCopy = {
     copyright: '© 2026 Envarly · MIT License',
     releases: 'リリース',
     license: 'ライセンス',
+  },
+};
+
+export const zhCNCopy: LandingCopy = {
+  lang: 'zh-CN',
+  title: 'Envarly — Windows 环境变量管理器',
+  description: '免费开源的 Windows 环境变量图形化编辑工具 — 支持文件夹选择的 PATH 编辑、敏感信息检测、更改预览与加密快照。',
+  ogDescription: '免费开源的 Windows 环境变量图形化编辑工具 — 支持文件夹选择的 PATH 编辑、敏感信息检测、更改预览与加密快照。',
+  canonicalPath: '/envarly/zh-cn/',
+  nav: {
+    features: '功能',
+    storybook: 'Storybook',
+    reports: '报告',
+    download: '下载',
+  },
+  hero: {
+    eyebrow: `Windows 环境变量管理器 · v${VERSION}`,
+    lead: '编辑、审计并保护你的 Windows 环境变量。应用前预览每一处更改，通过文件夹选择器整理 PATH 条目，让每一次注册表写入都清晰可控。',
+    download: `下载 Windows 版 v${VERSION}`,
+    github: '在 GitHub 上查看 →',
+  },
+  install: {
+    label: '或使用 WinGet 安装：',
+    copy: '复制',
+    copied: '已复制！',
+  },
+  screenshots: {
+    pathEditorAlt: 'Envarly — 带逐项校验和暂存更改的 PATH 编辑器',
+    applyModalAlt: 'Envarly — 显示 PATH 条目完整差异的应用确认弹窗',
+    firstLabel: '截图 1',
+    secondLabel: '截图 2',
+    prevLabel: '上一张截图',
+    nextLabel: '下一张截图',
+  },
+  featuresHeading: '功能',
+  featuresLead: '安全管理环境变量所需的一切。',
+  features: [
+    {
+      icon: '⠿',
+      title: '实用的 PATH 编辑器',
+      desc: '重新排序条目，通过实时的 ✓ / ✗ 存在性检查逐项校验，在列表和纯文本模式间切换，用键盘在行间移动，并直接选择文件夹 — 全程无需离开编辑器。',
+    },
+    {
+      icon: '⚿',
+      title: '敏感信息检测',
+      desc: '基于名称的启发式规则和值模式匹配，覆盖 35+ 种令牌格式 — 包括 GitHub、AWS、Anthropic、Stripe、npm 等。',
+    },
+    {
+      icon: '⇄',
+      title: '差异检测',
+      desc: 'Envarly 运行期间，检测其他进程对注册表所做的更改，并显示差异，可逐项选择接受。',
+    },
+    {
+      icon: '📸',
+      title: '快照与演示模式',
+      desc: '保存完整环境变量的命名快照，使用 DPAPI 加密。演示模式会打开逼真的示例数据，方便截图和演示而不影响你的实际注册表。',
+    },
+  ],
+  otherFeaturesHeading: '还包括',
+  otherFeatures: [
+    {
+      icon: '⚠',
+      title: '环境变量说明',
+      desc: '为常见变量显示简短说明，并对路径条目中无法解析的 %VAR% 引用发出警告。',
+    },
+    {
+      icon: '↩',
+      title: '暂存前的本地撤销',
+      desc: '在详情面板中暂存前，可多步 Ctrl+Z 撤销。拖动排序与文本编辑是各自独立的撤销步骤。',
+    },
+    {
+      icon: '⏳',
+      title: '应用进度与日志',
+      desc: '暂存的更改写入注册表期间，进度条和逐变量日志会准确展示发生了什么。',
+    },
+    {
+      icon: '⇅',
+      title: '导入 / 导出',
+      desc: '读写 .json 与 .reg 格式，还可导出为 PowerShell、DSC 及 Ansible 友好的文件格式。写入前均可预览。',
+    },
+    {
+      icon: '↔',
+      title: '可调整面板宽度',
+      desc: '拖动侧边栏和快照面板到你想要的宽度，重启后仍会记住。',
+    },
+    {
+      icon: '🔎',
+      title: '检查命令',
+      desc: '查明命令为何找不到 — 按名称或 exe 路径搜索有效 PATH，并标记被遮蔽的重复项。',
+    },
+  ],
+  audience: {
+    heading: '适合谁使用？',
+    paragraphs: [
+      'Envarly 专为经常在 Windows 10 / 11 上编辑用户和系统环境变量的开发者与高级用户打造 — 提供比内置 Windows 设置面板更安全、更直观的替代方案。',
+      '无论是整理杂乱的 PATH 变量、轮换存储为环境变量的 API 密钥、导入团队的 .env 基线，还是在安装失败后恢复快照 — Envarly 都能让你在写入注册表之前，完全掌握每一处更改。',
+    ],
+  },
+  stack: {
+    label: 'Built with',
+    items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
+  },
+  footer: {
+    copyright: '© 2026 Envarly · MIT License',
+    releases: '发行版',
+    license: '许可证',
+  },
+};
+
+export const ruCopy: LandingCopy = {
+  lang: 'ru',
+  title: 'Envarly — менеджер переменных окружения Windows',
+  description: 'Бесплатный опенсорсный GUI для переменных окружения Windows — безопасное редактирование PATH с выбором папок, обнаружение секретов, предпросмотр изменений, зашифрованные снимки.',
+  ogDescription: 'Бесплатный опенсорсный GUI для переменных окружения Windows — безопасное редактирование PATH с выбором папок, обнаружение секретов, предпросмотр изменений, зашифрованные снимки.',
+  canonicalPath: '/envarly/ru/',
+  nav: {
+    features: 'Возможности',
+    storybook: 'Storybook',
+    reports: 'Отчёты',
+    download: 'Скачать',
+  },
+  hero: {
+    eyebrow: `Менеджер переменных окружения Windows · v${VERSION}`,
+    lead: 'Редактируйте, проверяйте и защищайте переменные окружения Windows. Просматривайте каждое изменение перед применением, приводите PATH в порядок с помощью выбора папок и делайте каждую запись в реестр осознанной.',
+    download: `Скачать v${VERSION} для Windows`,
+    github: 'Смотреть на GitHub →',
+  },
+  install: {
+    label: 'Или установите через WinGet:',
+    copy: 'Копировать',
+    copied: 'Скопировано!',
+  },
+  screenshots: {
+    pathEditorAlt: 'Envarly — редактор PATH с проверкой каждой записи и изменениями в очереди',
+    applyModalAlt: 'Envarly — окно подтверждения применения с полным просмотром различий для записей PATH',
+    firstLabel: 'Скриншот 1',
+    secondLabel: 'Скриншот 2',
+    prevLabel: 'Предыдущий скриншот',
+    nextLabel: 'Следующий скриншот',
+  },
+  featuresHeading: 'Возможности',
+  featuresLead: 'Всё необходимое для безопасного управления переменными окружения.',
+  features: [
+    {
+      icon: '⠿',
+      title: 'Удобный редактор PATH',
+      desc: 'Меняйте порядок записей, проверяйте каждую в реальном времени (✓ / ✗ на существование), переключайтесь между списком и обычным текстом, перемещайтесь по строкам с клавиатуры и выбирайте папки — всё, не покидая редактор.',
+    },
+    {
+      icon: '⚿',
+      title: 'Обнаружение секретов',
+      desc: 'Эвристика по именам и сопоставление по шаблонам значений для более чем 35 форматов токенов — GitHub, AWS, Anthropic, Stripe, npm и другие.',
+    },
+    {
+      icon: '⇄',
+      title: 'Обнаружение различий',
+      desc: 'Обнаруживает изменения реестра, сделанные другими процессами, пока Envarly открыт. Показывает различия с выборочным применением по каждой записи.',
+    },
+    {
+      icon: '📸',
+      title: 'Снимки и демо-режим',
+      desc: 'Сохраняйте именованные снимки всего окружения, зашифрованные через DPAPI. Демо-режим открывает реалистичные тестовые данные для скриншотов и демонстраций, не затрагивая реестр.',
+    },
+  ],
+  otherFeaturesHeading: 'Также включено',
+  otherFeatures: [
+    {
+      icon: '⚠',
+      title: 'Подсказки по переменным',
+      desc: 'Показывает краткие описания для известных переменных и предупреждает о неразрешимых ссылках %VAR% в записях пути.',
+    },
+    {
+      icon: '↩',
+      title: 'Локальная отмена до постановки в очередь',
+      desc: 'Многошаговый Ctrl+Z в панели деталей до постановки в очередь. Перетаскивание и редактирование текста — отдельные шаги отмены.',
+    },
+    {
+      icon: '⏳',
+      title: 'Прогресс применения и журнал',
+      desc: 'Индикатор прогресса и журнал по каждой переменной точно показывают, что происходит при записи изменений из очереди в реестр.',
+    },
+    {
+      icon: '⇅',
+      title: 'Импорт / Экспорт',
+      desc: 'Чтение и запись форматов .json и .reg, а также экспорт в файлы, совместимые с PowerShell, DSC и Ansible. Предпросмотр перед любой записью.',
+    },
+    {
+      icon: '↔',
+      title: 'Изменяемые панели',
+      desc: 'Перетащите боковую панель и панель снимков на нужную ширину. Размеры сохраняются между перезапусками.',
+    },
+    {
+      icon: '🔎',
+      title: 'Проверка команды',
+      desc: 'Узнайте, почему команда не найдена — поиск по эффективному PATH по имени или пути к exe-файлу с выявлением перекрытых дублей.',
+    },
+  ],
+  audience: {
+    heading: 'Для кого это?',
+    paragraphs: [
+      'Envarly создан для разработчиков и опытных пользователей Windows 10 и 11, которые часто редактируют пользовательские и системные переменные окружения — и хотят более безопасную и наглядную альтернативу встроенной панели настроек Windows.',
+      'Приводите ли вы в порядок захламлённую переменную PATH, ротируете API-ключи, хранящиеся как переменные окружения, импортируете базовый .env команды или восстанавливаете снимок после неудачной установки — Envarly даёт полную видимость до того, как что-либо будет записано в реестр.',
+    ],
+  },
+  stack: {
+    label: 'Built with',
+    items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
+  },
+  footer: {
+    copyright: '© 2026 Envarly · MIT License',
+    releases: 'Релизы',
+    license: 'Лицензия',
+  },
+};
+
+export const koCopy: LandingCopy = {
+  lang: 'ko',
+  title: 'Envarly — Windows 환경 변수 관리자',
+  description: '무료 오픈소스 Windows 환경 변수 GUI — 폴더 선택 지원 PATH 편집, 민감 정보 감지, 변경 미리보기, 암호화된 스냅샷을 제공합니다.',
+  ogDescription: '무료 오픈소스 Windows 환경 변수 GUI — 폴더 선택 지원 PATH 편집, 민감 정보 감지, 변경 미리보기, 암호화된 스냅샷을 제공합니다.',
+  canonicalPath: '/envarly/ko/',
+  nav: {
+    features: '기능',
+    storybook: 'Storybook',
+    reports: '리포트',
+    download: '다운로드',
+  },
+  hero: {
+    eyebrow: `Windows 환경 변수 관리자 · v${VERSION}`,
+    lead: 'Windows 환경 변수를 편집, 점검, 보호하세요. 적용 전 모든 변경 사항을 미리 보고, 폴더 선택 기능으로 PATH 항목을 정리하며, 레지스트리에 쓰는 모든 내용을 의도한 대로 유지할 수 있습니다.',
+    download: `Windows용 v${VERSION} 다운로드`,
+    github: 'GitHub에서 보기 →',
+  },
+  install: {
+    label: '또는 WinGet으로 설치:',
+    copy: '복사',
+    copied: '복사됨!',
+  },
+  screenshots: {
+    pathEditorAlt: 'Envarly — 항목별 검증과 스테이징된 변경 사항을 보여주는 PATH 편집기',
+    applyModalAlt: 'Envarly — PATH 항목의 전체 차이를 보여주는 적용 확인 모달',
+    firstLabel: '스크린샷 1',
+    secondLabel: '스크린샷 2',
+    prevLabel: '이전 스크린샷',
+    nextLabel: '다음 스크린샷',
+  },
+  featuresHeading: '기능',
+  featuresLead: '환경 변수를 안전하게 관리하는 데 필요한 모든 것.',
+  features: [
+    {
+      icon: '⠿',
+      title: '실용적인 PATH 편집기',
+      desc: '항목 순서 변경, 실시간 ✓ / ✗ 존재 여부 검사로 항목별 검증, 목록과 일반 텍스트 전환, 키보드로 행 이동, 폴더 선택까지 — 편집기를 벗어나지 않고 모두 할 수 있습니다.',
+    },
+    {
+      icon: '⚿',
+      title: '민감 정보 감지',
+      desc: '이름 기반 휴리스틱과 값 패턴 매칭으로 GitHub, AWS, Anthropic, Stripe, npm 등 35개 이상의 토큰 형식을 감지합니다.',
+    },
+    {
+      icon: '⇄',
+      title: '외부 변경 감지',
+      desc: 'Envarly가 열려 있는 동안 다른 프로세스가 만든 레지스트리 변경을 감지합니다. 항목별로 선택하여 적용할 수 있는 차이를 보여줍니다.',
+    },
+    {
+      icon: '📸',
+      title: '스냅샷 및 데모 모드',
+      desc: '전체 환경의 이름 있는 스냅샷을 DPAPI로 암호화하여 저장합니다. 데모 모드는 실제 레지스트리를 건드리지 않고 스크린샷과 시연을 위한 사실적인 샘플 데이터를 엽니다.',
+    },
+  ],
+  otherFeaturesHeading: '이 외에도',
+  otherFeatures: [
+    {
+      icon: '⚠',
+      title: '환경 변수 안내',
+      desc: '잘 알려진 변수에 대한 간단한 설명을 보여주고, 경로 항목의 해석할 수 없는 %VAR% 참조에 대해 경고합니다.',
+    },
+    {
+      icon: '↩',
+      title: '스테이징 전 로컬 실행 취소',
+      desc: '스테이징 전 상세 패널에서 여러 단계의 Ctrl+Z를 사용할 수 있습니다. 드래그 순서 변경과 텍스트 편집은 별도의 실행 취소 단계로 취급됩니다.',
+    },
+    {
+      icon: '⏳',
+      title: '적용 진행률 및 로그',
+      desc: '스테이징된 변경 사항이 레지스트리에 기록되는 동안 진행률 표시줄과 변수별 로그로 정확히 무슨 일이 일어나는지 보여줍니다.',
+    },
+    {
+      icon: '⇅',
+      title: '가져오기 / 내보내기',
+      desc: '.json과 .reg 형식을 읽고 쓰며, PowerShell, DSC, Ansible 친화적인 파일로도 내보낼 수 있습니다. 쓰기 전에 항상 미리 볼 수 있습니다.',
+    },
+    {
+      icon: '↔',
+      title: '크기 조절 가능한 패널',
+      desc: '사이드바와 스냅샷 패널을 원하는 너비로 드래그하세요. 크기는 재시작 후에도 기억됩니다.',
+    },
+    {
+      icon: '🔎',
+      title: '명령어 확인',
+      desc: '명령어를 찾을 수 없는 이유를 확인하세요 — 이름이나 exe 경로로 유효 PATH를 검색하고 가려진 중복 항목을 표시합니다.',
+    },
+  ],
+  audience: {
+    heading: '누구를 위한 도구인가요?',
+    paragraphs: [
+      'Envarly는 Windows 10과 11에서 사용자 및 시스템 환경 변수를 자주 편집하는 개발자와 파워 유저를 위해 만들어졌습니다 — 기본 Windows 설정 패널보다 더 안전하고 시각적인 대안을 제공합니다.',
+      '어수선한 PATH 변수를 정리하든, 환경 변수로 저장된 API 키를 교체하든, 팀의 .env 기준선을 가져오든, 설치 실패 후 스냅샷을 복원하든 — Envarly는 레지스트리에 어떤 것이 기록되기 전에 완전한 가시성을 제공합니다.',
+    ],
+  },
+  stack: {
+    label: 'Built with',
+    items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
+  },
+  footer: {
+    copyright: '© 2026 Envarly · MIT License',
+    releases: '릴리스',
+    license: '라이선스',
   },
 };
