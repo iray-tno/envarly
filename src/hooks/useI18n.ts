@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 
-export type Language = "en" | "ja" | "zh-CN" | "ru";
+export type Language = "en" | "ja" | "zh-CN" | "ru" | "ko";
 
 const STORAGE_KEY = "envarly-language";
 
