@@ -20,6 +20,21 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=high
 
+  lp-npm-audit:
+    name: lp npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: lp/package-lock.json
+      - run: npm ci
+        working-directory: lp
+      - run: npm audit --audit-level=high
+        working-directory: lp
+
   cargo-audit:
     name: cargo audit
     runs-on: ubuntu-latest
