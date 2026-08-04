@@ -5,7 +5,7 @@ export const REPORTS_URL = '/envarly/reports/';
 export const VERSION = '1.5.0';
 export const WINGET_COMMAND = 'winget install Envarly.Envarly';
 
-export type LandingLang = 'en' | 'ja' | 'zh-CN' | 'ru' | 'ko';
+export type LandingLang = 'en' | 'ja' | 'zh-CN' | 'ru' | 'ko' | 'vi';
 
 export const LANGUAGES: Array<{ code: LandingLang; path: string; label: string }> = [
   { code: 'en', path: '/envarly/', label: 'English' },
@@ -13,6 +13,7 @@ export const LANGUAGES: Array<{ code: LandingLang; path: string; label: string }
   { code: 'zh-CN', path: '/envarly/zh-cn/', label: '简体中文' },
   { code: 'ru', path: '/envarly/ru/', label: 'Русский' },
   { code: 'ko', path: '/envarly/ko/', label: '한국어' },
+  { code: 'vi', path: '/envarly/vi/', label: 'Tiếng Việt' },
 ];
 
 export type LandingCopy = {
@@ -601,5 +602,111 @@ export const koCopy: LandingCopy = {
     copyright: '© 2026 Envarly · MIT License',
     releases: '릴리스',
     license: '라이선스',
+  },
+};
+
+export const viCopy: LandingCopy = {
+  lang: 'vi',
+  title: 'Envarly — Trình quản lý biến môi trường Windows',
+  description: 'GUI miễn phí, mã nguồn mở quản lý biến môi trường Windows — sửa PATH an toàn, phát hiện thông tin nhạy cảm, xem trước thay đổi, ảnh chụp nhanh mã hóa.',
+  ogDescription: 'GUI miễn phí, mã nguồn mở quản lý biến môi trường Windows — sửa PATH an toàn, phát hiện thông tin nhạy cảm, xem trước thay đổi, ảnh chụp nhanh mã hóa.',
+  canonicalPath: '/envarly/vi/',
+  nav: {
+    features: 'Tính năng',
+    storybook: 'Storybook',
+    reports: 'Báo cáo',
+    download: 'Tải xuống',
+  },
+  hero: {
+    eyebrow: `Trình quản lý biến môi trường Windows · v${VERSION}`,
+    lead: 'Chỉnh sửa, kiểm tra và bảo vệ biến môi trường Windows của bạn. Xem trước mọi thay đổi trước khi áp dụng, dọn dẹp các mục PATH bằng công cụ chọn thư mục, và giữ mọi lần ghi vào registry đều có chủ đích.',
+    download: `Tải xuống v${VERSION} cho Windows`,
+    github: 'Xem trên GitHub →',
+  },
+  install: {
+    label: 'Hoặc cài đặt bằng WinGet:',
+    copy: 'Sao chép',
+    copied: 'Đã sao chép!',
+  },
+  screenshots: {
+    pathEditorAlt: 'Envarly — trình chỉnh sửa PATH với kiểm tra từng mục và thay đổi đang chờ',
+    applyModalAlt: 'Envarly — hộp thoại xác nhận áp dụng với chế độ xem đầy đủ khác biệt cho các mục PATH',
+    firstLabel: 'Ảnh chụp màn hình 1',
+    secondLabel: 'Ảnh chụp màn hình 2',
+    prevLabel: 'Ảnh chụp màn hình trước',
+    nextLabel: 'Ảnh chụp màn hình tiếp theo',
+  },
+  featuresHeading: 'Tính năng',
+  featuresLead: 'Mọi thứ bạn cần để quản lý biến môi trường một cách an toàn.',
+  features: [
+    {
+      icon: '⠿',
+      title: 'Trình chỉnh sửa PATH thực dụng',
+      desc: 'Sắp xếp lại các mục, kiểm tra từng mục bằng dấu ✓ / ✗ theo thời gian thực, chuyển đổi giữa dạng danh sách và văn bản thuần, di chuyển qua các dòng bằng bàn phím, và chọn thư mục — tất cả mà không cần rời khỏi trình chỉnh sửa.',
+    },
+    {
+      icon: '⚿',
+      title: 'Phát hiện thông tin nhạy cảm',
+      desc: 'Suy đoán dựa trên tên biến và đối chiếu mẫu giá trị trên hơn 35 định dạng token — GitHub, AWS, Anthropic, Stripe, npm và nhiều hơn nữa.',
+    },
+    {
+      icon: '⇄',
+      title: 'Phát hiện thay đổi bên ngoài',
+      desc: 'Phát hiện các thay đổi registry do tiến trình khác thực hiện trong khi Envarly đang mở. Hiển thị khác biệt và cho phép áp dụng chọn lọc từng mục.',
+    },
+    {
+      icon: '📸',
+      title: 'Ảnh chụp nhanh & chế độ demo',
+      desc: 'Lưu các ảnh chụp nhanh có tên của toàn bộ môi trường, được mã hóa bằng DPAPI. Chế độ demo mở dữ liệu mẫu chân thực để chụp màn hình và trình diễn mà không ảnh hưởng đến registry thật của bạn.',
+    },
+  ],
+  otherFeaturesHeading: 'Còn có thêm',
+  otherFeatures: [
+    {
+      icon: '⚠',
+      title: 'Hướng dẫn về biến môi trường',
+      desc: 'Hiển thị mô tả ngắn gọn cho các biến phổ biến và cảnh báo khi có tham chiếu %VAR% không thể giải quyết trong các mục đường dẫn.',
+    },
+    {
+      icon: '↩',
+      title: 'Hoàn tác cục bộ trước khi xếp hàng',
+      desc: 'Ctrl+Z nhiều bước trong bảng chi tiết trước khi xếp hàng. Sắp xếp lại bằng kéo thả và chỉnh sửa văn bản là các bước hoàn tác độc lập.',
+    },
+    {
+      icon: '⏳',
+      title: 'Tiến trình áp dụng & nhật ký',
+      desc: 'Thanh tiến trình và nhật ký theo từng biến cho biết chính xác điều gì đang xảy ra khi các thay đổi đang chờ được ghi vào registry.',
+    },
+    {
+      icon: '⇅',
+      title: 'Nhập / Xuất',
+      desc: 'Đọc và ghi định dạng .json và .reg, cùng khả năng xuất sang các tệp thân thiện với PowerShell, DSC và Ansible. Xem trước trước khi ghi bất kỳ điều gì.',
+    },
+    {
+      icon: '↔',
+      title: 'Bảng có thể đổi kích thước',
+      desc: 'Kéo thanh bên và bảng ảnh chụp nhanh đến độ rộng bạn muốn. Kích thước được ghi nhớ qua các lần khởi động lại.',
+    },
+    {
+      icon: '🔎',
+      title: 'Kiểm tra lệnh',
+      desc: 'Tìm hiểu tại sao một lệnh không được tìm thấy — tìm kiếm PATH hiệu lực theo tên hoặc đường dẫn exe và đánh dấu các bản sao bị che khuất.',
+    },
+  ],
+  audience: {
+    heading: 'Dành cho ai?',
+    paragraphs: [
+      'Envarly được xây dựng cho các nhà phát triển và người dùng có kinh nghiệm trên Windows 10 và 11, những người thường xuyên chỉnh sửa biến môi trường Người dùng và Hệ thống — và muốn một giải pháp thay thế an toàn hơn, trực quan hơn so với bảng Cài đặt tích hợp sẵn của Windows.',
+      'Dù bạn đang dọn dẹp một biến PATH lộn xộn, xoay vòng API key được lưu dưới dạng biến môi trường, nhập baseline .env của nhóm, hay khôi phục ảnh chụp nhanh sau một lần cài đặt lỗi — Envarly cho bạn toàn quyền kiểm soát trước khi bất kỳ điều gì được ghi vào registry.',
+    ],
+  },
+  stack: {
+    label: 'Built with',
+    items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
+  },
+  footer: {
+    copyright: '© 2026 Envarly · MIT License',
+    releases: 'Bản phát hành',
+    license: 'Giấy phép',
   },
 };
