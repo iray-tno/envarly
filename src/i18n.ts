@@ -4,10 +4,11 @@ import en from "./locales/en.json";
 import ja from "./locales/ja.json";
 import ko from "./locales/ko.json";
 import ru from "./locales/ru.json";
+import vi from "./locales/vi.json";
 import zhCN from "./locales/zh-CN.json";
 
 const STORAGE_KEY = "envarly-language";
-const SUPPORTED_LANGUAGES = ["en", "ja", "zh-CN", "ru", "ko"] as const;
+const SUPPORTED_LANGUAGES = ["en", "ja", "zh-CN", "ru", "ko", "vi"] as const;
 
 function getStoredLanguage() {
   try {
@@ -25,6 +26,7 @@ function detectLanguage(): (typeof SUPPORTED_LANGUAGES)[number] {
   if (detected.startsWith("ja")) return "ja";
   if (detected.startsWith("ru")) return "ru";
   if (detected.startsWith("ko")) return "ko";
+  if (detected.startsWith("vi")) return "vi";
   return "en";
 }
 
@@ -39,6 +41,7 @@ i18n.use(initReactI18next).init({
     "zh-CN": { translation: zhCN },
     ru: { translation: ru },
     ko: { translation: ko },
+    vi: { translation: vi },
   },
   lng,
   fallbackLng: "en",
