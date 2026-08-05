@@ -4,9 +4,11 @@
 // transitions, sparse during holds — full 30fps capture the whole way through
 // isn't achievable over CDP round-trips, and isn't needed: most of the motion
 // is the app's own CSS transitions, not continuous cursor movement) plus
-// frames/manifest.json, which is the single source of truth for both frame
-// timing and captions. media/remotion/Root.tsx just renders whatever this
-// manifest says — edit the narrative here, not there.
+// frames/manifest.json, which is the single source of truth for frame timing,
+// captions, AND click positions (so Remotion can draw a synthetic cursor —
+// Playwright screenshots never include the real one). media/remotion/*.jsx
+// just renders whatever this manifest says — edit the narrative here, not
+// there.
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
@@ -50,6 +52,7 @@ async function waitForCdp(url, timeoutMs = 20000) {
 // --- Timeline recorder ---------------------------------------------------
 const frames = [];
 const captions = [];
+const clicks = [];
 let frameIndex = 0;
 
 async function shot(page, holdMs) {
@@ -83,6 +86,20 @@ function caption(text, durationMs) {
   captions.push({ text, startMs, endMs: startMs + durationMs });
 }
 
+/**
+ * Click a locator, recording the center of its bounding box (in the same
+ * 1200x760 content coordinate space as the screenshots) at the current point
+ * in the timeline — this is what lets Remotion draw a synthetic cursor that
+ * actually moves to the real click targets, instead of a hardcoded path.
+ */
+async function clickOn(locator) {
+  const box = await locator.boundingBox();
+  if (box) {
+    clicks.push({ x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2), atMs: totalMsSoFar() });
+  }
+  await locator.click();
+}
+
 // --- Drive the app ---------------------------------------------------------
 const exe = resolveExe();
 console.log(`Launching ${exe} --demo (CDP :${CDP_PORT})`);
@@ -112,35 +129,35 @@ try {
   hold(2200);
 
   // 2. Select Path (User) — reveals the "1 path not found on disk" warning.
-  await pathUserRow.click();
+  await clickOn(pathUserRow);
   await burst(page, 6, 80);
   caption("...like a PATH entry that doesn't exist on disk", 2200);
   hold(1600);
 
   // 3. Remove the missing entry.
-  await page.getByLabel("Remove C:\\Users\\demo\\Tools\\missing-bin").click();
+  await clickOn(page.getByLabel("Remove C:\\Users\\demo\\Tools\\missing-bin"));
   await burst(page, 8, 70);
   caption("Fix it, then stage the change...", 1500);
   hold(500);
 
   // 4. Stage it.
-  await page.getByRole("button", { name: "Stage", exact: true }).click();
+  await clickOn(page.getByRole("button", { name: "Stage", exact: true }));
   await burst(page, 5, 80);
   hold(700);
 
   // 5. Open the Apply confirmation modal (Full diff view).
-  await page.getByRole("button", { name: /staged/i }).click();
+  await clickOn(page.getByRole("button", { name: /staged/i }));
   await burst(page, 10, 60);
   const fullTab = page.getByRole("button", { name: "full" });
   if (await fullTab.isVisible().catch(() => false)) {
-    await fullTab.click();
+    await clickOn(fullTab);
     await burst(page, 4, 60);
   }
   caption("...and review exactly what will change before it's written", 3000);
   hold(2200);
 
   // 6. Apply.
-  await page.getByRole("button", { name: /Apply \d+ change/ }).click();
+  await clickOn(page.getByRole("button", { name: /Apply \d+ change/ }));
   await burst(page, 10, 80);
   caption("Nothing touches the registry until you say so", 2000);
   hold(1200);
@@ -149,9 +166,9 @@ try {
 
   writeFileSync(
     join(framesDir, "manifest.json"),
-    JSON.stringify({ fps: 30, frames, captions }, null, 2),
+    JSON.stringify({ fps: 30, frames, captions, clicks }, null, 2),
   );
-  console.log(`Captured ${frames.length} frames, ${(totalMsSoFar() / 1000).toFixed(1)}s total`);
+  console.log(`Captured ${frames.length} frames, ${clicks.length} clicks, ${(totalMsSoFar() / 1000).toFixed(1)}s total`);
 } finally {
   child.kill();
 }
