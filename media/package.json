@@ -1,0 +1,15 @@
+{
+  "name": "envarly-media",
+  "private": true,
+  "type": "module",
+  "description": "Automated demo screenshot + walkthrough video generation for Envarly. Drives the real app (--demo mode) via Playwright-over-CDP so assets stay in sync with the actual UI. See README.md.",
+  "scripts": {
+    "build:titlebar": "node build-titlebar.mjs",
+    "capture:screenshots": "node capture.mjs",
+    "compose:screenshots": "node compose.mjs",
+    "screenshots": "npm run capture:screenshots && npm run compose:screenshots"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}
