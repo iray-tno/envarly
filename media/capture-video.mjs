@@ -125,25 +125,25 @@ try {
   // 1. Opening shot: default dashboard.
   await page.waitForTimeout(300);
   await shot(page, 33);
-  caption("Envarly finds problems in your environment variables...", 2200);
-  hold(2200);
+  caption("Envarly finds problems in your environment variables...", 3800);
+  hold(3800);
 
   // 2. Select Path (User) — reveals the "1 path not found on disk" warning.
   await clickOn(pathUserRow);
   await burst(page, 6, 80);
-  caption("...like a PATH entry that doesn't exist on disk", 2200);
-  hold(1600);
+  caption("...like a PATH entry that doesn't exist on disk", 3200);
+  hold(3200);
 
   // 3. Remove the missing entry.
   await clickOn(page.getByLabel("Remove C:\\Users\\demo\\Tools\\missing-bin"));
   await burst(page, 8, 70);
-  caption("Fix it, then stage the change...", 1500);
-  hold(500);
+  caption("Fix it, then stage the change...", 2600);
+  hold(2600);
 
   // 4. Stage it.
   await clickOn(page.getByRole("button", { name: "Stage", exact: true }));
   await burst(page, 5, 80);
-  hold(700);
+  hold(900);
 
   // 5. Open the Apply confirmation modal (Full diff view).
   await clickOn(page.getByRole("button", { name: /staged/i }));
@@ -153,14 +153,14 @@ try {
     await clickOn(fullTab);
     await burst(page, 4, 60);
   }
-  caption("...and review exactly what will change before it's written", 3000);
-  hold(2200);
+  caption("...and review every change before it's written", 3800);
+  hold(3800);
 
   // 6. Apply.
   await clickOn(page.getByRole("button", { name: /Apply \d+ change/ }));
   await burst(page, 10, 80);
-  caption("Nothing touches the registry until you say so", 2000);
-  hold(1200);
+  caption("Nothing touches the registry until you say so", 3400);
+  hold(3400);
 
   await browser.close();
 
