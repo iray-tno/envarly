@@ -144,6 +144,19 @@ const { copy } = Astro.props;
       <div class="mx-auto">
         <div class="relative overflow-hidden rounded-xl shadow-2xl shadow-[var(--color-accent)]/5">
           <div id="carousel-track" class="flex" style="transition: transform 0.45s cubic-bezier(.4,0,.2,1)">
+            <video
+              id="carousel-video"
+              src="/envarly/walkthrough.mp4"
+              poster="/envarly/screenshot-path-editor.png"
+              aria-label={copy.screenshots.videoAlt}
+              width="1200"
+              height="800"
+              class="w-full shrink-0"
+              autoplay
+              muted
+              playsinline
+              preload="auto"
+            />
             <img
               src="/envarly/screenshot-path-editor.png"
               alt={copy.screenshots.pathEditorAlt}
@@ -178,16 +191,19 @@ const { copy } = Astro.props;
         </div>
         <!-- Dots -->
         <div class="flex justify-center gap-2 mt-4">
-          <button id="dot-0" aria-label={copy.screenshots.firstLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-accent)"></button>
-          <button id="dot-1" aria-label={copy.screenshots.secondLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-muted);opacity:0.4"></button>
+          <button id="dot-0" aria-label={copy.screenshots.videoLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-accent)"></button>
+          <button id="dot-1" aria-label={copy.screenshots.firstLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-muted);opacity:0.4"></button>
+          <button id="dot-2" aria-label={copy.screenshots.secondLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-muted);opacity:0.4"></button>
         </div>
       </div>
       <script>
         {
           const track = document.getElementById('carousel-track');
-          const dots = [document.getElementById('dot-0'), document.getElementById('dot-1')];
+          const dots = [document.getElementById('dot-0'), document.getElementById('dot-1'), document.getElementById('dot-2')];
           const prevBtn = document.getElementById('carousel-prev');
           const nextBtn = document.getElementById('carousel-next');
+          const video = document.getElementById('carousel-video') as HTMLVideoElement | null;
+          const VIDEO_SLIDE = 0;
           let current = 0;
           let timer: ReturnType<typeof setInterval>;
 
@@ -198,10 +214,28 @@ const { copy } = Astro.props;
               (d as HTMLElement).style.background = j === i ? 'var(--color-accent)' : 'var(--color-muted)';
               (d as HTMLElement).style.opacity = j === i ? '1' : '0.4';
             });
+            if (video) {
+              if (i === VIDEO_SLIDE) {
+                video.currentTime = 0;
+                video.play().catch(() => {});
+              } else {
+                video.pause();
+              }
+            }
           }
 
+          // The video slide advances itself when playback finishes (it's
+          // ~20s, far longer than the 5s image interval); the other slides
+          // still advance on a fixed timer.
+          video?.addEventListener('ended', () => {
+            if (current === VIDEO_SLIDE) restart((current + 1) % dots.length);
+          });
+
           function startAuto() {
-            timer = setInterval(() => goTo((current + 1) % dots.length), 5000);
+            timer = setInterval(() => {
+              if (current === VIDEO_SLIDE) return;
+              goTo((current + 1) % dots.length);
+            }, 5000);
           }
 
           function restart(i: number) {

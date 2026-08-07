@@ -7,9 +7,17 @@
     "build:titlebar": "node build-titlebar.mjs",
     "capture:screenshots": "node capture.mjs",
     "compose:screenshots": "node compose.mjs",
-    "screenshots": "npm run capture:screenshots && npm run compose:screenshots"
+    "screenshots": "npm run capture:screenshots && npm run compose:screenshots",
+    "capture:video": "node capture-video.mjs",
+    "render:video": "remotion render remotion/index.jsx Walkthrough out/walkthrough.mp4",
+    "render:gif": "remotion render remotion/index.jsx Walkthrough out/walkthrough.gif --codec=gif"
   },
   "devDependencies": {
-    "playwright": "^1.61.1"
+    "playwright": "^1.61.1",
+    "remotion": "^4.0.506",
+    "@remotion/cli": "^4.0.506",
+    "@remotion/gif": "^4.0.506",
+    "react": "^19",
+    "react-dom": "^19"
   }
 }
