@@ -40,8 +40,10 @@ export type LandingCopy = {
     copied: string;
   };
   screenshots: {
+    videoAlt: string;
     pathEditorAlt: string;
     applyModalAlt: string;
+    videoLabel: string;
     firstLabel: string;
     secondLabel: string;
     prevLabel: string;
@@ -99,8 +101,10 @@ export const enCopy: LandingCopy = {
     copied: 'Copied!',
   },
   screenshots: {
+    videoAlt: 'Envarly — short walkthrough: fixing a broken PATH entry and reviewing the change before applying it',
     pathEditorAlt: 'Envarly — PATH editor with per-entry validation and staged change',
     applyModalAlt: 'Envarly — Apply confirmation modal with Full diff view for PATH entries',
+    videoLabel: 'Walkthrough video',
     firstLabel: 'Screenshot 1',
     secondLabel: 'Screenshot 2',
     prevLabel: 'Previous screenshot',
@@ -205,8 +209,10 @@ export const jaCopy: LandingCopy = {
     copied: 'コピーしました！',
   },
   screenshots: {
+    videoAlt: 'Envarly — 短いウォークスルー: 壊れた PATH エントリを修正し、適用前に変更内容を確認する',
     pathEditorAlt: 'Envarly — エントリごとの検証とステージ済み変更を表示する PATH エディター',
     applyModalAlt: 'Envarly — PATH エントリの詳細差分を表示する適用確認モーダル',
+    videoLabel: 'ウォークスルー動画',
     firstLabel: 'スクリーンショット 1',
     secondLabel: 'スクリーンショット 2',
     prevLabel: '前のスクリーンショット',
@@ -311,8 +317,10 @@ export const zhCNCopy: LandingCopy = {
     copied: '已复制！',
   },
   screenshots: {
+    videoAlt: 'Envarly — 简短演示：修复失效的 PATH 条目，并在应用前查看更改内容',
     pathEditorAlt: 'Envarly — 带逐项校验和暂存更改的 PATH 编辑器',
     applyModalAlt: 'Envarly — 显示 PATH 条目完整差异的应用确认弹窗',
+    videoLabel: '演示视频',
     firstLabel: '截图 1',
     secondLabel: '截图 2',
     prevLabel: '上一张截图',
@@ -417,8 +425,10 @@ export const ruCopy: LandingCopy = {
     copied: 'Скопировано!',
   },
   screenshots: {
+    videoAlt: 'Envarly — короткая демонстрация: исправление неработающей записи PATH и просмотр изменения перед применением',
     pathEditorAlt: 'Envarly — редактор PATH с проверкой каждой записи и изменениями в очереди',
     applyModalAlt: 'Envarly — окно подтверждения применения с полным просмотром различий для записей PATH',
+    videoLabel: 'Видео с демонстрацией',
     firstLabel: 'Скриншот 1',
     secondLabel: 'Скриншот 2',
     prevLabel: 'Предыдущий скриншот',
@@ -523,8 +533,10 @@ export const koCopy: LandingCopy = {
     copied: '복사됨!',
   },
   screenshots: {
+    videoAlt: 'Envarly — 짧은 둘러보기: 손상된 PATH 항목을 수정하고 적용 전에 변경 사항을 검토합니다',
     pathEditorAlt: 'Envarly — 항목별 검증과 스테이징된 변경 사항을 보여주는 PATH 편집기',
     applyModalAlt: 'Envarly — PATH 항목의 전체 차이를 보여주는 적용 확인 모달',
+    videoLabel: '둘러보기 영상',
     firstLabel: '스크린샷 1',
     secondLabel: '스크린샷 2',
     prevLabel: '이전 스크린샷',
@@ -629,8 +641,10 @@ export const viCopy: LandingCopy = {
     copied: 'Đã sao chép!',
   },
   screenshots: {
+    videoAlt: 'Envarly — video ngắn: sửa một mục PATH bị lỗi và xem lại thay đổi trước khi áp dụng',
     pathEditorAlt: 'Envarly — trình chỉnh sửa PATH với kiểm tra từng mục và thay đổi đang chờ',
     applyModalAlt: 'Envarly — hộp thoại xác nhận áp dụng với chế độ xem đầy đủ khác biệt cho các mục PATH',
+    videoLabel: 'Video giới thiệu',
     firstLabel: 'Ảnh chụp màn hình 1',
     secondLabel: 'Ảnh chụp màn hình 2',
     prevLabel: 'Ảnh chụp màn hình trước',

@@ -12,6 +12,10 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 
 ![Envarly dark mode](docs/screenshot-dark.png)
 
+## Walkthrough
+
+![Envarly walkthrough: fixing a broken PATH entry, staging the change, and reviewing the diff before applying it](docs/walkthrough.gif)
+
 ## Features
 
 - **2-pane UI** — sidebar variable list with search/filter and scope tabs (All / User / System), detail editor on the right
