@@ -42,6 +42,7 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 - **WM\_SETTINGCHANGE broadcast** — running apps pick up changes without a restart
 - **Resizable panels** — drag the sidebar and snapshots panel to the width you want; sizes persist across restarts
 - **Check command** — find out why a command isn't found: searches the effective PATH (User + System merged, PATHEXT-aware) for a name or exe path and flags shadowed duplicates
+- **6 languages** — English, 日本語, 简体中文, Русский, 한국어, and Tiếng Việt; switch anytime from the header, including the ~150 built-in variable descriptions
 
 ## Stack
 

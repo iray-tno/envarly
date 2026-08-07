@@ -2,7 +2,7 @@ export const GITHUB_URL = 'https://github.com/iray-tno/envarly';
 export const RELEASE_URL = 'https://github.com/iray-tno/envarly/releases/latest';
 export const STORYBOOK_URL = '/envarly/storybook/';
 export const REPORTS_URL = '/envarly/reports/';
-export const VERSION = '1.5.0';
+export const VERSION = '1.6.0';
 export const WINGET_COMMAND = 'winget install Envarly.Envarly';
 
 export type LandingLang = 'en' | 'ja' | 'zh-CN' | 'ru' | 'ko' | 'vi';
