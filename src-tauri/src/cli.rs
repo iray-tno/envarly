@@ -1,4 +1,4 @@
-use crate::model::{EnvSnapshot, VarScope};
+use crate::model::{EnvChange, EnvSnapshot, VarScope};
 /// Read-only CLI commands. No subcommand → the caller launches the GUI instead.
 use clap::{Parser, Subcommand, ValueEnum};
 
@@ -56,6 +56,34 @@ enum Command {
         #[arg(long)]
         apply: bool,
     },
+    /// Set a single environment variable. Dry-run by default — nothing is
+    /// written unless --apply is passed.
+    Set {
+        /// Variable name (matched case-sensitively against the registry, like `import`)
+        name: String,
+        /// New value
+        value: String,
+        #[arg(long, value_enum, default_value_t = WriteScopeArg::User)]
+        scope: WriteScopeArg,
+        #[arg(long, value_enum, default_value_t = KindArg::Auto)]
+        kind: KindArg,
+        /// Actually write the change to the registry. Without this flag,
+        /// only prints what would change.
+        #[arg(long)]
+        apply: bool,
+    },
+    /// Delete a single environment variable. Dry-run by default — nothing is
+    /// written unless --apply is passed.
+    Delete {
+        /// Variable name (matched case-sensitively against the registry, like `import`)
+        name: String,
+        #[arg(long, value_enum, default_value_t = WriteScopeArg::User)]
+        scope: WriteScopeArg,
+        /// Actually write the change to the registry. Without this flag,
+        /// only prints what would change.
+        #[arg(long)]
+        apply: bool,
+    },
     /// Internal: remove Envarly install directory from PATH. Called by the uninstaller.
     #[command(name = "path-cleanup", hide = true)]
     PathCleanup {
@@ -103,6 +131,22 @@ enum StrategyArg {
     #[default]
     Merge,
     Replace,
+}
+
+/// Scope for a single-variable write. No `All` — a write always targets one scope.
+#[derive(Clone, ValueEnum, Default)]
+enum WriteScopeArg {
+    #[default]
+    User,
+    System,
+}
+
+#[derive(Clone, Copy, ValueEnum, Default)]
+enum KindArg {
+    #[default]
+    Auto,
+    String,
+    ExpandString,
 }
 
 /// Parse CLI args and execute the subcommand. Never returns — exits the process.
@@ -211,7 +255,6 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
             apply,
         } => {
             use crate::import::{diff_for_import, ImportStrategy};
-            use crate::model::EnvChange;
 
             let content =
                 std::fs::read_to_string(&file).map_err(crate::error::EnvarlyError::Registry)?;
@@ -276,37 +319,113 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
                 }
             }
 
-            if !apply {
-                println!("\nRun with --apply to write these changes to the registry.");
+            write_changes(&changes, apply)?;
+        }
+
+        Command::Set {
+            name,
+            value,
+            scope,
+            kind,
+            apply,
+        } => {
+            let write_scope = match scope {
+                WriteScopeArg::User => VarScope::User,
+                WriteScopeArg::System => VarScope::System,
+            };
+            let current = env_store::read_snapshot()?;
+            let existing = current_entry(&current, &write_scope, &name);
+            let value_kind = crate::import::resolve_set_kind(explicit_kind(kind), &value, existing);
+
+            let unchanged = existing
+                .is_some_and(|e| e.value == value && crate::import::resolve_kind(e) == value_kind);
+            if unchanged {
+                println!("Already up to date — nothing to change.");
                 return Ok(());
             }
 
-            println!();
-            let result = env_store::apply_changes(&changes, |index, total, change, result| {
-                let name = match change {
-                    EnvChange::Set { name, .. } | EnvChange::Delete { name, .. } => name,
-                };
-                match result {
-                    Ok(()) => println!("  [{}/{}] ok {}", index + 1, total, name),
-                    Err(e) => println!("  [{}/{}] FAILED {} ({})", index + 1, total, name, e),
-                }
-            });
-
-            match result {
-                Ok(()) => println!(
-                    "\nApplied {} change{}.",
-                    changes.len(),
-                    if changes.len() == 1 { "" } else { "s" }
+            match existing {
+                Some(e) if e.value != value => println!(
+                    "  ~ {}={} (was {})  [{}]",
+                    name,
+                    value,
+                    e.value,
+                    scope_tag(&write_scope)
                 ),
-                Err(e) => {
-                    eprintln!("\nApply failed, rolled back: {}", e);
-                    std::process::exit(1);
-                }
+                Some(_) => println!("  ~ {}={}  [{}]", name, value, scope_tag(&write_scope)),
+                None => println!("  + {}={}  [{}]", name, value, scope_tag(&write_scope)),
             }
+            print_critical_warning(&write_scope, &name);
+
+            let changes = vec![EnvChange::Set {
+                name,
+                value,
+                value_kind,
+                scope: write_scope,
+            }];
+            write_changes(&changes, apply)?;
+        }
+
+        Command::Delete { name, scope, apply } => {
+            let write_scope = match scope {
+                WriteScopeArg::User => VarScope::User,
+                WriteScopeArg::System => VarScope::System,
+            };
+            let current = env_store::read_snapshot()?;
+            if current_entry(&current, &write_scope, &name).is_none() {
+                eprintln!(
+                    "Variable '{}' not found in {} scope",
+                    name,
+                    scope_tag(&write_scope)
+                );
+                std::process::exit(1);
+            }
+
+            println!("  - {}  [{}]", name, scope_tag(&write_scope));
+            print_critical_warning(&write_scope, &name);
+
+            let changes = vec![EnvChange::Delete {
+                name,
+                scope: write_scope,
+            }];
+            write_changes(&changes, apply)?;
         }
     }
 
     Ok(())
+}
+
+fn write_changes(changes: &[EnvChange], apply: bool) -> Result<(), crate::error::EnvarlyError> {
+    if !apply {
+        println!("\nRun with --apply to write these changes to the registry.");
+        return Ok(());
+    }
+
+    println!();
+    let result = crate::env_store::apply_changes(changes, |index, total, change, result| {
+        let name = match change {
+            EnvChange::Set { name, .. } | EnvChange::Delete { name, .. } => name,
+        };
+        match result {
+            Ok(()) => println!("  [{}/{}] ok {}", index + 1, total, name),
+            Err(e) => println!("  [{}/{}] FAILED {} ({})", index + 1, total, name, e),
+        }
+    });
+
+    match result {
+        Ok(()) => {
+            println!(
+                "\nApplied {} change{}.",
+                changes.len(),
+                if changes.len() == 1 { "" } else { "s" }
+            );
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("\nApply failed, rolled back: {}", e);
+            std::process::exit(1);
+        }
+    }
 }
 
 fn current_value<'a>(current: &'a EnvSnapshot, scope: &VarScope, name: &str) -> Option<&'a str> {
@@ -323,5 +442,41 @@ fn scope_tag(scope: &VarScope) -> &'static str {
         VarScope::User => "User",
         VarScope::System => "System",
         VarScope::OtherUser => "OtherUser",
+    }
+}
+
+fn current_entry<'a>(
+    current: &'a EnvSnapshot,
+    scope: &VarScope,
+    name: &str,
+) -> Option<&'a crate::model::EnvValue> {
+    let map = match scope {
+        VarScope::User => &current.user,
+        VarScope::System => &current.system,
+        VarScope::OtherUser => return None,
+    };
+    map.get(name)
+}
+
+fn explicit_kind(kind: KindArg) -> Option<crate::model::EnvValueKind> {
+    match kind {
+        KindArg::Auto => None,
+        KindArg::String => Some(crate::model::EnvValueKind::String),
+        KindArg::ExpandString => Some(crate::model::EnvValueKind::ExpandString),
+    }
+}
+
+/// Mirrors `CRITICAL_VARS` in `src/components/StagedModal/StagedModal.tsx` —
+/// informational only, doesn't block the write.
+const CRITICAL_VARS: [&str; 3] = ["SYSTEMROOT", "WINDIR", "COMSPEC"];
+
+fn print_critical_warning(scope: &VarScope, name: &str) {
+    if matches!(scope, VarScope::System)
+        && CRITICAL_VARS.contains(&name.to_ascii_uppercase().as_str())
+    {
+        println!(
+            "  ⚠ {} is a critical system variable — changing it can break Windows or running applications.",
+            name
+        );
     }
 }
