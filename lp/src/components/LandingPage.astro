@@ -321,6 +321,9 @@ const { copy } = Astro.props;
 
   <!-- Footer -->
   <footer class="border-t border-[var(--color-border)] mt-12">
+    <p class="mx-auto max-w-2xl px-6 pt-6 text-xs text-[var(--color-muted)] text-center leading-relaxed">
+      {copy.privacyNote}
+    </p>
     <div class="mx-auto max-w-5xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
       <span class="text-xs text-[var(--color-muted)]">{copy.footer.copyright}</span>
       <div class="flex items-center gap-6">
