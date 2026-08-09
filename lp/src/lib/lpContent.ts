@@ -70,6 +70,7 @@ export type LandingCopy = {
     label: string;
     items: string[];
   };
+  privacyNote: string;
   footer: {
     copyright: string;
     releases: string;
@@ -178,6 +179,7 @@ export const enCopy: LandingCopy = {
     label: 'Built with',
     items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
   },
+  privacyNote: "No telemetry in the app — its only network call is a daily version check against GitHub. (This website uses analytics; the app doesn't.)",
   footer: {
     copyright: '© 2026 Envarly · MIT License',
     releases: 'Releases',
@@ -286,6 +288,7 @@ export const jaCopy: LandingCopy = {
     label: 'Built with',
     items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
   },
+  privacyNote: 'アプリ本体にテレメトリはありません — 唯一の通信は GitHub への日次バージョンチェックだけです。(この Web サイトはアクセス解析を使っていますが、アプリ本体は使っていません。)',
   footer: {
     copyright: '© 2026 Envarly · MIT License',
     releases: 'リリース',
@@ -394,6 +397,7 @@ export const zhCNCopy: LandingCopy = {
     label: 'Built with',
     items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
   },
+  privacyNote: '应用本身不含任何遥测 — 唯一的网络请求是每天向 GitHub 检查新版本。（本网站使用网站访问分析，应用本身不使用。）',
   footer: {
     copyright: '© 2026 Envarly · MIT License',
     releases: '发行版',
@@ -502,6 +506,7 @@ export const ruCopy: LandingCopy = {
     label: 'Built with',
     items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
   },
+  privacyNote: 'В приложении нет телеметрии — единственный сетевой запрос — ежедневная проверка новой версии на GitHub. (Этот сайт использует веб-аналитику, само приложение — нет.)',
   footer: {
     copyright: '© 2026 Envarly · MIT License',
     releases: 'Релизы',
@@ -610,6 +615,7 @@ export const koCopy: LandingCopy = {
     label: 'Built with',
     items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
   },
+  privacyNote: '앱에는 텔레메트리가 없습니다 — 유일한 네트워크 요청은 GitHub에서 매일 새 버전을 확인하는 것뿐입니다. (이 웹사이트는 방문자 분석을 사용하지만, 앱 자체는 사용하지 않습니다.)',
   footer: {
     copyright: '© 2026 Envarly · MIT License',
     releases: '릴리스',
@@ -718,6 +724,7 @@ export const viCopy: LandingCopy = {
     label: 'Built with',
     items: ['Tauri v2', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Rust'],
   },
+  privacyNote: 'Ứng dụng không thu thập dữ liệu từ xa — yêu cầu mạng duy nhất là kiểm tra phiên bản mới hằng ngày trên GitHub. (Trang web này sử dụng công cụ phân tích truy cập, bản thân ứng dụng thì không.)',
   footer: {
     copyright: '© 2026 Envarly · MIT License',
     releases: 'Bản phát hành',

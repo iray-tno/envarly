@@ -16,6 +16,12 @@ Windows environment variable manager built with Tauri v2, React, TypeScript, and
 
 ![Envarly walkthrough: fixing a broken PATH entry, staging the change, and reviewing the diff before applying it](docs/walkthrough.gif)
 
+## Privacy
+
+Envarly collects no telemetry and sends no data anywhere. The only network request the app makes is a passive daily check against the GitHub Releases API for a newer version — it sends nothing about you or your machine, just a GET request.
+
+(The [landing page](https://iray-tno.github.io/envarly/) uses standard web analytics to understand traffic — that's separate from the app itself, which has none.)
+
 ## Features
 
 - **2-pane UI** — sidebar variable list with search/filter and scope tabs (All / User / System), detail editor on the right
