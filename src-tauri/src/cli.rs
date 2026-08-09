@@ -1,3 +1,4 @@
+use crate::model::{EnvSnapshot, VarScope};
 /// Read-only CLI commands. No subcommand → the caller launches the GUI instead.
 use clap::{Parser, Subcommand, ValueEnum};
 
@@ -38,6 +39,23 @@ enum Command {
         #[arg(short, long)]
         output: Option<std::path::PathBuf>,
     },
+    /// Import environment variables from a previously exported file. Dry-run
+    /// by default — nothing is written to the registry unless --apply is
+    /// passed.
+    Import {
+        /// Path to a previously exported .json or .reg file
+        file: std::path::PathBuf,
+        #[arg(long, value_enum, default_value_t = ImportFormat::Json)]
+        format: ImportFormat,
+        #[arg(long, value_enum, default_value_t = ScopeArg::All)]
+        scope: ScopeArg,
+        #[arg(long, value_enum, default_value_t = StrategyArg::Merge)]
+        strategy: StrategyArg,
+        /// Actually write the changes to the registry. Without this flag,
+        /// only prints what would change.
+        #[arg(long)]
+        apply: bool,
+    },
     /// Internal: remove Envarly install directory from PATH. Called by the uninstaller.
     #[command(name = "path-cleanup", hide = true)]
     PathCleanup {
@@ -73,6 +91,20 @@ enum ExportFormat {
     Ansible,
 }
 
+#[derive(Clone, ValueEnum, Default)]
+enum ImportFormat {
+    #[default]
+    Json,
+    Reg,
+}
+
+#[derive(Clone, ValueEnum, Default)]
+enum StrategyArg {
+    #[default]
+    Merge,
+    Replace,
+}
+
 /// Parse CLI args and execute the subcommand. Never returns — exits the process.
 /// Only called when args.len() > 1.
 pub fn run() -> ! {
@@ -88,7 +120,6 @@ pub fn run() -> ! {
 fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
     use crate::env_store;
     use crate::export;
-    use crate::model::VarScope;
 
     match command {
         Command::Get { name, scope } => {
@@ -171,7 +202,126 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
                 None => print!("{}", content),
             }
         }
+
+        Command::Import {
+            file,
+            format,
+            scope,
+            strategy,
+            apply,
+        } => {
+            use crate::import::{diff_for_import, ImportStrategy};
+            use crate::model::EnvChange;
+
+            let content =
+                std::fs::read_to_string(&file).map_err(crate::error::EnvarlyError::Registry)?;
+            let imported = match format {
+                ImportFormat::Json => export::parse_json(&content)?,
+                ImportFormat::Reg => export::parse_reg(&content)?,
+            };
+            let current = env_store::read_snapshot()?;
+            let scopes: Vec<VarScope> = match scope {
+                ScopeArg::All => vec![VarScope::User, VarScope::System],
+                ScopeArg::User => vec![VarScope::User],
+                ScopeArg::System => vec![VarScope::System],
+            };
+            let import_strategy = match strategy {
+                StrategyArg::Merge => ImportStrategy::Merge,
+                StrategyArg::Replace => ImportStrategy::Replace,
+            };
+            let changes = diff_for_import(&current, &imported, &scopes, import_strategy);
+
+            if changes.is_empty() {
+                println!("Already up to date — nothing to change.");
+                return Ok(());
+            }
+
+            let strategy_label = match strategy {
+                StrategyArg::Merge => "merge",
+                StrategyArg::Replace => "replace",
+            };
+            let scope_label = match scope {
+                ScopeArg::All => "All",
+                ScopeArg::User => "User",
+                ScopeArg::System => "System",
+            };
+            println!(
+                "{} {} change{} ({}, scope: {}):",
+                if apply { "Applying" } else { "Would apply" },
+                changes.len(),
+                if changes.len() == 1 { "" } else { "s" },
+                strategy_label,
+                scope_label,
+            );
+            for change in &changes {
+                match change {
+                    EnvChange::Set {
+                        name, value, scope, ..
+                    } => match current_value(&current, scope, name) {
+                        Some(old) if old != value => {
+                            println!(
+                                "  ~ {}={} (was {})  [{}]",
+                                name,
+                                value,
+                                old,
+                                scope_tag(scope)
+                            )
+                        }
+                        Some(_) => println!("  ~ {}={}  [{}]", name, value, scope_tag(scope)),
+                        None => println!("  + {}={}  [{}]", name, value, scope_tag(scope)),
+                    },
+                    EnvChange::Delete { name, scope } => {
+                        println!("  - {}  [{}]", name, scope_tag(scope))
+                    }
+                }
+            }
+
+            if !apply {
+                println!("\nRun with --apply to write these changes to the registry.");
+                return Ok(());
+            }
+
+            println!();
+            let result = env_store::apply_changes(&changes, |index, total, change, result| {
+                let name = match change {
+                    EnvChange::Set { name, .. } | EnvChange::Delete { name, .. } => name,
+                };
+                match result {
+                    Ok(()) => println!("  [{}/{}] ok {}", index + 1, total, name),
+                    Err(e) => println!("  [{}/{}] FAILED {} ({})", index + 1, total, name, e),
+                }
+            });
+
+            match result {
+                Ok(()) => println!(
+                    "\nApplied {} change{}.",
+                    changes.len(),
+                    if changes.len() == 1 { "" } else { "s" }
+                ),
+                Err(e) => {
+                    eprintln!("\nApply failed, rolled back: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
     }
 
     Ok(())
+}
+
+fn current_value<'a>(current: &'a EnvSnapshot, scope: &VarScope, name: &str) -> Option<&'a str> {
+    let map = match scope {
+        VarScope::User => &current.user,
+        VarScope::System => &current.system,
+        VarScope::OtherUser => return None,
+    };
+    map.get(name).map(|v| v.value.as_str())
+}
+
+fn scope_tag(scope: &VarScope) -> &'static str {
+    match scope {
+        VarScope::User => "User",
+        VarScope::System => "System",
+        VarScope::OtherUser => "OtherUser",
+    }
 }

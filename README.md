@@ -44,7 +44,7 @@ Envarly collects no telemetry and sends no data anywhere. The only network reque
 - **Secret detection** — name-based + value-pattern detection across 35+ token formats (GitHub `ghp_`, GitLab `glpat-`, Slack `xoxb-`, Anthropic `sk-ant-`, npm `npm_`, PyPI `pypi-`, …); service badge shown on each match; **⚠ Secrets** sidebar tab; export confirmation lists affected services
 - **Admin elevation** — "Run as admin" button restarts the process elevated via UAC; system variables become editable; "Restart as admin →" inline hint appears in the detail panel when viewing a System variable without elevation
 - **Edit other accounts' variables** — when elevated, switch to any local account (including ones not currently logged in) to view/edit its per-user variables and PATH; the header account picker shows "My variables" until one is selected
-- **CLI mode** — read-only subcommands (`get`, `list`, `export`) run from a terminal without launching the GUI
+- **CLI mode** — read-only subcommands (`get`, `list`, `export`) plus `import` (merge/replace from a `.json`/`.reg` file) run from a terminal without launching the GUI; `import` is dry-run by default and only writes to the registry when passed `--apply`
 - **WM\_SETTINGCHANGE broadcast** — running apps pick up changes without a restart
 - **Resizable panels** — drag the sidebar and snapshots panel to the width you want; sizes persist across restarts
 - **Check command** — find out why a command isn't found: searches the effective PATH (User + System merged, PATHEXT-aware) for a name or exe path and flags shadowed duplicates
@@ -151,6 +151,13 @@ envarly export --format dsc_v2   --output backup.ps1      # PowerShell DSC v2 co
 envarly export --format dsc_v3   --output backup.dsc.yaml # DSC v3 YAML
 envarly export --format ansible  --output backup.yml      # Ansible environment playbook
 envarly export --format json | jq '.user.PATH'
+
+# Import from a file — dry-run by default (prints the diff, writes nothing)
+envarly import backup.json
+envarly import backup.reg --format reg --scope user --strategy replace
+
+# Add --apply to actually write the changes to the registry
+envarly import backup.json --apply
 ```
 
 ## Demo mode
