@@ -36,10 +36,27 @@ pub fn infer_env_value_kind(value: &str) -> EnvValueKind {
     }
 }
 
-fn resolve_kind(value: &EnvValue) -> EnvValueKind {
+pub fn resolve_kind(value: &EnvValue) -> EnvValueKind {
     value
         .kind
         .unwrap_or_else(|| infer_env_value_kind(&value.value))
+}
+
+/// Resolves the kind for `envarly set`. Mirrors the frontend's
+/// `resolveEnvValueKind` (`src/lib/envValueKind.ts`): an explicit kind wins
+/// outright; `None` (the CLI's "auto" selection) preserves the target
+/// variable's existing stored kind if it already has one, otherwise infers
+/// from the new value.
+pub fn resolve_set_kind(
+    explicit_kind: Option<EnvValueKind>,
+    value: &str,
+    existing: Option<&EnvValue>,
+) -> EnvValueKind {
+    explicit_kind.unwrap_or_else(|| {
+        existing
+            .and_then(|v| v.kind)
+            .unwrap_or_else(|| infer_env_value_kind(value))
+    })
 }
 
 fn scope_map(snapshot: &EnvSnapshot, scope: VarScope) -> Option<&HashMap<String, EnvValue>> {
@@ -261,6 +278,50 @@ mod tests {
                 value_kind: EnvValueKind::ExpandString,
                 scope: VarScope::User,
             }]
+        );
+    }
+
+    #[test]
+    fn resolve_set_kind_explicit_wins_regardless_of_existing() {
+        let existing = EnvValue::typed("old".into(), EnvValueKind::ExpandString);
+        assert_eq!(
+            resolve_set_kind(Some(EnvValueKind::String), "new", Some(&existing)),
+            EnvValueKind::String
+        );
+    }
+
+    #[test]
+    fn resolve_set_kind_auto_preserves_existing_stored_kind() {
+        let existing = EnvValue::typed("old".into(), EnvValueKind::ExpandString);
+        // New value has no %VAR% reference, so inference alone would say
+        // String — but the existing stored kind should win under Auto.
+        assert_eq!(
+            resolve_set_kind(None, "plain value", Some(&existing)),
+            EnvValueKind::ExpandString
+        );
+    }
+
+    #[test]
+    fn resolve_set_kind_auto_infers_when_no_existing_entry() {
+        assert_eq!(
+            resolve_set_kind(None, "%USERPROFILE%\\bin", None),
+            EnvValueKind::ExpandString
+        );
+        assert_eq!(
+            resolve_set_kind(None, "plain value", None),
+            EnvValueKind::String
+        );
+    }
+
+    #[test]
+    fn resolve_set_kind_auto_infers_when_existing_entry_has_no_kind() {
+        let existing = EnvValue {
+            value: "irrelevant".into(),
+            kind: None,
+        };
+        assert_eq!(
+            resolve_set_kind(None, "%USERPROFILE%\\bin", Some(&existing)),
+            EnvValueKind::ExpandString
         );
     }
 
