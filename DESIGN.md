@@ -78,7 +78,9 @@ Pre-op and post-op values are both pushed as checkpoints when a structural chang
 
 ### Read-only until confirmed
 
-The CLI (`get`, `list`, `export`) and Import preview **never write to the registry**. Imports are parsed into a preview structure that is staged locally; the user must click "Apply N staged changes" and confirm in the diff modal before any write happens. This is a hard invariant: no mutation escapes the `commands::set_env_var` / `commands::delete_env_var` handlers.
+**GUI writes require explicit confirmation.** Import preview is parsed into a structure staged locally; the user must click "Apply N staged changes" and confirm in the diff modal before any write happens. No GUI mutation escapes the `commands::set_env_var` / `commands::delete_env_var` handlers.
+
+The CLI's `get`/`list`/`export` are read-only. `import`/`set`/`delete` are a separate, intentional write path — see [CLI mode](#cli-mode) — gated by an explicit `--apply` flag instead of a confirmation dialog, since there's no GUI to show one.
 
 ### Content Security Policy
 
@@ -152,12 +154,17 @@ No other files are written. Settings are kept in Tauri's default store if added 
 
 ## CLI mode
 
-When launched with arguments, `try_run_cli()` intercepts before the GUI starts and exits the process after the command completes. Commands are strictly read-only — they call `env_store::read_all()` / `export::*` directly, never the write handlers.
+When launched with arguments, `try_run_cli()` intercepts before the GUI starts and exits the process after the command completes.
+
+`get`/`list`/`export` call `env_store::read_all()` / `export::*` directly and never write. `import`/`set`/`delete` are dry-run by default and only call `env_store::apply_changes()` — the same atomic apply-with-rollback path the GUI's Apply handler uses — when `--apply` is passed.
 
 ```
 envarly get <NAME> [--scope user|system]
-envarly list [--scope user|system] [--json]
-envarly export [--scope user|system] [--format json|reg] [--output <path>]
+envarly list [--scope user|system] [--format text|json]
+envarly export [--scope user|system] [--format json|reg|ps1|dsc-v2|dsc-v3|ansible] [--output <path>]
+envarly import <file> [--format json|reg] [--scope user|system] [--strategy merge|replace] [--apply]
+envarly set <NAME> <VALUE> [--scope user|system] [--kind auto|string|expand-string] [--apply]
+envarly delete <NAME> [--scope user|system] [--apply]
 ```
 
 ---
