@@ -1,0 +1,30 @@
+<meta property="og:site_name" content="Envarly" />
+<meta property="og:title" content="Envarly — Component Storybook" />
+<meta
+  name="description"
+  content="Component explorer for Envarly, the Windows environment variable manager (https://iray-tno.github.io/envarly/)."
+/>
+<script>
+  // Storybook's own runtime overwrites document.title after mount (to a bare
+  // "Storybook"), ignoring theme.brandTitle — so a plain static <title> tag
+  // gets clobbered. Re-assert ours whenever Storybook changes it.
+  (function () {
+    var desired = "Envarly — Component Storybook";
+    function apply() {
+      if (document.title !== desired) document.title = desired;
+    }
+    function watch(titleEl) {
+      apply();
+      new MutationObserver(apply).observe(titleEl, { childList: true });
+    }
+    var existing = document.querySelector("title");
+    if (existing) {
+      watch(existing);
+    } else {
+      new MutationObserver(function () {
+        var t = document.querySelector("title");
+        if (t) watch(t);
+      }).observe(document.head, { childList: true });
+    }
+  })();
+</script>
