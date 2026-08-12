@@ -23,7 +23,7 @@ export const GET: APIRoute = ({ site }) => {
 
 > ${enCopy.description}
 
-Envarly is a free, open-source desktop app for Windows 10/11 (Tauri v2 + React + Rust) that lets developers and power users view, edit, import, and export User and System environment variables — with PATH-entry validation, secret detection, change previews, encrypted snapshots, and a dry-run-by-default CLI mode. No telemetry in the app itself.
+Envarly is a free, open-source GUI (desktop app) for Windows 10/11 (Tauri v2 + React + Rust) that lets developers and power users view, edit, import, and export User and System environment variables — with PATH-entry validation, secret detection, change previews, encrypted snapshots, and a dry-run-by-default CLI mode. No telemetry in the app itself.
 
 ## Docs
 
