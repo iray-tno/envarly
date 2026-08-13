@@ -1,5 +1,10 @@
+//! CLI subcommands. No subcommand → the caller launches the GUI instead.
+//!
+//! `get`/`list`/`export` are read-only. `import`/`set`/`delete` can write to
+//! the registry, but are dry-run by default and only do so when `--apply` is
+//! passed.
+
 use crate::model::{EnvChange, EnvSnapshot, VarScope};
-/// Read-only CLI commands. No subcommand → the caller launches the GUI instead.
 use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
