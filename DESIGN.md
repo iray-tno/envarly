@@ -43,7 +43,8 @@ src-tauri/src/          Rust backend
   snapshot.rs           Snapshot save/list/restore + DPAPI encryption
   crypto.rs             DPAPI wrapper (protect/unprotect)
   export.rs             JSON, .reg, and IaC format (PS1, DSC v2/v3, Ansible) import/export
-  cli.rs                Read-only CLI subcommands (clap); export supports all GUI formats
+  import.rs             Backend-agnostic diff for `envarly import`/`set` (merge/replace, kind inference)
+  cli.rs                CLI subcommands (clap): get/list/export are read-only; import/set/delete write behind --apply
   error.rs              EnvarlyError (thiserror)
 ```
 
