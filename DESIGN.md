@@ -79,7 +79,7 @@ Pre-op and post-op values are both pushed as checkpoints when a structural chang
 
 ### Read-only until confirmed
 
-**GUI writes require explicit confirmation.** Import preview is parsed into a structure staged locally; the user must click "Apply N staged changes" and confirm in the diff modal before any write happens. No GUI mutation escapes the `commands::set_env_var` / `commands::delete_env_var` handlers.
+**GUI writes require explicit confirmation.** Import preview is parsed into a structure staged locally; the user must click "Apply N staged changes" and confirm in the diff modal before any write happens. No GUI mutation escapes the `commands::set_env_var` / `commands::delete_env_var` / `commands::apply_env_changes` handlers — the latter is what "Apply N staged changes" actually calls.
 
 The CLI's `get`/`list`/`export` are read-only. `import`/`set`/`delete` are a separate, intentional write path — see [CLI mode](#cli-mode) — gated by an explicit `--apply` flag instead of a confirmation dialog, since there's no GUI to show one.
 

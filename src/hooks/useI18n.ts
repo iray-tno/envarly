@@ -20,7 +20,5 @@ export function useI18n() {
     i18n.changeLanguage(lang);
   };
 
-  const toggleLanguage = () => setLanguage(language === "ja" ? "en" : "ja");
-
-  return { t, language, setLanguage, toggleLanguage };
+  return { t, language, setLanguage };
 }
