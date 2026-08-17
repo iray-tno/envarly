@@ -6,6 +6,8 @@
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg)](https://github.com/iray-tno/envarly/releases)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-yellow.svg)](https://tauri.app)
 
+[English](https://iray-tno.github.io/envarly/) | [日本語](https://iray-tno.github.io/envarly/ja/) | [简体中文](https://iray-tno.github.io/envarly/zh-cn/) | [Русский](https://iray-tno.github.io/envarly/ru/) | [한국어](https://iray-tno.github.io/envarly/ko/) | [Tiếng Việt](https://iray-tno.github.io/envarly/vi/)
+
 Windows environment variable manager built with Tauri v2, React, TypeScript, and Rust.
 
 ## Screenshot
