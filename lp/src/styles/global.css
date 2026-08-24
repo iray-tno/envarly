@@ -24,3 +24,14 @@ body {
   color: var(--color-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+
+/* #lang-select's trigger uses a hover:text-* utility for its own closed-state
+   affordance. `color` is inherited, and browsers keep the <select>'s :hover
+   state active while its native popup is open, so without this the option
+   list's text color flips with the trigger's hover state and clashes with
+   the OS-drawn per-row highlight. Pin it so options always use a fixed,
+   readable color regardless of the trigger's hover state. */
+#lang-select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
