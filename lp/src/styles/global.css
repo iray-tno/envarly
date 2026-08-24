@@ -12,6 +12,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* Site is dark-only (no light variant). Without this, native form
+     controls — notably the language <select>'s option list and its
+     hover highlight — default to light UI chrome, which clashes with
+     our custom text color and becomes unreadable on hover. */
+  color-scheme: dark;
 }
 
 body {
