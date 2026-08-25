@@ -81,8 +81,8 @@ export type LandingCopy = {
 export const enCopy: LandingCopy = {
   lang: 'en',
   title: 'Envarly — Windows Environment Variable Manager',
-  description: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
-  ogDescription: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
+  description: 'Preview every change as a diff before it touches the registry. Safe PATH editing, secret detection, encrypted snapshots. Free and open source for Windows 10/11.',
+  ogDescription: 'Preview every change as a diff before it touches the registry. Safe PATH editing, secret detection, encrypted snapshots. Free and open source for Windows 10/11.',
   canonicalPath: '/envarly/',
   nav: {
     features: 'Features',
@@ -115,9 +115,9 @@ export const enCopy: LandingCopy = {
   featuresLead: 'Everything you need to manage environment variables safely.',
   features: [
     {
-      icon: '⠿',
-      title: 'Practical PATH editor',
-      desc: 'Reorder entries, validate each one with a live ✓ / ✗ existence check, switch between list and plain text, move through rows with the keyboard, and choose folders — all without leaving the editor.',
+      icon: '±',
+      title: 'Diff preview',
+      desc: 'Every staged change is shown as a diff before you click Apply — nothing reaches the registry without going through this review.',
     },
     {
       icon: '⚿',
@@ -126,7 +126,7 @@ export const enCopy: LandingCopy = {
     },
     {
       icon: '⇄',
-      title: 'Diff detection',
+      title: 'External change detection',
       desc: 'Detects registry changes made by other processes while Envarly is open. Shows a diff with selective apply per entry.',
     },
     {
@@ -137,6 +137,11 @@ export const enCopy: LandingCopy = {
   ],
   otherFeaturesHeading: 'Also included',
   otherFeatures: [
+    {
+      icon: '⠿',
+      title: 'Practical PATH editor',
+      desc: 'Reorder entries, validate each one with a live ✓ / ✗ existence check, switch between list and plain text, move through rows with the keyboard, and choose folders — all without leaving the editor.',
+    },
     {
       icon: '⚠',
       title: 'Environment guidance',
@@ -190,8 +195,8 @@ export const enCopy: LandingCopy = {
 export const jaCopy: LandingCopy = {
   lang: 'ja',
   title: 'Envarly — Windows 環境変数マネージャー',
-  description: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
-  ogDescription: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
+  description: '変更はレジストリに書き込む前に必ず差分プレビュー。安全なPATH編集、シークレット検出、暗号化スナップショットに対応した無料のオープンソースGUI。Windows 10/11向け。',
+  ogDescription: '変更はレジストリに書き込む前に必ず差分プレビュー。安全なPATH編集、シークレット検出、暗号化スナップショットに対応した無料のオープンソースGUI。Windows 10/11向け。',
   canonicalPath: '/envarly/ja/',
   nav: {
     features: '機能',
@@ -224,9 +229,9 @@ export const jaCopy: LandingCopy = {
   featuresLead: '環境変数を安全に管理するために必要なものをひとまとめに。',
   features: [
     {
-      icon: '⠿',
-      title: '実用的な PATH エディター',
-      desc: 'エントリの並べ替え、ライブの ✓ / ✗ 存在チェックによる検証、リスト表示とプレーンテキストの切り替え、キーボードでの行移動、フォルダ選択まで、すべてエディターを離れずに行えます。',
+      icon: '±',
+      title: '差分プレビュー',
+      desc: 'ステージした変更はすべて、Apply をクリックする前に差分として表示されます。このレビューを経ずにレジストリへ反映されることはありません。',
     },
     {
       icon: '⚿',
@@ -246,6 +251,11 @@ export const jaCopy: LandingCopy = {
   ],
   otherFeaturesHeading: 'そのほかの機能',
   otherFeatures: [
+    {
+      icon: '⠿',
+      title: '実用的な PATH エディター',
+      desc: 'エントリの並べ替え、ライブの ✓ / ✗ 存在チェックによる検証、リスト表示とプレーンテキストの切り替え、キーボードでの行移動、フォルダ選択まで、すべてエディターを離れずに行えます。',
+    },
     {
       icon: '⚠',
       title: '環境変数の説明とガイド',
@@ -299,8 +309,8 @@ export const jaCopy: LandingCopy = {
 export const zhCNCopy: LandingCopy = {
   lang: 'zh-CN',
   title: 'Envarly — Windows 环境变量管理器',
-  description: '免费开源的 Windows 环境变量图形化编辑工具 — 支持文件夹选择的 PATH 编辑、敏感信息检测、更改预览与加密快照。',
-  ogDescription: '免费开源的 Windows 环境变量图形化编辑工具 — 支持文件夹选择的 PATH 编辑、敏感信息检测、更改预览与加密快照。',
+  description: '每一处更改在写入注册表前都会先以差异形式预览。安全的 PATH 编辑、敏感信息检测、加密快照。免费开源，适用于 Windows 10/11。',
+  ogDescription: '每一处更改在写入注册表前都会先以差异形式预览。安全的 PATH 编辑、敏感信息检测、加密快照。免费开源，适用于 Windows 10/11。',
   canonicalPath: '/envarly/zh-cn/',
   nav: {
     features: '功能',
@@ -333,9 +343,9 @@ export const zhCNCopy: LandingCopy = {
   featuresLead: '安全管理环境变量所需的一切。',
   features: [
     {
-      icon: '⠿',
-      title: '实用的 PATH 编辑器',
-      desc: '重新排序条目，通过实时的 ✓ / ✗ 存在性检查逐项校验，在列表和纯文本模式间切换，用键盘在行间移动，并直接选择文件夹 — 全程无需离开编辑器。',
+      icon: '±',
+      title: '差异预览',
+      desc: '每一处已暂存的更改，在点击 Apply 之前都会以差异形式展示 — 不经过这一步审阅，任何内容都不会写入注册表。',
     },
     {
       icon: '⚿',
@@ -344,7 +354,7 @@ export const zhCNCopy: LandingCopy = {
     },
     {
       icon: '⇄',
-      title: '差异检测',
+      title: '外部更改检测',
       desc: 'Envarly 运行期间，检测其他进程对注册表所做的更改，并显示差异，可逐项选择接受。',
     },
     {
@@ -355,6 +365,11 @@ export const zhCNCopy: LandingCopy = {
   ],
   otherFeaturesHeading: '还包括',
   otherFeatures: [
+    {
+      icon: '⠿',
+      title: '实用的 PATH 编辑器',
+      desc: '重新排序条目，通过实时的 ✓ / ✗ 存在性检查逐项校验，在列表和纯文本模式间切换，用键盘在行间移动，并直接选择文件夹 — 全程无需离开编辑器。',
+    },
     {
       icon: '⚠',
       title: '环境变量说明',
@@ -408,8 +423,8 @@ export const zhCNCopy: LandingCopy = {
 export const ruCopy: LandingCopy = {
   lang: 'ru',
   title: 'Envarly — менеджер переменных окружения Windows',
-  description: 'Бесплатный опенсорсный GUI для переменных окружения Windows — безопасное редактирование PATH с выбором папок, обнаружение секретов, предпросмотр изменений, зашифрованные снимки.',
-  ogDescription: 'Бесплатный опенсорсный GUI для переменных окружения Windows — безопасное редактирование PATH с выбором папок, обнаружение секретов, предпросмотр изменений, зашифрованные снимки.',
+  description: 'Каждое изменение показывается как diff перед записью в реестр. Безопасное редактирование PATH, обнаружение секретов, зашифрованные снимки. Бесплатно, с открытым исходным кодом, для Windows 10/11.',
+  ogDescription: 'Каждое изменение показывается как diff перед записью в реестр. Безопасное редактирование PATH, обнаружение секретов, зашифрованные снимки. Бесплатно, с открытым исходным кодом, для Windows 10/11.',
   canonicalPath: '/envarly/ru/',
   nav: {
     features: 'Возможности',
@@ -442,9 +457,9 @@ export const ruCopy: LandingCopy = {
   featuresLead: 'Всё необходимое для безопасного управления переменными окружения.',
   features: [
     {
-      icon: '⠿',
-      title: 'Удобный редактор PATH',
-      desc: 'Меняйте порядок записей, проверяйте каждую в реальном времени (✓ / ✗ на существование), переключайтесь между списком и обычным текстом, перемещайтесь по строкам с клавиатуры и выбирайте папки — всё, не покидая редактор.',
+      icon: '±',
+      title: 'Предпросмотр diff',
+      desc: 'Каждое отложенное изменение показывается как diff перед нажатием Apply — ничего не попадает в реестр, минуя этот просмотр.',
     },
     {
       icon: '⚿',
@@ -453,7 +468,7 @@ export const ruCopy: LandingCopy = {
     },
     {
       icon: '⇄',
-      title: 'Обнаружение различий',
+      title: 'Обнаружение внешних изменений',
       desc: 'Обнаруживает изменения реестра, сделанные другими процессами, пока Envarly открыт. Показывает различия с выборочным применением по каждой записи.',
     },
     {
@@ -464,6 +479,11 @@ export const ruCopy: LandingCopy = {
   ],
   otherFeaturesHeading: 'Также включено',
   otherFeatures: [
+    {
+      icon: '⠿',
+      title: 'Удобный редактор PATH',
+      desc: 'Меняйте порядок записей, проверяйте каждую в реальном времени (✓ / ✗ на существование), переключайтесь между списком и обычным текстом, перемещайтесь по строкам с клавиатуры и выбирайте папки — всё, не покидая редактор.',
+    },
     {
       icon: '⚠',
       title: 'Подсказки по переменным',
@@ -517,8 +537,8 @@ export const ruCopy: LandingCopy = {
 export const koCopy: LandingCopy = {
   lang: 'ko',
   title: 'Envarly — Windows 환경 변수 관리자',
-  description: '무료 오픈소스 Windows 환경 변수 GUI — 폴더 선택 지원 PATH 편집, 민감 정보 감지, 변경 미리보기, 암호화된 스냅샷을 제공합니다.',
-  ogDescription: '무료 오픈소스 Windows 환경 변수 GUI — 폴더 선택 지원 PATH 편집, 민감 정보 감지, 변경 미리보기, 암호화된 스냅샷을 제공합니다.',
+  description: '모든 변경 사항은 레지스트리에 기록되기 전에 diff로 미리 확인할 수 있습니다. 안전한 PATH 편집, 민감 정보 감지, 암호화된 스냅샷. Windows 10/11용 무료 오픈소스 GUI.',
+  ogDescription: '모든 변경 사항은 레지스트리에 기록되기 전에 diff로 미리 확인할 수 있습니다. 안전한 PATH 편집, 민감 정보 감지, 암호화된 스냅샷. Windows 10/11용 무료 오픈소스 GUI.',
   canonicalPath: '/envarly/ko/',
   nav: {
     features: '기능',
@@ -551,9 +571,9 @@ export const koCopy: LandingCopy = {
   featuresLead: '환경 변수를 안전하게 관리하는 데 필요한 모든 것.',
   features: [
     {
-      icon: '⠿',
-      title: '실용적인 PATH 편집기',
-      desc: '항목 순서 변경, 실시간 ✓ / ✗ 존재 여부 검사로 항목별 검증, 목록과 일반 텍스트 전환, 키보드로 행 이동, 폴더 선택까지 — 편집기를 벗어나지 않고 모두 할 수 있습니다.',
+      icon: '±',
+      title: 'Diff 미리보기',
+      desc: '스테이징된 모든 변경 사항은 Apply를 누르기 전에 diff로 표시됩니다. 이 검토를 거치지 않고는 어떤 것도 레지스트리에 반영되지 않습니다.',
     },
     {
       icon: '⚿',
@@ -573,6 +593,11 @@ export const koCopy: LandingCopy = {
   ],
   otherFeaturesHeading: '이 외에도',
   otherFeatures: [
+    {
+      icon: '⠿',
+      title: '실용적인 PATH 편집기',
+      desc: '항목 순서 변경, 실시간 ✓ / ✗ 존재 여부 검사로 항목별 검증, 목록과 일반 텍스트 전환, 키보드로 행 이동, 폴더 선택까지 — 편집기를 벗어나지 않고 모두 할 수 있습니다.',
+    },
     {
       icon: '⚠',
       title: '환경 변수 안내',
@@ -626,8 +651,8 @@ export const koCopy: LandingCopy = {
 export const viCopy: LandingCopy = {
   lang: 'vi',
   title: 'Envarly — Trình quản lý biến môi trường Windows',
-  description: 'GUI miễn phí, mã nguồn mở quản lý biến môi trường Windows — sửa PATH an toàn, phát hiện thông tin nhạy cảm, xem trước thay đổi, ảnh chụp nhanh mã hóa.',
-  ogDescription: 'GUI miễn phí, mã nguồn mở quản lý biến môi trường Windows — sửa PATH an toàn, phát hiện thông tin nhạy cảm, xem trước thay đổi, ảnh chụp nhanh mã hóa.',
+  description: 'Mọi thay đổi đều được xem trước dạng diff trước khi ghi vào registry. Chỉnh sửa PATH an toàn, phát hiện thông tin nhạy cảm, ảnh chụp nhanh mã hóa. Miễn phí, mã nguồn mở, dành cho Windows 10/11.',
+  ogDescription: 'Mọi thay đổi đều được xem trước dạng diff trước khi ghi vào registry. Chỉnh sửa PATH an toàn, phát hiện thông tin nhạy cảm, ảnh chụp nhanh mã hóa. Miễn phí, mã nguồn mở, dành cho Windows 10/11.',
   canonicalPath: '/envarly/vi/',
   nav: {
     features: 'Tính năng',
@@ -660,9 +685,9 @@ export const viCopy: LandingCopy = {
   featuresLead: 'Mọi thứ bạn cần để quản lý biến môi trường một cách an toàn.',
   features: [
     {
-      icon: '⠿',
-      title: 'Trình chỉnh sửa PATH thực dụng',
-      desc: 'Sắp xếp lại các mục, kiểm tra từng mục bằng dấu ✓ / ✗ theo thời gian thực, chuyển đổi giữa dạng danh sách và văn bản thuần, di chuyển qua các dòng bằng bàn phím, và chọn thư mục — tất cả mà không cần rời khỏi trình chỉnh sửa.',
+      icon: '±',
+      title: 'Xem trước diff',
+      desc: 'Mọi thay đổi đã xếp hàng đều được hiển thị dưới dạng diff trước khi bạn nhấn Apply — không có gì được ghi vào registry nếu chưa qua bước xem xét này.',
     },
     {
       icon: '⚿',
@@ -682,6 +707,11 @@ export const viCopy: LandingCopy = {
   ],
   otherFeaturesHeading: 'Còn có thêm',
   otherFeatures: [
+    {
+      icon: '⠿',
+      title: 'Trình chỉnh sửa PATH thực dụng',
+      desc: 'Sắp xếp lại các mục, kiểm tra từng mục bằng dấu ✓ / ✗ theo thời gian thực, chuyển đổi giữa dạng danh sách và văn bản thuần, di chuyển qua các dòng bằng bàn phím, và chọn thư mục — tất cả mà không cần rời khỏi trình chỉnh sửa.',
+    },
     {
       icon: '⚠',
       title: 'Hướng dẫn về biến môi trường',

@@ -8,7 +8,19 @@ export default defineConfig({
   base: '/envarly',
   trailingSlash: 'always',
   integrations: [
-    sitemap(),
+    sitemap({
+      i18n: {
+        defaultLocale: 'en',
+        locales: {
+          en: 'en',
+          ja: 'ja',
+          'zh-cn': 'zh-CN',
+          ru: 'ru',
+          ko: 'ko',
+          vi: 'vi',
+        },
+      },
+    }),
   ],
   vite: {
     plugins: [tailwindcss()],
