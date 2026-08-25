@@ -81,8 +81,8 @@ export type LandingCopy = {
 export const enCopy: LandingCopy = {
   lang: 'en',
   title: 'Envarly — Windows Environment Variable Manager',
-  description: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
-  ogDescription: 'A free, open-source GUI for Windows environment variables — safe PATH editing with folder pickers, secret detection, change previews, encrypted snapshots.',
+  description: 'Preview every change as a diff before it touches the registry. Safe PATH editing, secret detection, encrypted snapshots. Free and open source for Windows 10/11.',
+  ogDescription: 'Preview every change as a diff before it touches the registry. Safe PATH editing, secret detection, encrypted snapshots. Free and open source for Windows 10/11.',
   canonicalPath: '/envarly/',
   nav: {
     features: 'Features',
@@ -190,8 +190,8 @@ export const enCopy: LandingCopy = {
 export const jaCopy: LandingCopy = {
   lang: 'ja',
   title: 'Envarly — Windows 環境変数マネージャー',
-  description: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
-  ogDescription: '無料のオープンソースGUIでWindowsの環境変数を安全に編集 — フォルダ選択付きのPATH編集、シークレット検出、変更プレビュー、暗号化スナップショットに対応。',
+  description: '変更はレジストリに書き込む前に必ず差分プレビュー。安全なPATH編集、シークレット検出、暗号化スナップショットに対応した無料のオープンソースGUI。Windows 10/11向け。',
+  ogDescription: '変更はレジストリに書き込む前に必ず差分プレビュー。安全なPATH編集、シークレット検出、暗号化スナップショットに対応した無料のオープンソースGUI。Windows 10/11向け。',
   canonicalPath: '/envarly/ja/',
   nav: {
     features: '機能',
@@ -299,8 +299,8 @@ export const jaCopy: LandingCopy = {
 export const zhCNCopy: LandingCopy = {
   lang: 'zh-CN',
   title: 'Envarly — Windows 环境变量管理器',
-  description: '免费开源的 Windows 环境变量图形化编辑工具 — 支持文件夹选择的 PATH 编辑、敏感信息检测、更改预览与加密快照。',
-  ogDescription: '免费开源的 Windows 环境变量图形化编辑工具 — 支持文件夹选择的 PATH 编辑、敏感信息检测、更改预览与加密快照。',
+  description: '每一处更改在写入注册表前都会先以差异形式预览。安全的 PATH 编辑、敏感信息检测、加密快照。免费开源，适用于 Windows 10/11。',
+  ogDescription: '每一处更改在写入注册表前都会先以差异形式预览。安全的 PATH 编辑、敏感信息检测、加密快照。免费开源，适用于 Windows 10/11。',
   canonicalPath: '/envarly/zh-cn/',
   nav: {
     features: '功能',
@@ -408,8 +408,8 @@ export const zhCNCopy: LandingCopy = {
 export const ruCopy: LandingCopy = {
   lang: 'ru',
   title: 'Envarly — менеджер переменных окружения Windows',
-  description: 'Бесплатный опенсорсный GUI для переменных окружения Windows — безопасное редактирование PATH с выбором папок, обнаружение секретов, предпросмотр изменений, зашифрованные снимки.',
-  ogDescription: 'Бесплатный опенсорсный GUI для переменных окружения Windows — безопасное редактирование PATH с выбором папок, обнаружение секретов, предпросмотр изменений, зашифрованные снимки.',
+  description: 'Каждое изменение показывается как diff перед записью в реестр. Безопасное редактирование PATH, обнаружение секретов, зашифрованные снимки. Бесплатно, с открытым исходным кодом, для Windows 10/11.',
+  ogDescription: 'Каждое изменение показывается как diff перед записью в реестр. Безопасное редактирование PATH, обнаружение секретов, зашифрованные снимки. Бесплатно, с открытым исходным кодом, для Windows 10/11.',
   canonicalPath: '/envarly/ru/',
   nav: {
     features: 'Возможности',
@@ -517,8 +517,8 @@ export const ruCopy: LandingCopy = {
 export const koCopy: LandingCopy = {
   lang: 'ko',
   title: 'Envarly — Windows 환경 변수 관리자',
-  description: '무료 오픈소스 Windows 환경 변수 GUI — 폴더 선택 지원 PATH 편집, 민감 정보 감지, 변경 미리보기, 암호화된 스냅샷을 제공합니다.',
-  ogDescription: '무료 오픈소스 Windows 환경 변수 GUI — 폴더 선택 지원 PATH 편집, 민감 정보 감지, 변경 미리보기, 암호화된 스냅샷을 제공합니다.',
+  description: '모든 변경 사항은 레지스트리에 기록되기 전에 diff로 미리 확인할 수 있습니다. 안전한 PATH 편집, 민감 정보 감지, 암호화된 스냅샷. Windows 10/11용 무료 오픈소스 GUI.',
+  ogDescription: '모든 변경 사항은 레지스트리에 기록되기 전에 diff로 미리 확인할 수 있습니다. 안전한 PATH 편집, 민감 정보 감지, 암호화된 스냅샷. Windows 10/11용 무료 오픈소스 GUI.',
   canonicalPath: '/envarly/ko/',
   nav: {
     features: '기능',
@@ -626,8 +626,8 @@ export const koCopy: LandingCopy = {
 export const viCopy: LandingCopy = {
   lang: 'vi',
   title: 'Envarly — Trình quản lý biến môi trường Windows',
-  description: 'GUI miễn phí, mã nguồn mở quản lý biến môi trường Windows — sửa PATH an toàn, phát hiện thông tin nhạy cảm, xem trước thay đổi, ảnh chụp nhanh mã hóa.',
-  ogDescription: 'GUI miễn phí, mã nguồn mở quản lý biến môi trường Windows — sửa PATH an toàn, phát hiện thông tin nhạy cảm, xem trước thay đổi, ảnh chụp nhanh mã hóa.',
+  description: 'Mọi thay đổi đều được xem trước dạng diff trước khi ghi vào registry. Chỉnh sửa PATH an toàn, phát hiện thông tin nhạy cảm, ảnh chụp nhanh mã hóa. Miễn phí, mã nguồn mở, dành cho Windows 10/11.',
+  ogDescription: 'Mọi thay đổi đều được xem trước dạng diff trước khi ghi vào registry. Chỉnh sửa PATH an toàn, phát hiện thông tin nhạy cảm, ảnh chụp nhanh mã hóa. Miễn phí, mã nguồn mở, dành cho Windows 10/11.',
   canonicalPath: '/envarly/vi/',
   nav: {
     features: 'Tính năng',
