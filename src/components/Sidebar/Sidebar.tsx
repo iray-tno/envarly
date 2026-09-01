@@ -50,10 +50,7 @@ export function Sidebar({
   personalScopeLabel,
 }: Props) {
   const { t } = useI18n();
-  const scopeTabs = useMemo(
-    () => ["All", personalScope, "System"] as const,
-    [personalScope],
-  );
+  const scopeTabs = useMemo(() => ["All", personalScope, "System"] as const, [personalScope]);
   const { width, isDragging, handleProps } = useResizableWidth({ ...SIDEBAR_WIDTH, side: "left" });
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
