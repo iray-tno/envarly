@@ -162,7 +162,11 @@ export function DetailPanel({
   // OtherUser has no PATH tooling of its own yet — treat it as already present
   // so the hint never offers an action that would write to the wrong hive.
   const pathInEnvForScope =
-    variable.scope === "System" ? systemPathInEnv : variable.scope === "User" ? userPathInEnv : true;
+    variable.scope === "System"
+      ? systemPathInEnv
+      : variable.scope === "User"
+        ? userPathInEnv
+        : true;
   const showAddToPathHint =
     isPathVar &&
     !pathInEnvForScope &&
