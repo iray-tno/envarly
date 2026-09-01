@@ -76,15 +76,14 @@ jobs:
           mv storybook-static site/storybook
 
       - name: Build HTML reports
-        run: npx allure generate junit-reports --clean -o site/reports
+        run: npx allure generate --report-name "Envarly — Test Reports" -o site/reports junit-reports
 
       - name: Brand Allure report head
-        # Allure's generated page has generic "Allure Report" branding with no
-        # site identity — inject Envarly branding so it's identifiable if
-        # crawled/shared, using Allure's own <!-- allure-core-head --> anchor.
+        # Allure 3's generated page sets <title> from --report-name above but
+        # emits no OGP/description metadata of its own — inject Envarly
+        # branding so it's identifiable if crawled/shared.
         run: |
-          sed -i 's#<title>Allure Report</title>#<title>Envarly — Test Reports</title>#' site/reports/index.html
-          sed -i 's#<!-- allure-core-head:start -->#<!-- allure-core-head:start -->\n    <meta property="og:site_name" content="Envarly" />\n    <meta property="og:title" content="Envarly — Test Reports" />\n    <meta name="description" content="CI test reports for Envarly, the Windows environment variable manager (https://iray-tno.github.io/envarly/)." />#' site/reports/index.html
+          sed -i 's#</head>#    <meta property="og:site_name" content="Envarly" />\n    <meta property="og:title" content="Envarly — Test Reports" />\n    <meta name="description" content="CI test reports for Envarly, the Windows environment variable manager (https://iray-tno.github.io/envarly/)." />\n</head>#' site/reports/index.html
 
       - uses: actions/upload-pages-artifact@v3
         with:

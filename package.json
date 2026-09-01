@@ -57,7 +57,7 @@
     "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.9",
     "@xmldom/xmldom": "^0.9.10",
-    "allure-commandline": "^2.32.0",
+    "allure": "^3.16.0",
     "jsdom": "^29.1.1",
     "license-checker-rseidelsohn": "^5.0.1",
     "playwright": "^1.61.1",
