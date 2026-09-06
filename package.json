@@ -56,7 +56,7 @@
     "@vitejs/plugin-react": "^4.6.0",
     "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.9",
-    "@xmldom/xmldom": "^0.9.10",
+    "@xmldom/xmldom": "^0.9.12",
     "allure": "^3.16.0",
     "jsdom": "^29.1.1",
     "license-checker-rseidelsohn": "^5.0.1",
