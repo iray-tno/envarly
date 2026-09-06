@@ -37,13 +37,17 @@ src/                    React frontend (TypeScript)
 
 src-tauri/src/          Rust backend
   lib.rs                Entry point: CLI dispatch or Tauri run
-  commands.rs           Tauri command handlers (thin — delegate to domain modules)
+  commands/             Tauri command handlers per domain (env, export, launch, path, snapshot, update, users)
   env_store.rs          Registry read/write via winreg; EnvBackend trait + MemBackend for tests
+  env_backend.rs        Windows registry implementation (WinregBackend)
+  model.rs              Shared domain types and serialization
   path_manage.rs        PATH status check (userHasEntry / systemHasEntry) + propose-add
+  path_backend.rs       PATH manipulation backend trait
   snapshot.rs           Snapshot save/list/restore + DPAPI encryption
   crypto.rs             DPAPI wrapper (protect/unprotect)
-  export.rs             JSON, .reg, and IaC format (PS1, DSC v2/v3, Ansible) import/export
+  export/               JSON, .reg, and IaC format (PS1, DSC v2/v3, Ansible) export implementations
   import.rs             Backend-agnostic diff for `envarly import`/`set` (merge/replace, kind inference)
+  user_hive.rs          Loading and editing other local accounts' registry hives
   cli.rs                CLI subcommands (clap): get/list/export are read-only; import/set/delete write behind --apply
   error.rs              EnvarlyError (thiserror)
 ```
@@ -135,8 +139,13 @@ The JSON payload contains a `version` field. Current version is **1**.
   "createdAt": "2024-06-15T12:00:00Z",
   "label": "before npm install",
   "snapshot": {
-    "user":   { "VAR": "value", ... },
-    "system": { "PATH": "...", ... }
+    "user": {
+      "VAR": { "value": "my_value", "kind": "String" }
+    },
+    "system": {
+      "PATH": { "value": "C:\\Tools;...", "kind": "ExpandString" }
+    },
+    "otherUser": null
   }
 }
 ```
@@ -187,4 +196,4 @@ Spacing follows a 4px/8px grid. Tailwind class mapping:
 
 ## Storybook
 
-Deployed to GitHub Pages at `/envarly/storybook/` on push to `main`. The `/envarly/` root is reserved for a future landing page. Theme toggle (dark/light) uses `globalTypes` — the `backgrounds` addon is not used.
+Deployed to GitHub Pages at `/envarly/storybook/` on push to `main` (handled by `pages.yml`). The multi-language landing page (built with Astro in `lp/`) lives at the `/envarly/` root. Theme toggle (dark/light) uses `globalTypes` — the `backgrounds` addon is not used.

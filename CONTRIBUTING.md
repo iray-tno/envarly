@@ -42,9 +42,23 @@ chore: update tauri to 2.x
 ### PR checklist
 
 - [ ] `npm test` passes
+- [ ] `npm run lint` passes (Biome)
+- [ ] `npm run check-version` passes (if version files are touched)
 - [ ] `cargo test` passes (if Rust changed)
-- [ ] No direct registry writes added outside `commands::set_env_var` / `commands::delete_env_var`
+- [ ] No direct registry writes added outside `commands/env.rs` / `apply_env_changes`
 - [ ] New UI is keyboard-navigable and has appropriate ARIA roles
+
+## Adding or updating translations
+
+Envarly supports multiple languages using `react-i18next`. Translation resources live under `src/locales/`:
+
+- `src/locales/<lang>/translation.json` — UI labels, tooltips, dialogs, and messages
+- `src/locales/<lang>/descriptions.json` — Explanations for ~140 standard Windows environment variables
+
+When adding a new language:
+1. Create `src/locales/<lang>/` with `translation.json` and `descriptions.json`.
+2. Register the language resource in `src/i18n.ts`.
+3. Add the language option to the header language switcher in `src/components/AppHeader/LanguageMenu.tsx`.
 
 ## Setting up branch protection
 
