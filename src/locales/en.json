@@ -290,7 +290,8 @@
       "gcp": "GCP",
       "azure": "Azure",
       "devtools": "Dev tools",
-      "gpu": "GPU / CUDA"
+      "gpu": "GPU / CUDA",
+      "ai": "AI / LLM"
     },
     "PATH": "Directories searched for executable files. Programs like Node, Python, and Git are found here.",
     "PATHEXT": "File extensions treated as executables by the shell (e.g. .COM;.EXE;.BAT).",
@@ -428,6 +429,32 @@
     "ROCM_PATH": "AMD ROCm installation root. Used by HIP compilers and ROCm-aware frameworks.",
     "HIP_PATH": "HIP toolkit installation directory. Points to AMD's CUDA-compatible GPU programming layer.",
     "HIP_VISIBLE_DEVICES": "GPU indices visible to HIP/ROCm applications. Analogous to CUDA_VISIBLE_DEVICES.",
-    "OPENCL_VENDOR_PATH": "Directory containing OpenCL ICD (Installable Client Driver) vendor files."
+    "OPENCL_VENDOR_PATH": "Directory containing OpenCL ICD (Installable Client Driver) vendor files.",
+    "OPENAI_API_KEY": "API key for authenticating OpenAI API and Codex requests.",
+    "OPENAI_BASE_URL": "Custom base URL for the OpenAI API (e.g. for proxies, Azure OpenAI, or compatible local gateways).",
+    "OPENAI_ORG_ID": "OpenAI organization ID used to bill and group API requests across multiple organizations.",
+    "CODEX_HOME": "Configuration and data directory for Codex CLI (defaults to ~/.codex).",
+    "CODEX_API_KEY": "Codex CLI API key used for authentication.",
+    "CODEX_ACCESS_TOKEN": "OAuth access token for Codex CLI or ChatGPT enterprise accounts.",
+    "CODEX_SQLITE_HOME": "Directory where Codex CLI stores its internal SQLite session and cache databases.",
+    "ANTHROPIC_API_KEY": "API key for authenticating Anthropic Claude and Claude Code requests.",
+    "ANTHROPIC_BASE_URL": "Custom base URL for Anthropic API endpoints (e.g. for proxies or AWS Bedrock / GCP Vertex gateways).",
+    "ANTHROPIC_MODEL": "Default Anthropic model to use (e.g. claude-3-7-sonnet-latest) for tools that connect to Claude.",
+    "ANTHROPIC_AUTH_TOKEN": "Custom authorization token for Claude Code or enterprise Anthropic deployments.",
+    "CLAUDE_CODE_AUTO_CONNECT_IDE": "Controls whether Claude Code automatically connects to a running IDE instance on startup (1 to enable, 0 to disable).",
+    "DISABLE_TELEMETRY": "Disables telemetry, usage tracking, and anonymous reporting in AI and developer CLI tools.",
+    "GEMINI_API_KEY": "API key for Google Gemini API and Gemini CLI authentication.",
+    "GOOGLE_API_KEY": "API key for Google AI Studio, Gemini developer API, and Google Cloud services.",
+    "ANTIGRAVITY_API_KEY": "API key for Antigravity CLI and Google DeepMind Advanced Agentic Coding environment.",
+    "HF_TOKEN": "User access token for Hugging Face Hub (models, datasets, and spaces).",
+    "HF_HOME": "Root directory for Hugging Face cache, downloaded model weights, and datasets (defaults to ~/.cache/huggingface).",
+    "OLLAMA_HOST": "Network bind address or remote server URL for the Ollama daemon (defaults to 127.0.0.1:11434).",
+    "OLLAMA_MODELS": "Directory where downloaded local Ollama model files and manifests are stored.",
+    "GROQ_API_KEY": "API key for high-speed LLM inference via Groq Cloud.",
+    "DEEPSEEK_API_KEY": "API key for authenticating DeepSeek API and model inference requests.",
+    "MISTRAL_API_KEY": "API key for accessing Mistral AI models and platform APIs.",
+    "COHERE_API_KEY": "API key for Cohere Command, Embed, and Rerank APIs.",
+    "LANGCHAIN_API_KEY": "API key for LangChain, LangSmith tracing, and agent observability.",
+    "LANGCHAIN_TRACING_V2": "Set to \"true\" to enable LangSmith V2 execution tracing for LLM pipelines and chains."
   }
 }

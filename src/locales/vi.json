@@ -290,7 +290,8 @@
       "gcp": "GCP",
       "azure": "Azure",
       "devtools": "Công cụ phát triển",
-      "gpu": "GPU / CUDA"
+      "gpu": "GPU / CUDA",
+      "ai": "AI / LLM"
     },
     "PATH": "Danh sách các thư mục được tìm kiếm tệp thực thi. Các chương trình như Node, Python, Git được tìm thấy ở đây.",
     "PATHEXT": "Các phần mở rộng tệp được shell coi là tệp thực thi (ví dụ: .COM;.EXE;.BAT).",
@@ -428,6 +429,32 @@
     "ROCM_PATH": "Thư mục gốc cài đặt AMD ROCm. Dùng bởi trình biên dịch HIP và các framework hỗ trợ ROCm.",
     "HIP_PATH": "Thư mục cài đặt HIP Toolkit. Trỏ đến lớp lập trình GPU tương thích CUDA của AMD.",
     "HIP_VISIBLE_DEVICES": "Chỉ số GPU hiển thị với ứng dụng HIP/ROCm. Tương tự CUDA_VISIBLE_DEVICES.",
-    "OPENCL_VENDOR_PATH": "Thư mục chứa tệp nhà cung cấp OpenCL ICD (Installable Client Driver)."
+    "OPENCL_VENDOR_PATH": "Thư mục chứa tệp nhà cung cấp OpenCL ICD (Installable Client Driver).",
+    "OPENAI_API_KEY": "Khóa API để xác thực các yêu cầu OpenAI API và Codex.",
+    "OPENAI_BASE_URL": "URL cơ sở tùy chỉnh cho OpenAI API (ví dụ: cho proxy, Azure OpenAI hoặc cổng cục bộ tương thích).",
+    "OPENAI_ORG_ID": "ID tổ chức OpenAI dùng để thanh toán và nhóm các yêu cầu API giữa nhiều tổ chức.",
+    "CODEX_HOME": "Thư mục cấu hình và dữ liệu cho Codex CLI (mặc định là ~/.codex).",
+    "CODEX_API_KEY": "Khóa API Codex CLI dùng để xác thực.",
+    "CODEX_ACCESS_TOKEN": "Mã truy cập OAuth cho Codex CLI hoặc tài khoản ChatGPT doanh nghiệp.",
+    "CODEX_SQLITE_HOME": "Thư mục nơi Codex CLI lưu trữ cơ sở dữ liệu phiên và bộ nhớ đệm SQLite nội bộ.",
+    "ANTHROPIC_API_KEY": "Khóa API để xác thực các yêu cầu Anthropic Claude và Claude Code.",
+    "ANTHROPIC_BASE_URL": "URL cơ sở tùy chỉnh cho các điểm cuối Anthropic API (ví dụ: cho proxy hoặc cổng Bedrock/Vertex).",
+    "ANTHROPIC_MODEL": "Mô hình Anthropic mặc định được sử dụng (ví dụ: claude-3-7-sonnet-latest) cho các công cụ kết nối với Claude.",
+    "ANTHROPIC_AUTH_TOKEN": "Mã xác thực tùy chỉnh cho Claude Code hoặc các triển khai Anthropic doanh nghiệp.",
+    "CLAUDE_CODE_AUTO_CONNECT_IDE": "Kiểm soát việc Claude Code có tự động kết nối với IDE đang chạy khi khởi động hay không (1 để bật, 0 để tắt).",
+    "DISABLE_TELEMETRY": "Tắt tính năng đo từ xa, theo dõi việc sử dụng và báo cáo ẩn danh trong các công cụ AI và CLI dành cho nhà phát triển.",
+    "GEMINI_API_KEY": "Khóa API để xác thực Google Gemini API và Gemini CLI.",
+    "GOOGLE_API_KEY": "Khóa API cho Google AI Studio, API nhà phát triển Gemini và các dịch vụ Google Cloud.",
+    "ANTIGRAVITY_API_KEY": "Khóa API cho Antigravity CLI và môi trường Google DeepMind Advanced Agentic Coding.",
+    "HF_TOKEN": "Mã truy cập người dùng cho Hugging Face Hub (mô hình, tập dữ liệu và không gian).",
+    "HF_HOME": "Thư mục gốc cho bộ đệm Hugging Face, trọng số mô hình đã tải xuống và tập dữ liệu (mặc định là ~/.cache/huggingface).",
+    "OLLAMA_HOST": "Địa chỉ liên kết mạng hoặc URL máy chủ từ xa cho tiến trình nền Ollama (mặc định là 127.0.0.1:11434).",
+    "OLLAMA_MODELS": "Thư mục lưu trữ các tệp mô hình Ollama cục bộ đã tải xuống và tệp kê khai.",
+    "GROQ_API_KEY": "Khóa API để suy luận LLM tốc độ cao qua Groq Cloud.",
+    "DEEPSEEK_API_KEY": "Khóa API để xác thực các yêu cầu DeepSeek API và suy luận mô hình.",
+    "MISTRAL_API_KEY": "Khóa API để truy cập các mô hình Mistral AI và API nền tảng.",
+    "COHERE_API_KEY": "Khóa API cho Cohere Command, Embed và Rerank API.",
+    "LANGCHAIN_API_KEY": "Khóa API cho LangChain, theo dõi LangSmith và khả năng quan sát tác nhân.",
+    "LANGCHAIN_TRACING_V2": "Đặt thành \"true\" để bật tính năng theo dõi thực thi LangSmith V2 cho quy trình và chuỗi LLM."
   }
 }

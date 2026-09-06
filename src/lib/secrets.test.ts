@@ -15,11 +15,22 @@ describe("detectSecret — exact matches", () => {
     expect(detectSecret("OPENAI_API_KEY")).toMatchObject({ service: "OpenAI" });
     expect(detectSecret("DATABASE_URL")).toMatchObject({ service: "Database" });
     expect(detectSecret("ANTHROPIC_API_KEY")).toMatchObject({ service: "Anthropic" });
+    expect(detectSecret("CODEX_API_KEY")).toMatchObject({ service: "Codex", label: "Codex API Key" });
+    expect(detectSecret("CODEX_ACCESS_TOKEN")).toMatchObject({ service: "Codex", label: "Codex Access Token" });
+    expect(detectSecret("ANTHROPIC_AUTH_TOKEN")).toMatchObject({ service: "Anthropic", label: "Anthropic Auth Token" });
+    expect(detectSecret("ANTIGRAVITY_API_KEY")).toMatchObject({ service: "Antigravity", label: "Antigravity API Key" });
+    expect(detectSecret("HF_TOKEN")).toMatchObject({ service: "Hugging Face", label: "Hugging Face Token" });
+    expect(detectSecret("GROQ_API_KEY")).toMatchObject({ service: "Groq", label: "Groq API Key" });
+    expect(detectSecret("DEEPSEEK_API_KEY")).toMatchObject({ service: "DeepSeek", label: "DeepSeek API Key" });
+    expect(detectSecret("MISTRAL_API_KEY")).toMatchObject({ service: "Mistral", label: "Mistral API Key" });
+    expect(detectSecret("COHERE_API_KEY")).toMatchObject({ service: "Cohere", label: "Cohere API Key" });
+    expect(detectSecret("LANGCHAIN_API_KEY")).toMatchObject({ service: "LangChain", label: "LangChain API Key" });
   });
 
   it("is case-insensitive", () => {
     expect(detectSecret("github_token")).toMatchObject({ service: "GitHub" });
     expect(detectSecret("Openai_Api_Key")).toMatchObject({ service: "OpenAI" });
+    expect(detectSecret("codex_api_key")).toMatchObject({ service: "Codex" });
   });
 });
 
@@ -29,6 +40,11 @@ describe("detectSecret — prefix + keyword", () => {
     expect(detectSecret("AWS_PRIVATE_KEY")).toMatchObject({ service: "AWS" });
     expect(detectSecret("STRIPE_API_KEY")).toMatchObject({ service: "Stripe" });
     expect(detectSecret("GOOGLE_AUTH_TOKEN")).toMatchObject({ service: "Google" });
+    expect(detectSecret("CODEX_SESSION_TOKEN")).toMatchObject({ service: "Codex" });
+    expect(detectSecret("DEEPSEEK_SECRET_KEY")).toMatchObject({ service: "DeepSeek" });
+    expect(detectSecret("ANTIGRAVITY_TOKEN")).toMatchObject({ service: "Antigravity" });
+    expect(detectSecret("LANGCHAIN_SECRET")).toMatchObject({ service: "LangChain" });
+    expect(detectSecret("HF_API_KEY")).toMatchObject({ service: "Hugging Face" });
   });
 
   it("does not match prefix alone (no keyword in remainder)", () => {

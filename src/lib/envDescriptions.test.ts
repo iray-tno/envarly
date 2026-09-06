@@ -45,4 +45,19 @@ describe("lookupEnvDescription", () => {
   it("covers NODE_ENV with the nodejs category", () => {
     expect(lookupEnvDescription("NODE_ENV")?.categoryKey).toBe("env_desc.categories.nodejs");
   });
+
+  it("covers AI / LLM variables with the ai category", () => {
+    expect(lookupEnvDescription("OPENAI_API_KEY")).toEqual({
+      categoryKey: "env_desc.categories.ai",
+      summaryKey: "env_desc.OPENAI_API_KEY",
+    });
+    expect(lookupEnvDescription("ANTHROPIC_API_KEY")?.categoryKey).toBe("env_desc.categories.ai");
+    expect(lookupEnvDescription("CODEX_HOME")?.categoryKey).toBe("env_desc.categories.ai");
+    expect(lookupEnvDescription("GEMINI_API_KEY")?.categoryKey).toBe("env_desc.categories.ai");
+    expect(lookupEnvDescription("ANTIGRAVITY_API_KEY")?.categoryKey).toBe("env_desc.categories.ai");
+    expect(lookupEnvDescription("HF_TOKEN")?.categoryKey).toBe("env_desc.categories.ai");
+    expect(lookupEnvDescription("OLLAMA_HOST")?.categoryKey).toBe("env_desc.categories.ai");
+    expect(lookupEnvDescription("DEEPSEEK_API_KEY")?.categoryKey).toBe("env_desc.categories.ai");
+    expect(lookupEnvDescription("LANGCHAIN_TRACING_V2")?.categoryKey).toBe("env_desc.categories.ai");
+  });
 });

@@ -290,7 +290,8 @@
       "gcp": "GCP",
       "azure": "Azure",
       "devtools": "개발 도구",
-      "gpu": "GPU / CUDA"
+      "gpu": "GPU / CUDA",
+      "ai": "AI / LLM"
     },
     "PATH": "실행 파일을 검색할 디렉터리 목록입니다. Node, Python, Git 같은 프로그램이 여기서 검색됩니다.",
     "PATHEXT": "셸이 실행 파일로 취급하는 확장자 목록입니다 (예: .COM;.EXE;.BAT).",
@@ -428,6 +429,32 @@
     "ROCM_PATH": "AMD ROCm 설치 루트입니다. HIP 컴파일러와 ROCm 지원 프레임워크에서 사용됩니다.",
     "HIP_PATH": "HIP 툴킷 설치 디렉터리입니다. AMD의 CUDA 호환 GPU 프로그래밍 레이어를 가리킵니다.",
     "HIP_VISIBLE_DEVICES": "HIP/ROCm 애플리케이션에 표시되는 GPU 인덱스입니다. CUDA_VISIBLE_DEVICES와 유사합니다.",
-    "OPENCL_VENDOR_PATH": "OpenCL ICD(설치 가능한 클라이언트 드라이버) 벤더 파일이 있는 디렉터리입니다."
+    "OPENCL_VENDOR_PATH": "OpenCL ICD(설치 가능한 클라이언트 드라이버) 벤더 파일이 있는 디렉터리입니다.",
+    "OPENAI_API_KEY": "OpenAI API 및 Codex 요청을 인증하기 위한 API 키입니다.",
+    "OPENAI_BASE_URL": "OpenAI API의 커스텀 기본 URL입니다(프록시, Azure OpenAI 또는 호환 로컬 게이트웨이용).",
+    "OPENAI_ORG_ID": "여러 조직이 있을 때 API 요청을 청구 및 그룹화할 OpenAI 조직 ID입니다.",
+    "CODEX_HOME": "Codex CLI의 설정 및 데이터 디렉터리입니다(기본값: ~/.codex).",
+    "CODEX_API_KEY": "Codex CLI 인증에 사용되는 API 키입니다.",
+    "CODEX_ACCESS_TOKEN": "Codex CLI 또는 ChatGPT 기업용 계정을 위한 OAuth 액세스 토큰입니다.",
+    "CODEX_SQLITE_HOME": "Codex CLI가 내부 SQLite 세션 및 캐시 데이터베이스를 저장하는 디렉터리입니다.",
+    "ANTHROPIC_API_KEY": "Anthropic Claude 및 Claude Code 요청을 인증하기 위한 API 키입니다.",
+    "ANTHROPIC_BASE_URL": "Anthropic API 엔드포인트의 커스텀 기본 URL입니다(프록시, Bedrock/Vertex 게이트웨이 등).",
+    "ANTHROPIC_MODEL": "Claude에 연결하는 도구에서 사용할 기본 Anthropic 모델입니다(예: claude-3-7-sonnet-latest).",
+    "ANTHROPIC_AUTH_TOKEN": "Claude Code 또는 엔터프라이즈 Anthropic 배포를 위한 커스텀 인증 토큰입니다.",
+    "CLAUDE_CODE_AUTO_CONNECT_IDE": "Claude Code 시작 시 실행 중인 IDE 인스턴스에 자동으로 연결할지 여부를 제어합니다(1은 활성화, 0은 비활성화).",
+    "DISABLE_TELEMETRY": "AI 및 개발자 CLI 도구에서 텔레메트리, 사용 현황 추적, 익명 데이터 보고를 비활성화합니다.",
+    "GEMINI_API_KEY": "Google Gemini API 및 Gemini CLI 인증을 위한 API 키입니다.",
+    "GOOGLE_API_KEY": "Google AI Studio, Gemini 개발자 API 및 Google Cloud 서비스를 위한 API 키입니다.",
+    "ANTIGRAVITY_API_KEY": "Antigravity CLI 및 Google DeepMind Advanced Agentic Coding 환경을 위한 API 키입니다.",
+    "HF_TOKEN": "Hugging Face Hub(모델, 데이터셋, Spaces) 접근을 위한 사용자 토큰입니다.",
+    "HF_HOME": "Hugging Face 캐시, 다운로드된 모델 가중치 및 데이터셋의 루트 디렉터리입니다(기본값: ~/.cache/huggingface).",
+    "OLLAMA_HOST": "Ollama 데몬의 네트워크 바인드 주소 또는 원격 서버 URL입니다(기본값: 127.0.0.1:11434).",
+    "OLLAMA_MODELS": "다운로드된 로컬 Ollama 모델 파일과 매니페스트가 저장되는 디렉터리입니다.",
+    "GROQ_API_KEY": "Groq Cloud를 통한 초고속 LLM 추론용 API 키입니다.",
+    "DEEPSEEK_API_KEY": "DeepSeek API 및 모델 추론 요청을 인증하기 위한 API 키입니다.",
+    "MISTRAL_API_KEY": "Mistral AI 모델 및 플랫폼 API에 접근하기 위한 API 키입니다.",
+    "COHERE_API_KEY": "Cohere Command, Embed, Rerank API용 API 키입니다.",
+    "LANGCHAIN_API_KEY": "LangChain, LangSmith 추적 및 에이전트 가시성을 위한 API 키입니다.",
+    "LANGCHAIN_TRACING_V2": "LLM 파이프라인 및 체인의 LangSmith V2 실행 추적을 활성화하려면 \"true\"로 설정합니다."
   }
 }
