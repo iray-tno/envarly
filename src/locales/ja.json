@@ -290,7 +290,8 @@
       "gcp": "GCP",
       "azure": "Azure",
       "devtools": "開発ツール",
-      "gpu": "GPU / CUDA"
+      "gpu": "GPU / CUDA",
+      "ai": "AI / LLM"
     },
     "PATH": "実行ファイルを検索するディレクトリのリスト。Node、Python、Git などのプログラムはここで見つかります。",
     "PATHEXT": "シェルが実行可能として扱うファイル拡張子（例: .COM;.EXE;.BAT）。",
@@ -428,6 +429,32 @@
     "ROCM_PATH": "AMD ROCm インストールルート。HIP コンパイラと ROCm 対応フレームワークが使用。",
     "HIP_PATH": "HIP ツールキットのインストールディレクトリ。AMD の CUDA 互換 GPU プログラミング層を指す。",
     "HIP_VISIBLE_DEVICES": "HIP/ROCm アプリケーションに見える GPU インデックス。CUDA_VISIBLE_DEVICES に相当。",
-    "OPENCL_VENDOR_PATH": "OpenCL ICD（インストール可能クライアントドライバー）ベンダーファイルを含むディレクトリ。"
+    "OPENCL_VENDOR_PATH": "OpenCL ICD（インストール可能クライアントドライバー）ベンダーファイルを含むディレクトリ。",
+    "OPENAI_API_KEY": "OpenAI API および Codex リクエストを認証するための API キー。",
+    "OPENAI_BASE_URL": "OpenAI API のカスタムベース URL（プロキシ、Azure OpenAI、互換ローカルゲートウェイ等向け）。",
+    "OPENAI_ORG_ID": "複数の組織に所属する場合に API リクエストの請求・グループ化先を指定する OpenAI 組織 ID。",
+    "CODEX_HOME": "Codex CLI の設定およびデータディレクトリ（デフォルトは ~/.codex）。",
+    "CODEX_API_KEY": "Codex CLI の認証に使用する API キー。",
+    "CODEX_ACCESS_TOKEN": "Codex CLI または ChatGPT エンタープライズアカウント用の OAuth アクセストークン。",
+    "CODEX_SQLITE_HOME": "Codex CLI が内部セッションやキャッシュ SQLite データベースを保存するディレクトリ。",
+    "ANTHROPIC_API_KEY": "Anthropic Claude および Claude Code のリクエストを認証するための API キー。",
+    "ANTHROPIC_BASE_URL": "Anthropic API エンドポイントのカスタムベース URL（プロキシ、Bedrock/Vertex ゲートウェイ等向け）。",
+    "ANTHROPIC_MODEL": "Claude に接続するツールで使用するデフォルトの Anthropic モデル（例: claude-3-7-sonnet-latest）。",
+    "ANTHROPIC_AUTH_TOKEN": "Claude Code またはエンタープライズ Anthropic デプロイ向けのカスタム認証トークン。",
+    "CLAUDE_CODE_AUTO_CONNECT_IDE": "起動時に Claude Code が実行中の IDE インスタンスへ自動接続するかどうかを制御（1 で有効、0 で無効）。",
+    "DISABLE_TELEMETRY": "AI や開発者向け CLI ツールでのテレメトリ、利用状況追跡、匿名データ送信を無効化。",
+    "GEMINI_API_KEY": "Google Gemini API および Gemini CLI 認証用の API キー。",
+    "GOOGLE_API_KEY": "Google AI Studio、Gemini 開発者 API、Google Cloud サービス用の API キー。",
+    "ANTIGRAVITY_API_KEY": "Antigravity CLI および Google DeepMind Advanced Agentic Coding 環境用の API キー。",
+    "HF_TOKEN": "Hugging Face Hub（モデル、データセット、Spaces）へのアクセス用ユーザートークン。",
+    "HF_HOME": "Hugging Face のキャッシュ、ダウンロードしたモデル重み、データセットのルートディレクトリ（デフォルトは ~/.cache/huggingface）。",
+    "OLLAMA_HOST": "Ollama デーモンのネットワークバインドアドレスまたはリモートサーバー URL（デフォルトは 127.0.0.1:11434）。",
+    "OLLAMA_MODELS": "ダウンロードされたローカル Ollama モデルファイルおよびマニフェストが保存されるディレクトリ。",
+    "GROQ_API_KEY": "Groq Cloud を介した高速 LLM 推論用の API キー。",
+    "DEEPSEEK_API_KEY": "DeepSeek API およびモデル推論リクエストを認証するための API キー。",
+    "MISTRAL_API_KEY": "Mistral AI モデルおよびプラットフォーム API にアクセスするための API キー。",
+    "COHERE_API_KEY": "Cohere Command、Embed、Rerank API 用の API キー。",
+    "LANGCHAIN_API_KEY": "LangChain、LangSmith トレース、およびエージェントの可観測性のための API キー。",
+    "LANGCHAIN_TRACING_V2": "LLM パイプラインおよびチェーンの LangSmith V2 実行トレースを有効にするフラグ（\"true\" を設定）。"
   }
 }

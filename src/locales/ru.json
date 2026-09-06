@@ -322,7 +322,8 @@
       "gcp": "GCP",
       "azure": "Azure",
       "devtools": "Инструменты разработки",
-      "gpu": "GPU / CUDA"
+      "gpu": "GPU / CUDA",
+      "ai": "ИИ / LLM"
     },
     "PATH": "Список каталогов для поиска исполняемых файлов. Здесь находятся такие программы, как Node, Python и Git.",
     "PATHEXT": "Расширения файлов, которые оболочка считает исполняемыми (например, .COM;.EXE;.BAT).",
@@ -460,6 +461,32 @@
     "ROCM_PATH": "Корневой каталог установки AMD ROCm. Используется компиляторами HIP и фреймворками, поддерживающими ROCm.",
     "HIP_PATH": "Каталог установки HIP Toolkit. Указывает на CUDA-совместимый уровень GPU-программирования AMD.",
     "HIP_VISIBLE_DEVICES": "Индексы GPU, видимые приложениям HIP/ROCm. Аналогично CUDA_VISIBLE_DEVICES.",
-    "OPENCL_VENDOR_PATH": "Каталог с файлами поставщиков OpenCL ICD (устанавливаемых клиентских драйверов)."
+    "OPENCL_VENDOR_PATH": "Каталог с файлами поставщиков OpenCL ICD (устанавливаемых клиентских драйверов).",
+    "OPENAI_API_KEY": "API-ключ для аутентификации запросов к OpenAI API и Codex.",
+    "OPENAI_BASE_URL": "Пользовательский базовый URL для OpenAI API (например, для прокси, Azure OpenAI или совместимых локальных шлюзов).",
+    "OPENAI_ORG_ID": "Идентификатор организации OpenAI для биллинга и группировки запросов между организациями.",
+    "CODEX_HOME": "Каталог конфигурации и данных для Codex CLI (по умолчанию ~/.codex).",
+    "CODEX_API_KEY": "API-ключ для аутентификации в Codex CLI.",
+    "CODEX_ACCESS_TOKEN": "OAuth токен доступа для Codex CLI или корпоративных аккаунтов ChatGPT.",
+    "CODEX_SQLITE_HOME": "Каталог, в котором Codex CLI сохраняет внутренние базы данных сессий и кэша SQLite.",
+    "ANTHROPIC_API_KEY": "API-ключ для аутентификации запросов к Anthropic Claude и Claude Code.",
+    "ANTHROPIC_BASE_URL": "Пользовательский базовый URL для эндпоинтов Anthropic API (например, для прокси или шлюзов Bedrock/Vertex).",
+    "ANTHROPIC_MODEL": "Модель Anthropic по умолчанию (например, claude-3-7-sonnet-latest) для инструментов, подключающихся к Claude.",
+    "ANTHROPIC_AUTH_TOKEN": "Пользовательский токен авторизации для Claude Code или корпоративных развертываний Anthropic.",
+    "CLAUDE_CODE_AUTO_CONNECT_IDE": "Управляет автоматическим подключением Claude Code к запущенной IDE при запуске (1 — включить, 0 — отключить).",
+    "DISABLE_TELEMETRY": "Отключает телеметрию, отслеживание использования и анонимную отчетность в инструментах AI и CLI.",
+    "GEMINI_API_KEY": "API-ключ для аутентификации в Google Gemini API и Gemini CLI.",
+    "GOOGLE_API_KEY": "API-ключ для Google AI Studio, Gemini API для разработчиков и сервисов Google Cloud.",
+    "ANTIGRAVITY_API_KEY": "API-ключ для Antigravity CLI и среды Google DeepMind Advanced Agentic Coding.",
+    "HF_TOKEN": "Пользовательский токен доступа к Hugging Face Hub (модели, датасеты и spaces).",
+    "HF_HOME": "Корневой каталог для кэша Hugging Face, загруженных весов моделей и датасетов (по умолчанию ~/.cache/huggingface).",
+    "OLLAMA_HOST": "Сетевой адрес привязки или URL удаленного сервера для демона Ollama (по умолчанию 127.0.0.1:11434).",
+    "OLLAMA_MODELS": "Каталог, в котором сохраняются загруженные локальные файлы моделей и манифесты Ollama.",
+    "GROQ_API_KEY": "API-ключ для высокоскоростного вывода LLM через Groq Cloud.",
+    "DEEPSEEK_API_KEY": "API-ключ для аутентификации запросов к DeepSeek API и инференсу моделей.",
+    "MISTRAL_API_KEY": "API-ключ для доступа к моделям и платформенным API Mistral AI.",
+    "COHERE_API_KEY": "API-ключ для API Cohere Command, Embed и Rerank.",
+    "LANGCHAIN_API_KEY": "API-ключ для LangChain, трассировки LangSmith и мониторинга агентов.",
+    "LANGCHAIN_TRACING_V2": "Установите в \"true\", чтобы включить трассировку выполнения LangSmith V2 для конвейеров и цепочек LLM."
   }
 }

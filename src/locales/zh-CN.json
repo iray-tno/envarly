@@ -290,7 +290,8 @@
       "gcp": "GCP",
       "azure": "Azure",
       "devtools": "开发工具",
-      "gpu": "GPU / CUDA"
+      "gpu": "GPU / CUDA",
+      "ai": "AI / 大语言模型"
     },
     "PATH": "用于搜索可执行文件的目录列表。Node、Python、Git 等程序均通过此处查找。",
     "PATHEXT": "Shell 视为可执行文件的扩展名列表（例如 .COM;.EXE;.BAT）。",
@@ -428,6 +429,32 @@
     "ROCM_PATH": "AMD ROCm 安装根目录。被 HIP 编译器及 ROCm 相关框架使用。",
     "HIP_PATH": "HIP 工具包安装目录，指向 AMD 兼容 CUDA 的 GPU 编程层。",
     "HIP_VISIBLE_DEVICES": "HIP/ROCm 应用程序可见的 GPU 索引，类似于 CUDA_VISIBLE_DEVICES。",
-    "OPENCL_VENDOR_PATH": "包含 OpenCL ICD（可安装客户端驱动程序）供应商文件的目录。"
+    "OPENCL_VENDOR_PATH": "包含 OpenCL ICD（可安装客户端驱动程序）供应商文件的目录。",
+    "OPENAI_API_KEY": "用于验证 OpenAI API 和 Codex 请求的 API 密钥。",
+    "OPENAI_BASE_URL": "OpenAI API 的自定义 Base URL（例如用于反向代理、Azure OpenAI 或兼容本地网关）。",
+    "OPENAI_ORG_ID": "用于计费和区分多个组织间 API 请求的 OpenAI 组织 ID。",
+    "CODEX_HOME": "Codex CLI 的配置与数据目录（默认为 ~/.codex）。",
+    "CODEX_API_KEY": "用于 Codex CLI 身份验证的 API 密钥。",
+    "CODEX_ACCESS_TOKEN": "Codex CLI 或 ChatGPT 企业版账户的 OAuth 访问令牌。",
+    "CODEX_SQLITE_HOME": "Codex CLI 存放内部 SQLite 会话与缓存数据库的目录。",
+    "ANTHROPIC_API_KEY": "用于验证 Anthropic Claude 和 Claude Code 请求的 API 密钥。",
+    "ANTHROPIC_BASE_URL": "Anthropic API 端点的自定义 Base URL（例如用于反向代理或 Bedrock/Vertex 网关）。",
+    "ANTHROPIC_MODEL": "连接到 Claude 的工具所使用的默认 Anthropic 模型（例如 claude-3-7-sonnet-latest）。",
+    "ANTHROPIC_AUTH_TOKEN": "用于 Claude Code 或企业级 Anthropic 部署的自定义授权令牌。",
+    "CLAUDE_CODE_AUTO_CONNECT_IDE": "控制 Claude Code 启动时是否自动连接到正在运行的 IDE 实例（1 为启用，0 为禁用）。",
+    "DISABLE_TELEMETRY": "在 AI 与开发者 CLI 工具中禁用遥测、使用情况跟踪和匿名数据上报。",
+    "GEMINI_API_KEY": "用于 Google Gemini API 和 Gemini CLI 身份验证的 API 密钥。",
+    "GOOGLE_API_KEY": "用于 Google AI Studio、Gemini 开发者 API 及 Google Cloud 服务的 API 密钥。",
+    "ANTIGRAVITY_API_KEY": "用于 Antigravity CLI 及 Google DeepMind Advanced Agentic Coding 环境的 API 密钥。",
+    "HF_TOKEN": "用于 Hugging Face Hub（模型、数据集和 Spaces）的个人访问令牌。",
+    "HF_HOME": "Hugging Face 缓存、已下载模型权重和数据集的根目录（默认为 ~/.cache/huggingface）。",
+    "OLLAMA_HOST": "Ollama 守护进程的网络监听地址或远程服务器 URL（默认为 127.0.0.1:11434）。",
+    "OLLAMA_MODELS": "存储已下载的本地 Ollama 模型文件与清单的目录。",
+    "GROQ_API_KEY": "用于通过 Groq Cloud 进行高速 LLM 推理的 API 密钥。",
+    "DEEPSEEK_API_KEY": "用于验证 DeepSeek API 及模型推理请求的 API 密钥。",
+    "MISTRAL_API_KEY": "用于访问 Mistral AI 模型及平台 API 的 API 密钥。",
+    "COHERE_API_KEY": "用于 Cohere Command、Embed 和 Rerank API 的 API 密钥。",
+    "LANGCHAIN_API_KEY": "用于 LangChain、LangSmith 跟踪以及智能体可观测性的 API 密钥。",
+    "LANGCHAIN_TRACING_V2": "设置为 \"true\" 以启用 LLM 管道与调用链的 LangSmith V2 执行跟踪。"
   }
 }
