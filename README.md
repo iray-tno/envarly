@@ -95,6 +95,7 @@ session, use `mise exec -- npm run dev`.
 npm test                       # Vitest in watch mode
 npm run coverage               # coverage report (V8)
 npx vitest run                 # single run (used in CI)
+npm run test:storybook -- --run # Storybook accessibility (a11y) test
 cd src-tauri && cargo test     # Rust unit tests (runs on Linux/macOS too)
 ```
 
@@ -149,8 +150,8 @@ envarly list --scope system --format json
 envarly export --format json     --output backup.json
 envarly export --format reg      --output backup.reg
 envarly export --format ps1      --output backup.ps1      # PowerShell [Environment]::SetEnvironmentVariable
-envarly export --format dsc_v2   --output backup.ps1      # PowerShell DSC v2 configuration
-envarly export --format dsc_v3   --output backup.dsc.yaml # DSC v3 YAML
+envarly export --format dsc-v2   --output backup.ps1      # PowerShell DSC v2 configuration
+envarly export --format dsc-v3   --output backup.dsc.yaml # DSC v3 YAML
 envarly export --format ansible  --output backup.yml      # Ansible environment playbook
 envarly export --format json | jq '.user.PATH'
 
@@ -255,14 +256,16 @@ Detected secrets are shown with a `⚠ ServiceName` badge (e.g. `⚠ AWS`, `⚠ 
 
 ## Snapshots
 
-Snapshots are stored as JSON files under `%LOCALAPPDATA%\Envarly\snapshots\`. Each file contains the full user and system environment at the time of the snapshot. They can be listed, restored, or deleted from within the app.
+Snapshots are stored as DPAPI-encrypted `.snap` files under `%LOCALAPPDATA%\Envarly\snapshots\`. Only the Windows user account that created the snapshot on the same machine can decrypt it. Each file contains the full user and system environment at the time of the snapshot. They can be listed, restored, or deleted from within the app.
 
 ## CI
 
 | Workflow | Trigger | Jobs |
 |---|---|---|
-| `test.yml` | Every push | Frontend (vitest) + Rust (cargo test) + version consistency check |
-| `release.yml` | Tag push `v*` or manual | Windows build → GitHub Releases |
+| `test.yml` | Every push / PR | Frontend (vitest + storybook a11y) + Rust (cargo test) + version consistency & lint |
+| `release.yml` | Tag push `v*` or manual | Windows build (NSIS, WiX MSI, portable ZIP) → GitHub Releases |
+| `pages.yml` | Push to `main` | Storybook, Allure report, and landing page deployment to GitHub Pages |
+| `winget.yml` | GitHub Release published or manual | Updates and submits WinGet package manifest |
 | `security.yml` | Weekly (Mon 09:00 UTC) or manual | npm audit + cargo audit |
 
 ## Project structure
