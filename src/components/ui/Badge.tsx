@@ -1,3 +1,4 @@
+import { Text } from "@hozo/core";
 import type { ReactNode } from "react";
 import { cn } from "../../lib/cn";
 
@@ -20,7 +21,7 @@ interface Props {
 
 export function Badge({ variant, children, className }: Props) {
   return (
-    <span
+    <Text
       className={cn(
         "inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide shrink-0",
         variantCls[variant],
@@ -28,6 +29,6 @@ export function Badge({ variant, children, className }: Props) {
       )}
     >
       {children}
-    </span>
+    </Text>
   );
 }
