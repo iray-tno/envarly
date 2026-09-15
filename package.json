@@ -54,8 +54,8 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
-    "@vitest/browser-playwright": "^4.1.10",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/browser-playwright": "^4.1.11",
+    "@vitest/coverage-v8": "^4.1.11",
     "@xmldom/xmldom": "^0.9.12",
     "allure": "^3.16.0",
     "jsdom": "^29.1.1",
@@ -64,6 +64,6 @@
     "storybook": "^10.4.6",
     "typescript": "~5.8.3",
     "vite": "^6.4.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   }
 }
