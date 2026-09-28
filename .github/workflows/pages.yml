@@ -97,14 +97,12 @@ jobs:
           mkdir -p site/reports/history
           cp allure-history/allure-history.jsonl site/reports/history/allure-history.jsonl
 
-      - name: Brand Allure report head
+      - name: Brand Allure report and add Back to LP button
         # Allure 3's generated page sets <title> from allurerc.mjs's `name`
-        # (padded with stray spaces by its own template — trim those) but
-        # emits no OGP/description metadata of its own — inject Envarly
-        # branding so it's identifiable if crawled/shared.
-        run: |
-          sed -i 's#<title> Envarly — Test Reports </title>#<title>Envarly — Test Reports</title>#' site/reports/index.html
-          sed -i 's#</head>#    <meta property="og:site_name" content="Envarly" />\n    <meta property="og:title" content="Envarly — Test Reports" />\n    <meta name="description" content="CI test reports for Envarly, the Windows environment variable manager (https://iray-tno.github.io/envarly/)." />\n</head>#' site/reports/index.html
+        # (padded with stray spaces by its own template — trim those) and
+        # emits no OGP/description metadata or navigation back to the LP.
+        # Run scripts/brand-allure-report.mjs to inject branding and the Back to LP button.
+        run: node scripts/brand-allure-report.mjs site/reports/index.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
