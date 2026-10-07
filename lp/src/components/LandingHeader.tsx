@@ -15,14 +15,14 @@ interface LandingHeaderProps {
 export default function LandingHeader({ copy }: LandingHeaderProps) {
   return (
     <Header className="block sticky top-0 z-50 border-b border-[var(--color-border)] bg-bg/90 backdrop-blur">
-      <View className="w-full mx-auto max-w-5xl px-6 h-14 flex flex-row items-center justify-between">
+      <View className="w-full mx-auto max-w-5xl px-4 sm:px-6 h-14 flex flex-row items-center justify-between">
         <Link
           href={copy.canonicalPath}
-          className="font-semibold text-[var(--color-text)] tracking-tight"
+          className="shrink-0 font-semibold text-[var(--color-text)] tracking-tight"
         >
           Envarly
         </Link>
-        <Nav className="flex flex-row items-center gap-6">
+        <Nav className="flex flex-row shrink items-center gap-2 sm:gap-6">
           <Link
             href="#features"
             className="hidden lg:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
@@ -54,7 +54,7 @@ export default function LandingHeader({ copy }: LandingHeaderProps) {
             id="lang-select"
             aria-label="Language"
             defaultValue={LANGUAGES.find((language) => language.code === copy.lang)?.path}
-            className="text-sm bg-transparent border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="max-w-28 sm:max-w-none text-sm bg-transparent border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
           >
             {LANGUAGES.map((language) => (
               <option key={language.code} value={language.path}>
@@ -67,7 +67,7 @@ export default function LandingHeader({ copy }: LandingHeaderProps) {
             href={RELEASE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm px-4 py-1.5 rounded-full bg-[var(--color-accent)] text-[var(--color-bg)] font-medium hover:bg-[var(--color-accent-dim)] transition-colors"
+            className="shrink-0 whitespace-nowrap text-sm px-3 sm:px-4 py-1.5 rounded-full bg-[var(--color-accent)] text-[var(--color-bg)] font-medium hover:bg-[var(--color-accent-dim)] transition-colors"
           >
             {copy.nav.download}
           </Link>

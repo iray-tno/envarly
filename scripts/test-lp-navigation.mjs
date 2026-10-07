@@ -89,6 +89,7 @@ for (const [index, locale] of locales.entries()) {
           bounds: [...header.querySelectorAll("a, select")]
             .filter((element) => element.getBoundingClientRect().width)
             .map((element) => ({
+              name: element.id || element.textContent.trim(),
               left: element.getBoundingClientRect().left,
               right: element.getBoundingClientRect().right,
             })),
@@ -99,7 +100,7 @@ for (const [index, locale] of locales.entries()) {
         for (const bound of layout.bounds) {
           assert.ok(
             bound.left >= 0 && bound.right <= width,
-            `${width}px: header control outside viewport`,
+            `${width}px: header control outside viewport: ${JSON.stringify(bound)}`,
           );
         }
         for (let i = 1; i < layout.bounds.length; i++) {
