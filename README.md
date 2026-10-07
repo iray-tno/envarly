@@ -301,7 +301,7 @@ The baseline snapshot is captured on app mount. Every Refresh call re-reads the 
 
 ### Apply progress
 
-`apply_changes_with` (Rust) takes a per-change progress callback; the `apply_env_changes` Tauri command uses it to emit an `apply-progress` event for each variable as it's written, while keeping the existing atomic all-or-nothing rollback behavior unchanged. The frontend subscribes via `api.onApplyProgress` *before* calling `applyEnvChanges` — subscribing after would race a fast apply, since events emitted before a listener attaches are simply lost.
+`apply_changes_with` (Rust) takes a per-change progress callback; the `apply_env_changes` Tauri command uses it to emit an `apply-progress` event for each variable as it is written. Failed batches attempt to restore only completed mutations, in reverse order, preserving conflicting external changes and reporting unresolved entries. This is best-effort rollback, not a registry transaction: process termination can interrupt it, and another writer can race a restoration. The frontend subscribes via `api.onApplyProgress` before calling `applyEnvChanges`, so a fast apply cannot emit events before the listener attaches.
 
 ## License
 

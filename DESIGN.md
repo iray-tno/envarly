@@ -166,7 +166,7 @@ No other files are written. Settings are kept in Tauri's default store if added 
 
 When launched with arguments, `try_run_cli()` intercepts before the GUI starts and exits the process after the command completes.
 
-`get`/`list`/`export` call `env_store::read_all()` / `export::*` directly and never write. `import`/`set`/`delete` are dry-run by default and only call `env_store::apply_changes()` — the same atomic apply-with-rollback path the GUI's Apply handler uses — when `--apply` is passed.
+`get`/`list`/`export` call `env_store::read_all()` / `export::*` directly and never write. `import`/`set`/`delete` are dry-run by default and only call `env_store::apply_changes()` when `--apply` is passed. This is the GUI's shared apply path with best-effort rollback of completed mutations. Restoration checks for conflicting external changes and reports unresolved entries; it does not provide crash safety or transactional isolation.
 
 ```
 envarly get <NAME> [--scope user|system]
