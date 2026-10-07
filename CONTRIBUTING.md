@@ -48,6 +48,23 @@ chore: update tauri to 2.x
 - [ ] No direct registry writes added outside `commands/env.rs` / `apply_env_changes`
 - [ ] New UI is keyboard-navigable and has appropriate ARIA roles
 
+## Incremental Hozo Migration
+
+The LP footer and the desktop `Badge` use Hozo 0.2.0. Desktop Vite and Vitest
+share `hozo.config.mjs`; Storybook inherits the Vite integration. Keep Hozo before
+the React transform and use `src/index.css` as the token source.
+
+Tailwind remains responsible for dynamic utilities, including `cn()` calls and
+caller class overrides. Hozo's candidate scan and preflight are disabled to
+avoid introducing duplicate global CSS during the pilot. The compiler's
+`DYNAMIC_CLASS_NAME_NOT_RESOLVED` warning for `Badge` is expected: those classes
+are intentionally passed through to Tailwind. Static Hozo classes still compile.
+
+Before migrating another component, check its DOM semantics, class overrides,
+both themes, and interaction tests in Storybook. Generated `*.hozo.css` files are
+ignored build artifacts. Interactive components keep their current DOM APIs
+until their event, focus, ref, and accessibility contracts can be preserved.
+
 ## Adding or updating translations
 
 Envarly supports multiple languages using `react-i18next`. Translation resources live under `src/locales/`:

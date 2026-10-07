@@ -1,15 +1,17 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { hozo } from "@hozo/vite";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig, defineProject } from "vitest/config";
+import { hozoOptions } from "./hozo.config.mjs";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [tailwindcss(), react()],
+  plugins: [hozo(hozoOptions), tailwindcss(), react()],
   test: {
     projects: [
       defineProject({
