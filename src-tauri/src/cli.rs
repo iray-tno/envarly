@@ -427,7 +427,7 @@ fn write_changes(changes: &[EnvChange], apply: bool) -> Result<(), crate::error:
             Ok(())
         }
         Err(e) => {
-            eprintln!("\nApply failed, rolled back: {}", e);
+            eprintln!("\nApply failed: {}", e);
             std::process::exit(1);
         }
     }

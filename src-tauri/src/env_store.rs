@@ -292,43 +292,83 @@ pub fn apply_changes_with(
     changes: &[EnvChange],
     mut on_progress: impl FnMut(usize, usize, &EnvChange, &Result<(), EnvarlyError>),
 ) -> Result<(), EnvarlyError> {
-    let baseline = read_snapshot_with(backend)?;
+    let mut journal = Vec::new();
     let total = changes.len();
 
     for (index, change) in changes.iter().enumerate() {
-        let result = match change {
+        let (name, scope, expected) = match change {
             EnvChange::Set {
                 name,
+                scope,
                 value,
                 value_kind,
+            } => (
+                name,
                 scope,
-            } => {
-                let env_value = EnvValue::typed(value.clone(), *value_kind);
-                match scope {
-                    VarScope::User => backend.write_user(name, &env_value),
-                    VarScope::System => backend.write_system(name, &env_value),
-                    VarScope::OtherUser => backend.write_other_user(name, &env_value),
-                }
-                .and_then(|()| verify_value(backend, name, scope, Some(&env_value)))
-            }
-            EnvChange::Delete { name, scope } => match scope {
-                VarScope::User => backend.delete_user(name),
-                VarScope::System => backend.delete_system(name),
-                VarScope::OtherUser => backend.delete_other_user(name),
-            }
-            .and_then(|()| verify_value(backend, name, scope, None)),
+                Some(EnvValue::typed(value.clone(), *value_kind)),
+            ),
+            EnvChange::Delete { name, scope } => (name, scope, None),
         };
+        let before = read_scope_value(backend, name, scope);
+        let original = before.as_ref().ok().cloned();
+        let mut wrote = false;
+        let result = before.and_then(|before| {
+            let result = match change {
+                EnvChange::Set {
+                    name,
+                    value,
+                    value_kind,
+                    scope,
+                } => {
+                    let env_value = EnvValue::typed(value.clone(), *value_kind);
+                    match scope {
+                        VarScope::User => backend.write_user(name, &env_value),
+                        VarScope::System => backend.write_system(name, &env_value),
+                        VarScope::OtherUser => backend.write_other_user(name, &env_value),
+                    }
+                }
+                EnvChange::Delete { name, scope } => match scope {
+                    VarScope::User => backend.delete_user(name),
+                    VarScope::System => backend.delete_system(name),
+                    VarScope::OtherUser => backend.delete_other_user(name),
+                },
+            };
+            if result.is_ok() {
+                wrote = true;
+                journal.push(RollbackEntry {
+                    name: name.clone(),
+                    scope: scope.clone(),
+                    before,
+                    expected: expected.clone(),
+                });
+            }
+            result.and_then(|()| verify_value(backend, name, scope, expected.as_ref()))
+        });
 
         on_progress(index, total, change, &result);
 
         if let Err(error) = result {
-            let rollback = restore_snapshot_with(backend, &baseline);
+            // A backend error may leave the mutation outcome unknown. Never
+            // overwrite an unexpected value in an attempt to guess what happened.
+            let mut failures = rollback_changes(backend, &journal);
+            if !wrote {
+                if let Some(original) = original {
+                    match read_scope_value(backend, name, scope) {
+                        Ok(current) if current == original => {},
+                        _ => failures.push(format!(
+                            "mutation outcome unknown for {name:?} in {scope:?}; current state preserved"
+                        )),
+                    }
+                }
+            }
             backend.broadcast_changes();
-            return match rollback {
-                Ok(()) => Err(error),
-                Err(rollback_error) => Err(EnvarlyError::InvalidInput(format!(
-                    "apply failed: {error}; rollback also failed: {rollback_error}"
-                ))),
+            return if failures.is_empty() {
+                Err(error)
+            } else {
+                Err(EnvarlyError::InvalidInput(format!(
+                    "apply failed: {error}; rollback details: {}",
+                    failures.join("; ")
+                )))
             };
         }
     }
@@ -343,12 +383,7 @@ fn verify_value(
     scope: &VarScope,
     expected: Option<&EnvValue>,
 ) -> Result<(), EnvarlyError> {
-    let values = match scope {
-        VarScope::User => backend.read_user()?,
-        VarScope::System => backend.read_system()?,
-        VarScope::OtherUser => backend.read_other_user()?.unwrap_or_default(),
-    };
-    if values.get(name) == expected {
+    if read_scope_value(backend, name, scope)?.as_ref() == expected {
         Ok(())
     } else {
         Err(EnvarlyError::InvalidInput(format!(
@@ -357,48 +392,83 @@ fn verify_value(
     }
 }
 
-fn restore_snapshot_with(
+fn read_scope_value(
     backend: &dyn EnvBackend,
-    snapshot: &EnvSnapshot,
-) -> Result<(), EnvarlyError> {
-    restore_scope(
-        backend.read_user()?,
-        &snapshot.user,
-        |name, value| backend.write_user(name, value),
-        |name| backend.delete_user(name),
-    )?;
-    restore_scope(
-        backend.read_system()?,
-        &snapshot.system,
-        |name, value| backend.write_system(name, value),
-        |name| backend.delete_system(name),
-    )?;
-    if let Some(other_baseline) = &snapshot.other_user {
-        if let Some(current_other) = backend.read_other_user()? {
-            restore_scope(
-                current_other,
-                other_baseline,
-                |name, value| backend.write_other_user(name, value),
-                |name| backend.delete_other_user(name),
-            )?;
-        }
-    }
-    Ok(())
+    name: &str,
+    scope: &VarScope,
+) -> Result<Option<EnvValue>, EnvarlyError> {
+    let values = match scope {
+        VarScope::User => backend.read_user()?,
+        VarScope::System => backend.read_system()?,
+        VarScope::OtherUser => backend.read_other_user()?.unwrap_or_default(),
+    };
+    Ok(values
+        .into_iter()
+        .find(|(key, _)| names_equal(key, name))
+        .map(|(_, value)| value))
 }
 
-fn restore_scope(
-    current: HashMap<String, EnvValue>,
-    baseline: &HashMap<String, EnvValue>,
-    write: impl Fn(&str, &EnvValue) -> Result<(), EnvarlyError>,
-    delete: impl Fn(&str) -> Result<(), EnvarlyError>,
-) -> Result<(), EnvarlyError> {
-    for name in current.keys().filter(|name| !baseline.contains_key(*name)) {
-        delete(name)?;
+struct RollbackEntry {
+    name: String,
+    scope: VarScope,
+    before: Option<EnvValue>,
+    expected: Option<EnvValue>,
+}
+
+fn names_equal(left: &str, right: &str) -> bool {
+    #[cfg(windows)]
+    {
+        let left: Vec<u16> = left.encode_utf16().collect();
+        let right: Vec<u16> = right.encode_utf16().collect();
+        unsafe {
+            windows_sys::Win32::Globalization::CompareStringOrdinal(
+                left.as_ptr(),
+                left.len() as i32,
+                right.as_ptr(),
+                right.len() as i32,
+                1,
+            ) == windows_sys::Win32::Globalization::CSTR_EQUAL
+        }
     }
-    for (name, value) in baseline {
-        write(name, value)?;
+    #[cfg(not(windows))]
+    {
+        left.to_uppercase() == right.to_uppercase()
     }
-    Ok(())
+}
+
+fn rollback_changes(backend: &dyn EnvBackend, journal: &[RollbackEntry]) -> Vec<String> {
+    let mut failures = Vec::new();
+    let mut unresolved: Vec<(&VarScope, &str)> = Vec::new();
+    for entry in journal.iter().rev() {
+        if unresolved
+            .iter()
+            .any(|(scope, name)| **scope == entry.scope && names_equal(name, &entry.name))
+        {
+            continue;
+        }
+        let result = (|| {
+            if read_scope_value(backend, &entry.name, &entry.scope)? != entry.expected {
+                return Err(EnvarlyError::InvalidInput(format!(
+                    "rollback conflict for {:?} in {:?}; current state preserved",
+                    entry.name, entry.scope
+                )));
+            }
+            match (&entry.scope, &entry.before) {
+                (VarScope::User, Some(value)) => backend.write_user(&entry.name, value),
+                (VarScope::System, Some(value)) => backend.write_system(&entry.name, value),
+                (VarScope::OtherUser, Some(value)) => backend.write_other_user(&entry.name, value),
+                (VarScope::User, None) => backend.delete_user(&entry.name),
+                (VarScope::System, None) => backend.delete_system(&entry.name),
+                (VarScope::OtherUser, None) => backend.delete_other_user(&entry.name),
+            }?;
+            verify_value(backend, &entry.name, &entry.scope, entry.before.as_ref())
+        })();
+        if let Err(error) = result {
+            unresolved.push((&entry.scope, &entry.name));
+            failures.push(format!("{:?} in {:?}: {error}", entry.name, entry.scope));
+        }
+    }
+    failures
 }
 
 // ---------------------------------------------------------------------------
@@ -471,6 +541,147 @@ pub(crate) fn detect_list_separator(name: &str, value: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct FaultBackend {
+        inner: MemBackend,
+        fail_read: std::sync::atomic::AtomicBool,
+        fail_restore: bool,
+    }
+
+    impl EnvBackend for FaultBackend {
+        fn read_user(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError> {
+            if self
+                .fail_read
+                .swap(false, std::sync::atomic::Ordering::SeqCst)
+            {
+                return Err(EnvarlyError::InvalidInput(
+                    "injected verification read failure".into(),
+                ));
+            }
+            self.inner.read_user()
+        }
+        fn read_system(&self) -> Result<HashMap<String, EnvValue>, EnvarlyError> {
+            self.inner.read_system()
+        }
+        fn write_user(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError> {
+            if self.fail_restore && name == "B" && value.value == "original" {
+                return Err(EnvarlyError::InvalidInput(
+                    "injected restore failure".into(),
+                ));
+            }
+            self.inner.write_user(name, value)?;
+            if name == "VERIFY" && value.value == "changed" {
+                self.fail_read
+                    .store(true, std::sync::atomic::Ordering::SeqCst);
+            }
+            Ok(())
+        }
+        fn write_system(&self, name: &str, value: &EnvValue) -> Result<(), EnvarlyError> {
+            self.inner.write_system(name, value)
+        }
+        fn delete_user(&self, name: &str) -> Result<(), EnvarlyError> {
+            self.inner.delete_user(name)
+        }
+        fn delete_system(&self, name: &str) -> Result<(), EnvarlyError> {
+            self.inner.delete_system(name)
+        }
+        fn is_elevated(&self) -> bool {
+            self.inner.is_elevated()
+        }
+    }
+
+    #[test]
+    fn rollback_includes_a_write_whose_verification_read_failed() {
+        let b = FaultBackend {
+            inner: MemBackend::new().with_user([("VERIFY", "original")]),
+            fail_read: false.into(),
+            fail_restore: false,
+        };
+        let result = apply_changes_with(
+            &b,
+            &[EnvChange::Set {
+                name: "VERIFY".into(),
+                value: "changed".into(),
+                value_kind: EnvValueKind::String,
+                scope: VarScope::User,
+            }],
+            |_, _, _, _| {},
+        );
+        assert!(result.is_err());
+        assert_eq!(b.read_user().unwrap()["VERIFY"].value, "original");
+    }
+
+    #[test]
+    fn rollback_continues_after_a_restore_write_fails() {
+        let b = FaultBackend {
+            inner: MemBackend::new()
+                .with_user([("A", "original"), ("B", "original")])
+                .with_elevated(false),
+            fail_read: false.into(),
+            fail_restore: true,
+        };
+        let changes = ["A", "B", "DENIED"].map(|name| EnvChange::Set {
+            name: name.into(),
+            value: "changed".into(),
+            value_kind: EnvValueKind::String,
+            scope: if name == "DENIED" {
+                VarScope::System
+            } else {
+                VarScope::User
+            },
+        });
+        let error = apply_changes_with(&b, &changes, |_, _, _, _| {}).unwrap_err();
+        assert!(error.to_string().contains("injected restore failure"));
+        assert_eq!(b.read_user().unwrap()["A"].value, "original");
+        assert_eq!(b.read_user().unwrap()["B"].value, "changed");
+    }
+
+    #[test]
+    fn registry_lookup_ignores_name_case() {
+        let b = MemBackend::new().with_user([("Path", "original"), ("Ä_VAR", "unicode")]);
+        assert_eq!(
+            read_scope_value(&b, "PATH", &VarScope::User)
+                .unwrap()
+                .unwrap()
+                .value,
+            "original"
+        );
+        assert_eq!(
+            read_scope_value(&b, "ä_var", &VarScope::User)
+                .unwrap()
+                .unwrap()
+                .value,
+            "unicode"
+        );
+    }
+
+    #[test]
+    fn rollback_conflict_blocks_earlier_mutations_of_the_same_variable() {
+        let b = MemBackend::new()
+            .with_user([("A", "original")])
+            .with_elevated(false);
+        let changes = ["first", "second", "denied"].map(|value| EnvChange::Set {
+            name: "A".into(),
+            value: value.into(),
+            value_kind: EnvValueKind::String,
+            scope: if value == "denied" {
+                VarScope::System
+            } else {
+                VarScope::User
+            },
+        });
+        let result = apply_changes_with(&b, &changes, |index, _, _, _| {
+            if index == 1 {
+                b.write_user("A", &EnvValue::typed("first".into(), EnvValueKind::String))
+                    .unwrap();
+            }
+        });
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("rollback conflict"));
+        assert_eq!(b.read_user().unwrap()["A"].value, "first");
+    }
 
     fn backend() -> MemBackend {
         MemBackend::new()
@@ -638,7 +849,7 @@ mod tests {
     }
 
     #[test]
-    fn atomic_apply_preserves_types() {
+    fn apply_preserves_types() {
         let b = backend().with_user([("EXPANDED", "%USERPROFILE%\\bin")]);
         apply_changes_with(
             &b,
@@ -658,7 +869,7 @@ mod tests {
     }
 
     #[test]
-    fn atomic_apply_rolls_back_prior_changes_after_failure() {
+    fn apply_rolls_back_prior_changes_after_failure() {
         let b = MemBackend::new()
             .with_user([("KEEP", "original")])
             .with_elevated(false);
@@ -713,6 +924,129 @@ mod tests {
         .unwrap();
 
         assert_eq!(seen, vec![(0, 2, true), (1, 2, true)]);
+    }
+
+    #[test]
+    fn rollback_preserves_unrelated_concurrent_changes() {
+        let b = MemBackend::new()
+            .with_user([("KEEP", "original"), ("B", "old"), ("C", "old")])
+            .with_elevated(false);
+        let result = apply_changes_with(
+            &b,
+            &[
+                EnvChange::Set {
+                    name: "KEEP".into(),
+                    value: "changed".into(),
+                    value_kind: EnvValueKind::ExpandString,
+                    scope: VarScope::User,
+                },
+                EnvChange::Set {
+                    name: "DENIED".into(),
+                    value: "value".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::System,
+                },
+            ],
+            |index, _, _, _| {
+                if index == 0 {
+                    b.write_user(
+                        "NEW_TOOL",
+                        &EnvValue::typed("external".into(), EnvValueKind::String),
+                    )
+                    .unwrap();
+                    b.write_user(
+                        "B",
+                        &EnvValue::typed("external".into(), EnvValueKind::String),
+                    )
+                    .unwrap();
+                    b.delete_user("C").unwrap();
+                }
+            },
+        );
+        assert!(result.is_err());
+        let values = b.read_user().unwrap();
+        assert_eq!(
+            values["KEEP"],
+            EnvValue::typed("original".into(), EnvValueKind::String)
+        );
+        assert_eq!(values["NEW_TOOL"].value, "external");
+        assert_eq!(values["B"].value, "external");
+        assert!(!values.contains_key("C"));
+    }
+
+    #[test]
+    fn rollback_reports_conflicts_and_continues_restoring_other_entries() {
+        let b = MemBackend::new()
+            .with_user([("A", "original"), ("B", "original")])
+            .with_elevated(false);
+        let changes = ["A", "B", "DENIED"].map(|name| EnvChange::Set {
+            name: name.into(),
+            value: "changed".into(),
+            value_kind: EnvValueKind::String,
+            scope: if name == "DENIED" {
+                VarScope::System
+            } else {
+                VarScope::User
+            },
+        });
+        let error = apply_changes_with(&b, &changes, |index, _, _, _| {
+            if index == 1 {
+                b.write_user(
+                    "B",
+                    &EnvValue::typed("external".into(), EnvValueKind::String),
+                )
+                .unwrap();
+            }
+        })
+        .unwrap_err();
+        assert!(error.to_string().contains("rollback conflict"));
+        let values = b.read_user().unwrap();
+        assert_eq!(values["A"].value, "original");
+        assert_eq!(values["B"].value, "external");
+    }
+
+    #[test]
+    fn rollback_reverses_repeated_sets_additions_and_deletions() {
+        let b = MemBackend::new()
+            .with_user([("KEEP", "original")])
+            .with_elevated(false);
+        let baseline = b.read_user().unwrap();
+        let result = apply_changes_with(
+            &b,
+            &[
+                EnvChange::Delete {
+                    name: "KEEP".into(),
+                    scope: VarScope::User,
+                },
+                EnvChange::Set {
+                    name: "KEEP".into(),
+                    value: "replacement".into(),
+                    value_kind: EnvValueKind::ExpandString,
+                    scope: VarScope::User,
+                },
+                EnvChange::Set {
+                    name: "NEW".into(),
+                    value: "1".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::User,
+                },
+                EnvChange::Set {
+                    name: "NEW".into(),
+                    value: "2".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::User,
+                },
+                EnvChange::Set {
+                    name: "DENIED".into(),
+                    value: "value".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::System,
+                },
+            ],
+            |_, _, _, _| {},
+        );
+        assert!(result.is_err());
+        assert_eq!(b.read_user().unwrap(), baseline);
     }
 
     // --- VarScope::OtherUser dispatch ---
