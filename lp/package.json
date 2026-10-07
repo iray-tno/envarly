@@ -12,11 +12,21 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/react": "^7.0.1",
     "@astrojs/sitemap": "^3.7.3",
+    "@hozo/core": "0.2.0",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.1",
     "astro": "^7.0.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "satori": "^0.33.4",
     "tailwindcss": "^4.3.1"
+  },
+  "devDependencies": {
+    "@hozo/compiler": "0.2.0",
+    "@hozo/vite": "0.2.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4"
   }
 }

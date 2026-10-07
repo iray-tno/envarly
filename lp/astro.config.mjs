@@ -2,12 +2,15 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import react from '@astrojs/react';
+import { hozo } from '@hozo/vite';
 
 export default defineConfig({
   site: 'https://iray-tno.github.io',
   base: '/envarly',
   trailingSlash: 'always',
   integrations: [
+    react(),
     sitemap({
       i18n: {
         defaultLocale: 'en',
@@ -23,6 +26,6 @@ export default defineConfig({
     }),
   ],
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [hozo({ css: 'src/styles/global.css', preflight: false }), tailwindcss()],
   },
 });

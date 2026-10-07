@@ -20,3 +20,14 @@ npm run preview  # preview production build locally
 - `src/pages/` — Page routes for each supported language (`/`, `/ja/`, `/zh-cn/`, `/ko/`, `/ru/`, `/vi/`)
 - `src/lib/lpContent.ts` — Localized copy, translations, and metadata (version is synced automatically with `npm version` in the repository root)
 - `src/components/` — UI components used across the landing page
+
+## Hozo Pilot
+
+`LandingFooter.tsx` uses Hozo 0.2.0 primitives through `@hozo/vite` and Astro's
+React integration. Astro renders it as static HTML: do not add a `client:*`
+directive unless browser-side interaction is required. The rest of the page
+remains in Astro, including the language selector and analytics listeners.
+
+Hozo reads `src/styles/global.css` for the existing Tailwind tokens. Its preflight
+is disabled because Tailwind already provides the page reset. Generated
+`*.hozo.css` files are build artifacts and are not committed.
