@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { api } from "../../api";
 import { useI18n } from "../../hooks/useI18n";
+import { validateEnvInput } from "../../lib/envValidation";
 import { resolveSecret } from "../../lib/secrets";
 import type { EnvValueKind, VarScope } from "../../types";
 import { Button } from "../ui/Button";
@@ -83,6 +84,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
   const handleApply = async () => {
     if (!preview) return;
     const selected = preview.filter((v) => checked[varKey(v)]);
+    if (selected.some((v) => validateEnvInput(v.name, v.value) !== null)) return;
     if (selected.length === 0) {
       onStatus(t("import.no_selected"));
       return;
@@ -140,6 +142,8 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
     ? preview.filter((v) => checked[varKey(v)] && resolveSecret(v.name, v.value) !== null).length
     : 0;
   const noneChecked = checkedCount === 0;
+  const invalidSelected =
+    preview?.filter((v) => checked[varKey(v)] && validateEnvInput(v.name, v.value) !== null) ?? [];
   const hasUnresolvedTypes = preview?.some((variable) => variable.valueKind === null) ?? false;
 
   const affectedScopes = preview
@@ -192,6 +196,14 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
       {preview && (
         <div className="flex flex-col gap-3">
           <SecretBanner count={secretCount} />
+          {invalidSelected.map((v) => (
+            <p key={varKey(v)} role="alert" className="text-xs text-danger">
+              {t("validation.variable_error", {
+                name: v.name,
+                error: t(`validation.${validateEnvInput(v.name, v.value)}`),
+              })}
+            </p>
+          ))}
           {hasUnresolvedTypes && (
             <p className="flex items-center gap-2 text-xs text-warn">
               <Icon name="warning" size={14} />
@@ -234,7 +246,7 @@ export function ImportTab({ onStage, onStatus }: ImportTabProps) {
             variant={strategy === "replace" ? "danger" : "primary"}
             size="md"
             onClick={handleApply}
-            disabled={applying || noneChecked}
+            disabled={applying || noneChecked || invalidSelected.length > 0}
             className="self-start"
           >
             {applying

@@ -1,4 +1,10 @@
 {
+  "validation": {
+    "empty_name": "Tên biến môi trường không được để trống.",
+    "invalid_name": "Tên biến môi trường không được chứa '=' hoặc ký tự NUL.",
+    "invalid_value": "Giá trị biến môi trường không được chứa ký tự NUL.",
+    "variable_error": "{{name}}: {{error}}"
+  },
   "app": {
     "registry_error": "Lỗi Registry: {{error}}",
     "account_switch_error": "Không thể chuyển tài khoản: {{error}}",

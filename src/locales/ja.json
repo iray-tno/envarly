@@ -1,4 +1,10 @@
 {
+  "validation": {
+    "empty_name": "環境変数名を入力してください。",
+    "invalid_name": "環境変数名に「=」やNUL文字は使用できません。",
+    "invalid_value": "環境変数の値にNUL文字は使用できません。",
+    "variable_error": "{{name}}: {{error}}"
+  },
   "app": {
     "registry_error": "レジストリエラー: {{error}}",
     "account_switch_error": "アカウントを切り替えられませんでした: {{error}}",

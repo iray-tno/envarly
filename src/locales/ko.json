@@ -1,4 +1,10 @@
 {
+  "validation": {
+    "empty_name": "환경 변수 이름은 비워 둘 수 없습니다.",
+    "invalid_name": "환경 변수 이름에는 '=' 또는 NUL 문자를 사용할 수 없습니다.",
+    "invalid_value": "환경 변수 값에는 NUL 문자를 사용할 수 없습니다.",
+    "variable_error": "{{name}}: {{error}}"
+  },
   "app": {
     "registry_error": "레지스트리 오류: {{error}}",
     "account_switch_error": "계정을 전환할 수 없습니다: {{error}}",

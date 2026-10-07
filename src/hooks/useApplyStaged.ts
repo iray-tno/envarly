@@ -1,7 +1,9 @@
 import type { RefObject } from "react";
 import { useCallback, useState } from "react";
 import { api } from "../api";
+import { validateEnvInput } from "../lib/envValidation";
 import type { ApplyProgressEvent, EnvChange, EnvSnapshot } from "../types";
+import { useI18n } from "./useI18n";
 import type { StagedChange } from "./useStaged";
 
 type SetDialog = (d: "importexport" | "changes" | "staged" | "licenses" | "newvar" | null) => void;
@@ -23,6 +25,7 @@ export function useApplyStaged({
   baselineRef,
   setDialog,
 }: Params) {
+  const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<{ index: number; total: number } | null>(null);
@@ -56,6 +59,19 @@ export function useApplyStaged({
                 scope: change.scope,
               },
         );
+        for (const change of changes) {
+          const inputError = validateEnvInput(
+            change.name,
+            change.changeType === "set" ? change.value : undefined,
+          );
+          if (inputError)
+            throw new Error(
+              t("validation.variable_error", {
+                name: change.name,
+                error: t(`validation.${inputError}`),
+              }),
+            );
+        }
         await api.applyEnvChanges(changes);
         clearStaged();
         await refresh();
@@ -72,7 +88,7 @@ export function useApplyStaged({
         setBusy(false);
       }
     },
-    [staged, clearStaged, refresh, refreshPathStatus, baselineRef, setDialog],
+    [staged, clearStaged, refresh, refreshPathStatus, baselineRef, setDialog, t],
   );
 
   return { handleApplyStaged, busy, error, progress, log };

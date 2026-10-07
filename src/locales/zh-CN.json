@@ -1,4 +1,10 @@
 {
+  "validation": {
+    "empty_name": "环境变量名不能为空。",
+    "invalid_name": "环境变量名不能包含“=”或 NUL 字符。",
+    "invalid_value": "环境变量值不能包含 NUL 字符。",
+    "variable_error": "{{name}}: {{error}}"
+  },
   "app": {
     "registry_error": "注册表错误：{{error}}",
     "account_switch_error": "无法切换账户：{{error}}",

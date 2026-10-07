@@ -55,6 +55,7 @@ pub fn apply_env_changes(
     app: tauri::AppHandle,
     changes: Vec<EnvChange>,
 ) -> Result<(), EnvarlyError> {
+    env_store::validate_changes(&changes)?;
     let snapshot = env_store::read_snapshot()?;
     snapshot::save_snapshot(snapshot, "auto: before apply")?;
     env_store::apply_changes(&changes, |index, total, change, result| {

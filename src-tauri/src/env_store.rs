@@ -253,6 +253,7 @@ pub fn write_var_with(
     kind: EnvValueKind,
     scope: &VarScope,
 ) -> Result<(), EnvarlyError> {
+    validate_input(name, Some(value))?;
     let env_value = EnvValue::typed(value.to_string(), kind);
     match scope {
         VarScope::User => backend.write_user(name, &env_value)?,
@@ -278,6 +279,7 @@ pub fn delete_var_with(
     name: &str,
     scope: &VarScope,
 ) -> Result<(), EnvarlyError> {
+    validate_input(name, None)?;
     match scope {
         VarScope::User => backend.delete_user(name)?,
         VarScope::System => backend.delete_system(name)?,
@@ -292,6 +294,7 @@ pub fn apply_changes_with(
     changes: &[EnvChange],
     mut on_progress: impl FnMut(usize, usize, &EnvChange, &Result<(), EnvarlyError>),
 ) -> Result<(), EnvarlyError> {
+    validate_changes(changes)?;
     let mut journal = Vec::new();
     let total = changes.len();
 
@@ -374,6 +377,30 @@ pub fn apply_changes_with(
     }
 
     backend.broadcast_changes();
+    Ok(())
+}
+
+pub fn validate_input(name: &str, value: Option<&str>) -> Result<(), EnvarlyError> {
+    if name.is_empty() || name.contains(['=', '\0']) {
+        return Err(EnvarlyError::InvalidInput(format!(
+            "invalid variable name {name:?}: names must be nonempty and contain neither '=' nor NUL"
+        )));
+    }
+    if value.is_some_and(|value| value.contains('\0')) {
+        return Err(EnvarlyError::InvalidInput(format!(
+            "invalid value for {name:?}: values must not contain NUL"
+        )));
+    }
+    Ok(())
+}
+
+pub fn validate_changes(changes: &[EnvChange]) -> Result<(), EnvarlyError> {
+    for change in changes {
+        match change {
+            EnvChange::Set { name, value, .. } => validate_input(name, Some(value))?,
+            EnvChange::Delete { name, .. } => validate_input(name, None)?,
+        }
+    }
     Ok(())
 }
 
@@ -541,6 +568,80 @@ pub(crate) fn detect_list_separator(name: &str, value: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn invalid_inputs_are_rejected_without_exposing_values() {
+        for name in ["", "A=B", "A\0B"] {
+            assert!(validate_input(name, Some("secret-token")).is_err());
+            assert!(validate_input(name, None).is_err());
+        }
+        let error = validate_input("TOKEN", Some("secret\0token"))
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("TOKEN"));
+        assert!(!error.contains("secret"));
+        assert!(validate_input("日本語", Some("")).is_ok());
+        assert!(validate_input(" MY VAR ", Some("%USERPROFILE%\\bin")).is_ok());
+    }
+
+    #[test]
+    fn invalid_later_entry_is_rejected_before_backend_access() {
+        let b = FaultBackend {
+            inner: MemBackend::new(),
+            fail_read: true.into(),
+            fail_restore: false,
+        };
+        let mut progress = 0;
+        let result = apply_changes_with(
+            &b,
+            &[
+                EnvChange::Set {
+                    name: "VALID".into(),
+                    value: "value".into(),
+                    value_kind: EnvValueKind::String,
+                    scope: VarScope::User,
+                },
+                EnvChange::Delete {
+                    name: "INVALID=NAME".into(),
+                    scope: VarScope::User,
+                },
+            ],
+            |_, _, _, _| progress += 1,
+        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("invalid variable name"));
+        assert_eq!(progress, 0);
+        assert!(b.fail_read.load(std::sync::atomic::Ordering::SeqCst));
+        assert!(b.inner.read_user().unwrap().is_empty());
+    }
+
+    #[test]
+    fn single_mutations_validate_before_backend_access() {
+        let b = MemBackend::new();
+        assert!(write_var_with(
+            &b,
+            "BAD=NAME",
+            "value",
+            EnvValueKind::String,
+            &VarScope::User
+        )
+        .is_err());
+        assert!(write_var_with(
+            &b,
+            "VALID",
+            "bad\0value",
+            EnvValueKind::String,
+            &VarScope::User
+        )
+        .is_err());
+        assert!(delete_var_with(&b, "", &VarScope::User)
+            .unwrap_err()
+            .to_string()
+            .contains("invalid variable name"));
+        assert!(b.read_user().unwrap().is_empty());
+    }
 
     struct FaultBackend {
         inner: MemBackend,
