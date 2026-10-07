@@ -328,7 +328,7 @@ fn lookup_account_sid(username: &str) -> Result<String, EnvarlyError> {
 }
 
 fn ensure_backup_restore_privileges() -> Result<(), EnvarlyError> {
-    use windows_sys::Win32::Foundation::{CloseHandle, LUID};
+    use windows_sys::Win32::Foundation::{CloseHandle, GetLastError, SetLastError, LUID};
     use windows_sys::Win32::Security::{
         AdjustTokenPrivileges, LookupPrivilegeValueW, LUID_AND_ATTRIBUTES, SE_PRIVILEGE_ENABLED,
         TOKEN_ADJUST_PRIVILEGES, TOKEN_PRIVILEGES,
@@ -341,33 +341,44 @@ fn ensure_backup_restore_privileges() -> Result<(), EnvarlyError> {
             return Err(std::io::Error::last_os_error().into());
         }
 
-        for name in ["SeBackupPrivilege", "SeRestorePrivilege"] {
-            let mut luid: LUID = std::mem::zeroed();
-            if LookupPrivilegeValueW(std::ptr::null(), wide(name).as_ptr(), &mut luid) == 0 {
-                CloseHandle(token);
-                return Err(std::io::Error::last_os_error().into());
+        let result = (|| {
+            for name in ["SeBackupPrivilege", "SeRestorePrivilege"] {
+                let mut luid: LUID = std::mem::zeroed();
+                if LookupPrivilegeValueW(std::ptr::null(), wide(name).as_ptr(), &mut luid) == 0 {
+                    return Err(std::io::Error::last_os_error().into());
+                }
+                let privs = TOKEN_PRIVILEGES {
+                    PrivilegeCount: 1,
+                    Privileges: [LUID_AND_ATTRIBUTES {
+                        Luid: luid,
+                        Attributes: SE_PRIVILEGE_ENABLED,
+                    }],
+                };
+                SetLastError(0);
+                let adjusted = AdjustTokenPrivileges(
+                    token,
+                    0,
+                    &privs,
+                    0,
+                    std::ptr::null_mut(),
+                    std::ptr::null_mut(),
+                );
+                let error = GetLastError();
+                check_privilege_adjustment(name, adjusted != 0, error)?;
             }
-            let privs = TOKEN_PRIVILEGES {
-                PrivilegeCount: 1,
-                Privileges: [LUID_AND_ATTRIBUTES {
-                    Luid: luid,
-                    Attributes: SE_PRIVILEGE_ENABLED,
-                }],
-            };
-            if AdjustTokenPrivileges(
-                token,
-                0,
-                &privs,
-                0,
-                std::ptr::null_mut(),
-                std::ptr::null_mut(),
-            ) == 0
-            {
-                CloseHandle(token);
-                return Err(std::io::Error::last_os_error().into());
-            }
-        }
+            Ok(())
+        })();
         CloseHandle(token);
+        result
+    }
+}
+
+fn check_privilege_adjustment(name: &str, adjusted: bool, error: u32) -> Result<(), EnvarlyError> {
+    if !adjusted || error != windows_sys::Win32::Foundation::ERROR_SUCCESS {
+        return Err(EnvarlyError::OtherUserAccount(format!(
+            "could not enable {name}: {}",
+            std::io::Error::from_raw_os_error(error as i32)
+        )));
     }
     Ok(())
 }
@@ -396,6 +407,40 @@ fn reg_unload_key(sid: &str) -> Result<(), EnvarlyError> {
         return Err(std::io::Error::from_raw_os_error(status as i32).into());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod privilege_tests {
+    use super::*;
+    use windows_sys::Win32::Foundation::{
+        ERROR_ACCESS_DENIED, ERROR_NOT_ALL_ASSIGNED, ERROR_SUCCESS,
+    };
+
+    #[test]
+    fn successful_return_without_all_privileges_is_an_error() {
+        let error = check_privilege_adjustment("SeBackupPrivilege", true, ERROR_NOT_ALL_ASSIGNED)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("SeBackupPrivilege"));
+        assert!(error.contains(
+            &std::io::Error::from_raw_os_error(ERROR_NOT_ALL_ASSIGNED as i32).to_string()
+        ));
+    }
+
+    #[test]
+    fn api_failure_preserves_the_captured_error() {
+        let error = check_privilege_adjustment("SeRestorePrivilege", false, ERROR_ACCESS_DENIED)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("SeRestorePrivilege"));
+        assert!(error
+            .contains(&std::io::Error::from_raw_os_error(ERROR_ACCESS_DENIED as i32).to_string()));
+    }
+
+    #[test]
+    fn all_privileges_assigned() {
+        assert!(check_privilege_adjustment("SeBackupPrivilege", true, ERROR_SUCCESS).is_ok());
+    }
 }
 
 #[cfg(test)]
