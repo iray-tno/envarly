@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import LandingFooter from './LandingFooter';
 import {
   GITHUB_URL,
   LANGUAGES,
@@ -319,22 +320,7 @@ const { copy } = Astro.props;
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-[var(--color-border)] mt-12">
-    <p class="mx-auto max-w-2xl px-6 pt-6 text-xs text-[var(--color-muted)] text-center leading-relaxed">
-      {copy.privacyNote}
-    </p>
-    <div class="mx-auto max-w-5xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <span class="text-xs text-[var(--color-muted)]">{copy.footer.copyright}</span>
-      <div class="flex items-center gap-6">
-        <a id="footer-github" href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
-        <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.footer.releases}</a>
-        <a href={STORYBOOK_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Storybook</a>
-        <a href={REPORTS_URL} class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">Reports</a>
-        <a href={`${GITHUB_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.footer.license}</a>
-      </div>
-    </div>
-  </footer>
+  <LandingFooter copy={copy} />
 
   <script>
     const track = (id: string, event: string) => {
