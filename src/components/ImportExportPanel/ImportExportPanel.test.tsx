@@ -142,6 +142,33 @@ describe("ImportExportPanel — Export tab", () => {
 });
 
 describe("ImportExportPanel — Import tab", () => {
+  it("blocks invalid imported variables and allows deselecting them", async () => {
+    vi.mocked(api.parseImport).mockResolvedValueOnce({
+      user: {
+        "BAD=NAME": { value: "value", kind: "String" },
+        VALID: { value: "", kind: "String" },
+      },
+      system: {},
+    });
+    const onStage = vi.fn();
+    const user = userEvent.setup();
+    render(<ImportExportPanel onStage={onStage} />);
+    await user.click(screen.getByRole("radio", { name: /^import$/i }));
+    fireEvent.change(screen.getByPlaceholderText(/paste file contents/i), {
+      target: { value: "{}" },
+    });
+    await user.click(screen.getByRole("button", { name: /^parse$/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("BAD=NAME");
+    expect(screen.getByRole("button", { name: /stage 2 variables/i })).toBeDisabled();
+    await user.click(screen.getByRole("checkbox", { name: "BAD=NAME" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /stage 1 variable/i }));
+    expect(onStage).toHaveBeenCalledWith(
+      [{ name: "VALID", scope: "User", value: "", valueKind: "String" }],
+      [],
+    );
+  });
+
   function switchToImport() {
     return userEvent.setup().click(screen.getByRole("radio", { name: /^import$/i }));
   }

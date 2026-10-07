@@ -278,6 +278,7 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
                 StrategyArg::Replace => ImportStrategy::Replace,
             };
             let changes = diff_for_import(&current, &imported, &scopes, import_strategy);
+            env_store::validate_changes(&changes)?;
 
             if changes.is_empty() {
                 println!("Already up to date — nothing to change.");
@@ -334,6 +335,7 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
             kind,
             apply,
         } => {
+            env_store::validate_input(&name, Some(&value))?;
             let write_scope = match scope {
                 WriteScopeArg::User => VarScope::User,
                 WriteScopeArg::System => VarScope::System,
@@ -372,6 +374,7 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
         }
 
         Command::Delete { name, scope, apply } => {
+            env_store::validate_input(&name, None)?;
             let write_scope = match scope {
                 WriteScopeArg::User => VarScope::User,
                 WriteScopeArg::System => VarScope::System,
@@ -401,6 +404,7 @@ fn execute(command: Command) -> Result<(), crate::error::EnvarlyError> {
 }
 
 fn write_changes(changes: &[EnvChange], apply: bool) -> Result<(), crate::error::EnvarlyError> {
+    crate::env_store::validate_changes(changes)?;
     if !apply {
         println!("\nRun with --apply to write these changes to the registry.");
         return Ok(());

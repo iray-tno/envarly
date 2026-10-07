@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
+import { validateEnvInput } from "../../lib/envValidation";
 import { inferEnvValueKind } from "../../lib/envValueKind";
 import type { EnvValueKindSelection, EnvVar, VarScope } from "../../types";
 import { Button } from "../ui/Button";
@@ -32,11 +33,11 @@ export function NewVarModal({
   const [valueKind, setValueKind] = useState<EnvValueKindSelection>("Auto");
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const trimmedName = name.trim();
-  const alreadyExists = trimmedName
-    ? vars.some((v) => v.name.toLowerCase() === trimmedName.toLowerCase() && v.scope === scope)
+  const inputError = validateEnvInput(name, value);
+  const alreadyExists = name
+    ? vars.some((v) => v.name.toLowerCase() === name.toLowerCase() && v.scope === scope)
     : false;
-  const canSubmit = trimmedName.length > 0 && !alreadyExists;
+  const canSubmit = inputError === null && !alreadyExists;
 
   useEffect(() => {
     nameInputRef.current?.focus();
@@ -45,7 +46,7 @@ export function NewVarModal({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    onStage(trimmedName, scope, value, valueKind);
+    onStage(name, scope, value, valueKind);
   };
 
   return (
@@ -62,6 +63,10 @@ export function NewVarModal({
           ref={nameInputRef}
           type="text"
           value={name}
+          aria-invalid={inputError === "invalid_name" || alreadyExists}
+          aria-describedby={
+            inputError === "invalid_name" || alreadyExists ? "newvar-name-error" : undefined
+          }
           onChange={(e) => setName(e.target.value)}
           spellCheck={false}
           placeholder={t("new_var.placeholder_name")}
@@ -72,7 +77,14 @@ export function NewVarModal({
           )}
         />
         {alreadyExists && (
-          <p className="text-xs text-danger">{t("new_var.exists", { name: trimmedName, scope })}</p>
+          <p id="newvar-name-error" className="text-xs text-danger">
+            {t("new_var.exists", { name, scope })}
+          </p>
+        )}
+        {!alreadyExists && inputError === "invalid_name" && (
+          <p id="newvar-name-error" className="text-xs text-danger">
+            {t("validation.invalid_name")}
+          </p>
         )}
       </div>
 
@@ -136,6 +148,8 @@ export function NewVarModal({
         <textarea
           id="newvar-value"
           value={value}
+          aria-invalid={inputError === "invalid_value"}
+          aria-describedby={inputError === "invalid_value" ? "newvar-value-error" : undefined}
           onChange={(e) => setValue(e.target.value)}
           spellCheck={false}
           rows={3}
@@ -145,6 +159,11 @@ export function NewVarModal({
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent",
           )}
         />
+        {inputError === "invalid_value" && (
+          <p id="newvar-value-error" className="text-xs text-danger">
+            {t("validation.invalid_value")}
+          </p>
+        )}
       </div>
 
       <div className="flex gap-2 justify-end pt-1">

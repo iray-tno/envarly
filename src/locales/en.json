@@ -1,4 +1,10 @@
 {
+  "validation": {
+    "empty_name": "Variable names must not be empty.",
+    "invalid_name": "Variable names must not contain '=' or NUL.",
+    "invalid_value": "Variable values must not contain NUL.",
+    "variable_error": "{{name}}: {{error}}"
+  },
   "app": {
     "registry_error": "Registry error: {{error}}",
     "account_switch_error": "Couldn't switch account: {{error}}",

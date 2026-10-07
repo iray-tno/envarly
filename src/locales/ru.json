@@ -1,4 +1,10 @@
 {
+  "validation": {
+    "empty_name": "Имя переменной не должно быть пустым.",
+    "invalid_name": "Имя переменной не должно содержать '=' или символ NUL.",
+    "invalid_value": "Значение переменной не должно содержать символ NUL.",
+    "variable_error": "{{name}}: {{error}}"
+  },
   "app": {
     "registry_error": "Ошибка реестра: {{error}}",
     "account_switch_error": "Не удалось переключить учётную запись: {{error}}",
