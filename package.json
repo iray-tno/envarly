@@ -11,6 +11,7 @@
     "tauri": "node scripts/tauri.mjs",
     "test": "vitest --project=unit",
     "test:reports": "node --test scripts/normalize-junit.test.mjs scripts/brand-allure-report.test.mjs",
+    "test:lp": "node --test scripts/test-lp-navigation.mjs",
     "test:storybook": "vitest --project=storybook",
     "test:ui": "vitest --ui --project=unit",
     "coverage": "vitest run --project=unit --coverage",

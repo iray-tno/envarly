@@ -1,12 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 import LandingFooter from './LandingFooter';
+import LandingHeader from './LandingHeader';
 import {
   GITHUB_URL,
-  LANGUAGES,
   RELEASE_URL,
-  REPORTS_URL,
-  STORYBOOK_URL,
   WINGET_COMMAND,
   type LandingCopy,
 } from '../lib/lpContent';
@@ -25,36 +23,7 @@ const { copy } = Astro.props;
   lang={copy.lang}
   canonicalPath={copy.canonicalPath}
 >
-  <!-- Nav -->
-  <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 backdrop-blur">
-    <div class="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
-      <a href={copy.canonicalPath} class="font-semibold text-[var(--color-text)] tracking-tight">Envarly</a>
-      <nav class="flex items-center gap-6">
-        <a href="#features" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.features}</a>
-        <a href={STORYBOOK_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.storybook}</a>
-        <a href={REPORTS_URL} class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">{copy.nav.reports}</a>
-        <a id="nav-github" href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hidden sm:block text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">GitHub</a>
-        <select
-          id="lang-select"
-          aria-label="Language"
-          class="text-sm bg-transparent border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
-        >
-          {LANGUAGES.map((l) => (
-            <option value={l.path} selected={l.code === copy.lang}>{l.label}</option>
-          ))}
-        </select>
-        <a
-          id="nav-download"
-          href={RELEASE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-sm px-4 py-1.5 rounded-full bg-[var(--color-accent)] text-[var(--color-bg)] font-medium hover:bg-[var(--color-accent-dim)] transition-colors"
-        >
-          {copy.nav.download}
-        </a>
-      </nav>
-    </div>
-  </header>
+  <LandingHeader copy={copy} />
 
   <main>
     <!-- Hero -->
