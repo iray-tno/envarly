@@ -47,6 +47,14 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Test Storybook accessibility
         run: npm run test:storybook -- --run
+      - name: Install LP dependencies
+        run: npm ci
+        working-directory: lp
+      - name: Build LP
+        run: npm run build
+        working-directory: lp
+      - name: Test LP navigation
+        run: npm run test:lp
 
   test-rs:
     name: Test (rust)
