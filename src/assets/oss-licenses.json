@@ -565,6 +565,78 @@
       "repository": "https://github.com/wraithgar/node-promise-retry"
     },
     {
+      "name": "@hozo/behaviors",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/compiler",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/compiler-win32-x64-msvc",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/core",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/engine",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/patterns",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/primitives",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/rn-compat",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/semantics",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/tailwind",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/typography",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
+      "name": "@hozo/vite",
+      "version": "0.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/iray-tno/hozo"
+    },
+    {
       "name": "@isaacs/fs-minipass",
       "version": "4.0.1",
       "license": "ISC",
@@ -737,6 +809,24 @@
       "version": "3.0.0",
       "license": "MIT",
       "repository": "https://github.com/nodable/val-parsers"
+    },
+    {
+      "name": "@nodelib/fs.scandir",
+      "version": "2.1.5",
+      "license": "MIT",
+      "repository": "https://github.com/nodelib/nodelib.git#master"
+    },
+    {
+      "name": "@nodelib/fs.stat",
+      "version": "2.0.5",
+      "license": "MIT",
+      "repository": "https://github.com/nodelib/nodelib.git#master"
+    },
+    {
+      "name": "@nodelib/fs.walk",
+      "version": "1.2.8",
+      "license": "MIT",
+      "repository": "https://github.com/nodelib/nodelib.git#master"
     },
     {
       "name": "@npmcli/agent",
@@ -959,6 +1049,12 @@
       "version": "3.1.1",
       "license": "Apache-2.0",
       "repository": "https://github.com/sigstore/sigstore-js"
+    },
+    {
+      "name": "@sindresorhus/merge-streams",
+      "version": "2.3.0",
+      "license": "MIT",
+      "repository": "https://github.com/sindresorhus/merge-streams"
     },
     {
       "name": "@standard-schema/spec",
@@ -1561,6 +1657,12 @@
       "repository": "https://github.com/juliangruber/brace-expansion"
     },
     {
+      "name": "braces",
+      "version": "3.0.3",
+      "license": "MIT",
+      "repository": "https://github.com/micromatch/braces"
+    },
+    {
       "name": "browserslist",
       "version": "4.28.4",
       "license": "MIT",
@@ -1757,6 +1859,12 @@
       "version": "3.2.3",
       "license": "MIT",
       "repository": "https://github.com/frenic/csstype"
+    },
+    {
+      "name": "culori",
+      "version": "4.0.2",
+      "license": "MIT",
+      "repository": "https://github.com/Evercoder/culori"
     },
     {
       "name": "d3-array",
@@ -2161,6 +2269,12 @@
       "repository": "https://github.com/coveooss/exponential-backoff"
     },
     {
+      "name": "fast-glob",
+      "version": "3.3.3",
+      "license": "MIT",
+      "repository": "https://github.com/mrmlnc/fast-glob"
+    },
+    {
       "name": "fast-xml-builder",
       "version": "1.3.1",
       "license": "MIT",
@@ -2173,10 +2287,22 @@
       "repository": "https://github.com/NaturalIntelligence/fast-xml-parser"
     },
     {
+      "name": "fastq",
+      "version": "1.20.3",
+      "license": "ISC",
+      "repository": "https://github.com/mcollina/fastq"
+    },
+    {
       "name": "fdir",
       "version": "6.5.0",
       "license": "MIT",
       "repository": "https://github.com/thecodrr/fdir"
+    },
+    {
+      "name": "fill-range",
+      "version": "7.1.1",
+      "license": "MIT",
+      "repository": "https://github.com/jonschlinkert/fill-range"
     },
     {
       "name": "find-root",
@@ -2237,6 +2363,18 @@
       "version": "13.0.6",
       "license": "BlueOak-1.0.0",
       "repository": "https://github.com/isaacs/node-glob"
+    },
+    {
+      "name": "glob-parent",
+      "version": "5.1.2",
+      "license": "ISC",
+      "repository": "https://github.com/gulpjs/glob-parent"
+    },
+    {
+      "name": "globby",
+      "version": "14.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/sindresorhus/globby"
     },
     {
       "name": "gopd",
@@ -2359,6 +2497,12 @@
       "repository": "https://github.com/feross/ieee754"
     },
     {
+      "name": "ignore",
+      "version": "7.0.12",
+      "license": "MIT",
+      "repository": "https://github.com/kaelzhang/node-ignore"
+    },
+    {
       "name": "ignore-walk",
       "version": "8.0.0",
       "license": "ISC",
@@ -2419,6 +2563,18 @@
       "repository": "https://github.com/sindresorhus/is-docker"
     },
     {
+      "name": "is-extglob",
+      "version": "2.1.1",
+      "license": "MIT",
+      "repository": "https://github.com/jonschlinkert/is-extglob"
+    },
+    {
+      "name": "is-glob",
+      "version": "4.0.3",
+      "license": "MIT",
+      "repository": "https://github.com/micromatch/is-glob"
+    },
+    {
       "name": "is-in-ssh",
       "version": "1.0.0",
       "license": "MIT",
@@ -2429,6 +2585,12 @@
       "version": "1.0.0",
       "license": "MIT",
       "repository": "https://github.com/sindresorhus/is-inside-container"
+    },
+    {
+      "name": "is-number",
+      "version": "7.0.0",
+      "license": "MIT",
+      "repository": "https://github.com/jonschlinkert/is-number"
     },
     {
       "name": "is-potential-custom-element-name",
@@ -2717,6 +2879,18 @@
       "version": "6.0.0",
       "license": "MIT",
       "repository": "https://github.com/alexreardon/memoize-one"
+    },
+    {
+      "name": "merge2",
+      "version": "1.4.1",
+      "license": "MIT",
+      "repository": "https://github.com/teambition/merge2"
+    },
+    {
+      "name": "micromatch",
+      "version": "4.0.8",
+      "license": "MIT",
+      "repository": "https://github.com/micromatch/micromatch"
     },
     {
       "name": "mime-db",
@@ -3031,6 +3205,12 @@
       "repository": "https://github.com/sindresorhus/path-type"
     },
     {
+      "name": "path-type",
+      "version": "6.0.0",
+      "license": "MIT",
+      "repository": "https://github.com/sindresorhus/path-type"
+    },
+    {
       "name": "pathe",
       "version": "2.0.3",
       "license": "MIT",
@@ -3050,7 +3230,13 @@
     },
     {
       "name": "picomatch",
-      "version": "4.0.4",
+      "version": "2.3.2",
+      "license": "MIT",
+      "repository": "https://github.com/micromatch/picomatch"
+    },
+    {
+      "name": "picomatch",
+      "version": "4.0.7",
       "license": "MIT",
       "repository": "https://github.com/micromatch/picomatch"
     },
@@ -3169,6 +3355,12 @@
       "repository": "https://github.com/mathiasbynens/punycode.js"
     },
     {
+      "name": "queue-microtask",
+      "version": "1.2.3",
+      "license": "MIT",
+      "repository": "https://github.com/feross/queue-microtask"
+    },
+    {
       "name": "react",
       "version": "19.2.7",
       "license": "MIT",
@@ -3277,6 +3469,12 @@
       "repository": "https://github.com/sindresorhus/resolve-from"
     },
     {
+      "name": "reusify",
+      "version": "1.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/mcollina/reusify"
+    },
+    {
       "name": "robust-predicates",
       "version": "3.0.3",
       "license": "Unlicense",
@@ -3293,6 +3491,12 @@
       "version": "7.1.0",
       "license": "MIT",
       "repository": "https://github.com/sindresorhus/run-applescript"
+    },
+    {
+      "name": "run-parallel",
+      "version": "1.2.0",
+      "license": "MIT",
+      "repository": "https://github.com/feross/run-parallel"
     },
     {
       "name": "safe-buffer",
@@ -3359,6 +3563,12 @@
       "version": "1.0.5",
       "license": "MIT",
       "repository": "https://github.com/terkelg/sisteransi"
+    },
+    {
+      "name": "slash",
+      "version": "5.1.0",
+      "license": "MIT",
+      "repository": "https://github.com/sindresorhus/slash"
     },
     {
       "name": "smart-buffer",
@@ -3611,6 +3821,12 @@
       "version": "7.4.3",
       "license": "MIT",
       "repository": "https://github.com/remusao/tldts"
+    },
+    {
+      "name": "to-regex-range",
+      "version": "5.0.1",
+      "license": "MIT",
+      "repository": "https://github.com/micromatch/to-regex-range"
     },
     {
       "name": "totalist",
