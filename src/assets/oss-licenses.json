@@ -2114,7 +2114,7 @@
     },
     {
       "name": "dompurify",
-      "version": "3.4.14",
+      "version": "3.4.16",
       "license": "(MPL-2.0 OR Apache-2.0)",
       "repository": "https://github.com/cure53/DOMPurify"
     },
@@ -2390,7 +2390,7 @@
     },
     {
       "name": "handlebars",
-      "version": "4.7.9",
+      "version": "4.7.10",
       "license": "MIT",
       "repository": "https://github.com/handlebars-lang/handlebars.js"
     },
@@ -2450,7 +2450,7 @@
     },
     {
       "name": "http-cache-semantics",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "license": "BSD-2-Clause",
       "repository": "https://github.com/kornelski/http-cache-semantics"
     },
@@ -2534,7 +2534,7 @@
     },
     {
       "name": "ip-address",
-      "version": "10.3.1",
+      "version": "10.7.4",
       "license": "MIT",
       "repository": "https://github.com/beaugunderson/ip-address"
     },
@@ -3608,7 +3608,7 @@
     },
     {
       "name": "source-map-js",
-      "version": "1.2.1",
+      "version": "1.2.2",
       "license": "BSD-3-Clause",
       "repository": "https://github.com/7rulnik/source-map-js"
     },
