@@ -23,6 +23,11 @@
     "satori": "^0.33.4",
     "tailwindcss": "^4.3.1"
   },
+  "overrides": {
+    "satori": {
+      "fflate": "0.7.5"
+    }
+  },
   "devDependencies": {
     "@hozo/compiler": "0.2.0",
     "@hozo/vite": "0.2.0",
