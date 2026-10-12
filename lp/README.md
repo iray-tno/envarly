@@ -15,6 +15,13 @@ npm run build    # build static output to ./dist/
 npm run preview  # preview production build locally
 ```
 
+## Dependency Overrides
+
+Satori pins `fflate` to 0.7.3, which is affected by GHSA-px8p-9vwx-vf98.
+The scoped override selects the patched 0.7.5 release without changing Satori's
+API. Remove it when Satori adopts a patched dependency. Verify OG image
+generation with `npm run build` when updating this override.
+
 ## Structure
 
 - `src/pages/` — Page routes for each supported language (`/`, `/ja/`, `/zh-cn/`, `/ko/`, `/ru/`, `/vi/`)
