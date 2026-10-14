@@ -76,6 +76,56 @@ for (const [index, locale] of locales.entries()) {
       for (const width of [320, 375, 768, 1024, 1280]) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`${origin}${path}`);
+        const content = await page.locator("#features").evaluate((section) => {
+          const grids = [...section.children].filter(
+            (element) => getComputedStyle(element).display === "grid",
+          );
+          const audience = section.nextElementSibling;
+          const stack = audience.nextElementSibling;
+          return {
+            tag: section.tagName,
+            headings: section.querySelectorAll("h3").length,
+            cards: grids.map((grid) => grid.children.length),
+            columns: grids.map(
+              (grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length,
+            ),
+            audienceTag: audience.tagName,
+            audienceHeadings: audience.querySelectorAll("h2").length,
+            audienceParagraphs: audience.querySelectorAll("p").length,
+            stackTag: stack.tagName,
+            stackItems: stack.querySelectorAll("span").length,
+            bounds: [section, audience, stack].flatMap((element) =>
+              [...element.querySelectorAll("h2,h3,p,span")].map((node) => ({
+                text: node.textContent.trim(),
+                left: node.getBoundingClientRect().left,
+                right: node.getBoundingClientRect().right,
+              })),
+            ),
+          };
+        });
+        assert.equal(content.tag, "SECTION");
+        assert.equal(content.headings, 11);
+        assert.deepEqual(content.cards, [4, 7]);
+        assert.deepEqual(content.columns, [
+          width >= 1024 ? 4 : width >= 640 ? 2 : 1,
+          width >= 640 ? 2 : 1,
+        ]);
+        assert.equal(content.audienceTag, "SECTION");
+        assert.equal(content.audienceHeadings, 1);
+        assert.equal(content.audienceParagraphs, 2);
+        assert.equal(content.stackTag, "SECTION");
+        assert.equal(content.stackItems, 5);
+        for (const bound of content.bounds) {
+          assert.ok(bound.text.length, "Localized section text must not be empty");
+          assert.ok(
+            bound.left >= 0 && bound.right <= width,
+            `${width}px: section text outside viewport: ${JSON.stringify(bound)}`,
+          );
+        }
+        assert.equal(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+          true,
+        );
         assert.equal(await page.locator("astro-island").count(), 0);
         assert.equal(await page.locator("#lang-select").inputValue(), path);
         assert.equal(await page.locator("#lang-select option").count(), 6);

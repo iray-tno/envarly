@@ -30,15 +30,16 @@ generation with `npm run build` when updating this override.
 
 ## Hozo Pilot
 
-`LandingHeader.tsx` and `LandingFooter.tsx` use Hozo 0.3.0 primitives through
-`@hozo/vite` and Astro's React integration. Astro renders them as static HTML:
-do not add a `client:*` directive unless browser-side interaction is required. The rest of the page
-remains in Astro, including the language-switching and analytics listeners.
+The header, footer, features, audience, and stack components use Hozo 0.3.0
+primitives through `@hozo/vite` and Astro's React integration. Astro renders
+them as static HTML: do not add a `client:*` directive unless browser-side
+interaction is required. The hero and carousel remain in Astro, together with
+the copy-button, language-switching, and analytics listeners.
 The header's native select uses `defaultValue` to render the current language
 without hydration; option paths and tracked link IDs must stay stable.
 
 After building the LP, run `npm run test:lp` from the repository root to check
-all six language pages in Chromium. The root dependencies and Playwright's
+all six language pages and responsive content layouts in Chromium. The root dependencies and Playwright's
 Chromium browser must be installed (`npx playwright install chromium`).
 
 Hozo reads `src/styles/global.css` for the existing Tailwind tokens. Its preflight
