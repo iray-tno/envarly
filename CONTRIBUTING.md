@@ -50,7 +50,7 @@ chore: update tauri to 2.x
 
 ## Incremental Hozo Migration
 
-The LP footer and the desktop `Badge` use Hozo 0.2.0. Desktop Vite and Vitest
+The LP header/footer and the desktop `Badge` use Hozo 0.3.0. Desktop Vite and Vitest
 share `hozo.config.mjs`; Storybook inherits the Vite integration. Keep Hozo before
 the React transform and use `src/index.css` as the token source.
 

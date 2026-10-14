@@ -30,7 +30,7 @@ generation with `npm run build` when updating this override.
 
 ## Hozo Pilot
 
-`LandingHeader.tsx` and `LandingFooter.tsx` use Hozo 0.2.0 primitives through
+`LandingHeader.tsx` and `LandingFooter.tsx` use Hozo 0.3.0 primitives through
 `@hozo/vite` and Astro's React integration. Astro renders them as static HTML:
 do not add a `client:*` directive unless browser-side interaction is required. The rest of the page
 remains in Astro, including the language-switching and analytics listeners.
