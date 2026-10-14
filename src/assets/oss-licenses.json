@@ -566,73 +566,73 @@
     },
     {
       "name": "@hozo/behaviors",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/compiler",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/compiler-win32-x64-msvc",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/core",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/engine",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/patterns",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/primitives",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/rn-compat",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/semantics",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/tailwind",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/typography",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
     {
       "name": "@hozo/vite",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "repository": "https://github.com/iray-tno/hozo"
     },
