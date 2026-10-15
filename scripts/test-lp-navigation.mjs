@@ -118,6 +118,22 @@ after(async () => {
   if (server?.listening) await new Promise((done) => server.close(done));
 });
 
+test("LP Open Graph image", async () => {
+  const page = await browser.newPage();
+  try {
+    const response = await page.goto(`${origin}/envarly/og-image.png`);
+    assert.equal(response.status(), 200);
+    assert.equal(response.headers()["content-type"], "image/png");
+    const size = await page.locator("img").evaluate(async (image) => {
+      await image.decode();
+      return { width: image.naturalWidth, height: image.naturalHeight };
+    });
+    assert.deepEqual(size, { width: 1200, height: 630 });
+  } finally {
+    await page.close();
+  }
+});
+
 for (const [index, locale] of locales.entries()) {
   test(`LP navigation: ${locale || "en"}`, async () => {
     const page = await browser.newPage();

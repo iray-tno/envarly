@@ -50,6 +50,9 @@ jobs:
       - name: Install LP dependencies
         run: npm ci
         working-directory: lp
+      - name: Check LP types
+        # Static Astro builds transpile TypeScript without checking its types.
+        run: npm run check:lp
       - name: Build LP
         run: npm run build
         working-directory: lp

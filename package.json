@@ -12,6 +12,7 @@
     "test": "vitest --project=unit",
     "test:reports": "node --test scripts/normalize-junit.test.mjs scripts/brand-allure-report.test.mjs",
     "test:lp": "node --test scripts/test-lp-navigation.mjs",
+    "check:lp": "npm --prefix lp run astro -- sync && tsc --noEmit -p lp/tsconfig.json",
     "test:storybook": "vitest --project=storybook",
     "test:ui": "vitest --ui --project=unit",
     "coverage": "vitest run --project=unit --coverage",
