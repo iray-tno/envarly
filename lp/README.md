@@ -30,17 +30,24 @@ generation with `npm run build` when updating this override.
 
 ## Hozo Pilot
 
-The header, footer, features, audience, and stack components use Hozo 0.3.0
+The header, hero introduction, footer, features, audience, and stack use Hozo 0.3.0
 primitives through `@hozo/vite` and Astro's React integration. Astro renders
 them as static HTML: do not add a `client:*` directive unless browser-side
-interaction is required. The hero and carousel remain in Astro, together with
+interaction is required. The hero's install control and carousel remain in Astro, together with
 the copy-button, language-switching, and analytics listeners.
-The header's native select uses `defaultValue` to render the current language
-without hydration; option paths and tracked link IDs must stay stable.
+The header uses `NativeSelect` from `@hozo/form`, with `defaultValue` rendering
+the current language without hydration. The Astro listener owns navigation;
+option paths and tracked link IDs must stay stable.
 
 After building the LP, run `npm run test:lp` from the repository root to check
 all six language pages and responsive content layouts in Chromium. The root dependencies and Playwright's
 Chromium browser must be installed (`npx playwright install chromium`).
+
+The hero repeats `sm:leading-relaxed` to retain its original line height while
+[Hozo #939](https://github.com/iray-tno/hozo/issues/939) is open; browser tests
+check the computed typography. The native install button remains until a
+supported static host-ID/data-attribute API is available
+([Hozo #938](https://github.com/iray-tno/hozo/issues/938)).
 
 Hozo reads `src/styles/global.css` for the existing Tailwind tokens. Its preflight
 is disabled because Tailwind already provides the page reset. Generated

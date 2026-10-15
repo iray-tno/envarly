@@ -1,4 +1,5 @@
 import { Header, Link, Nav, View } from "@hozo/core";
+import { NativeSelect } from "@hozo/form";
 import {
   GITHUB_URL,
   LANGUAGES,
@@ -50,18 +51,13 @@ export default function LandingHeader({ copy }: LandingHeaderProps) {
           >
             GitHub
           </Link>
-          <select
+          <NativeSelect
             id="lang-select"
-            aria-label="Language"
+            accessibilityLabel="Language"
             defaultValue={LANGUAGES.find((language) => language.code === copy.lang)?.path}
+            options={LANGUAGES.map((language) => ({ value: language.path, label: language.label }))}
             className="max-w-28 sm:max-w-none text-sm bg-transparent border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
-          >
-            {LANGUAGES.map((language) => (
-              <option key={language.code} value={language.path}>
-                {language.label}
-              </option>
-            ))}
-          </select>
+          />
           <Link
             nativeID="nav-download"
             href={RELEASE_URL}

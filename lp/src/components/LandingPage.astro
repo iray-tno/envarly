@@ -5,9 +5,8 @@ import LandingHeader from './LandingHeader';
 import LandingFeatures from './LandingFeatures';
 import LandingAudience from './LandingAudience';
 import LandingStack from './LandingStack';
+import LandingHero from './LandingHero';
 import {
-  GITHUB_URL,
-  RELEASE_URL,
   WINGET_COMMAND,
   type LandingCopy,
 } from '../lib/lpContent';
@@ -31,39 +30,7 @@ const { copy } = Astro.props;
   <main>
     <!-- Hero -->
     <section class="mx-auto max-w-5xl px-6 pt-24 pb-16 text-center">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--color-border)] text-xs text-[var(--color-muted)] mb-6">
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] inline-block"></span>
-        {copy.hero.eyebrow}
-      </div>
-
-      <h1 class="text-5xl sm:text-6xl font-bold tracking-tight text-[var(--color-text)] mb-5">
-        Envarly
-      </h1>
-
-      <p class="text-lg sm:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-10 leading-relaxed">
-        {copy.hero.lead}
-      </p>
-
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-        <a
-          id="hero-download"
-          href={RELEASE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="px-6 py-3 rounded-lg bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold text-sm hover:bg-[var(--color-accent-dim)] transition-colors"
-        >
-          {copy.hero.download}
-        </a>
-        <a
-          id="hero-github"
-          href={GITHUB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="px-6 py-3 rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] font-medium text-sm hover:border-[var(--color-accent)] hover:text-[var(--color-text)] transition-colors"
-        >
-          {copy.hero.github}
-        </a>
-      </div>
+      <LandingHero copy={copy.hero} />
 
       <!-- WinGet install -->
       <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-16 -mt-8 text-sm">
