@@ -2,6 +2,9 @@
 import Base from '../layouts/Base.astro';
 import LandingFooter from './LandingFooter';
 import LandingHeader from './LandingHeader';
+import LandingFeatures from './LandingFeatures';
+import LandingAudience from './LandingAudience';
+import LandingStack from './LandingStack';
 import {
   GITHUB_URL,
   RELEASE_URL,
@@ -237,56 +240,9 @@ const { copy } = Astro.props;
       </script>
     </section>
 
-    <!-- Features -->
-    <section id="features" class="mx-auto max-w-5xl px-6 py-20">
-      <h2 class="text-2xl font-bold text-[var(--color-text)] text-center mb-3">{copy.featuresHeading}</h2>
-      <p class="text-[var(--color-muted)] text-center mb-12">{copy.featuresLead}</p>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
-        {copy.features.map((f) => (
-          <div class="p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-colors">
-            <div class="text-2xl mb-3">{f.icon}</div>
-            <h3 class="text-sm font-semibold text-[var(--color-text)] mb-2">{f.title}</h3>
-            <p class="text-xs text-[var(--color-muted)] leading-relaxed">{f.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      <p class="text-xs text-[var(--color-muted)] text-center mb-5 uppercase tracking-widest">{copy.otherFeaturesHeading}</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
-        {copy.otherFeatures.map((f) => (
-          <div class="flex items-start gap-3 py-2">
-            <div class="text-base shrink-0 mt-0.5">{f.icon}</div>
-            <div>
-              <h3 class="text-xs font-semibold text-[var(--color-text)] mb-0.5">{f.title}</h3>
-              <p class="text-xs text-[var(--color-muted)] leading-relaxed">{f.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    <!-- Who is it for -->
-    <section class="mx-auto max-w-3xl px-6 py-16 text-center">
-      <h2 class="text-2xl font-bold text-[var(--color-text)] mb-4">{copy.audience.heading}</h2>
-      {copy.audience.paragraphs.map((paragraph) => (
-        <p class="text-[var(--color-muted)] leading-relaxed mb-4">
-          {paragraph}
-        </p>
-      ))}
-    </section>
-
-    <!-- Stack -->
-    <section class="mx-auto max-w-5xl px-6 py-12 border-t border-[var(--color-border)]">
-      <p class="text-xs text-[var(--color-muted)] text-center mb-5 uppercase tracking-widest">{copy.stack.label}</p>
-      <div class="flex flex-wrap items-center justify-center gap-3">
-        {copy.stack.items.map((tech) => (
-          <span class="px-3 py-1.5 rounded-full border border-[var(--color-border)] text-xs text-[var(--color-muted)]">
-            {tech}
-          </span>
-        ))}
-      </div>
-    </section>
+    <LandingFeatures copy={copy} />
+    <LandingAudience copy={copy.audience} />
+    <LandingStack copy={copy.stack} />
   </main>
 
   <LandingFooter copy={copy} />
