@@ -15,6 +15,9 @@ npm run build    # build static output to ./dist/
 npm run preview  # preview production build locally
 ```
 
+Run `npm run check:lp` from the repository root to type-check all LP TypeScript.
+CI runs this before building the LP; Astro's build alone only transpiles it.
+
 ## Dependency Overrides
 
 Satori pins `fflate` to 0.7.3, which is affected by GHSA-px8p-9vwx-vf98.
