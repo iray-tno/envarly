@@ -10,6 +10,12 @@
   --color-accent-dim: #3b6fd4;
 }
 
+@layer base {
+  :where(button, select):not(:disabled, [aria-disabled="true"], [data-hozo-disabled]) {
+    cursor: pointer;
+  }
+}
+
 html {
   scroll-behavior: smooth;
   /* Site is dark-only (no light variant). Without this, native form
