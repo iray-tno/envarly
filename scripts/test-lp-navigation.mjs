@@ -130,6 +130,27 @@ for (const [index, locale] of locales.entries()) {
         assert.equal(await page.locator("#lang-select").inputValue(), path);
         assert.equal(await page.locator("#lang-select option").count(), 6);
         assert.equal(await page.getByRole("combobox", { name: "Language" }).count(), 1);
+        const controlCursors = await page.locator("button, select").evaluateAll((controls) =>
+          controls.map((control) => ({
+            id: control.id,
+            cursor: getComputedStyle(control).cursor,
+          })),
+        );
+        assert.deepEqual(
+          controlCursors.map((control) => control.id),
+          [
+            "lang-select",
+            "winget-copy",
+            "carousel-prev",
+            "carousel-next",
+            "dot-0",
+            "dot-1",
+            "dot-2",
+          ],
+        );
+        for (const control of controlCursors) {
+          assert.equal(control.cursor, "pointer", `${control.id} should use the pointer cursor`);
+        }
         assert.equal(await page.locator("h1").count(), 1);
         assert.equal(await page.locator("h1").innerText(), "Envarly");
         const heroType = await page
@@ -227,6 +248,24 @@ for (const [index, locale] of locales.entries()) {
       );
       await page.clock.fastForward(1600);
       assert.equal(await label.innerText(), originalLabel);
+      const disabledCursors = await page.locator("button, select").evaluateAll((controls) =>
+        controls.flatMap((control) => {
+          const results = [];
+          for (const attribute of ["disabled", "aria-disabled", "data-hozo-disabled"]) {
+            control.setAttribute(attribute, attribute === "aria-disabled" ? "true" : "");
+            results.push({ id: control.id, attribute, cursor: getComputedStyle(control).cursor });
+            control.removeAttribute(attribute);
+          }
+          return results;
+        }),
+      );
+      for (const control of disabledCursors) {
+        assert.notEqual(
+          control.cursor,
+          "pointer",
+          `${control.id} should not use pointer with ${control.attribute}`,
+        );
+      }
       assert.deepEqual(await page.evaluate(() => window.__trackedEvents), [
         ["event", "github_link_click"],
         ["event", "download_click"],
