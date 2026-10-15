@@ -71,6 +71,12 @@ export type LandingCopy = {
     items: string[];
   };
   privacyNote: string;
+  faq: {
+    heading: string;
+    items: Array<{ id: string; question: string; answer: string }>;
+    cliSetup: string;
+    cliDocs: string;
+  };
   footer: {
     copyright: string;
     releases: string;
@@ -79,6 +85,48 @@ export type LandingCopy = {
 };
 
 export const enCopy: LandingCopy = {
+  faq: {
+    heading: 'Frequently asked questions',
+    items: [
+      {
+        id: 'windows-editor',
+        question: 'How does Envarly differ from the Windows environment variable editor?',
+        answer: 'Envarly lets you stage multiple environment variable changes and review their diffs before applying them. It also includes a PATH list editor with folder selection and path checks, secret detection, and encrypted snapshots.',
+      },
+      {
+        id: 'path',
+        question: 'Can I add folders to PATH and change their order?',
+        answer: 'Yes. In the PATH list editor, type a folder path or choose a folder, then drag entries to reorder them. You can also move between rows with the arrow keys and reorder with Alt + Up/Down. Stage the edit and review the diff before applying it.',
+      },
+      {
+        id: 'preview',
+        question: 'Can I review environment variable changes before saving them?',
+        answer: 'Yes. Editing and staging do not write to the registry. The Apply dialog shows additions, changes, and deletions together, including before-and-after values and PATH entry diffs. Only confirming Apply writes the staged changes.',
+      },
+      {
+        id: 'snapshots',
+        question: 'Can I back up environment variables and restore an earlier state?',
+        answer: 'Yes. Save a named snapshot, or use the automatic snapshot taken before applying changes in the app. Restoring a snapshot stages the changes for review, including deletion of variables added since that snapshot. Snapshots are encrypted with Windows DPAPI and can only be decrypted by the same Windows account on the same PC; they are not portable backups.',
+      },
+      {
+        id: 'admin',
+        question: 'Can I use Envarly without administrator privileges?',
+        answer: 'Yes. You can view User and System variables and edit your own User variables without elevation. Changing System variables or editing another account requires administrator privileges. Envarly can restart with elevation when needed.',
+      },
+      {
+        id: 'terminal',
+        question: 'Why are my changed environment variables not reflected in the terminal?',
+        answer: 'An already running process keeps its own environment. Envarly notifies Windows after applying changes, but it cannot replace the environment of an existing shell. Restart the terminal or the application that launches it, such as your editor; opening a new tab in an existing terminal may not be enough.',
+      },
+      {
+        id: 'cli',
+        question: 'Can I use Envarly from the command line or scripts?',
+        answer: 'Yes. Envarly provides get, list, and export commands for reading, plus set, delete, and import for changes. These write commands default to a dry run and only modify the registry when you add --apply. Run envarly --help to see the commands and options.',
+      },
+    ],
+    cliSetup: 'Run these commands from a terminal. Add the Envarly installation folder to PATH using the app, or invoke envarly.exe by its full path.',
+    cliDocs: 'CLI usage and examples',
+  },
   lang: 'en',
   title: 'Envarly — Windows Environment Variable Manager',
   description: 'Preview every change as a diff before it touches the registry. Safe PATH editing, secret detection, encrypted snapshots. Free and open source for Windows 10/11.',
@@ -172,6 +220,11 @@ export const enCopy: LandingCopy = {
       title: 'Check command',
       desc: "Find out why a command isn't found — searches the effective PATH for a name or exe path and flags shadowed duplicates.",
     },
+    {
+      icon: '>_',
+      title: 'Command-line interface',
+      desc: 'Read, export, and edit environment variables from scripts. Write commands default to a dry run and require --apply to save changes.',
+    },
   ],
   audience: {
     heading: 'Who is it for?',
@@ -193,6 +246,48 @@ export const enCopy: LandingCopy = {
 };
 
 export const jaCopy: LandingCopy = {
+  faq: {
+    heading: 'よくある質問',
+    items: [
+      {
+        id: 'windows-editor',
+        question: 'Envarly は、Windows 標準の環境変数エディターと何が違いますか？',
+        answer: 'Envarly は、複数の環境変数の変更をステージし、適用前に差分をまとめて確認できます。フォルダー選択とパスの存在確認に対応した PATH リストエディター、シークレット検出、暗号化スナップショットも備えています。',
+      },
+      {
+        id: 'path',
+        question: 'PATH にフォルダーを追加したり、順番を変更したりできますか？',
+        answer: 'はい。PATH のリストエディターでパスを入力するか、フォルダーを選んで追加し、ドラッグで順番を変更できます。上下キーで行を移動し、Alt + 上下キーで並べ替えることもできます。編集後にステージし、差分を確認してから適用します。',
+      },
+      {
+        id: 'preview',
+        question: '環境変数の変更内容を、保存する前に確認できますか？',
+        answer: 'はい。編集やステージの時点ではレジストリに書き込みません。適用ダイアログで追加・変更・削除をまとめて確認でき、変更前後の値や PATH のエントリーごとの差分も表示されます。適用を確定したときに、ステージした変更を書き込みます。',
+      },
+      {
+        id: 'snapshots',
+        question: '環境変数をバックアップして、変更前の状態に戻せますか？',
+        answer: 'はい。名前付きスナップショットを保存でき、アプリでの変更適用前にも自動保存されます。復元する際は差分がステージされ、スナップショット作成後に追加された変数の削除も含めて確認できます。スナップショットは Windows DPAPI で暗号化され、同じ PC の同じ Windows アカウントでのみ復号できます。別の PC に持ち運ぶためのバックアップではありません。',
+      },
+      {
+        id: 'admin',
+        question: '管理者権限なしでも使えますか？',
+        answer: 'はい。管理者権限がなくても User・System の環境変数を表示でき、自分の User 変数を編集できます。System 変数の変更や別アカウントの編集には管理者権限が必要です。必要なときはアプリから管理者として再起動できます。',
+      },
+      {
+        id: 'terminal',
+        question: '変更した環境変数がターミナルに反映されないのはなぜですか？',
+        answer: '起動済みのプロセスは、それぞれの環境変数を保持しているためです。Envarly は適用後に Windows へ変更を通知しますが、実行中のシェルの環境変数を置き換えることはできません。ターミナルや、その起動元のエディターなどを再起動してください。既存のターミナルで新しいタブを開くだけでは反映されない場合があります。',
+      },
+      {
+        id: 'cli',
+        question: 'Envarly をコマンドラインやスクリプトから使えますか？',
+        answer: 'はい。読み取り用の get・list・export と、変更用の set・delete・import を利用できます。変更用コマンドは既定ではドライランになり、--apply を付けたときだけレジストリへ書き込みます。envarly --help でコマンドとオプションを確認できます。',
+      },
+    ],
+    cliSetup: 'ターミナルから実行してください。アプリで Envarly のインストール先を PATH に追加するか、envarly.exe をフルパスで指定します。',
+    cliDocs: 'CLI の使い方と実行例',
+  },
   lang: 'ja',
   title: 'Envarly — Windows 環境変数マネージャー',
   description: '変更はレジストリに書き込む前に必ず差分プレビュー。安全なPATH編集、シークレット検出、暗号化スナップショットに対応した無料のオープンソースGUI。Windows 10/11向け。',
@@ -286,6 +381,11 @@ export const jaCopy: LandingCopy = {
       title: 'コマンドを調べる',
       desc: 'コマンドが見つからない理由を調査。実効PATHをコマンド名やexeパスで検索し、シャドーイングされた重複も検出します。',
     },
+    {
+      icon: '>_',
+      title: 'コマンドライン操作',
+      desc: 'スクリプトから環境変数を読み取り・エクスポート・編集できます。変更用コマンドは既定ではドライランになり、--apply で書き込みます。',
+    },
   ],
   audience: {
     heading: '誰のためのアプリ？',
@@ -307,6 +407,48 @@ export const jaCopy: LandingCopy = {
 };
 
 export const zhCNCopy: LandingCopy = {
+  faq: {
+    heading: '常见问题',
+    items: [
+      {
+        id: 'windows-editor',
+        question: 'Envarly 与 Windows 自带的环境变量编辑器有什么区别？',
+        answer: 'Envarly 可以暂存多个环境变量的更改，并在应用前集中查看差异。它还提供支持文件夹选择和路径检查的 PATH 列表编辑器、敏感信息检测以及加密快照。',
+      },
+      {
+        id: 'path',
+        question: '可以向 PATH 添加文件夹并调整顺序吗？',
+        answer: '可以。在 PATH 列表编辑器中输入路径或选择文件夹，然后拖动条目调整顺序。也可以用上下方向键切换行，用 Alt + 上下方向键排序。暂存编辑后，先查看差异再应用。',
+      },
+      {
+        id: 'preview',
+        question: '保存前可以查看环境变量的更改内容吗？',
+        answer: '可以。编辑和暂存不会写入注册表。应用对话框会集中显示新增、修改和删除，包括更改前后的值以及 PATH 条目的差异。只有确认应用后才会写入暂存的更改。',
+      },
+      {
+        id: 'snapshots',
+        question: '可以备份环境变量并恢复到之前的状态吗？',
+        answer: '可以。您可以保存命名快照，应用内应用更改前也会自动保存快照。恢复时会暂存差异供您检查，包括删除快照创建后新增的变量。快照使用 Windows DPAPI 加密，只能由同一台电脑上的同一个 Windows 账户解密，不能用作跨电脑迁移的备份。',
+      },
+      {
+        id: 'admin',
+        question: '没有管理员权限也能使用 Envarly 吗？',
+        answer: '可以。无需管理员权限即可查看用户和系统变量，并编辑自己的用户变量。修改系统变量或编辑其他账户需要管理员权限。必要时可以从应用中以管理员身份重新启动。',
+      },
+      {
+        id: 'terminal',
+        question: '为什么修改后的环境变量没有在终端中生效？',
+        answer: '已经运行的进程保留自己的环境变量。Envarly 会在应用更改后通知 Windows，但无法替换现有 shell 的环境。请重新启动终端或启动它的应用，例如编辑器；仅在现有终端中打开新标签页可能不够。',
+      },
+      {
+        id: 'cli',
+        question: '可以从命令行或脚本使用 Envarly 吗？',
+        answer: '可以。get、list 和 export 用于读取，set、delete 和 import 用于修改。修改命令默认为试运行，只有添加 --apply 才会写入注册表。运行 envarly --help 可查看命令和选项。',
+      },
+    ],
+    cliSetup: '请在终端中运行。通过应用将 Envarly 安装目录添加到 PATH，或使用 envarly.exe 的完整路径。',
+    cliDocs: 'CLI 用法和示例',
+  },
   lang: 'zh-CN',
   title: 'Envarly — Windows 环境变量管理器',
   description: '每一处更改在写入注册表前都会先以差异形式预览。安全的 PATH 编辑、敏感信息检测、加密快照。免费开源，适用于 Windows 10/11。',
@@ -400,6 +542,11 @@ export const zhCNCopy: LandingCopy = {
       title: '检查命令',
       desc: '查明命令为何找不到 — 按名称或 exe 路径搜索有效 PATH，并标记被遮蔽的重复项。',
     },
+    {
+      icon: '>_',
+      title: '命令行界面',
+      desc: '通过脚本读取、导出和编辑环境变量。修改命令默认为试运行，需要 --apply 才会保存更改。',
+    },
   ],
   audience: {
     heading: '适合谁使用？',
@@ -421,6 +568,48 @@ export const zhCNCopy: LandingCopy = {
 };
 
 export const ruCopy: LandingCopy = {
+  faq: {
+    heading: 'Частые вопросы',
+    items: [
+      {
+        id: 'windows-editor',
+        question: 'Чем Envarly отличается от редактора переменных среды Windows?',
+        answer: 'Envarly позволяет подготовить несколько изменений переменных среды и просмотреть их различия перед применением. Также доступны редактор PATH с выбором папок и проверкой путей, обнаружение секретов и зашифрованные снимки.',
+      },
+      {
+        id: 'path',
+        question: 'Можно ли добавлять папки в PATH и менять их порядок?',
+        answer: 'Да. В редакторе списка PATH введите путь или выберите папку, затем перетаскивайте записи для изменения порядка. Стрелки переключают строки, а Alt + Вверх/Вниз меняет их порядок. Подготовьте изменения и проверьте различия перед применением.',
+      },
+      {
+        id: 'preview',
+        question: 'Можно ли проверить изменения переменных среды перед сохранением?',
+        answer: 'Да. Редактирование и подготовка изменений не записывают данные в реестр. Диалог применения показывает добавления, изменения и удаления, включая старые и новые значения и различия записей PATH. Запись происходит только после подтверждения применения.',
+      },
+      {
+        id: 'snapshots',
+        question: 'Можно ли сохранить переменные среды и восстановить прежнее состояние?',
+        answer: 'Да. Можно сохранить именованный снимок; перед применением изменений в приложении снимок создаётся автоматически. При восстановлении различия подготавливаются для проверки, включая удаление переменных, добавленных после создания снимка. Снимки зашифрованы Windows DPAPI: расшифровать их может только та же учётная запись Windows на том же ПК. Они не предназначены для переноса на другой компьютер.',
+      },
+      {
+        id: 'admin',
+        question: 'Можно ли пользоваться Envarly без прав администратора?',
+        answer: 'Да. Без повышения прав можно просматривать пользовательские и системные переменные и редактировать свои пользовательские переменные. Для изменения системных переменных или работы с другой учётной записью нужны права администратора. Приложение можно перезапустить с повышением прав.',
+      },
+      {
+        id: 'terminal',
+        question: 'Почему изменённые переменные среды не появились в терминале?',
+        answer: 'Уже запущенный процесс сохраняет собственное окружение. Envarly уведомляет Windows после применения изменений, но не может заменить окружение работающей оболочки. Перезапустите терминал или запускающее его приложение, например редактор. Открытия новой вкладки в работающем терминале может быть недостаточно.',
+      },
+      {
+        id: 'cli',
+        question: 'Можно ли использовать Envarly из командной строки или скриптов?',
+        answer: 'Да. Команды get, list и export читают данные, а set, delete и import подготавливают изменения. По умолчанию команды изменения работают в пробном режиме и записывают в реестр только с флагом --apply. Команда envarly --help показывает доступные команды и параметры.',
+      },
+    ],
+    cliSetup: 'Запускайте команды из терминала. Добавьте папку установки Envarly в PATH через приложение или укажите полный путь к envarly.exe.',
+    cliDocs: 'Использование CLI и примеры',
+  },
   lang: 'ru',
   title: 'Envarly — менеджер переменных окружения Windows',
   description: 'Каждое изменение показывается как diff перед записью в реестр. Безопасное редактирование PATH, обнаружение секретов, зашифрованные снимки. Бесплатно, с открытым исходным кодом, для Windows 10/11.',
@@ -514,6 +703,11 @@ export const ruCopy: LandingCopy = {
       title: 'Проверка команды',
       desc: 'Узнайте, почему команда не найдена — поиск по эффективному PATH по имени или пути к exe-файлу с выявлением перекрытых дублей.',
     },
+    {
+      icon: '>_',
+      title: 'Командная строка',
+      desc: 'Читайте, экспортируйте и редактируйте переменные из скриптов. Команды изменения по умолчанию работают в пробном режиме; для записи нужен --apply.',
+    },
   ],
   audience: {
     heading: 'Для кого это?',
@@ -535,6 +729,48 @@ export const ruCopy: LandingCopy = {
 };
 
 export const koCopy: LandingCopy = {
+  faq: {
+    heading: '자주 묻는 질문',
+    items: [
+      {
+        id: 'windows-editor',
+        question: 'Envarly는 Windows 기본 환경 변수 편집기와 무엇이 다른가요?',
+        answer: 'Envarly는 여러 환경 변수의 변경 사항을 스테이징하고 적용 전에 차이를 한 번에 확인할 수 있습니다. 폴더 선택과 경로 확인을 지원하는 PATH 목록 편집기, 비밀 정보 탐지, 암호화된 스냅샷도 제공합니다.',
+      },
+      {
+        id: 'path',
+        question: 'PATH에 폴더를 추가하거나 순서를 바꿀 수 있나요?',
+        answer: '네. PATH 목록 편집기에서 경로를 입력하거나 폴더를 선택하고, 항목을 드래그하여 순서를 바꿀 수 있습니다. 위아래 방향키로 행을 이동하고 Alt + 위/아래로 순서를 변경할 수도 있습니다. 편집 내용을 스테이징한 뒤 차이를 확인하고 적용합니다.',
+      },
+      {
+        id: 'preview',
+        question: '환경 변수 변경 내용을 저장 전에 확인할 수 있나요?',
+        answer: '네. 편집하거나 스테이징하는 단계에서는 레지스트리에 쓰지 않습니다. 적용 대화 상자에서 추가, 변경, 삭제를 한 번에 확인하며 변경 전후의 값과 PATH 항목별 차이도 볼 수 있습니다. 적용을 확정할 때만 스테이징한 변경 사항을 기록합니다.',
+      },
+      {
+        id: 'snapshots',
+        question: '환경 변수를 백업하고 이전 상태로 복원할 수 있나요?',
+        answer: '네. 이름을 지정한 스냅샷을 저장할 수 있으며 앱에서 변경 사항을 적용하기 전에도 자동으로 저장됩니다. 복원 시 차이가 스테이징되며, 스냅샷 이후 추가된 변수의 삭제도 확인할 수 있습니다. 스냅샷은 Windows DPAPI로 암호화되어 같은 PC의 같은 Windows 계정에서만 복호화할 수 있습니다. 다른 PC로 옮기는 용도의 백업은 아닙니다.',
+      },
+      {
+        id: 'admin',
+        question: '관리자 권한 없이도 사용할 수 있나요?',
+        answer: '네. 관리자 권한 없이 사용자 및 시스템 변수를 보고 자신의 사용자 변수를 편집할 수 있습니다. 시스템 변수를 변경하거나 다른 계정을 편집하려면 관리자 권한이 필요합니다. 필요할 때 앱에서 관리자 권한으로 다시 시작할 수 있습니다.',
+      },
+      {
+        id: 'terminal',
+        question: '변경한 환경 변수가 터미널에 반영되지 않는 이유는 무엇인가요?',
+        answer: '이미 실행 중인 프로세스는 자신의 환경을 유지하기 때문입니다. Envarly는 적용 후 Windows에 변경을 알리지만 실행 중인 셸의 환경을 바꿀 수는 없습니다. 터미널이나 터미널을 실행한 편집기 등의 앱을 다시 시작하세요. 기존 터미널에서 새 탭만 여는 것으로는 부족할 수 있습니다.',
+      },
+      {
+        id: 'cli',
+        question: '명령줄이나 스크립트에서 Envarly를 사용할 수 있나요?',
+        answer: '네. get, list, export는 읽기에, set, delete, import는 변경에 사용합니다. 변경 명령은 기본적으로 미리 실행만 하며 --apply를 추가할 때만 레지스트리에 기록합니다. envarly --help로 명령과 옵션을 확인할 수 있습니다.',
+      },
+    ],
+    cliSetup: '터미널에서 실행하세요. 앱에서 Envarly 설치 폴더를 PATH에 추가하거나 envarly.exe의 전체 경로를 지정하세요.',
+    cliDocs: 'CLI 사용법과 예제',
+  },
   lang: 'ko',
   title: 'Envarly — Windows 환경 변수 관리자',
   description: '모든 변경 사항은 레지스트리에 기록되기 전에 diff로 미리 확인할 수 있습니다. 안전한 PATH 편집, 민감 정보 감지, 암호화된 스냅샷. Windows 10/11용 무료 오픈소스 GUI.',
@@ -628,6 +864,11 @@ export const koCopy: LandingCopy = {
       title: '명령어 확인',
       desc: '명령어를 찾을 수 없는 이유를 확인하세요 — 이름이나 exe 경로로 유효 PATH를 검색하고 가려진 중복 항목을 표시합니다.',
     },
+    {
+      icon: '>_',
+      title: '명령줄 인터페이스',
+      desc: '스크립트에서 환경 변수를 읽고 내보내고 편집하세요. 변경 명령은 기본적으로 미리 실행만 하며 --apply를 추가해야 기록합니다.',
+    },
   ],
   audience: {
     heading: '누구를 위한 도구인가요?',
@@ -649,6 +890,48 @@ export const koCopy: LandingCopy = {
 };
 
 export const viCopy: LandingCopy = {
+  faq: {
+    heading: 'Câu hỏi thường gặp',
+    items: [
+      {
+        id: 'windows-editor',
+        question: 'Envarly khác gì so với trình chỉnh sửa biến môi trường của Windows?',
+        answer: 'Envarly cho phép chuẩn bị nhiều thay đổi biến môi trường và xem các khác biệt trước khi áp dụng. Ứng dụng còn có trình chỉnh sửa danh sách PATH với tính năng chọn thư mục và kiểm tra đường dẫn, phát hiện thông tin bí mật và ảnh chụp nhanh được mã hóa.',
+      },
+      {
+        id: 'path',
+        question: 'Tôi có thể thêm thư mục vào PATH và thay đổi thứ tự không?',
+        answer: 'Có. Trong trình chỉnh sửa danh sách PATH, nhập đường dẫn hoặc chọn thư mục, sau đó kéo các mục để sắp xếp lại. Bạn cũng có thể chuyển dòng bằng phím mũi tên và đổi thứ tự bằng Alt + Lên/Xuống. Đưa thay đổi vào danh sách chờ và xem khác biệt trước khi áp dụng.',
+      },
+      {
+        id: 'preview',
+        question: 'Tôi có thể xem lại thay đổi biến môi trường trước khi lưu không?',
+        answer: 'Có. Việc chỉnh sửa và đưa vào danh sách chờ không ghi vào registry. Hộp thoại áp dụng hiển thị các mục thêm, sửa và xóa cùng giá trị trước và sau, cũng như khác biệt từng mục PATH. Chỉ khi xác nhận áp dụng thì các thay đổi đang chờ mới được ghi.',
+      },
+      {
+        id: 'snapshots',
+        question: 'Tôi có thể sao lưu biến môi trường và khôi phục trạng thái trước đó không?',
+        answer: 'Có. Bạn có thể lưu ảnh chụp nhanh có tên; ứng dụng cũng tự động lưu trước khi áp dụng thay đổi. Khi khôi phục, các khác biệt được đưa vào danh sách chờ để xem lại, kể cả việc xóa các biến được thêm sau thời điểm chụp. Ảnh chụp được mã hóa bằng Windows DPAPI và chỉ cùng tài khoản Windows trên cùng máy tính mới giải mã được; chúng không phải bản sao lưu để chuyển sang máy khác.',
+      },
+      {
+        id: 'admin',
+        question: 'Tôi có thể dùng Envarly mà không có quyền quản trị không?',
+        answer: 'Có. Bạn có thể xem biến Người dùng và Hệ thống, đồng thời chỉnh sửa biến Người dùng của mình mà không cần quyền quản trị. Thay đổi biến Hệ thống hoặc chỉnh sửa tài khoản khác cần quyền quản trị. Khi cần, bạn có thể khởi động lại ứng dụng với quyền quản trị.',
+      },
+      {
+        id: 'terminal',
+        question: 'Tại sao biến môi trường đã thay đổi chưa được cập nhật trong terminal?',
+        answer: 'Tiến trình đang chạy giữ môi trường riêng của nó. Envarly thông báo cho Windows sau khi áp dụng, nhưng không thể thay môi trường của shell đang chạy. Hãy khởi động lại terminal hoặc ứng dụng mở terminal, chẳng hạn trình soạn thảo; chỉ mở tab mới trong terminal hiện tại có thể chưa đủ.',
+      },
+      {
+        id: 'cli',
+        question: 'Tôi có thể dùng Envarly từ dòng lệnh hoặc script không?',
+        answer: 'Có. get, list và export dùng để đọc; set, delete và import dùng để thay đổi. Các lệnh thay đổi mặc định chỉ chạy thử và chỉ ghi vào registry khi thêm --apply. Chạy envarly --help để xem các lệnh và tùy chọn.',
+      },
+    ],
+    cliSetup: 'Chạy từ terminal. Thêm thư mục cài đặt Envarly vào PATH bằng ứng dụng, hoặc dùng đường dẫn đầy đủ tới envarly.exe.',
+    cliDocs: 'Cách dùng CLI và ví dụ',
+  },
   lang: 'vi',
   title: 'Envarly — Trình quản lý biến môi trường Windows',
   description: 'Mọi thay đổi đều được xem trước dạng diff trước khi ghi vào registry. Chỉnh sửa PATH an toàn, phát hiện thông tin nhạy cảm, ảnh chụp nhanh mã hóa. Miễn phí, mã nguồn mở, dành cho Windows 10/11.',
@@ -741,6 +1024,11 @@ export const viCopy: LandingCopy = {
       icon: '🔎',
       title: 'Kiểm tra lệnh',
       desc: 'Tìm hiểu tại sao một lệnh không được tìm thấy — tìm kiếm PATH hiệu lực theo tên hoặc đường dẫn exe và đánh dấu các bản sao bị che khuất.',
+    },
+    {
+      icon: '>_',
+      title: 'Giao diện dòng lệnh',
+      desc: 'Đọc, xuất và chỉnh sửa biến môi trường từ script. Các lệnh thay đổi mặc định chỉ chạy thử và cần --apply để ghi.',
     },
   ],
   audience: {

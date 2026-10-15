@@ -19,6 +19,66 @@ let browser;
 let server;
 let origin;
 
+async function checkFaq(page, width) {
+  const faq = page.locator("#faq");
+  assert.equal(await faq.locator("h2").count(), 1);
+  assert.equal(await faq.locator("h3").count(), 7);
+  const items = await faq.locator(":scope > div").evaluateAll((elements) =>
+    elements.map((element) => ({
+      id: element.id,
+      question: element.querySelector("h3").textContent,
+      answer: element.querySelector("p").textContent,
+    })),
+  );
+  assert.deepEqual(
+    items.map((item) => item.id),
+    ["windows-editor", "path", "preview", "snapshots", "admin", "terminal", "cli"].map(
+      (id) => `faq-${id}`,
+    ),
+  );
+  for (const item of items) {
+    assert.ok(item.question.trim().length);
+    assert.ok(item.answer.trim().length);
+  }
+  const schema = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((scripts) => scripts.map((script) => JSON.parse(script.textContent)));
+  assert.equal(schema.filter((entry) => entry["@type"] === "SoftwareApplication").length, 1);
+  const faqs = schema.filter((entry) => entry["@type"] === "FAQPage");
+  assert.equal(faqs.length, 1);
+  assert.equal(faqs[0]["@context"], "https://schema.org");
+  assert.equal(faqs[0].inLanguage, await page.locator("html").getAttribute("lang"));
+  assert.equal(
+    faqs[0]["@id"],
+    `${await page.locator('link[rel="canonical"]').getAttribute("href")}#faq`,
+  );
+  assert.deepEqual(
+    faqs[0].mainEntity,
+    items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
+    })),
+  );
+  assert.equal(
+    await faq.locator("pre code").innerText(),
+    "envarly --help\nenvarly list --scope user",
+  );
+  assert.equal(
+    await faq.locator("a").getAttribute("href"),
+    "https://github.com/iray-tno/envarly/blob/main/README.md#cli-usage",
+  );
+  const bounds = await faq.locator("h2,h3,p,pre,a").evaluateAll((elements) =>
+    elements.map((element) => ({
+      left: element.getBoundingClientRect().left,
+      right: element.getBoundingClientRect().right,
+    })),
+  );
+  for (const bound of bounds) {
+    assert.ok(bound.left >= 0 && bound.right <= width, `${width}px: FAQ outside viewport`);
+  }
+}
+
 before(async () => {
   await readFile(resolve(dist, "index.html"));
   server = createServer(async (request, response) => {
@@ -81,7 +141,7 @@ for (const [index, locale] of locales.entries()) {
             (element) => getComputedStyle(element).display === "grid",
           );
           const audience = section.nextElementSibling;
-          const stack = audience.nextElementSibling;
+          const stack = document.getElementById("stack");
           return {
             tag: section.tagName,
             headings: section.querySelectorAll("h3").length,
@@ -104,8 +164,8 @@ for (const [index, locale] of locales.entries()) {
           };
         });
         assert.equal(content.tag, "SECTION");
-        assert.equal(content.headings, 11);
-        assert.deepEqual(content.cards, [4, 7]);
+        assert.equal(content.headings, 12);
+        assert.deepEqual(content.cards, [4, 8]);
         assert.deepEqual(content.columns, [
           width >= 1024 ? 4 : width >= 640 ? 2 : 1,
           width >= 640 ? 2 : 1,
@@ -115,6 +175,7 @@ for (const [index, locale] of locales.entries()) {
         assert.equal(content.audienceParagraphs, 2);
         assert.equal(content.stackTag, "SECTION");
         assert.equal(content.stackItems, 5);
+        await checkFaq(page, width);
         for (const bound of content.bounds) {
           assert.ok(bound.text.length, "Localized section text must not be empty");
           assert.ok(
@@ -299,6 +360,7 @@ for (const locale of locales) {
       assert.ok((await page.locator("main > section > p").first().innerText()).length);
       assert.ok((await page.locator("#hero-download").innerText()).length);
       assert.ok((await page.locator("#features h3").first().innerText()).length);
+      await checkFaq(page, 1280);
       assert.equal(await page.locator("astro-island").count(), 0);
     } finally {
       await page.close();
