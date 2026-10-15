@@ -15,8 +15,9 @@ npm run build    # build static output to ./dist/
 npm run preview  # preview production build locally
 ```
 
-Run `npm run check:lp` from the repository root to type-check all LP TypeScript.
-CI runs this before building the LP; Astro's build alone only transpiles it.
+Run `npm run check:lp` from the repository root to sync Astro's generated types
+and type-check all LP TypeScript. CI runs this before building the LP;
+Astro's build alone only transpiles it.
 
 ## Dependency Overrides
 
