@@ -6,6 +6,7 @@ import LandingFeatures from './LandingFeatures';
 import LandingAudience from './LandingAudience';
 import LandingStack from './LandingStack';
 import LandingHero from './LandingHero';
+import LandingFaq from './LandingFaq';
 import {
   WINGET_COMMAND,
   type LandingCopy,
@@ -16,6 +17,17 @@ interface Props {
 }
 
 const { copy } = Astro.props;
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  '@id': `${new URL(copy.canonicalPath, Astro.site)}#faq`,
+  inLanguage: copy.lang,
+  mainEntity: copy.faq.items.map(({ question, answer }) => ({
+    '@type': 'Question',
+    name: question,
+    acceptedAnswer: { '@type': 'Answer', text: answer },
+  })),
+};
 ---
 
 <Base
@@ -209,6 +221,8 @@ const { copy } = Astro.props;
 
     <LandingFeatures copy={copy} />
     <LandingAudience copy={copy.audience} />
+    <LandingFaq copy={copy.faq} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd).replace(/</g, '\\u003c')} />
     <LandingStack copy={copy.stack} />
   </main>
 

@@ -30,7 +30,7 @@ generation with `npm run build` when updating this override.
 
 ## Hozo Pilot
 
-The header, hero introduction, footer, features, audience, and stack use Hozo 0.3.0
+The header, hero introduction, footer, features, audience, FAQ, and stack use Hozo 0.3.0
 primitives through `@hozo/vite` and Astro's React integration. Astro renders
 them as static HTML: do not add a `client:*` directive unless browser-side
 interaction is required. The hero's install control and carousel remain in Astro, together with
@@ -38,6 +38,12 @@ the copy-button, language-switching, and analytics listeners.
 The header uses `NativeSelect` from `@hozo/form`, with `defaultValue` rendering
 the current language without hydration. The Astro listener owns navigation;
 option paths and tracked link IDs must stay stable.
+
+The FAQ renders seven question/answer pairs as headings and paragraphs, without
+hydration or collapsed content. Its six-language copy lives in `lpContent.ts`;
+`LandingPage.astro` generates `FAQPage` JSON-LD from the same answers. Browser tests
+check that structured data matches the visible copy, including with JavaScript
+disabled. The CLI entry includes read-only examples and links to the main README.
 
 After building the LP, run `npm run test:lp` from the repository root to check
 all six language pages and responsive content layouts in Chromium. The root dependencies and Playwright's

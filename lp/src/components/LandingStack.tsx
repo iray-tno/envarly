@@ -7,7 +7,10 @@ interface LandingStackProps {
 
 export default function LandingStack({ copy }: LandingStackProps) {
   return (
-    <Section className="block w-full mx-auto max-w-5xl px-6 py-12 border-t border-border">
+    <Section
+      nativeID="stack"
+      className="block w-full mx-auto max-w-5xl px-6 py-12 border-t border-border"
+    >
       <Paragraph className="text-xs text-muted text-center mb-5 uppercase tracking-widest">
         {copy.label}
       </Paragraph>
