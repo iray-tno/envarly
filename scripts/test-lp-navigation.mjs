@@ -129,6 +129,29 @@ for (const [index, locale] of locales.entries()) {
         assert.equal(await page.locator("astro-island").count(), 0);
         assert.equal(await page.locator("#lang-select").inputValue(), path);
         assert.equal(await page.locator("#lang-select option").count(), 6);
+        assert.equal(await page.getByRole("combobox", { name: "Language" }).count(), 1);
+        assert.equal(await page.locator("h1").count(), 1);
+        assert.equal(await page.locator("h1").innerText(), "Envarly");
+        const heroType = await page
+          .locator("main > section > p")
+          .first()
+          .evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              fontSize: Number.parseFloat(style.fontSize),
+              lineHeight: Number.parseFloat(style.lineHeight),
+            };
+          });
+        assert.equal(heroType.fontSize, width >= 640 ? 20 : 18);
+        assert.equal(heroType.lineHeight / heroType.fontSize, 1.625);
+        assert.equal(
+          await page.locator("#hero-download").getAttribute("href"),
+          "https://github.com/iray-tno/envarly/releases/latest",
+        );
+        assert.equal(
+          await page.locator("#hero-github").getAttribute("href"),
+          "https://github.com/iray-tno/envarly",
+        );
         assert.equal(await page.locator("header a").first().getAttribute("href"), path);
         assert.equal(await page.locator("header nav").count(), 1);
         assert.equal(await page.locator("#nav-github").isVisible(), width >= 1024);
@@ -169,15 +192,47 @@ for (const [index, locale] of locales.entries()) {
         );
       }
       await page.evaluate(() => {
-        for (const id of ["nav-github", "nav-download"]) {
+        for (const id of ["nav-github", "nav-download", "hero-github", "hero-download"]) {
           document.getElementById(id).addEventListener("click", (event) => event.preventDefault());
         }
       });
       await page.locator("#nav-github").click();
       await page.locator("#nav-download").click();
+      await page.locator("#hero-github").click();
+      await page.locator("#hero-download").click();
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, "clipboard", {
+          configurable: true,
+          value: {
+            writeText: async (value) => {
+              window.__copiedText = value;
+            },
+          },
+        });
+      });
+      const copy = page.locator("#winget-copy");
+      const label = page.locator("#winget-copy-label");
+      const originalLabel = await label.innerText();
+      const originalWidth = await copy.evaluate((element) => element.getBoundingClientRect().width);
+      await page.clock.install();
+      await copy.click();
+      assert.equal(
+        await page.evaluate(() => window.__copiedText),
+        "winget install Envarly.Envarly",
+      );
+      assert.equal(await label.innerText(), await copy.getAttribute("data-copied-label"));
+      assert.equal(
+        await copy.evaluate((element) => element.getBoundingClientRect().width),
+        originalWidth,
+      );
+      await page.clock.fastForward(1600);
+      assert.equal(await label.innerText(), originalLabel);
       assert.deepEqual(await page.evaluate(() => window.__trackedEvents), [
         ["event", "github_link_click"],
         ["event", "download_click"],
+        ["event", "github_link_click"],
+        ["event", "download_click"],
+        ["event", "winget_copy_click"],
       ]);
       const nextPath = `/envarly/${locales[(index + 1) % locales.length]}`;
       await Promise.all([
@@ -186,6 +241,26 @@ for (const [index, locale] of locales.entries()) {
       ]);
       assert.equal(await page.locator("#lang-select").inputValue(), nextPath);
       assert.deepEqual(scripts, [], "Static navigation must not load local scripts");
+    } finally {
+      await page.close();
+    }
+  });
+}
+
+for (const locale of locales) {
+  test(`LP static HTML without JavaScript: ${locale || "en"}`, async () => {
+    const page = await browser.newPage({ javaScriptEnabled: false });
+    try {
+      const path = `/envarly/${locale}`;
+      await page.goto(`${origin}${path}`);
+      assert.equal(await page.locator("#lang-select").inputValue(), path);
+      assert.equal(await page.getByRole("combobox", { name: "Language" }).count(), 1);
+      assert.equal(await page.locator("#lang-select option").count(), 6);
+      assert.equal(await page.getByRole("heading", { name: "Envarly", level: 1 }).count(), 1);
+      assert.ok((await page.locator("main > section > p").first().innerText()).length);
+      assert.ok((await page.locator("#hero-download").innerText()).length);
+      assert.ok((await page.locator("#features h3").first().innerText()).length);
+      assert.equal(await page.locator("astro-island").count(), 0);
     } finally {
       await page.close();
     }
