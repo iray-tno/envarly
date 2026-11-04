@@ -59,8 +59,8 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^6.1.1",
-    "@vitest/browser-playwright": "^4.1.11",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/browser-playwright": "^5.0.5",
+    "@vitest/coverage-v8": "^5.0.5",
     "@xmldom/xmldom": "^0.9.12",
     "allure": "^3.16.0",
     "jsdom": "^30.0.1",
@@ -69,7 +69,7 @@
     "storybook": "^10.4.6",
     "typescript": "~7.0.2",
     "vite": "^8.3.0",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "@allurereport/web-commons": {
