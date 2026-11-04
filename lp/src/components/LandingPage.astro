@@ -2,11 +2,7 @@
 import Base from '../layouts/Base.astro';
 import LandingFooter from './LandingFooter';
 import LandingHeader from './LandingHeader';
-import LandingFeatures from './LandingFeatures';
-import LandingAudience from './LandingAudience';
-import LandingStack from './LandingStack';
-import LandingHero from './LandingHero';
-import LandingFaq from './LandingFaq';
+import LandingMain from './LandingMain';
 import {
   WINGET_COMMAND,
   type LandingCopy,
@@ -39,192 +35,105 @@ const faqJsonLd = {
 >
   <LandingHeader copy={copy} />
 
-  <main>
-    <!-- Hero -->
-    <section class="mx-auto max-w-5xl px-6 pt-24 pb-16 text-center">
-      <LandingHero copy={copy.hero} />
+  <LandingMain copy={copy} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd).replace(/</g, '\\u003c')} />
 
-      <!-- WinGet install -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-16 -mt-8 text-sm">
-        <span class="text-[var(--color-muted)]">{copy.install.label}</span>
-        <div id="winget-pill" class="flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors">
-          <code id="winget-command" class="font-mono text-xs text-[var(--color-text)]">{WINGET_COMMAND}</code>
-          <button
-            id="winget-copy"
-            type="button"
-            class="grid px-2 py-1 rounded-md text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-border)]/40 transition-colors"
-            data-copy-label={copy.install.copy}
-            data-copied-label={copy.install.copied}
-          >
-            {/* Both labels are stacked in the same grid cell so the button
-                width is always the wider of the two — whichever language —
-                and never jitters when the visible label swaps on click. */}
-            <span class="invisible col-start-1 row-start-1 whitespace-nowrap" aria-hidden="true">{copy.install.copy}</span>
-            <span class="invisible col-start-1 row-start-1 whitespace-nowrap" aria-hidden="true">{copy.install.copied}</span>
-            <span id="winget-copy-label" class="col-start-1 row-start-1 whitespace-nowrap">{copy.install.copy}</span>
-          </button>
-        </div>
-      </div>
-      <script define:vars={{ command: WINGET_COMMAND }}>
-        {
-          // Inline styles, not Tailwind utility classes — classes added via
-          // classList from a script aren't visible to Tailwind's build-time
-          // scanner, so they'd never get generated CSS.
-          const pill = document.getElementById('winget-pill');
-          const button = document.getElementById('winget-copy');
-          const label = document.getElementById('winget-copy-label');
-          let resetTimer;
-          button?.addEventListener('click', async () => {
-            await navigator.clipboard.writeText(command);
-            window.gtag?.('event', 'winget_copy_click');
-            const copied = button.dataset.copiedLabel ?? 'Copied!';
-            const original = button.dataset.copyLabel ?? label?.textContent ?? '';
-            if (label) label.textContent = copied;
-            if (label) label.style.color = 'var(--color-accent)';
-            if (pill) pill.style.borderColor = 'var(--color-accent)';
-            clearTimeout(resetTimer);
-            resetTimer = setTimeout(() => {
-              if (label) label.textContent = original;
-              if (label) label.style.color = '';
-              if (pill) pill.style.borderColor = '';
-            }, 1500);
-          });
+  <script define:vars={{ command: WINGET_COMMAND }}>
+    {
+      // Inline styles, not Tailwind utility classes — classes added via
+      // classList from a script aren't visible to Tailwind's build-time
+      // scanner, so they'd never get generated CSS.
+      const pill = document.getElementById('winget-pill');
+      const button = document.getElementById('winget-copy');
+      const label = document.getElementById('winget-copy-label');
+      let resetTimer;
+      button?.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(command);
+        window.gtag?.('event', 'winget_copy_click');
+        const copied = button.dataset.copiedLabel ?? 'Copied!';
+        const original = button.dataset.copyLabel ?? label?.textContent ?? '';
+        if (label) label.textContent = copied;
+        if (label) label.style.color = 'var(--color-accent)';
+        if (pill) pill.style.borderColor = 'var(--color-accent)';
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
+          if (label) label.textContent = original;
+          if (label) label.style.color = '';
+          if (pill) pill.style.borderColor = '';
+        }, 1500);
+      });
+    }
+  </script>
+
+  <script>
+    {
+      const track = document.getElementById('carousel-track');
+      const dots = [document.getElementById('dot-0'), document.getElementById('dot-1'), document.getElementById('dot-2')];
+      const prevBtn = document.getElementById('carousel-prev');
+      const nextBtn = document.getElementById('carousel-next');
+      const video = document.getElementById('carousel-video') as HTMLVideoElement | null;
+      const VIDEO_SLIDE = 0;
+      let current = 0;
+      let timer: ReturnType<typeof setInterval>;
+
+      function goTo(i: number) {
+        current = i;
+        (track as HTMLElement).style.transform = `translateX(-${i * 100}%)`;
+        dots.forEach((d, j) => {
+          (d as HTMLElement).style.background = j === i ? 'var(--color-accent)' : 'var(--color-muted)';
+          (d as HTMLElement).style.opacity = j === i ? '1' : '0.4';
+        });
+        if (video) {
+          if (i === VIDEO_SLIDE) {
+            video.currentTime = 0;
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
         }
-      </script>
+      }
 
-      <!-- Screenshot carousel -->
-      <div class="mx-auto">
-        <div class="relative overflow-hidden rounded-xl shadow-2xl shadow-[var(--color-accent)]/5">
-          <div id="carousel-track" class="flex" style="transition: transform 0.45s cubic-bezier(.4,0,.2,1)">
-            <video
-              id="carousel-video"
-              src="/envarly/walkthrough.mp4"
-              poster="/envarly/screenshot-path-editor.png"
-              aria-label={copy.screenshots.videoAlt}
-              width="1200"
-              height="800"
-              class="w-full shrink-0"
-              autoplay
-              muted
-              playsinline
-              preload="auto"
-            />
-            <img
-              src="/envarly/screenshot-path-editor.png"
-              alt={copy.screenshots.pathEditorAlt}
-              width="1200"
-              height="800"
-              class="w-full shrink-0"
-              loading="eager"
-            />
-            <img
-              src="/envarly/screenshot-apply-modal.png"
-              alt={copy.screenshots.applyModalAlt}
-              width="1200"
-              height="800"
-              class="w-full shrink-0"
-              loading="lazy"
-            />
-          </div>
-          <button
-            id="carousel-prev"
-            aria-label={copy.screenshots.prevLabel}
-            class="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-[var(--color-surface)]/80 border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)]/60 transition-colors backdrop-blur"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
-          <button
-            id="carousel-next"
-            aria-label={copy.screenshots.nextLabel}
-            class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-[var(--color-surface)]/80 border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)]/60 transition-colors backdrop-blur"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-          </button>
-        </div>
-        <!-- Dots -->
-        <div class="flex justify-center gap-2 mt-4">
-          <button id="dot-0" aria-label={copy.screenshots.videoLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-accent)"></button>
-          <button id="dot-1" aria-label={copy.screenshots.firstLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-muted);opacity:0.4"></button>
-          <button id="dot-2" aria-label={copy.screenshots.secondLabel} class="w-2 h-2 rounded-full transition-colors" style="background:var(--color-muted);opacity:0.4"></button>
-        </div>
-      </div>
-      <script>
-        {
-          const track = document.getElementById('carousel-track');
-          const dots = [document.getElementById('dot-0'), document.getElementById('dot-1'), document.getElementById('dot-2')];
-          const prevBtn = document.getElementById('carousel-prev');
-          const nextBtn = document.getElementById('carousel-next');
-          const video = document.getElementById('carousel-video') as HTMLVideoElement | null;
-          const VIDEO_SLIDE = 0;
-          let current = 0;
-          let timer: ReturnType<typeof setInterval>;
+      // The video slide advances itself when playback finishes (it's
+      // ~20s, far longer than the 5s image interval); the other slides
+      // still advance on a fixed timer.
+      video?.addEventListener('ended', () => {
+        if (current === VIDEO_SLIDE) restart((current + 1) % dots.length);
+      });
 
-          function goTo(i: number) {
-            current = i;
-            (track as HTMLElement).style.transform = `translateX(-${i * 100}%)`;
-            dots.forEach((d, j) => {
-              (d as HTMLElement).style.background = j === i ? 'var(--color-accent)' : 'var(--color-muted)';
-              (d as HTMLElement).style.opacity = j === i ? '1' : '0.4';
-            });
-            if (video) {
-              if (i === VIDEO_SLIDE) {
-                video.currentTime = 0;
-                video.play().catch(() => {});
-              } else {
-                video.pause();
-              }
-            }
-          }
+      function startAuto() {
+        timer = setInterval(() => {
+          if (current === VIDEO_SLIDE) return;
+          goTo((current + 1) % dots.length);
+        }, 5000);
+      }
 
-          // The video slide advances itself when playback finishes (it's
-          // ~20s, far longer than the 5s image interval); the other slides
-          // still advance on a fixed timer.
-          video?.addEventListener('ended', () => {
-            if (current === VIDEO_SLIDE) restart((current + 1) % dots.length);
-          });
+      function restart(i: number) {
+        clearInterval(timer);
+        goTo(i);
+        startAuto();
+      }
 
-          function startAuto() {
-            timer = setInterval(() => {
-              if (current === VIDEO_SLIDE) return;
-              goTo((current + 1) % dots.length);
-            }, 5000);
-          }
+      dots.forEach((d, i) => d?.addEventListener('click', () => restart(i)));
+      prevBtn?.addEventListener('click', () => restart((current - 1 + dots.length) % dots.length));
+      nextBtn?.addEventListener('click', () => restart((current + 1) % dots.length));
 
-          function restart(i: number) {
-            clearInterval(timer);
-            goTo(i);
-            startAuto();
-          }
+      const SWIPE_THRESHOLD_PX = 40;
+      let touchStartX = 0;
 
-          dots.forEach((d, i) => d?.addEventListener('click', () => restart(i)));
-          prevBtn?.addEventListener('click', () => restart((current - 1 + dots.length) % dots.length));
-          nextBtn?.addEventListener('click', () => restart((current + 1) % dots.length));
+      track?.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
 
-          const SWIPE_THRESHOLD_PX = 40;
-          let touchStartX = 0;
+      track?.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
+        if (dx < 0) restart((current + 1) % dots.length);
+        else restart((current - 1 + dots.length) % dots.length);
+      }, { passive: true });
 
-          track?.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-          }, { passive: true });
-
-          track?.addEventListener('touchend', (e) => {
-            const dx = e.changedTouches[0].clientX - touchStartX;
-            if (Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
-            if (dx < 0) restart((current + 1) % dots.length);
-            else restart((current - 1 + dots.length) % dots.length);
-          }, { passive: true });
-
-          startAuto();
-        }
-      </script>
-    </section>
-
-    <LandingFeatures copy={copy} />
-    <LandingAudience copy={copy.audience} />
-    <LandingFaq copy={copy.faq} />
-    <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd).replace(/</g, '\\u003c')} />
-    <LandingStack copy={copy.stack} />
-  </main>
+      startAuto();
+    }
+  </script>
 
   <LandingFooter copy={copy} />
 
