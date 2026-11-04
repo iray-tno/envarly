@@ -6,6 +6,7 @@ import LandingFeatures from './LandingFeatures';
 import LandingAudience from './LandingAudience';
 import LandingStack from './LandingStack';
 import LandingHero from './LandingHero';
+import LandingInstall from './LandingInstall';
 import LandingFaq from './LandingFaq';
 import {
   WINGET_COMMAND,
@@ -44,27 +45,7 @@ const faqJsonLd = {
     <section class="mx-auto max-w-5xl px-6 pt-24 pb-16 text-center">
       <LandingHero copy={copy.hero} />
 
-      <!-- WinGet install -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mb-16 -mt-8 text-sm">
-        <span class="text-[var(--color-muted)]">{copy.install.label}</span>
-        <div id="winget-pill" class="flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors">
-          <code id="winget-command" class="font-mono text-xs text-[var(--color-text)]">{WINGET_COMMAND}</code>
-          <button
-            id="winget-copy"
-            type="button"
-            class="grid px-2 py-1 rounded-md text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-border)]/40 transition-colors"
-            data-copy-label={copy.install.copy}
-            data-copied-label={copy.install.copied}
-          >
-            {/* Both labels are stacked in the same grid cell so the button
-                width is always the wider of the two — whichever language —
-                and never jitters when the visible label swaps on click. */}
-            <span class="invisible col-start-1 row-start-1 whitespace-nowrap" aria-hidden="true">{copy.install.copy}</span>
-            <span class="invisible col-start-1 row-start-1 whitespace-nowrap" aria-hidden="true">{copy.install.copied}</span>
-            <span id="winget-copy-label" class="col-start-1 row-start-1 whitespace-nowrap">{copy.install.copy}</span>
-          </button>
-        </div>
-      </div>
+      <LandingInstall copy={copy.install} />
       <script define:vars={{ command: WINGET_COMMAND }}>
         {
           // Inline styles, not Tailwind utility classes — classes added via
