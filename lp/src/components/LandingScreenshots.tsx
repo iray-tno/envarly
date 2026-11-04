@@ -37,10 +37,10 @@ export default function LandingScreenshots({ copy }: LandingScreenshotsProps) {
           nativeID="carousel-track"
           className="flex flex-row transition-[transform] duration-450 ease-[cubic-bezier(.4,0,.2,1)]"
         >
-          {/* Raw media tags: Hozo's Video starts playback from JS after
-              hydration, and its Image has no width/height/loading, while this
-              page ships no client JS and needs intrinsic sizes against layout
-              shift. */}
+          {/* Raw media tags until iray-tno/hozo#1674: Hozo's Video starts
+              playback from JS after hydration, and its Image doesn't declare
+              width/height/loading, while this page ships no client JS and
+              needs intrinsic sizes against layout shift. */}
           <video
             id="carousel-video"
             src="/envarly/walkthrough.mp4"
