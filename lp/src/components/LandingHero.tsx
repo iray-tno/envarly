@@ -15,8 +15,7 @@ export default function LandingHero({ copy }: LandingHeroProps) {
       <Heading level={1} className="text-5xl sm:text-6xl font-bold tracking-tight text-text mb-5">
         Envarly
       </Heading>
-      {/* Keep responsive leading explicit until iray-tno/hozo#939 is fixed. */}
-      <Paragraph className="text-lg sm:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed sm:leading-relaxed">
+      <Paragraph className="text-lg sm:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
         {copy.lead}
       </Paragraph>
       <View className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
