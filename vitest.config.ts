@@ -6,12 +6,13 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig, defineProject } from "vitest/config";
-import { hozoOptions } from "./hozo.config.mjs";
+import { hozoOptimizeDeps, hozoOptions } from "./hozo.config.mjs";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [hozo(hozoOptions), tailwindcss(), react()],
+  optimizeDeps: { include: hozoOptimizeDeps },
   test: {
     projects: [
       defineProject({

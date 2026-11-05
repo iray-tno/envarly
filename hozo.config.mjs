@@ -14,3 +14,9 @@ export const hozoOptions = {
     { module: "../../../lib/cn", name: "cn", recognize: false },
   ],
 };
+
+// Modules Hozo's compiler imports into transformed components. Vite's
+// dependency scan runs before that transform, so it finds them mid-run
+// and reloads the page, which fails Storybook's browser tests on a cold
+// cache. Pre-bundle them up front.
+export const hozoOptimizeDeps = ["@hozo/core/generated/text-input-dom-props"];
