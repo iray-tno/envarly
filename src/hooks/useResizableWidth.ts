@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function clampWidth(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max);
@@ -9,8 +9,6 @@ export interface UseResizableWidthOptions {
   defaultWidth: number;
   min: number;
   max: number;
-  /** Which edge of the viewport the panel docks to — determines drag direction. */
-  side: "left" | "right";
 }
 
 function readStoredWidth(storageKey: string, defaultWidth: number, min: number, max: number) {
@@ -19,67 +17,43 @@ function readStoredWidth(storageKey: string, defaultWidth: number, min: number, 
   return clampWidth(width, min, max);
 }
 
-const KEYBOARD_STEP = 8;
-const KEYBOARD_STEP_LARGE = 32;
-
+/**
+ * The width of a resizable panel, remembered in localStorage.
+ *
+ * The pointer and keyboard handling is Hozo's `Splitter`'s; `splitterProps`
+ * is what it takes. A size change that has not been committed yet is a drag
+ * in progress, which is when `isDragging` is true and the width is not saved.
+ */
 export function useResizableWidth({
   storageKey,
   defaultWidth,
   min,
   max,
-  side,
 }: UseResizableWidthOptions) {
   const [width, setWidth] = useState(() => readStoredWidth(storageKey, defaultWidth, min, max));
   const [isDragging, setIsDragging] = useState(false);
-  const dragStartXRef = useRef(0);
-  const dragStartWidthRef = useRef(width);
 
   useEffect(() => {
     if (isDragging) return;
     localStorage.setItem(storageKey, String(width));
   }, [isDragging, width, storageKey]);
 
-  const direction = side === "left" ? 1 : -1;
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragStartXRef.current = e.clientX;
-    dragStartWidthRef.current = width;
-    setIsDragging(true);
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
-    const delta = (e.clientX - dragStartXRef.current) * direction;
-    setWidth(clampWidth(dragStartWidthRef.current + delta, min, max));
-  };
-
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    }
-    setIsDragging(false);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const step = e.shiftKey ? KEYBOARD_STEP_LARGE : KEYBOARD_STEP;
-    if (e.key === "ArrowLeft") setWidth((w) => clampWidth(w - step * direction, min, max));
-    else if (e.key === "ArrowRight") setWidth((w) => clampWidth(w + step * direction, min, max));
-    else if (e.key === "Home") setWidth(min);
-    else if (e.key === "End") setWidth(max);
-    else return;
-    e.preventDefault();
-  };
-
   return {
     width,
     isDragging,
-    handleProps: {
-      onPointerDown,
-      onPointerMove,
-      onPointerUp: endDrag,
-      onPointerCancel: endDrag,
-      onKeyDown,
+    splitterProps: {
+      min,
+      max,
+      size: width,
+      onSizeChange: (next: number) => {
+        setWidth(next);
+        setIsDragging(true);
+      },
+      onSizeCommit: (next: number) => {
+        setWidth(next);
+        setIsDragging(false);
+      },
+      onSizeCancel: () => setIsDragging(false),
     },
   };
 }
