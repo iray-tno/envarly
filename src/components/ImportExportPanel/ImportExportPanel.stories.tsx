@@ -82,8 +82,8 @@ const withStoryApi: Story["decorators"] = [
 function CustomExportStory(args: ComponentProps<typeof ImportExportPanel>) {
   useEffect(() => {
     const id = window.setTimeout(() => {
-      const custom = Array.from(document.querySelectorAll("label")).find((label) =>
-        label.textContent?.includes("Custom"),
+      const custom = Array.from(document.querySelectorAll<HTMLElement>("[role=radio]")).find(
+        (radio) => radio.textContent?.includes("Custom"),
       );
       custom?.click();
     }, 0);
@@ -105,8 +105,8 @@ export const CustomExport: Story = {
 export const ImportEmpty: Story = {
   decorators: withStoryApi,
   play: async ({ canvasElement }) => {
-    const importTab = Array.from(canvasElement.querySelectorAll("label")).find((label) =>
-      label.textContent?.includes("Import"),
+    const importTab = Array.from(canvasElement.querySelectorAll<HTMLElement>("[role=radio]")).find(
+      (radio) => radio.textContent?.includes("Import"),
     );
     importTab?.click();
   },
