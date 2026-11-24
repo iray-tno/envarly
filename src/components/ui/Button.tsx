@@ -1,11 +1,33 @@
-import type { ButtonHTMLAttributes } from "react";
+import { Button as HozoButton } from "@hozo/core";
+import type { MouseEventHandler, ReactNode } from "react";
 import { cn } from "../../lib/cn";
 import { Icon, type IconName } from "./Icon";
+import { Tooltip } from "./Tooltip";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "warn" | "link";
 type Size = "xs" | "sm" | "md";
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonBaseProps {
+  className?: string;
+  children?: ReactNode;
+  onClick?: MouseEventHandler<HTMLElement>;
+  disabled?: boolean;
+  /** Shown as a tooltip on hover and focus, and read as the button's description. */
+  title?: string;
+  /**
+   * `submit` renders a native submit button: Hozo's Button is always
+   * `type="button"`, and its SubmitButton submits Hozo's own Form, not a
+   * native `<form>`.
+   */
+  type?: "button" | "submit";
+  id?: string;
+  "aria-label"?: string;
+  "aria-expanded"?: boolean;
+  "aria-controls"?: string;
+  "data-testid"?: string;
+}
+
+interface Props extends ButtonBaseProps {
   variant?: Variant;
   size?: Size;
   icon?: IconName;
@@ -27,6 +49,54 @@ const sizeCls: Record<Size, string> = {
   md: "px-5 py-3 text-sm font-medium",
 };
 
+/** The element under Button and IconButton: Hozo's Button, or a native submit button. */
+export function ButtonHost({
+  className,
+  children,
+  onClick,
+  disabled,
+  title,
+  type = "button",
+  id,
+  "aria-label": ariaLabel,
+  "aria-expanded": ariaExpanded,
+  "aria-controls": ariaControls,
+  "data-testid": testId,
+}: ButtonBaseProps) {
+  const button =
+    type === "submit" ? (
+      <button
+        type="submit"
+        id={id}
+        className={className}
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-description={title}
+        aria-expanded={ariaExpanded}
+        aria-controls={ariaControls}
+        data-testid={testId}
+      >
+        {children}
+      </button>
+    ) : (
+      <HozoButton
+        nativeID={id}
+        className={className}
+        onPress={onClick}
+        disabled={disabled}
+        accessibilityLabel={ariaLabel}
+        accessibilityHint={title}
+        accessibilityState={ariaExpanded === undefined ? undefined : { expanded: ariaExpanded }}
+        aria-controls={ariaControls}
+        testID={testId}
+      >
+        {children}
+      </HozoButton>
+    );
+  return <Tooltip content={title}>{button}</Tooltip>;
+}
+
 export function Button({
   variant = "ghost",
   size = "sm",
@@ -37,8 +107,7 @@ export function Button({
   ...props
 }: Props) {
   return (
-    <button
-      type="button"
+    <ButtonHost
       {...props}
       className={cn(
         "inline-flex items-center gap-1 rounded font-medium transition-colors whitespace-nowrap shrink-0",
@@ -52,6 +121,6 @@ export function Button({
       {icon && iconPosition === "left" && <Icon name={icon} size={14} />}
       {children}
       {icon && iconPosition === "right" && <Icon name={icon} size={14} />}
-    </button>
+    </ButtonHost>
   );
 }
