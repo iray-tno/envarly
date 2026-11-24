@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { type CSSProperties, useId } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import { usePresence } from "../../hooks/usePresence";
 import { useResizableWidth } from "../../hooks/useResizableWidth";
@@ -23,12 +23,14 @@ const DOCK_WIDTH = {
 export function SnapshotPanelDock({ open, onClose, onStageSnapshot }: Props) {
   const { t } = useI18n();
   const presence = usePresence(open);
-  const { width, isDragging, handleProps } = useResizableWidth({ ...DOCK_WIDTH, side: "right" });
+  const { width, isDragging, splitterProps } = useResizableWidth(DOCK_WIDTH);
+  const asideId = useId();
 
   if (!presence.mounted) return null;
 
   return (
     <aside
+      id={asideId}
       className="motion-snapshot-panel relative min-h-0 shrink-0 border-l border-rim overflow-hidden"
       data-state={presence.state}
       data-resizing={isDragging || undefined}
@@ -38,12 +40,9 @@ export function SnapshotPanelDock({ open, onClose, onStageSnapshot }: Props) {
     >
       <ResizeHandle
         edge="left"
-        isDragging={isDragging}
-        width={width}
-        min={DOCK_WIDTH.min}
-        max={DOCK_WIDTH.max}
+        controls={asideId}
         aria-label={t("snapshot.resize")}
-        handleProps={handleProps}
+        splitterProps={splitterProps}
       />
       <div
         className="motion-snapshot-content h-full min-h-0 flex flex-col bg-panel"

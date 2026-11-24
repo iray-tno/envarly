@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import { useResizableWidth } from "../../hooks/useResizableWidth";
 import type { StagedChange } from "../../hooks/useStaged";
@@ -51,7 +51,8 @@ export function Sidebar({
 }: Props) {
   const { t } = useI18n();
   const scopeTabs = useMemo(() => ["All", personalScope, "System"] as const, [personalScope]);
-  const { width, isDragging, handleProps } = useResizableWidth({ ...SIDEBAR_WIDTH, side: "left" });
+  const { width, splitterProps } = useResizableWidth(SIDEBAR_WIDTH);
+  const asideId = useId();
   const [search, setSearch] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("All");
   const [secretsOnly, setSecretsOnly] = useState(false);
@@ -142,6 +143,7 @@ export function Sidebar({
 
   return (
     <aside
+      id={asideId}
       style={{ width }}
       className="relative shrink-0 flex flex-col bg-panel border-r border-rim overflow-hidden"
     >
@@ -247,12 +249,9 @@ export function Sidebar({
 
       <ResizeHandle
         edge="right"
-        isDragging={isDragging}
-        width={width}
-        min={SIDEBAR_WIDTH.min}
-        max={SIDEBAR_WIDTH.max}
+        controls={asideId}
         aria-label={t("sidebar.resize")}
-        handleProps={handleProps}
+        splitterProps={splitterProps}
       />
     </aside>
   );
