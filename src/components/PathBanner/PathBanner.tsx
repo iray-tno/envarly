@@ -1,3 +1,4 @@
+import { Text, View } from "@hozo/core";
 import { useI18n } from "../../hooks/useI18n";
 import { Button } from "../ui/Button";
 
@@ -13,17 +14,17 @@ export function PathBanner({ scopeLabel, onStageAddToPath, onDismiss }: PathBann
   const { t } = useI18n();
 
   return (
-    <div className="flex items-center gap-3 px-5 py-2 bg-accent/10 border-b border-accent/30 text-sm shrink-0">
-      <span className="text-fg flex-1">
+    <View className="flex flex-row items-center gap-3 px-5 py-2 bg-accent/10 border-b border-accent/30 text-sm shrink-0">
+      <Text className="text-fg flex-1">
         {t("path_banner.prefix", { scope: scopeLabel })}{" "}
-        <span className="font-mono text-fg">envarly</span> {t("path_banner.suffix")}
-      </span>
+        <Text className="font-mono text-fg">envarly</Text> {t("path_banner.suffix")}
+      </Text>
       <Button variant="secondary" size="sm" icon="plus" onClick={onStageAddToPath}>
         {t("path_banner.add", { scope: scopeLabel })}
       </Button>
       <Button variant="ghost" size="sm" onClick={onDismiss}>
         {t("path_banner.dismiss")}
       </Button>
-    </div>
+    </View>
   );
 }

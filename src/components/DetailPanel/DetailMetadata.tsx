@@ -1,3 +1,4 @@
+import { Text, View } from "@hozo/core";
 import { useI18n } from "../../hooks/useI18n";
 import type { VarScope } from "../../types";
 
@@ -43,13 +44,13 @@ export function DetailMetadata({
   ];
 
   return (
-    <div className="flex flex-col gap-1 pt-2 border-t border-rim-subtle mt-1">
+    <View className="flex flex-col gap-1 pt-2 border-t border-rim-subtle mt-1">
       {rows.map(([label, val]) => (
-        <div key={label} className="flex gap-3 text-sm">
-          <span className="text-dim w-14 shrink-0">{label}</span>
-          <span className="text-muted font-mono">{val}</span>
-        </div>
+        <View key={label} className="flex flex-row gap-3 text-sm">
+          <Text className="text-dim w-14 shrink-0">{label}</Text>
+          <Text className="text-muted font-mono">{val}</Text>
+        </View>
       ))}
-    </div>
+    </View>
   );
 }
