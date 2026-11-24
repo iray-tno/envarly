@@ -1,15 +1,17 @@
-import { type ReactNode, useEffect, useId, useRef, useState } from "react";
-import { useOnClickOutside } from "../../hooks/useOnClickOutside";
+import { Popover } from "@hozo/core";
+import { type ReactNode, useRef, useState } from "react";
 import { cn } from "../../lib/cn";
-
-export interface DropdownTriggerProps {
-  onClick: () => void;
-  "aria-expanded": boolean;
-  "aria-controls": string;
-}
+import { Icon, type IconName } from "./Icon";
+import { iconButtonClassName } from "./IconButton";
+import { Tooltip } from "./Tooltip";
 
 interface DropdownProps {
-  trigger: (props: DropdownTriggerProps) => ReactNode;
+  /** The trigger: an icon button with this icon and accessible name. */
+  triggerIcon: IconName;
+  triggerLabel: string;
+  /** Shown as a tooltip on the trigger, and read as its description. */
+  triggerTitle?: string;
+  triggerTestId?: string;
   children: ReactNode;
   align?: "left" | "right";
   panelClassName?: string;
@@ -18,58 +20,70 @@ interface DropdownProps {
 }
 
 /**
- * A minimal floating panel anchored to a trigger — the WAI-ARIA "disclosure"
- * pattern (aria-expanded/aria-controls), not a full ARIA "menu" widget. This
- * is deliberate: the panel can hold arbitrary interactive content (a native
- * <select>, not just menuitem-role buttons), and no arrow-key navigation
- * between items is implemented, so claiming role="menu"/aria-haspopup="menu"
- * would both violate ARIA's required-children rule for menus and overstate
- * the keyboard support to assistive tech.
+ * A floating panel anchored to an icon button: Hozo's Popover. The panel is
+ * a non-modal `role="dialog"` and the trigger says `aria-haspopup="dialog"`,
+ * not a `menu`, because the panel holds arbitrary controls (a native
+ * <select>, not only menu items) and has no arrow-key navigation. Focus moves
+ * into the panel when it opens and back to the trigger when it closes; it
+ * closes on Escape, on a press outside, and when focus leaves it.
  */
 export function Dropdown({
-  trigger,
+  triggerIcon,
+  triggerLabel,
+  triggerTitle,
+  triggerTestId,
   children,
   align = "right",
   panelClassName,
   "aria-label": ariaLabel,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const panelId = useId();
-
-  useOnClickOutside(containerRef, () => setOpen(false), open);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [open]);
+  // Hozo's Popover treats a press on its own trigger as a press outside the
+  // panel: pointerdown closes it and the click then reopens it, so the trigger
+  // can never close it (iray-tno/hozo#2255). Ignore that one dismissal and
+  // let the click toggle.
+  const pressingTrigger = useRef(false);
+  const onOpenChange = (next: boolean) => {
+    if (!next && pressingTrigger.current) {
+      pressingTrigger.current = false;
+      return;
+    }
+    setOpen(next);
+  };
 
   return (
-    <div ref={containerRef} className="relative inline-flex">
-      {trigger({
-        onClick: () => setOpen((o) => !o),
-        "aria-expanded": open,
-        "aria-controls": panelId,
-      })}
-      {open && (
-        // biome-ignore lint/a11y/useSemanticElements: not a form — holds a mix of buttons/controls, <fieldset> doesn't fit
-        <div
-          id={panelId}
-          role="group"
-          aria-label={ariaLabel}
-          className={cn(
-            "absolute top-full z-50 mt-1 min-w-[180px] rounded border border-rim bg-panel p-1 shadow-xl",
-            align === "right" ? "right-0" : "left-0",
+    // Hozo renders the trigger button itself, so the tooltip hangs on this
+    // wrapper, and stays closed while the panel (also inside it) is open.
+    <Tooltip content={triggerTitle} disabled={open}>
+      <span
+        className="relative inline-flex"
+        onPointerDownCapture={(e) => {
+          pressingTrigger.current = !!(e.target as Element).closest("[aria-haspopup]");
+        }}
+        onClickCapture={() => {
+          pressingTrigger.current = false;
+        }}
+      >
+        <Popover
+          open={open}
+          onOpenChange={onOpenChange}
+          placement={align === "right" ? "bottom-end" : "bottom-start"}
+          offset={4}
+          accessibilityLabel={ariaLabel}
+          triggerAccessibilityLabel={triggerLabel}
+          triggerAccessibilityHint={triggerTitle}
+          triggerTestID={triggerTestId}
+          className="inline-flex"
+          triggerClassName={iconButtonClassName()}
+          panelClassName={cn(
+            "min-w-[180px] rounded border border-rim bg-panel p-1 shadow-xl",
             panelClassName,
           )}
+          trigger={<Icon name={triggerIcon} size={16} />}
         >
           {children}
-        </div>
-      )}
-    </div>
+        </Popover>
+      </span>
+    </Tooltip>
   );
 }

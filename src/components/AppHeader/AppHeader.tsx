@@ -5,7 +5,6 @@ import type { LocalAccount, UpdateInfo } from "../../types";
 import { Button } from "../ui/Button";
 import { Dropdown } from "../ui/Dropdown";
 import { Icon } from "../ui/Icon";
-import { IconButton } from "../ui/IconButton";
 import { Select } from "../ui/Select";
 
 interface AppHeaderProps {
@@ -202,15 +201,10 @@ export function AppHeader({
           <Dropdown
             align="right"
             aria-label={t("header.more_options")}
-            trigger={(triggerProps) => (
-              <IconButton
-                {...triggerProps}
-                icon="more"
-                aria-label={t("header.more_options")}
-                title={t("header.more_options")}
-                data-testid="header-more-trigger"
-              />
-            )}
+            triggerIcon="more"
+            triggerLabel={t("header.more_options")}
+            triggerTitle={t("header.more_options")}
+            triggerTestId="header-more-trigger"
           >
             {selectableAccounts.length > 0 && (
               <div className="flex items-center gap-2 px-2 py-1.5">

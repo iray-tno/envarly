@@ -93,7 +93,7 @@ export const Narrow: Story = {
     const canvas = within(canvasElement);
     const trigger = await waitFor(() => canvas.getByTestId("header-more-trigger"));
     trigger.click();
-    const panel = await waitFor(() => canvas.getByRole("group"));
+    const panel = await waitFor(() => canvas.getByRole("dialog"));
     // 5 buttons (import/export, check command, GitHub, theme, licenses) + the language <select>.
     const buttons = within(panel).getAllByRole("button");
     expect(buttons).toHaveLength(5);

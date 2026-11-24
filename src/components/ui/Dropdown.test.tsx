@@ -4,55 +4,58 @@ import { Dropdown } from "./Dropdown";
 
 function renderDropdown() {
   return render(
-    <Dropdown
-      aria-label="More options"
-      trigger={(triggerProps) => (
-        <button type="button" {...triggerProps}>
-          Trigger
-        </button>
-      )}
-    >
+    <Dropdown aria-label="More options" triggerIcon="more" triggerLabel="Open menu">
       <button type="button">Item</button>
     </Dropdown>,
   );
 }
 
+const trigger = () => screen.getByRole("button", { name: "Open menu" });
+const panel = () => screen.queryByRole("dialog", { name: "More options" });
+
+/** A press as a browser delivers it: pointerdown, then click. */
+function press(element: Element) {
+  fireEvent.pointerDown(element);
+  fireEvent.click(element);
+}
+
 describe("Dropdown", () => {
   it("opens the panel when the trigger is clicked", () => {
     renderDropdown();
-    expect(screen.queryByRole("group")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText("Trigger"));
-    expect(screen.getByRole("group")).toBeInTheDocument();
+    expect(panel()).not.toBeInTheDocument();
+    press(trigger());
+    expect(panel()).toBeInTheDocument();
+    expect(trigger()).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("closes the panel when the trigger is clicked again", () => {
+  it("closes the panel when the trigger is clicked again (no double-toggle)", () => {
     renderDropdown();
-    fireEvent.click(screen.getByText("Trigger"));
-    fireEvent.click(screen.getByText("Trigger"));
-    expect(screen.queryByRole("group")).not.toBeInTheDocument();
+    press(trigger());
+    press(trigger());
+    expect(panel()).not.toBeInTheDocument();
+    expect(trigger()).toHaveAttribute("aria-expanded", "false");
   });
 
   it("closes when Escape is pressed", () => {
     renderDropdown();
-    fireEvent.click(screen.getByText("Trigger"));
-    expect(screen.getByRole("group")).toBeInTheDocument();
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByRole("group")).not.toBeInTheDocument();
+    press(trigger());
+    expect(panel()).toBeInTheDocument();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+    expect(panel()).not.toBeInTheDocument();
   });
 
-  it("closes on a click outside the container", () => {
+  it("closes on a press outside the container", () => {
     renderDropdown();
-    fireEvent.click(screen.getByText("Trigger"));
-    expect(screen.getByRole("group")).toBeInTheDocument();
-    fireEvent.mouseDown(document.body);
-    expect(screen.queryByRole("group")).not.toBeInTheDocument();
+    press(trigger());
+    expect(panel()).toBeInTheDocument();
+    fireEvent.pointerDown(document.body);
+    expect(panel()).not.toBeInTheDocument();
   });
 
-  it("does not close from a click on the trigger itself (no double-toggle)", () => {
+  it("stays open for a press inside the panel", () => {
     renderDropdown();
-    fireEvent.click(screen.getByText("Trigger"));
-    expect(screen.getByRole("group")).toBeInTheDocument();
-    fireEvent.mouseDown(screen.getByText("Trigger"));
-    expect(screen.getByRole("group")).toBeInTheDocument();
+    press(trigger());
+    press(screen.getByRole("button", { name: "Item" }));
+    expect(panel()).toBeInTheDocument();
   });
 });
