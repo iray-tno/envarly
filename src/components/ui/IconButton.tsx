@@ -1,10 +1,10 @@
-import type { ButtonHTMLAttributes } from "react";
 import { cn } from "../../lib/cn";
+import { type ButtonBaseProps, ButtonHost } from "./Button";
 import { Icon, type IconName } from "./Icon";
 
 type Variant = "ghost" | "danger";
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface Props extends Omit<ButtonBaseProps, "children"> {
   "aria-label": string;
   icon: IconName;
   variant?: Variant;
@@ -12,8 +12,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export function IconButton({ icon, variant = "ghost", className, ...props }: Props) {
   return (
-    <button
-      type="button"
+    <ButtonHost
       {...props}
       className={cn(
         "inline-flex size-7 items-center justify-center rounded leading-none transition-colors",
@@ -25,6 +24,6 @@ export function IconButton({ icon, variant = "ghost", className, ...props }: Pro
       )}
     >
       <Icon name={icon} size={16} />
-    </button>
+    </ButtonHost>
   );
 }
