@@ -1,5 +1,5 @@
 import { Tooltip as HozoTooltip } from "@hozo/patterns";
-import { type ReactElement, useEffect, useState } from "react";
+import type { ReactElement } from "react";
 
 interface TooltipProps {
   /** The text shown on hover and focus. No text, no tooltip. */
@@ -15,21 +15,11 @@ interface TooltipProps {
  * Hozo's Button takes no `title`, and recommends a Tooltip for what the
  * pointer sees plus `accessibilityHint` for what assistive tech reads.
  */
-export function Tooltip({ content, disabled = false, children }: TooltipProps) {
-  // Controlled, so `disabled` can also close a tooltip that is already open:
-  // Hozo's `disabled` only stops it changing, open or closed
-  // (iray-tno/hozo#2256).
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (disabled) setOpen(false);
-  }, [disabled]);
-
+export function Tooltip({ content, disabled, children }: TooltipProps) {
   if (!content) return children;
   return (
     <HozoTooltip
       content={content}
-      open={open && !disabled}
-      onOpenChange={setOpen}
       disabled={disabled}
       className="z-50 max-w-xs rounded border border-rim bg-surface px-2 py-1 text-xs text-fg shadow-lg"
     >
