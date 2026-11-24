@@ -23,26 +23,8 @@ describe("Modal", () => {
     );
   });
 
-  it("keeps the dialog mounted while its exit motion completes", () => {
-    vi.useFakeTimers();
-    const { rerender } = render(
-      <Modal open title="Example" onClose={vi.fn()}>
-        Content
-      </Modal>,
-    );
-
-    expect(screen.getByRole("dialog")).toHaveAttribute("data-state", "open");
-
-    rerender(
-      <Modal open={false} title="Example" onClose={vi.fn()}>
-        Content
-      </Modal>,
-    );
-
-    expect(screen.getByRole("dialog")).toHaveAttribute("data-state", "closed");
-    act(() => vi.advanceTimersByTime(180));
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
+  // The exit motion is tested in the browser (Modal.stories.tsx, ExitMotion):
+  // it is timed by CSS, which jsdom does not load.
 
   it("closes when Escape is pressed", () => {
     const onClose = vi.fn();
