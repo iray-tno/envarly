@@ -1,5 +1,5 @@
 import { Popover } from "@hozo/core";
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { cn } from "../../lib/cn";
 import { Icon, type IconName } from "./Icon";
 import { iconButtonClassName } from "./IconButton";
@@ -38,35 +38,15 @@ export function Dropdown({
   "aria-label": ariaLabel,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
-  // Hozo's Popover treats a press on its own trigger as a press outside the
-  // panel: pointerdown closes it and the click then reopens it, so the trigger
-  // can never close it (iray-tno/hozo#2255). Ignore that one dismissal and
-  // let the click toggle.
-  const pressingTrigger = useRef(false);
-  const onOpenChange = (next: boolean) => {
-    if (!next && pressingTrigger.current) {
-      pressingTrigger.current = false;
-      return;
-    }
-    setOpen(next);
-  };
 
   return (
     // Hozo renders the trigger button itself, so the tooltip hangs on this
     // wrapper, and stays closed while the panel (also inside it) is open.
     <Tooltip content={triggerTitle} disabled={open}>
-      <span
-        className="relative inline-flex"
-        onPointerDownCapture={(e) => {
-          pressingTrigger.current = !!(e.target as Element).closest("[aria-haspopup]");
-        }}
-        onClickCapture={() => {
-          pressingTrigger.current = false;
-        }}
-      >
+      <span className="relative inline-flex">
         <Popover
           open={open}
-          onOpenChange={onOpenChange}
+          onOpenChange={setOpen}
           placement={align === "right" ? "bottom-end" : "bottom-start"}
           offset={4}
           accessibilityLabel={ariaLabel}
