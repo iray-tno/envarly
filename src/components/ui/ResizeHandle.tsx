@@ -47,42 +47,29 @@ export function ResizeHandle({
 }: ResizeHandleProps) {
   return (
     <WholeLabel>
-      {/* Hozo's drag focuses the handle with a plain `focus()`, which Chromium counts as
-          focus-visible, so the line below would stay lit after every mouse drag
-          (iray-tno/hozo#1714). Focusing it first, before Hozo's handler runs, makes that
-          call a no-op. `display: contents` keeps this wrapper out of the layout. */}
-      <div
-        className="contents"
-        onPointerDownCapture={(e) => {
-          if (e.button !== 0 || !e.isPrimary) return;
-          const handle = e.currentTarget.querySelector<HTMLElement>("[role=separator]");
-          handle?.focus({ focusVisible: false } as FocusOptions);
-        }}
-      >
-        <Splitter
-          {...splitterProps}
-          label={ariaLabel}
-          controls={controls}
-          // The handle on a panel's right edge has the panel at its start.
-          side={edge === "right" ? "start" : "end"}
-          // The number alone, as before; Hozo's default is English ("300 pixels").
-          valueText={String}
-          // Hozo positions the handle `relative` inline; it sits over the panel's edge instead.
-          style={{ position: "absolute", zIndex: 10 }}
-          className={cn(
-            "inset-y-0 w-2 cursor-ew-resize focus:outline-none",
-            // Kept fully inside the host's box (not a negative inset straddling the border):
-            // the host panels use `overflow-hidden` for their scrollable content, which silently
-            // excludes any part of an absolutely-positioned child that pokes outside the box from
-            // hit-testing, even though it still paints there.
-            edge === "left" ? "left-0" : "right-0",
-            // The visible 1px line, centred in the 8px handle.
-            "before:absolute before:inset-y-0 before:inset-x-0 before:mx-auto before:w-px before:bg-transparent before:transition-colors",
-            "hover:before:bg-accent/60 focus-visible:before:bg-accent/60",
-            "data-dragging:before:bg-accent",
-          )}
-        />
-      </div>
+      <Splitter
+        {...splitterProps}
+        label={ariaLabel}
+        controls={controls}
+        // The handle on a panel's right edge has the panel at its start.
+        side={edge === "right" ? "start" : "end"}
+        // The number alone, as before; Hozo's default is English ("300 pixels").
+        valueText={String}
+        // Hozo positions the handle `relative` inline; it sits over the panel's edge instead.
+        style={{ position: "absolute", zIndex: 10 }}
+        className={cn(
+          "inset-y-0 w-2 cursor-ew-resize focus:outline-none",
+          // Kept fully inside the host's box (not a negative inset straddling the border):
+          // the host panels use `overflow-hidden` for their scrollable content, which silently
+          // excludes any part of an absolutely-positioned child that pokes outside the box from
+          // hit-testing, even though it still paints there.
+          edge === "left" ? "left-0" : "right-0",
+          // The visible 1px line, centred in the 8px handle.
+          "before:absolute before:inset-y-0 before:inset-x-0 before:mx-auto before:w-px before:bg-transparent before:transition-colors",
+          "hover:before:bg-accent/60 focus-visible:before:bg-accent/60",
+          "data-dragging:before:bg-accent",
+        )}
+      />
     </WholeLabel>
   );
 }
