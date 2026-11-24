@@ -137,7 +137,7 @@ export const Compare: Story = {
     compareWithButton?.click();
 
     await waitFor(() => {
-      const dialog = canvasElement.ownerDocument.querySelector<HTMLElement>('[role="dialog"]');
+      const dialog = canvasElement.ownerDocument.querySelector<HTMLElement>("dialog");
       expect(dialog?.parentElement).toBe(canvasElement.ownerDocument.body);
     });
   },
@@ -174,7 +174,7 @@ export const WidePreviewDiff: Story = {
     previewButton?.click();
 
     await waitFor(() => {
-      const dialog = canvasElement.ownerDocument.querySelector<HTMLElement>('[role="dialog"]');
+      const dialog = canvasElement.ownerDocument.querySelector<HTMLElement>("dialog");
       expect(dialog?.parentElement).toBe(canvasElement.ownerDocument.body);
     });
 

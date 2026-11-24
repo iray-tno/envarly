@@ -39,8 +39,15 @@ export function NewVarModal({
     : false;
   const canSubmit = inputError === null && !alreadyExists;
 
+  // Start in the name field. Inside a <dialog>, `showModal()` moves focus to
+  // the element carrying the `autofocus` attribute (React's `autoFocus` prop
+  // focuses by script and renders no attribute), and focusing it ourselves
+  // first would make the field, not the opener, where focus returns on close.
   useEffect(() => {
-    nameInputRef.current?.focus();
+    const input = nameInputRef.current;
+    if (!input) return;
+    input.setAttribute("autofocus", "");
+    if (!input.closest("dialog")) input.focus();
   }, []);
 
   const handleSubmit = (e: FormEvent) => {

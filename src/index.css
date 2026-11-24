@@ -136,6 +136,17 @@
     }
   }
 
+  /* The <dialog> itself: shown, and so still modal, until its backdrop and panel have
+     animated out. Hozo waits for this transition before it closes the dialog and
+     returns focus (it times the exit from the dialog's own style). */
+  .motion-modal {
+    transition: visibility 120ms;
+  }
+
+  .motion-modal[data-state="closed"] {
+    visibility: hidden;
+  }
+
   .motion-modal-backdrop[data-state="open"] {
     animation: modal-backdrop-in 140ms ease-out both;
   }
@@ -199,6 +210,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .motion-modal,
   .motion-modal-backdrop,
   .motion-modal-panel,
   .motion-snapshot-panel,

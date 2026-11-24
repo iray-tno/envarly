@@ -1,3 +1,4 @@
+import { Dialog } from "@hozo/core";
 import { type ReactNode, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { usePresence } from "../../hooks/usePresence";
@@ -23,6 +24,17 @@ const sizeCls = {
   "2xl": "max-w-[900px]",
 };
 
+/**
+ * Hozo's `Dialog` is the browser's `<dialog>` opened with `showModal()`: focus
+ * moves into it, the page behind is inert, and focus goes back to the opener
+ * when it closes.
+ *
+ * The exit motion runs on the backdrop and the panel. Hozo times the exit from
+ * the `<dialog>`'s own style, so `motion-modal` gives the dialog a matching
+ * `visibility` transition: it stays shown and modal until they have animated
+ * out, and only then closes and returns focus. Escape and the backdrop stay
+ * ours, so `onClose` is called once either way.
+ */
 export function Modal({
   open,
   onClose,
@@ -47,16 +59,16 @@ export function Modal({
   if (!presence.mounted) return null;
 
   return createPortal(
-    <div
+    <Dialog
+      open={open}
+      accessibilityLabel={title ? undefined : ariaLabel}
+      accessibilityLabelledBy={title ? titleId : undefined}
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center p-6",
+        // Undo the UA's <dialog> box: it is a full-viewport layer, as the old div was.
+        "fixed inset-0 z-50 m-0 h-full max-h-none w-full max-w-none overflow-visible border-0 bg-transparent p-6 text-inherit",
+        "motion-modal flex items-center justify-center backdrop:bg-transparent",
         presence.state === "closed" && "pointer-events-none",
       )}
-      data-state={presence.state}
-      role="dialog"
-      aria-modal="true"
-      aria-label={title ? undefined : ariaLabel}
-      aria-labelledby={title ? titleId : undefined}
     >
       {/* Backdrop */}
       <div
@@ -88,7 +100,7 @@ export function Modal({
           {children}
         </div>
       </div>
-    </div>,
+    </Dialog>,
     document.body,
   );
 }
